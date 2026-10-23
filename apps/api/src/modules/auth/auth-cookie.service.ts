@@ -4,6 +4,7 @@ import {
   ACCESS_TOKEN_COOKIE,
   REFRESH_COOKIE_PATH,
   REFRESH_TOKEN_COOKIE,
+  SESSION_HINT_COOKIE,
 } from '../../common/constants.js';
 import { AppConfigService } from '../../config/app-config.service.js';
 
@@ -37,10 +38,16 @@ export class AuthCookieService {
       path: REFRESH_COOKIE_PATH,
       maxAge: refreshTtlDays * 24 * 60 * 60 * 1000,
     });
+    res.cookie(SESSION_HINT_COOKIE, '1', {
+      ...this.base(),
+      path: '/',
+      maxAge: refreshTtlDays * 24 * 60 * 60 * 1000,
+    });
   }
 
   clearAuthCookies(res: Response): void {
     res.clearCookie(ACCESS_TOKEN_COOKIE, { ...this.base(), path: '/' });
     res.clearCookie(REFRESH_TOKEN_COOKIE, { ...this.base(), path: REFRESH_COOKIE_PATH });
+    res.clearCookie(SESSION_HINT_COOKIE, { ...this.base(), path: '/' });
   }
 }
