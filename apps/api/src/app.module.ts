@@ -9,6 +9,7 @@ import { AppConfigModule } from './config/app-config.module.js';
 import { AppConfigService } from './config/app-config.service.js';
 import { AdminUsersModule } from './modules/admin-users/admin-users.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
+import { ChatModule } from './modules/chat/chat.module.js';
 import { HealthController } from './modules/health/health.controller.js';
 import { MeModule } from './modules/me/me.module.js';
 import { StorageModule } from './modules/storage/storage.module.js';
@@ -26,6 +27,7 @@ import { StorageModule } from './modules/storage/storage.module.js';
     AuthModule,
     MeModule,
     AdminUsersModule,
+    ChatModule,
   ],
   controllers: [HealthController],
   providers: [
