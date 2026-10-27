@@ -10,7 +10,6 @@
     "retry": "Thử lại",
     "loading": "Đang tải...",
     "actions": "Thao tác",
-    "comingSoon": "Đang phát triển",
     "previous": "Trước",
     "next": "Sau",
     "pageOf": "Trang {page} / {totalPages}",
@@ -25,7 +24,8 @@
     "users": "Người dùng",
     "profile": "Hồ sơ cá nhân",
     "logout": "Đăng xuất",
-    "toggleSidebar": "Ẩn/hiện thanh bên"
+    "toggleSidebar": "Ẩn/hiện thanh bên",
+    "ask": "Hỏi đáp tài liệu"
   },
   "theme": {
     "label": "Giao diện",
@@ -88,7 +88,10 @@
     "FILE_REQUIRED": "Vui lòng chọn tệp.",
     "FILE_TOO_LARGE": "Tệp quá lớn (tối đa 2MB).",
     "FILE_INVALID_TYPE": "Chỉ chấp nhận ảnh JPG, PNG hoặc WEBP.",
-    "NETWORK_ERROR": "Không kết nối được máy chủ. Vui lòng kiểm tra mạng."
+    "NETWORK_ERROR": "Không kết nối được máy chủ. Vui lòng kiểm tra mạng.",
+    "CONVERSATION_NOT_FOUND": "Không tìm thấy cuộc hội thoại.",
+    "CHAT_STREAM_IN_PROGRESS": "Trợ lý đang trả lời trong hội thoại này. Vui lòng đợi hoặc bấm Dừng.",
+    "CHAT_NOTHING_TO_REGENERATE": "Không có câu hỏi nào để tạo lại câu trả lời."
   },
   "roles": {
     "ADMIN": "Quản trị viên",
@@ -99,12 +102,146 @@
     "BLOCKED": "Đã khóa"
   },
   "chat": {
-    "title": "Trò chuyện với AI",
-    "description": "Module 2 – Trợ lý hội thoại sẽ được triển khai ở giai đoạn tiếp theo: tạo cuộc hội thoại, gửi tin nhắn và nhận phản hồi theo thời gian thực."
+    "newChat": "Cuộc trò chuyện mới",
+    "history": "Lịch sử trò chuyện",
+    "searchPlaceholder": "Tìm cuộc trò chuyện...",
+    "emptyList": "Chưa có cuộc trò chuyện nào.",
+    "emptySearch": "Không tìm thấy cuộc trò chuyện phù hợp.",
+    "loadMore": "Xem thêm",
+    "actions": "Thao tác",
+    "notFound": "Không tìm thấy cuộc trò chuyện",
+    "notFoundHint": "Cuộc trò chuyện có thể đã bị xóa.",
+    "greeting": "Xin chào, {name}!",
+    "greetingHint": "Hôm nay mình có thể giúp gì cho bạn? Hãy đặt câu hỏi hoặc chọn một gợi ý bên dưới.",
+    "suggestions": {
+      "email": "Soạn email xin nghỉ phép 2 ngày gửi trưởng phòng",
+      "summary": "Tóm tắt các bước onboarding cho nhân viên mới",
+      "compare": "So sánh ưu, nhược điểm của làm việc từ xa và tại văn phòng",
+      "ideas": "Gợi ý ý tưởng cho buổi team building cuối năm"
+    },
+    "groups": {
+      "today": "Hôm nay",
+      "yesterday": "Hôm qua",
+      "last7Days": "7 ngày trước",
+      "last30Days": "30 ngày trước",
+      "older": "Cũ hơn"
+    },
+    "input": {
+      "placeholder": "Nhập tin nhắn cho CAT GPT...",
+      "hint": "Enter để gửi · Shift + Enter để xuống dòng",
+      "send": "Gửi",
+      "stop": "Dừng"
+    },
+    "message": {
+      "copy": "Sao chép",
+      "copied": "Đã sao chép",
+      "regenerate": "Tạo lại câu trả lời",
+      "stopped": "Đã dừng",
+      "error": "Lỗi khi tạo câu trả lời",
+      "empty": "Không có nội dung."
+    },
+    "rename": {
+      "action": "Đổi tên",
+      "title": "Đổi tên cuộc trò chuyện",
+      "done": "Đã đổi tên cuộc trò chuyện."
+    },
+    "delete": {
+      "action": "Xóa",
+      "title": "Xóa cuộc trò chuyện?",
+      "description": "Cuộc trò chuyện \"{title}\" và toàn bộ tin nhắn sẽ bị xóa vĩnh viễn.",
+      "confirm": "Xóa",
+      "done": "Đã xóa cuộc trò chuyện."
+    }
   },
   "documents": {
     "title": "Quản lý tài liệu",
-    "description": "Module 3 – Tải lên, tìm kiếm và theo dõi trạng thái xử lý tài liệu sẽ được triển khai ở giai đoạn tiếp theo."
+    "description": "Tải lên tài liệu nội bộ để trợ lý AI có thể tóm tắt và hỏi–đáp theo nội dung.",
+    "demoBadge": "Dữ liệu minh họa",
+    "searchPlaceholder": "Tìm theo tên tài liệu...",
+    "allStatuses": "Tất cả trạng thái",
+    "empty": "Chưa có tài liệu nào.",
+    "emptyFiltered": "Không có tài liệu phù hợp với bộ lọc.",
+    "chunksCount": "{count} đoạn",
+    "stats": {
+      "total": "Tổng tài liệu",
+      "ready": "Sẵn sàng",
+      "processing": "Đang xử lý",
+      "failed": "Lỗi"
+    },
+    "columns": {
+      "name": "Tài liệu",
+      "size": "Dung lượng",
+      "status": "Trạng thái",
+      "uploaded": "Tải lên"
+    },
+    "status": {
+      "UPLOADING": "Đang tải lên",
+      "PROCESSING": "Đang xử lý",
+      "READY": "Sẵn sàng",
+      "FAILED": "Lỗi xử lý"
+    },
+    "steps": {
+      "EXTRACTING": "Bóc tách văn bản",
+      "CHUNKING": "Chia đoạn",
+      "EMBEDDING": "Sinh vector",
+      "INDEXING": "Lưu chỉ mục"
+    },
+    "stepHints": {
+      "EXTRACTING": "Đọc nội dung chữ từ PDF / DOCX / TXT",
+      "CHUNKING": "Cắt văn bản thành các đoạn ngắn có gối đầu",
+      "EMBEDDING": "Chuyển mỗi đoạn thành vector bằng mô hình embedding đa ngữ",
+      "INDEXING": "Lưu vector vào cơ sở dữ liệu vector để truy hồi"
+    },
+    "errors": {
+      "ocrRequired": "Tài liệu dạng ảnh/scan, chưa hỗ trợ OCR."
+    },
+    "actions": {
+      "open": "Mở menu thao tác",
+      "view": "Xem chi tiết",
+      "download": "Tải xuống",
+      "downloadDemo": "Bản demo: chưa tải xuống được \"{name}\".",
+      "reprocess": "Xử lý lại",
+      "delete": "Xóa",
+      "summarize": "Tóm tắt bằng AI",
+      "ask": "Hỏi đáp tài liệu này"
+    },
+    "upload": {
+      "action": "Tải lên",
+      "title": "Tải lên tài liệu",
+      "description": "Tài liệu sẽ được xử lý tự động để sẵn sàng cho hỏi–đáp.",
+      "dropzone": "Kéo thả tệp vào đây hoặc bấm để chọn",
+      "hint": "PDF (dạng text), DOCX, TXT · tối đa 20MB mỗi tệp",
+      "remove": "Bỏ tệp",
+      "submit": "Tải lên {count} tệp",
+      "started": "Đang tải lên {count} tệp.",
+      "invalidType": "\"{name}\": định dạng không được hỗ trợ.",
+      "tooLarge": "\"{name}\": vượt quá 20MB."
+    },
+    "detail": {
+      "metadata": "Thông tin tài liệu",
+      "type": "Định dạng",
+      "size": "Dung lượng",
+      "pages": "Số trang",
+      "chunks": "Số đoạn",
+      "uploadedBy": "Người tải lên",
+      "uploadedAt": "Thời gian tải lên",
+      "processedAt": "Xử lý xong lúc",
+      "pipeline": "Tiến trình xử lý"
+    },
+    "delete": {
+      "title": "Xóa tài liệu?",
+      "description": "Tài liệu \"{name}\" và dữ liệu đã xử lý sẽ bị xóa.",
+      "confirm": "Xóa",
+      "done": "Đã xóa tài liệu."
+    },
+    "summary": {
+      "title": "Tóm tắt bằng AI",
+      "short": "Ngắn gọn",
+      "detailed": "Chi tiết",
+      "reading": "Đang đọc {chunks} đoạn của tài liệu...",
+      "note": "Nội dung do AI tạo, vui lòng đối chiếu với tài liệu gốc.",
+      "askThis": "Hỏi đáp tài liệu này"
+    }
   },
   "profile": {
     "title": "Hồ sơ cá nhân",
@@ -227,5 +364,40 @@
   "forbidden": {
     "title": "Không có quyền truy cập",
     "description": "Trang này chỉ dành cho quản trị viên."
+  },
+  "ask": {
+    "title": "Hỏi đáp tài liệu",
+    "demoBadge": "Dữ liệu minh họa",
+    "reset": "Phiên mới",
+    "heading": "Hỏi đáp dựa trên tài liệu nội bộ",
+    "intro": "Câu trả lời chỉ được tổng hợp từ nội dung các tài liệu đã chọn và luôn kèm trích dẫn nguồn để bạn kiểm chứng.",
+    "placeholder": "Đặt câu hỏi về nội dung tài liệu...",
+    "suggestions": {
+      "remote": "Quy định làm việc từ xa của công ty như thế nào?",
+      "leave": "Mỗi năm nhân viên được nghỉ phép bao nhiêu ngày?",
+      "purchase": "Mua laptop 25 triệu cần ai phê duyệt?",
+      "outOfScope": "Công ty có chính sách hỗ trợ gửi xe không?"
+    },
+    "steps": {
+      "searching": "Tìm kiếm ngữ nghĩa trong {count} tài liệu...",
+      "retrieved": "Tìm thấy {chunks} đoạn liên quan từ {documents} tài liệu",
+      "noMatch": "Không tìm thấy đoạn văn bản đủ liên quan",
+      "generating": "Tổng hợp câu trả lời từ các đoạn tìm được"
+    },
+    "sources": "Nguồn trích dẫn",
+    "page": "Trang {page}",
+    "relevance": "Độ liên quan {score}%",
+    "scope": {
+      "label": "Phạm vi",
+      "all": "Tất cả tài liệu ({count})",
+      "some": "{count} tài liệu",
+      "title": "Phạm vi tra cứu",
+      "description": "Chỉ những tài liệu được chọn mới được dùng làm nguồn cho câu trả lời.",
+      "selected": "Đã chọn {count} tài liệu",
+      "selectAll": "Chọn tất cả",
+      "clearAll": "Bỏ chọn tất cả",
+      "chunks": "{count} đoạn đã lập chỉ mục",
+      "apply": "Áp dụng"
+    }
   }
 }

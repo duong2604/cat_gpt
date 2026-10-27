@@ -10,7 +10,6 @@
     "retry": "Retry",
     "loading": "Loading...",
     "actions": "Actions",
-    "comingSoon": "Coming soon",
     "previous": "Previous",
     "next": "Next",
     "pageOf": "Page {page} of {totalPages}",
@@ -25,7 +24,8 @@
     "users": "Users",
     "profile": "Profile",
     "logout": "Log out",
-    "toggleSidebar": "Toggle sidebar"
+    "toggleSidebar": "Toggle sidebar",
+    "ask": "Document Q&A"
   },
   "theme": {
     "label": "Theme",
@@ -88,7 +88,10 @@
     "FILE_REQUIRED": "Please choose a file.",
     "FILE_TOO_LARGE": "File is too large (max 2MB).",
     "FILE_INVALID_TYPE": "Only JPG, PNG or WEBP images are allowed.",
-    "NETWORK_ERROR": "Cannot reach the server. Please check your connection."
+    "NETWORK_ERROR": "Cannot reach the server. Please check your connection.",
+    "CONVERSATION_NOT_FOUND": "Conversation not found.",
+    "CHAT_STREAM_IN_PROGRESS": "The assistant is still answering in this conversation. Please wait or press Stop.",
+    "CHAT_NOTHING_TO_REGENERATE": "There is no question to regenerate an answer for."
   },
   "roles": {
     "ADMIN": "Administrator",
@@ -99,12 +102,146 @@
     "BLOCKED": "Blocked"
   },
   "chat": {
-    "title": "Chat with AI",
-    "description": "Module 2 – the conversational assistant comes next: create conversations, send messages and receive real-time streaming replies."
+    "newChat": "New chat",
+    "history": "Chat history",
+    "searchPlaceholder": "Search chats...",
+    "emptyList": "No conversations yet.",
+    "emptySearch": "No matching conversations.",
+    "loadMore": "Load more",
+    "actions": "Actions",
+    "notFound": "Conversation not found",
+    "notFoundHint": "It may have been deleted.",
+    "greeting": "Hello, {name}!",
+    "greetingHint": "How can I help you today? Ask a question or pick a suggestion below.",
+    "suggestions": {
+      "email": "Write an email to my manager requesting 2 days of leave",
+      "summary": "Summarize the onboarding steps for new employees",
+      "compare": "Compare the pros and cons of remote and office work",
+      "ideas": "Suggest ideas for a year-end team building event"
+    },
+    "groups": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "last7Days": "Previous 7 days",
+      "last30Days": "Previous 30 days",
+      "older": "Older"
+    },
+    "input": {
+      "placeholder": "Message CAT GPT...",
+      "hint": "Enter to send · Shift + Enter for a new line",
+      "send": "Send",
+      "stop": "Stop"
+    },
+    "message": {
+      "copy": "Copy",
+      "copied": "Copied",
+      "regenerate": "Regenerate answer",
+      "stopped": "Stopped",
+      "error": "Failed to generate answer",
+      "empty": "No content."
+    },
+    "rename": {
+      "action": "Rename",
+      "title": "Rename conversation",
+      "done": "Conversation renamed."
+    },
+    "delete": {
+      "action": "Delete",
+      "title": "Delete conversation?",
+      "description": "\"{title}\" and all of its messages will be permanently deleted.",
+      "confirm": "Delete",
+      "done": "Conversation deleted."
+    }
   },
   "documents": {
-    "title": "Document management",
-    "description": "Module 3 – uploading, searching and tracking document processing will be built in the next phase."
+    "title": "Documents",
+    "description": "Upload internal documents so the AI assistant can summarize and answer questions about them.",
+    "demoBadge": "Sample data",
+    "searchPlaceholder": "Search by document name...",
+    "allStatuses": "All statuses",
+    "empty": "No documents yet.",
+    "emptyFiltered": "No documents match the filters.",
+    "chunksCount": "{count} chunks",
+    "stats": {
+      "total": "Total documents",
+      "ready": "Ready",
+      "processing": "Processing",
+      "failed": "Failed"
+    },
+    "columns": {
+      "name": "Document",
+      "size": "Size",
+      "status": "Status",
+      "uploaded": "Uploaded"
+    },
+    "status": {
+      "UPLOADING": "Uploading",
+      "PROCESSING": "Processing",
+      "READY": "Ready",
+      "FAILED": "Failed"
+    },
+    "steps": {
+      "EXTRACTING": "Extracting text",
+      "CHUNKING": "Chunking",
+      "EMBEDDING": "Embedding",
+      "INDEXING": "Indexing"
+    },
+    "stepHints": {
+      "EXTRACTING": "Read the text content of PDF / DOCX / TXT",
+      "CHUNKING": "Split the text into short overlapping chunks",
+      "EMBEDDING": "Turn each chunk into a vector with a multilingual embedding model",
+      "INDEXING": "Store vectors in the vector database for retrieval"
+    },
+    "errors": {
+      "ocrRequired": "Image/scanned document — OCR is not supported yet."
+    },
+    "actions": {
+      "open": "Open actions menu",
+      "view": "View details",
+      "download": "Download",
+      "downloadDemo": "Demo: \"{name}\" cannot be downloaded yet.",
+      "reprocess": "Reprocess",
+      "delete": "Delete",
+      "summarize": "Summarize with AI",
+      "ask": "Ask about this document"
+    },
+    "upload": {
+      "action": "Upload",
+      "title": "Upload documents",
+      "description": "Documents are processed automatically so they are ready for Q&A.",
+      "dropzone": "Drag and drop files here or click to browse",
+      "hint": "PDF (text-based), DOCX, TXT · up to 20MB each",
+      "remove": "Remove file",
+      "submit": "Upload {count} file(s)",
+      "started": "Uploading {count} file(s).",
+      "invalidType": "\"{name}\": unsupported format.",
+      "tooLarge": "\"{name}\": larger than 20MB."
+    },
+    "detail": {
+      "metadata": "Document info",
+      "type": "Format",
+      "size": "Size",
+      "pages": "Pages",
+      "chunks": "Chunks",
+      "uploadedBy": "Uploaded by",
+      "uploadedAt": "Uploaded at",
+      "processedAt": "Processed at",
+      "pipeline": "Processing pipeline"
+    },
+    "delete": {
+      "title": "Delete document?",
+      "description": "\"{name}\" and its processed data will be deleted.",
+      "confirm": "Delete",
+      "done": "Document deleted."
+    },
+    "summary": {
+      "title": "AI summary",
+      "short": "Brief",
+      "detailed": "Detailed",
+      "reading": "Reading {chunks} chunks of the document...",
+      "note": "AI-generated content — please verify against the original document.",
+      "askThis": "Ask about this document"
+    }
   },
   "profile": {
     "title": "Profile",
@@ -227,5 +364,40 @@
   "forbidden": {
     "title": "Access denied",
     "description": "This page is for administrators only."
+  },
+  "ask": {
+    "title": "Document Q&A",
+    "demoBadge": "Sample data",
+    "reset": "New session",
+    "heading": "Ask questions about internal documents",
+    "intro": "Answers are composed only from the selected documents and always cite their sources so you can verify them.",
+    "placeholder": "Ask a question about your documents...",
+    "suggestions": {
+      "remote": "What is the company policy on remote work?",
+      "leave": "How many days of annual leave do employees get?",
+      "purchase": "Who must approve buying a 25 million VND laptop?",
+      "outOfScope": "Does the company offer a parking allowance?"
+    },
+    "steps": {
+      "searching": "Semantic search across {count} documents...",
+      "retrieved": "Found {chunks} relevant chunks in {documents} documents",
+      "noMatch": "No sufficiently relevant passages found",
+      "generating": "Composing the answer from the retrieved chunks"
+    },
+    "sources": "Sources",
+    "page": "Page {page}",
+    "relevance": "{score}% relevant",
+    "scope": {
+      "label": "Scope",
+      "all": "All documents ({count})",
+      "some": "{count} documents",
+      "title": "Search scope",
+      "description": "Only the selected documents are used as sources for answers.",
+      "selected": "{count} documents selected",
+      "selectAll": "Select all",
+      "clearAll": "Clear all",
+      "chunks": "{count} indexed chunks",
+      "apply": "Apply"
+    }
   }
 }

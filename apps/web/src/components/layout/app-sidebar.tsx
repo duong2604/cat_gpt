@@ -1,6 +1,12 @@
 "use client";
 
-import { FileTextIcon, MessageSquareIcon, UsersIcon, type LucideIcon } from "lucide-react";
+import {
+  BookOpenCheckIcon,
+  FileTextIcon,
+  MessageSquareIcon,
+  UsersIcon,
+  type LucideIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -15,7 +21,6 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
@@ -24,26 +29,24 @@ import { useCurrentUser } from "@/features/auth/hooks";
 import { routes } from "@/lib/routes";
 import { NavUser } from "./nav-user";
 
-type NavKey = "chat" | "documents" | "users";
+type NavKey = "chat" | "documents" | "ask" | "users";
 
 interface NavItem {
   key: NavKey;
   href: string;
   icon: LucideIcon;
-  /** Module chưa triển khai → hiển thị nhãn "Sắp có". */
-  comingSoon?: boolean;
 }
 
 const WORKSPACE_ITEMS: NavItem[] = [
-  { key: "chat", href: routes.chat, icon: MessageSquareIcon, comingSoon: true },
-  { key: "documents", href: routes.documents, icon: FileTextIcon, comingSoon: true },
+  { key: "chat", href: routes.chat, icon: MessageSquareIcon },
+  { key: "documents", href: routes.documents, icon: FileTextIcon },
+  { key: "ask", href: routes.ask, icon: BookOpenCheckIcon },
 ];
 
 const ADMIN_ITEMS: NavItem[] = [{ key: "users", href: routes.adminUsers, icon: UsersIcon }];
 
 function NavGroup({ label, items }: { label: string; items: NavItem[] }) {
   const t = useTranslations("nav");
-  const tCommon = useTranslations("common");
   const pathname = usePathname();
 
   return (
@@ -63,11 +66,6 @@ function NavGroup({ label, items }: { label: string; items: NavItem[] }) {
                   <span>{t(item.key)}</span>
                 </Link>
               </SidebarMenuButton>
-              {item.comingSoon ? (
-                <SidebarMenuBadge className="text-[10px] font-normal text-muted-foreground">
-                  {tCommon("comingSoon")}
-                </SidebarMenuBadge>
-              ) : null}
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
