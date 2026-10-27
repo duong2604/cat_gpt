@@ -1,3 +1,4 @@
+import dns from 'node:dns';
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
@@ -9,6 +10,11 @@ import { ACCESS_TOKEN_COOKIE, API_PREFIX, LOCAL_FILES_ROUTE } from './common/con
 import { appValidationPipe } from './common/pipes/app-validation.pipe.js';
 import { AppConfigService } from './config/app-config.service.js';
 import { LocalStorageProvider } from './modules/storage/local-storage.provider.js';
+
+// Node trên Windows đôi khi đọc DNS hệ thống thành 127.0.0.1 → SRV lookup của mongodb+srv lỗi ECONNREFUSED.
+if (dns.getServers().every((s) => s.startsWith('127.') || s === '::1')) {
+  dns.setServers(['8.8.8.8', '1.1.1.1']);
+}
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
