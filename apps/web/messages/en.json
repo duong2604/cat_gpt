@@ -1,0 +1,231 @@
+{
+  "common": {
+    "appName": "CAT GPT",
+    "appTagline": "Internal AI assistant",
+    "save": "Save changes",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "close": "Close",
+    "retry": "Retry",
+    "loading": "Loading...",
+    "actions": "Actions",
+    "comingSoon": "Coming soon",
+    "previous": "Previous",
+    "next": "Next",
+    "pageOf": "Page {page} of {totalPages}",
+    "totalItems": "{total} records in total",
+    "notUpdated": "Not set"
+  },
+  "nav": {
+    "workspace": "Workspace",
+    "administration": "Administration",
+    "chat": "Chat",
+    "documents": "Documents",
+    "users": "Users",
+    "profile": "Profile",
+    "logout": "Log out",
+    "toggleSidebar": "Toggle sidebar"
+  },
+  "theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "locale": {
+    "label": "Language",
+    "vi": "Tiếng Việt",
+    "en": "English"
+  },
+  "auth": {
+    "loginTitle": "Sign in",
+    "loginSubtitle": "Sign in to use the internal AI assistant",
+    "email": "Email",
+    "emailPlaceholder": "name@company.com",
+    "password": "Password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "submit": "Sign in",
+    "submitting": "Signing in...",
+    "noAccount": "No account yet? Contact your administrator.",
+    "reason": {
+      "expired": "Your session has expired. Please sign in again.",
+      "blocked": "Your account has been blocked. Please contact your administrator.",
+      "loggedOut": "You have been signed out."
+    }
+  },
+  "validation": {
+    "required": "This field is required",
+    "email": "Invalid email address",
+    "passwordMin": "Password must be at least 8 characters",
+    "passwordMax": "Password must be at most 64 characters",
+    "passwordPattern": "Password must contain both letters and numbers",
+    "passwordMismatch": "Passwords do not match",
+    "phone": "Invalid phone number (9–11 digits)",
+    "tooLong": "Too long (max 100 characters)",
+    "invalid": "Invalid value"
+  },
+  "errors": {
+    "VALIDATION_FAILED": "Invalid data, please check your input.",
+    "INTERNAL_ERROR": "Something went wrong. Please try again later.",
+    "NOT_FOUND": "Not found.",
+    "TOO_MANY_REQUESTS": "Too many requests. Please try again in a few minutes.",
+    "FORBIDDEN": "You do not have permission to perform this action.",
+    "AUTH_INVALID_CREDENTIALS": "Incorrect email or password.",
+    "AUTH_ACCOUNT_BLOCKED": "Your account has been blocked. Please contact your administrator.",
+    "AUTH_UNAUTHENTICATED": "Please sign in to continue.",
+    "AUTH_SESSION_EXPIRED": "Your session has expired.",
+    "AUTH_REFRESH_INVALID": "Your session has expired.",
+    "USER_NOT_FOUND": "User not found.",
+    "USER_EMAIL_EXISTS": "This email is already in use.",
+    "USER_WRONG_CURRENT_PASSWORD": "Current password is incorrect.",
+    "USER_SAME_PASSWORD": "New password must be different from the current one.",
+    "USER_CANNOT_MODIFY_SELF": "You cannot block yourself or change your own role.",
+    "USER_LAST_ADMIN": "There must be at least one active administrator.",
+    "SESSION_NOT_FOUND": "Session not found or already ended.",
+    "SESSION_CANNOT_REVOKE_CURRENT": "You cannot end the current session here. Use Log out instead.",
+    "FILE_REQUIRED": "Please choose a file.",
+    "FILE_TOO_LARGE": "File is too large (max 2MB).",
+    "FILE_INVALID_TYPE": "Only JPG, PNG or WEBP images are allowed.",
+    "NETWORK_ERROR": "Cannot reach the server. Please check your connection."
+  },
+  "roles": {
+    "ADMIN": "Administrator",
+    "USER": "User"
+  },
+  "status": {
+    "ACTIVE": "Active",
+    "BLOCKED": "Blocked"
+  },
+  "chat": {
+    "title": "Chat with AI",
+    "description": "Module 2 – the conversational assistant comes next: create conversations, send messages and receive real-time streaming replies."
+  },
+  "documents": {
+    "title": "Document management",
+    "description": "Module 3 – uploading, searching and tracking document processing will be built in the next phase."
+  },
+  "profile": {
+    "title": "Profile",
+    "description": "Manage your personal information, password and signed-in devices.",
+    "tabs": {
+      "info": "Information",
+      "security": "Password",
+      "sessions": "Sessions"
+    },
+    "info": {
+      "title": "Personal information",
+      "description": "Information visible to your colleagues in the system.",
+      "fullName": "Full name",
+      "email": "Email",
+      "emailHint": "Contact an administrator to change your email.",
+      "phone": "Phone number",
+      "department": "Department",
+      "role": "Role",
+      "updated": "Profile updated."
+    },
+    "avatar": {
+      "upload": "Upload photo",
+      "remove": "Remove",
+      "hint": "JPG, PNG or WEBP, up to 2MB.",
+      "updated": "Avatar updated.",
+      "removed": "Avatar removed."
+    },
+    "security": {
+      "title": "Change password",
+      "description": "After changing your password, other devices will be signed out.",
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "newPasswordHint": "At least 8 characters, with letters and numbers.",
+      "confirmPassword": "Confirm new password",
+      "submit": "Change password",
+      "changed": "Password changed. Other devices have been signed out."
+    },
+    "sessions": {
+      "title": "Signed-in devices",
+      "description": "If you see an unfamiliar device, sign it out and change your password.",
+      "current": "This device",
+      "lastActive": "Active {time}",
+      "signedInAt": "Signed in {time}",
+      "unknownDevice": "Unknown device",
+      "browserOnOs": "{browser} on {os}",
+      "revoke": "Sign out",
+      "revokeAll": "Sign out all other devices",
+      "revoked": "Device signed out.",
+      "revokedAll": "All other devices signed out.",
+      "confirmRevokeAllTitle": "Sign out all other devices?",
+      "confirmRevokeAllDescription": "Every device except this one will need to sign in again.",
+      "onlyCurrent": "Only this device is signed in."
+    }
+  },
+  "adminUsers": {
+    "title": "User management",
+    "description": "Create accounts, assign roles, block/unblock and reset passwords for employees.",
+    "add": "Add user",
+    "searchPlaceholder": "Search by name, email, department...",
+    "allRoles": "All roles",
+    "allStatuses": "All statuses",
+    "you": "You",
+    "never": "Never signed in",
+    "empty": "No users yet.",
+    "emptyFiltered": "No users match the current filters.",
+    "columns": {
+      "user": "User",
+      "department": "Department",
+      "role": "Role",
+      "status": "Status",
+      "lastLogin": "Last sign-in",
+      "actions": "Actions"
+    },
+    "actions": {
+      "open": "Open actions menu",
+      "edit": "Edit",
+      "resetPassword": "Reset password",
+      "block": "Block account",
+      "unblock": "Unblock account"
+    },
+    "form": {
+      "createTitle": "Add user",
+      "createDescription": "The new account can sign in right away with the email and password you set.",
+      "editTitle": "Edit user",
+      "editDescription": "Update the information and role of {name}.",
+      "fullName": "Full name",
+      "email": "Email",
+      "password": "Password",
+      "passwordHint": "At least 8 characters, with letters and numbers.",
+      "phone": "Phone number",
+      "department": "Department",
+      "role": "Role",
+      "selfRoleHint": "You cannot change your own role.",
+      "create": "Create account",
+      "created": "Account {email} created.",
+      "updated": "User updated."
+    },
+    "reset": {
+      "title": "Reset password",
+      "description": "Set a new password for {name}. They will be signed out of all devices.",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm password",
+      "submit": "Reset password",
+      "done": "Password reset for {name}."
+    },
+    "statusDialog": {
+      "blockTitle": "Block {name}?",
+      "blockDescription": "The user will be signed out of all devices immediately and cannot sign in until unblocked.",
+      "unblockTitle": "Unblock {name}?",
+      "unblockDescription": "The user will be able to sign in again with their current password.",
+      "blocked": "{name} has been blocked.",
+      "unblocked": "{name} has been unblocked."
+    }
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "The page you are looking for does not exist or has been moved.",
+    "home": "Back to home"
+  },
+  "forbidden": {
+    "title": "Access denied",
+    "description": "This page is for administrators only."
+  }
+}

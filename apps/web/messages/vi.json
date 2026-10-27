@@ -1,0 +1,231 @@
+{
+  "common": {
+    "appName": "CAT GPT",
+    "appTagline": "Trợ lý AI nội bộ",
+    "save": "Lưu thay đổi",
+    "saving": "Đang lưu...",
+    "cancel": "Hủy",
+    "confirm": "Xác nhận",
+    "close": "Đóng",
+    "retry": "Thử lại",
+    "loading": "Đang tải...",
+    "actions": "Thao tác",
+    "comingSoon": "Đang phát triển",
+    "previous": "Trước",
+    "next": "Sau",
+    "pageOf": "Trang {page} / {totalPages}",
+    "totalItems": "Tổng {total} bản ghi",
+    "notUpdated": "Chưa cập nhật"
+  },
+  "nav": {
+    "workspace": "Không gian làm việc",
+    "administration": "Quản trị",
+    "chat": "Trò chuyện",
+    "documents": "Tài liệu",
+    "users": "Người dùng",
+    "profile": "Hồ sơ cá nhân",
+    "logout": "Đăng xuất",
+    "toggleSidebar": "Ẩn/hiện thanh bên"
+  },
+  "theme": {
+    "label": "Giao diện",
+    "light": "Sáng",
+    "dark": "Tối",
+    "system": "Theo hệ thống"
+  },
+  "locale": {
+    "label": "Ngôn ngữ",
+    "vi": "Tiếng Việt",
+    "en": "English"
+  },
+  "auth": {
+    "loginTitle": "Đăng nhập",
+    "loginSubtitle": "Đăng nhập để sử dụng trợ lý AI nội bộ",
+    "email": "Email",
+    "emailPlaceholder": "ten@congty.vn",
+    "password": "Mật khẩu",
+    "showPassword": "Hiện mật khẩu",
+    "hidePassword": "Ẩn mật khẩu",
+    "submit": "Đăng nhập",
+    "submitting": "Đang đăng nhập...",
+    "noAccount": "Chưa có tài khoản? Liên hệ quản trị viên để được cấp.",
+    "reason": {
+      "expired": "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
+      "blocked": "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.",
+      "loggedOut": "Bạn đã đăng xuất."
+    }
+  },
+  "validation": {
+    "required": "Không được để trống",
+    "email": "Email không hợp lệ",
+    "passwordMin": "Mật khẩu tối thiểu 8 ký tự",
+    "passwordMax": "Mật khẩu tối đa 64 ký tự",
+    "passwordPattern": "Mật khẩu phải có cả chữ và số",
+    "passwordMismatch": "Mật khẩu xác nhận không khớp",
+    "phone": "Số điện thoại không hợp lệ (9–11 chữ số)",
+    "tooLong": "Quá dài (tối đa 100 ký tự)",
+    "invalid": "Giá trị không hợp lệ"
+  },
+  "errors": {
+    "VALIDATION_FAILED": "Dữ liệu không hợp lệ, vui lòng kiểm tra lại.",
+    "INTERNAL_ERROR": "Đã có lỗi xảy ra. Vui lòng thử lại sau.",
+    "NOT_FOUND": "Không tìm thấy dữ liệu.",
+    "TOO_MANY_REQUESTS": "Bạn thao tác quá nhanh. Vui lòng thử lại sau ít phút.",
+    "FORBIDDEN": "Bạn không có quyền thực hiện thao tác này.",
+    "AUTH_INVALID_CREDENTIALS": "Email hoặc mật khẩu không đúng.",
+    "AUTH_ACCOUNT_BLOCKED": "Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên.",
+    "AUTH_UNAUTHENTICATED": "Bạn cần đăng nhập để tiếp tục.",
+    "AUTH_SESSION_EXPIRED": "Phiên đăng nhập đã hết hạn.",
+    "AUTH_REFRESH_INVALID": "Phiên đăng nhập đã hết hạn.",
+    "USER_NOT_FOUND": "Không tìm thấy người dùng.",
+    "USER_EMAIL_EXISTS": "Email này đã được sử dụng.",
+    "USER_WRONG_CURRENT_PASSWORD": "Mật khẩu hiện tại không đúng.",
+    "USER_SAME_PASSWORD": "Mật khẩu mới phải khác mật khẩu hiện tại.",
+    "USER_CANNOT_MODIFY_SELF": "Bạn không thể khóa hoặc đổi vai trò của chính mình.",
+    "USER_LAST_ADMIN": "Hệ thống phải còn ít nhất một quản trị viên đang hoạt động.",
+    "SESSION_NOT_FOUND": "Phiên đăng nhập không tồn tại hoặc đã kết thúc.",
+    "SESSION_CANNOT_REVOKE_CURRENT": "Không thể đăng xuất phiên hiện tại tại đây. Hãy dùng nút Đăng xuất.",
+    "FILE_REQUIRED": "Vui lòng chọn tệp.",
+    "FILE_TOO_LARGE": "Tệp quá lớn (tối đa 2MB).",
+    "FILE_INVALID_TYPE": "Chỉ chấp nhận ảnh JPG, PNG hoặc WEBP.",
+    "NETWORK_ERROR": "Không kết nối được máy chủ. Vui lòng kiểm tra mạng."
+  },
+  "roles": {
+    "ADMIN": "Quản trị viên",
+    "USER": "Người dùng"
+  },
+  "status": {
+    "ACTIVE": "Hoạt động",
+    "BLOCKED": "Đã khóa"
+  },
+  "chat": {
+    "title": "Trò chuyện với AI",
+    "description": "Module 2 – Trợ lý hội thoại sẽ được triển khai ở giai đoạn tiếp theo: tạo cuộc hội thoại, gửi tin nhắn và nhận phản hồi theo thời gian thực."
+  },
+  "documents": {
+    "title": "Quản lý tài liệu",
+    "description": "Module 3 – Tải lên, tìm kiếm và theo dõi trạng thái xử lý tài liệu sẽ được triển khai ở giai đoạn tiếp theo."
+  },
+  "profile": {
+    "title": "Hồ sơ cá nhân",
+    "description": "Quản lý thông tin cá nhân, mật khẩu và các thiết bị đang đăng nhập.",
+    "tabs": {
+      "info": "Thông tin",
+      "security": "Mật khẩu",
+      "sessions": "Phiên đăng nhập"
+    },
+    "info": {
+      "title": "Thông tin cá nhân",
+      "description": "Thông tin hiển thị với đồng nghiệp trong hệ thống.",
+      "fullName": "Họ và tên",
+      "email": "Email",
+      "emailHint": "Liên hệ quản trị viên nếu cần đổi email.",
+      "phone": "Số điện thoại",
+      "department": "Phòng ban",
+      "role": "Vai trò",
+      "updated": "Đã cập nhật thông tin cá nhân."
+    },
+    "avatar": {
+      "upload": "Tải ảnh lên",
+      "remove": "Xóa ảnh",
+      "hint": "JPG, PNG hoặc WEBP, tối đa 2MB.",
+      "updated": "Đã cập nhật ảnh đại diện.",
+      "removed": "Đã xóa ảnh đại diện."
+    },
+    "security": {
+      "title": "Đổi mật khẩu",
+      "description": "Sau khi đổi mật khẩu, các thiết bị khác sẽ bị đăng xuất.",
+      "currentPassword": "Mật khẩu hiện tại",
+      "newPassword": "Mật khẩu mới",
+      "newPasswordHint": "Tối thiểu 8 ký tự, có cả chữ và số.",
+      "confirmPassword": "Xác nhận mật khẩu mới",
+      "submit": "Đổi mật khẩu",
+      "changed": "Đã đổi mật khẩu. Các thiết bị khác đã bị đăng xuất."
+    },
+    "sessions": {
+      "title": "Thiết bị đang đăng nhập",
+      "description": "Nếu thấy thiết bị lạ, hãy đăng xuất thiết bị đó và đổi mật khẩu.",
+      "current": "Thiết bị này",
+      "lastActive": "Hoạt động {time}",
+      "signedInAt": "Đăng nhập lúc {time}",
+      "unknownDevice": "Thiết bị không xác định",
+      "browserOnOs": "{browser} trên {os}",
+      "revoke": "Đăng xuất",
+      "revokeAll": "Đăng xuất tất cả thiết bị khác",
+      "revoked": "Đã đăng xuất thiết bị.",
+      "revokedAll": "Đã đăng xuất tất cả thiết bị khác.",
+      "confirmRevokeAllTitle": "Đăng xuất tất cả thiết bị khác?",
+      "confirmRevokeAllDescription": "Tất cả thiết bị trừ thiết bị này sẽ phải đăng nhập lại.",
+      "onlyCurrent": "Chỉ có thiết bị này đang đăng nhập."
+    }
+  },
+  "adminUsers": {
+    "title": "Quản lý người dùng",
+    "description": "Tạo tài khoản, phân quyền, khóa/mở khóa và đặt lại mật khẩu cho nhân viên.",
+    "add": "Thêm người dùng",
+    "searchPlaceholder": "Tìm theo tên, email, phòng ban...",
+    "allRoles": "Tất cả vai trò",
+    "allStatuses": "Tất cả trạng thái",
+    "you": "Bạn",
+    "never": "Chưa đăng nhập",
+    "empty": "Chưa có người dùng nào.",
+    "emptyFiltered": "Không có người dùng phù hợp với bộ lọc.",
+    "columns": {
+      "user": "Người dùng",
+      "department": "Phòng ban",
+      "role": "Vai trò",
+      "status": "Trạng thái",
+      "lastLogin": "Đăng nhập gần nhất",
+      "actions": "Thao tác"
+    },
+    "actions": {
+      "open": "Mở menu thao tác",
+      "edit": "Chỉnh sửa",
+      "resetPassword": "Đặt lại mật khẩu",
+      "block": "Khóa tài khoản",
+      "unblock": "Mở khóa tài khoản"
+    },
+    "form": {
+      "createTitle": "Thêm người dùng",
+      "createDescription": "Tài khoản mới có thể đăng nhập ngay bằng email và mật khẩu bạn đặt.",
+      "editTitle": "Chỉnh sửa người dùng",
+      "editDescription": "Cập nhật thông tin và vai trò của {name}.",
+      "fullName": "Họ và tên",
+      "email": "Email",
+      "password": "Mật khẩu",
+      "passwordHint": "Tối thiểu 8 ký tự, có cả chữ và số.",
+      "phone": "Số điện thoại",
+      "department": "Phòng ban",
+      "role": "Vai trò",
+      "selfRoleHint": "Bạn không thể tự đổi vai trò của mình.",
+      "create": "Tạo tài khoản",
+      "created": "Đã tạo tài khoản {email}.",
+      "updated": "Đã cập nhật người dùng."
+    },
+    "reset": {
+      "title": "Đặt lại mật khẩu",
+      "description": "Đặt mật khẩu mới cho {name}. Người dùng sẽ bị đăng xuất khỏi mọi thiết bị.",
+      "newPassword": "Mật khẩu mới",
+      "confirmPassword": "Xác nhận mật khẩu",
+      "submit": "Đặt lại mật khẩu",
+      "done": "Đã đặt lại mật khẩu cho {name}."
+    },
+    "statusDialog": {
+      "blockTitle": "Khóa tài khoản {name}?",
+      "blockDescription": "Người dùng sẽ bị đăng xuất ngay lập tức khỏi mọi thiết bị và không thể đăng nhập cho đến khi được mở khóa.",
+      "unblockTitle": "Mở khóa tài khoản {name}?",
+      "unblockDescription": "Người dùng có thể đăng nhập lại bằng mật khẩu hiện tại.",
+      "blocked": "Đã khóa tài khoản {name}.",
+      "unblocked": "Đã mở khóa tài khoản {name}."
+    }
+  },
+  "notFound": {
+    "title": "Không tìm thấy trang",
+    "description": "Trang bạn tìm không tồn tại hoặc đã bị di chuyển.",
+    "home": "Về trang chủ"
+  },
+  "forbidden": {
+    "title": "Không có quyền truy cập",
+    "description": "Trang này chỉ dành cho quản trị viên."
+  }
+}
