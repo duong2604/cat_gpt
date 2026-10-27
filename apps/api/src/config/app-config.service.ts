@@ -52,6 +52,13 @@ export class AppConfigService {
     return this.get('UPLOAD_DIR');
   }
 
+  get llm() {
+    return {
+      model: this.get('LLM_MODEL'),
+      systemPrompt: this.get('LLM_SYSTEM_PROMPT'),
+    };
+  }
+
   get seedAdmin() {
     return {
       email: this.get('ADMIN_EMAIL'),

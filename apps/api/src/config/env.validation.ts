@@ -83,6 +83,15 @@ export class EnvironmentVariables {
 
   @IsString()
   ADMIN_FULL_NAME = 'Administrator';
+
+  @IsString()
+  @IsNotEmpty()
+  LLM_MODEL = 'mock-1';
+
+  @IsString()
+  @IsNotEmpty()
+  LLM_SYSTEM_PROMPT =
+    'Bạn là CAT GPT, trợ lý AI nội bộ của công ty. Trả lời bằng tiếng Việt (trừ khi người dùng dùng ngôn ngữ khác), ngắn gọn, chính xác, trình bày bằng markdown khi phù hợp.';
 }
 
 export function validateEnv(config: Record<string, unknown>): EnvironmentVariables {
