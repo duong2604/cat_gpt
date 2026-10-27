@@ -6,8 +6,16 @@ export const NETWORK_ERROR = "NETWORK_ERROR";
 
 export type AppErrorCode = ErrorCode | typeof NETWORK_ERROR;
 
+/** Lỗi API cho các request không đi qua axios (ví dụ fetch streaming). */
+export class ApiError extends Error {
+  constructor(readonly code: AppErrorCode) {
+    super(code);
+  }
+}
+
 /** Rút mã lỗi chuẩn hóa từ mọi loại lỗi (axios, lỗi mạng, lỗi JS). */
 export function getErrorCode(error: unknown): AppErrorCode {
+  if (error instanceof ApiError) return error.code;
   if (isAxiosError(error)) {
     if (!error.response) return NETWORK_ERROR;
     const code = (error.response.data as Partial<ApiErrorBody> | undefined)?.code;

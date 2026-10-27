@@ -125,3 +125,58 @@
     @apply bg-background font-sans text-foreground;
   }
 }
+
+/* Tô màu code trong câu trả lời chat (class do rehype-highlight sinh ra), theo kiểu GitHub sáng/tối. */
+.hljs-comment,
+.hljs-quote {
+  color: #6e7781;
+  font-style: italic;
+}
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal,
+.hljs-type {
+  color: #cf222e;
+}
+.hljs-string,
+.hljs-regexp,
+.hljs-template-string {
+  color: #0a3069;
+}
+.hljs-number,
+.hljs-attr,
+.hljs-variable,
+.hljs-built_in {
+  color: #0550ae;
+}
+.hljs-title,
+.hljs-title.function_,
+.hljs-section {
+  color: #8250df;
+}
+.dark .hljs-comment,
+.dark .hljs-quote {
+  color: #8b949e;
+}
+.dark .hljs-keyword,
+.dark .hljs-selector-tag,
+.dark .hljs-literal,
+.dark .hljs-type {
+  color: #ff7b72;
+}
+.dark .hljs-string,
+.dark .hljs-regexp,
+.dark .hljs-template-string {
+  color: #a5d6ff;
+}
+.dark .hljs-number,
+.dark .hljs-attr,
+.dark .hljs-variable,
+.dark .hljs-built_in {
+  color: #79c0ff;
+}
+.dark .hljs-title,
+.dark .hljs-title.function_,
+.dark .hljs-section {
+  color: #d2a8ff;
+}
