@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import type { UserDto } from '@cat-gpt/shared';
+import type { AdminUserDto, UserDto } from '@cat-gpt/shared';
 import { StorageService } from '../storage/storage.service.js';
 import type { User } from './schemas/user.schema.js';
 
@@ -22,5 +22,11 @@ export class UserPresenter {
       createdAt: user.createdAt.toISOString(),
       updatedAt: user.updatedAt.toISOString(),
     };
+  }
+
+  /** Cho màn quản trị: bỏ avatarUrl (CS-4 — ảnh đại diện chỉ chính chủ xem). */
+  toAdminDto(user: User): AdminUserDto {
+    const { avatarUrl: _avatarUrl, ...dto } = this.toDto(user);
+    return dto;
   }
 }

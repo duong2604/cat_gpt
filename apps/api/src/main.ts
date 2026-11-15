@@ -6,10 +6,9 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { AppModule } from './app.module.js';
-import { ACCESS_TOKEN_COOKIE, API_PREFIX, LOCAL_FILES_ROUTE } from './common/constants.js';
+import { ACCESS_TOKEN_COOKIE, API_PREFIX } from './common/constants.js';
 import { appValidationPipe } from './common/pipes/app-validation.pipe.js';
 import { AppConfigService } from './config/app-config.service.js';
-import { LocalStorageProvider } from './modules/storage/local-storage.provider.js';
 
 // Node trên Windows đôi khi đọc DNS hệ thống thành 127.0.0.1 → SRV lookup của mongodb+srv lỗi ECONNREFUSED.
 if (dns.getServers().every((s) => s.startsWith('127.') || s === '::1')) {
@@ -31,14 +30,6 @@ async function bootstrap() {
   if (config.corsOrigins.length > 0) {
     app.enableCors({ origin: config.corsOrigins, credentials: true });
   }
-
-  // Phục vụ file của LocalStorageProvider (avatar). Sẽ bỏ khi chuyển sang MinIO.
-  app.useStaticAssets(app.get(LocalStorageProvider).rootDir, {
-    prefix: LOCAL_FILES_ROUTE,
-    index: false,
-    dotfiles: 'deny',
-    maxAge: '7d',
-  });
 
   if (config.swaggerEnabled) {
     const document = SwaggerModule.createDocument(

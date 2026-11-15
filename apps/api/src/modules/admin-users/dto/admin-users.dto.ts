@@ -9,10 +9,11 @@ import {
   MaxLength,
   ValidateIf,
 } from 'class-validator';
-import { PHONE_PATTERN, UserRole, UserStatus } from '@cat-gpt/shared';
+import { type AdminUserDto, PHONE_PATTERN, UserRole, UserStatus } from '@cat-gpt/shared';
 import { PaginationQueryDto } from '../../../common/dto/pagination-query.dto.js';
 import { IsStrongPassword } from '../../../common/validation/password.js';
 import { EmptyToNull, Trim, TrimLower } from '../../../common/validation/transforms.js';
+import { PaginationMetaResponse } from '../../users/dto/user.response.js';
 
 export class ListUsersQueryDto extends PaginationQueryDto {
   @ApiPropertyOptional({ description: 'Tìm theo email, họ tên, phòng ban' })
@@ -116,4 +117,23 @@ export class UpdateUserStatusDto {
 export class ResetPasswordDto {
   @IsStrongPassword()
   newPassword: string;
+}
+
+/** Không có avatarUrl: CS-4 — ảnh đại diện chỉ chính chủ xem, màn quản trị không hiện. */
+export class AdminUserResponse implements AdminUserDto {
+  @ApiProperty() id: string;
+  @ApiProperty() email: string;
+  @ApiProperty() fullName: string;
+  @ApiPropertyOptional({ type: String, nullable: true }) phone: string | null;
+  @ApiPropertyOptional({ type: String, nullable: true }) department: string | null;
+  @ApiProperty({ enum: Object.values(UserRole) }) role: UserRole;
+  @ApiProperty({ enum: Object.values(UserStatus) }) status: UserStatus;
+  @ApiPropertyOptional({ type: String, nullable: true }) lastLoginAt: string | null;
+  @ApiProperty() createdAt: string;
+  @ApiProperty() updatedAt: string;
+}
+
+export class PaginatedAdminUsersResponse {
+  @ApiProperty({ type: [AdminUserResponse] }) items: AdminUserResponse[];
+  @ApiProperty({ type: PaginationMetaResponse }) meta: PaginationMetaResponse;
 }

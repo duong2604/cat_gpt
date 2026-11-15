@@ -6,7 +6,7 @@ import { useEffect, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { ErrorCode, type UserDto, UserRole } from "@cat-gpt/shared";
+import { type AdminUserDto, ErrorCode, UserRole } from "@cat-gpt/shared";
 import { FormFieldError } from "@/components/form/form-field-error";
 import { PasswordInput } from "@/components/form/password-input";
 import { Button } from "@/components/ui/button";
@@ -48,7 +48,7 @@ function makeSchema(isEdit: boolean) {
 }
 type Values = z.infer<ReturnType<typeof makeSchema>>;
 
-function toFormValues(user?: UserDto): Values {
+function toFormValues(user?: AdminUserDto): Values {
   return {
     fullName: user?.fullName ?? "",
     email: user?.email ?? "",
@@ -67,7 +67,7 @@ export function UserFormDialog({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  user?: UserDto;
+  user?: AdminUserDto;
 }) {
   const t = useTranslations("adminUsers.form");
   const tCommon = useTranslations("common");

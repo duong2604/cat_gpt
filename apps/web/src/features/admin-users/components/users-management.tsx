@@ -14,9 +14,8 @@ import {
 } from "lucide-react";
 import { useFormatter, useNow, useTranslations } from "next-intl";
 import { useState } from "react";
-import { DEFAULT_PAGE_SIZE, type UserDto, UserRole, UserStatus } from "@cat-gpt/shared";
+import { type AdminUserDto, DEFAULT_PAGE_SIZE, UserRole, UserStatus } from "@cat-gpt/shared";
 import { PageHeader } from "@/components/page-header";
-import { UserAvatar } from "@/components/user-avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -78,9 +77,9 @@ export function UsersManagement() {
   });
 
   // Dialog state: mỗi dialog giữ user đang thao tác (null = đóng).
-  const [formState, setFormState] = useState<{ open: boolean; user?: UserDto }>({ open: false });
-  const [resetTarget, setResetTarget] = useState<UserDto | null>(null);
-  const [statusTarget, setStatusTarget] = useState<UserDto | null>(null);
+  const [formState, setFormState] = useState<{ open: boolean; user?: AdminUserDto }>({ open: false });
+  const [resetTarget, setResetTarget] = useState<AdminUserDto | null>(null);
+  const [statusTarget, setStatusTarget] = useState<AdminUserDto | null>(null);
 
   const isFiltered = Boolean(debouncedSearch) || role !== ALL || status !== ALL;
   const meta = users.data?.meta;
@@ -252,7 +251,7 @@ function UserRow({
   onResetPassword,
   onToggleStatus,
 }: {
-  user: UserDto;
+  user: AdminUserDto;
   onEdit: () => void;
   onResetPassword: () => void;
   onToggleStatus: () => void;
@@ -267,15 +266,12 @@ function UserRow({
   return (
     <TableRow className={blocked ? "text-muted-foreground" : undefined}>
       <TableCell>
-        <div className="flex items-center gap-3">
-          <UserAvatar name={user.fullName} src={user.avatarUrl} className="size-9" />
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="truncate font-medium text-foreground">{user.fullName}</span>
-              {isSelf ? <Badge variant="outline">{t("you")}</Badge> : null}
-            </div>
-            <div className="truncate text-xs text-muted-foreground">{user.email}</div>
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="truncate font-medium text-foreground">{user.fullName}</span>
+            {isSelf ? <Badge variant="outline">{t("you")}</Badge> : null}
           </div>
+          <div className="truncate text-xs text-muted-foreground">{user.email}</div>
         </div>
       </TableCell>
       <TableCell className="hidden md:table-cell">{user.department ?? "—"}</TableCell>
