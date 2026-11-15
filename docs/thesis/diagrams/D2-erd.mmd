@@ -1,0 +1,41 @@
+erDiagram
+  USERS ||--o{ SESSIONS : "có"
+  USERS ||--o{ CONVERSATIONS : "sở hữu"
+  CONVERSATIONS ||--o{ MESSAGES : "gồm"
+  USERS {
+    ObjectId _id
+    string email "unique, chữ thường"
+    string passwordHash "select:false"
+    string fullName
+    string phone
+    string department
+    string avatarKey
+    enum role "ADMIN | USER"
+    enum status "ACTIVE | BLOCKED"
+    date lastLoginAt
+    ObjectId createdBy
+  }
+  SESSIONS {
+    ObjectId userId "index"
+    string tokenHash "SHA-256"
+    string previousTokenHash
+    date rotatedAt
+    string userAgent
+    string ip
+    date lastUsedAt
+    date expiresAt "TTL index"
+    date revokedAt
+  }
+  CONVERSATIONS {
+    ObjectId userId
+    string title "≤ 100 ký tự"
+    date lastMessageAt
+  }
+  MESSAGES {
+    ObjectId conversationId
+    ObjectId userId
+    enum role "user | assistant"
+    string content
+    enum status "COMPLETED | STOPPED | ERROR (+ TRUNCATED trên PR #4)"
+    string model
+  }

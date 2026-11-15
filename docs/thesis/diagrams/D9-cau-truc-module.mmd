@@ -1,0 +1,36 @@
+flowchart TB
+  subgraph API["apps/api/src/modules/ (NestJS)"]
+    direction TB
+    subgraph M1B["Module 1"]
+      auth["auth/<br/>auth.controller · auth.service · jwt.strategy"]
+      sessions["sessions/<br/>sessions.service · refresh-token"]
+      users["users/<br/>users.service · user.presenter"]
+      me["me/<br/>me.controller · me.service"]
+      admin["admin-users/<br/>admin-users.controller · .service"]
+      storage["storage/<br/>local-storage.provider · files.controller [PR #3]"]
+    end
+    subgraph M2B["Module 2"]
+      chat["chat/<br/>chat.controller · chat.service · conversations.service"]
+      llm["llm/<br/>llm.provider · mock-llm.provider · openai-llm.provider [PR #4]"]
+    end
+  end
+  subgraph WEB["apps/web/src/features/ (Next.js)"]
+    direction TB
+    fauth["auth/"]
+    fprofile["profile/"]
+    fadmin["admin-users/"]
+    fchat["chat/"]
+  end
+  SH["packages/shared/<br/>enums · error-codes · types"]
+
+  fauth --> auth
+  fprofile --> me
+  fadmin --> admin
+  fchat --> chat
+  chat --> llm
+  auth --> sessions
+  admin --> users
+  me --> users
+  me --> storage
+  WEB -. import .-> SH
+  API -. import .-> SH

@@ -1,6 +1,6 @@
 # TL-004 — Bộ tài liệu nguồn cho báo cáo đồ án (Markdown)
 
-Trạng thái: Chờ Review (vòng 3, 15/11/2026 — sớm so với hạn 19/11); vòng 4 (sau tích hợp PR #3 → PR #4) 25/11
+Trạng thái: Đang làm — vòng 3 **khách hàng duyệt** 15/11/2026 tại `da66569` để dựng Word nháp ([TL-005](TL-005-thesis-word-draft.md)); vòng 4 (sau tích hợp PR #3 → PR #4) 25/11
 Người phụ trách: TL · Ưu tiên: P1 · Ước lượng: 3,5 ngày làm việc, chia 4 mốc (bảng dưới)
 Phụ thuộc: [SE-008](SE-008-thesis-implementation-evidence.md) (`03-implementation.md` + bảng bằng chứng); cập nhật trạng thái Module 1–2 sau khi tích hợp PR #3 (SE-002) và PR #4 (SE-007)
 Hạn bàn giao review: **19/11/2026** (vòng 2, bộ nguồn trước demo) · cập nhật theo `develop` sau tích hợp: **25/11/2026** (CTO, 15/11/2026) · Hạn hoàn tất: Chờ chốt
@@ -61,7 +61,8 @@ Một bộ Markdown chính xác, truy vết được, đủ để một AI khác
 - Vòng 2 (15/11/2026): đọc hai file khách hàng chỉ định, cập nhật `01`, `02`, `04`, README — [Checklist vòng 2](#checklist-vòng-2). Chờ khách hàng + CTO.
 - SE-008 vòng 1 (PR #5 @ `bbfd59f`): TL review **Cần sửa** 15/11 — [Review SE-008 vòng 1](#review-se-008-vòng-1-tl).
 - SE-008 vòng 2 (`44bfbad`): TL **Đạt**, merge PR #5 → `8732458`, SE-008 `Done` 15/11.
-- Vòng 3 (15/11/2026, sớm so với hạn 19/11): đủ nguồn 4 chương, `04` tổng hợp từ SE-008 — [Checklist vòng 3](#checklist-vòng-3). Chờ khách hàng + CTO.
+- Vòng 3 (15/11/2026, sớm so với hạn 19/11): đủ nguồn 4 chương, `04` tổng hợp từ SE-008 — [Checklist vòng 3](#checklist-vòng-3). **Khách hàng duyệt tại `da66569`** để dựng Word nháp — [Review vòng 3](#review-vòng-3) → [TL-005](TL-005-thesis-word-draft.md).
+- Vòng 4 (25/11): cập nhật bộ Markdown theo kết quả xác minh trên `develop` sau tích hợp PR #3 → PR #4; TL-005 cập nhật bản Word từ SHA nguồn mới.
 - (Kế hoạch ban đầu) Vòng 3 (19/11): sau review SE-008 — [kế hoạch](#kế-hoạch-vòng-2) (đánh số lại: review SE-008 thành vòng 3, cập nhật sau tích hợp thành vòng 4).
 
 ## Lịch sử review
@@ -162,6 +163,11 @@ Yêu cầu tiếp: giao SE-008 ngay (bàn giao 18/11, TL review + tổng hợp 1
 - Sau khi khách hàng + CTO duyệt: TL tạo task riêng để AI viết `.docx` từ SHA bộ nguồn đã duyệt, áp dụng Q1–Q15, kèm checklist kiểm tra bản Word.
 
 **Trạng thái và bước tiếp theo** — Chờ Review (khách hàng + CTO). Vòng 4 (25/11): sau tích hợp PR #3 → PR #4 và xác minh trên `develop`, đổi nhãn [PR] → đã tích hợp kèm SHA merge; chụp lại ảnh B13.
+
+#### Review vòng 3
+Khách hàng (15/11/2026), nguyên văn: "Tôi duyệt bộ nguồn vòng 3 tại `da66569` để dựng bản Word nháp. Ghi kết luận vào vòng 3 của `TL-004` và giữ lịch sử checklist. Tạo task riêng cho AI viết `.docx` từ đúng SHA này, theo bố cục bốn chương và quy định Q1–Q15. Trong task, dẫn trực tiếp tới PDF quy định để người dựng Word đối chiếu khi cần."
+Yêu cầu kèm theo (ghi vào [TL-005](TL-005-thesis-word-draft.md)): bản nháp mô tả đúng trạng thái tại `da66569` (Module 1 và Chat phản hồi mẫu đã tích hợp; ảnh đại diện và OpenAI đã kiểm thử trên PR #3/#4; Module 3–4 là thiết kế và giao diện minh họa; Chương 4 dùng ca kiểm thử có nguồn); nhãn `CẦN BỔ SUNG`; ảnh tạm và ảnh cần thay; chốt B7 theo checklist vòng 3 và quy định Khoa; checklist bàn giao Word; bàn giao `Chờ Review`. Sau tích hợp 23–24/11: cập nhật bộ Markdown (vòng 4), 25/11 cập nhật bản Word, báo bằng checklist vòng mới.
+Checklist vòng 1–3 giữ nguyên ở trên.
 
 ## Phản hồi UI
 Không áp dụng (tài liệu).

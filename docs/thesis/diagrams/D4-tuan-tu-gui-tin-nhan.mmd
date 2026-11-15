@@ -1,0 +1,19 @@
+sequenceDiagram
+  actor U as Người dùng
+  participant W as Web /chat
+  participant A as API ChatService
+  participant L as LlmProvider
+  participant D as MongoDB
+  U->>W: Nhập câu hỏi, Enter
+  W->>A: POST /chat/stream {conversationId?, content} (fetch + ReadableStream)
+  A->>A: Kiểm tra đăng nhập, giới hạn 20/phút, quyền sở hữu (lỗi → JSON, chưa mở stream)
+  A->>D: Lưu tin người dùng (tạo hội thoại nếu là tin đầu)
+  A-->>W: event: meta
+  A->>D: Đọc 20 tin gần nhất
+  A->>L: stream(system prompt + lịch sử, signal)
+  loop từng đoạn
+    L-->>A: đoạn văn bản
+    A-->>W: event: delta (chữ hiện dần)
+  end
+  A->>D: Lưu câu trả lời một lần (COMPLETED)
+  A-->>W: event: done

@@ -1,0 +1,26 @@
+flowchart LR
+  B["Trình duyệt<br/>(nhân viên / quản trị viên)"]
+  subgraph WEB["apps/web — Next.js 16 (cổng 3000)"]
+    UI["Trang App Router<br/>/login /chat /profile /admin/users"]
+    RW["rewrites /api/* (cùng origin)"]
+  end
+  subgraph API["apps/api — NestJS (cổng 4000, /api/v1)"]
+    G["Guard toàn cục:<br/>JwtAuthGuard, Throttler"]
+    M1["auth · sessions · me · admin-users · storage"]
+    M2["chat (REST + SSE)"]
+    L["LlmProvider<br/>Mock (mặc định) | OpenAI [PR #4]"]
+  end
+  DB[("MongoDB<br/>users · sessions<br/>conversations · messages")]
+  FS[("uploads/ (ảnh đại diện)<br/>LocalStorageProvider")]
+  OAI["OpenAI Responses API<br/>[PR #4]"]
+  SH["packages/shared<br/>enum · mã lỗi · kiểu"]
+
+  B -- "HTML/JS, cookie httpOnly" --> UI
+  B -- "fetch /api/*" --> RW --> G
+  G --> M1 & M2
+  M2 --> L
+  L -. "streaming HTTPS" .-> OAI
+  M1 & M2 --> DB
+  M1 --> FS
+  SH -. "import" .- WEB
+  SH -. "import" .- API
