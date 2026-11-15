@@ -47,6 +47,8 @@ TL viết task (Nháp) ─► Khách hàng + CTO chốt ─► TL: Sẵn sàng �
 5. Nhánh trên remote: chỉ **TL** xóa, sau khi nhánh đã nằm trong `origin/develop` — `git push origin --delete <nhánh>`. Senior Dev không xóa nhánh remote.
 6. **Không bao giờ xóa:** `develop`, `main`, `preview/module-2-4-demo`, nhánh của task chưa `Done` (ghi lý do giữ).
 
+**Thư mục làm việc riêng:** TL và Senior Dev không dùng chung một working tree. Khi cùng máy, mỗi vai dùng worktree riêng (ví dụ TL ở `../cat_gpt-tl`, tạo bằng `git worktree add ../cat_gpt-tl <nhánh>`); trước khi sửa, kiểm tra `git status` và `git branch --show-current` — có thay đổi không phải của mình thì dừng, không commit, không `restore` thay người khác.
+
 Ghi vào checklist (TL: mẫu 6.2; Senior Dev: mẫu 6.1 của lần bàn giao kế tiếp) một dòng: `develop` local đã cập nhật tới SHA nào; nhánh/worktree nào đã dọn (local, remote); nhánh/worktree nào còn giữ và lý do.
 
 ## 3. Nơi lưu task

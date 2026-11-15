@@ -25,7 +25,7 @@ Hướng dẫn cài đặt và chạy local nằm ở [README.md](../README.md) 
 
 ## Task — `tasks/`
 
-Mục lục: [tasks/README.md](tasks/README.md). Task demo Chat: [TL-001](tasks/TL-001-chat-integration-scope.md) (khoanh phạm vi), [SE-001](tasks/SE-001-chat-integration.md) (tích hợp Chat), [TL-002](tasks/TL-002-chat-demo-acceptance.md) (nghiệm thu). Rà quyền, UI và phát hành: [TL-003](tasks/TL-003-access-ui-release-audit.md) → [SE-002](tasks/SE-002-avatar-requires-login.md), [SE-003](tasks/SE-003-release-mode-navigation.md), [SE-004](tasks/SE-004-ui-consistency.md).
+Mục lục: [tasks/README.md](tasks/README.md). Task demo Chat: [TL-001](tasks/TL-001-chat-integration-scope.md) (khoanh phạm vi), [SE-001](tasks/SE-001-chat-integration.md) (tích hợp Chat), [TL-002](tasks/TL-002-chat-demo-acceptance.md) (nghiệm thu). Rà quyền, UI và phát hành: [TL-003](tasks/TL-003-access-ui-release-audit.md) → [SE-002](tasks/SE-002-avatar-requires-login.md), [SE-003](tasks/SE-003-release-mode-navigation.md), [SE-006](tasks/SE-006-account-admin-rules.md), [SE-005](tasks/SE-005-login-limit-shared-ip.md), [SE-004](tasks/SE-004-ui-consistency.md).
 
 ## Báo cáo — `reports/`
 
@@ -39,8 +39,8 @@ Mục lục: [tasks/README.md](tasks/README.md). Task demo Chat: [TL-001](tasks/
 |---|---|
 | [module-1-auth.md](design/module-1-auth.md) | Module 1: yêu cầu đã chốt, token & phiên, dữ liệu, API, màn hình, kiểm thử |
 | [module-2-chat.md](design/module-2-chat.md) | Module 2: phạm vi, câu hỏi chốt, thiết kế BE/FE, giao thức SSE, kế hoạch, checklist |
-| [access-control.md](design/access-control.md) | Ma trận phân quyền vai trò → màn hình → thao tác → dữ liệu → khi thiếu quyền; khoảng trống và chính sách cần chốt (Chờ Review) |
-| [ui-release-standards.md](design/ui-release-standards.md) | Chuẩn giao diện (font tiếng Việt, theme, spacing, component, thông báo), chế độ phát hành `demo`/`staff`, tiêu chí chuẩn bị cho 500 nhân sự (Chờ Review) |
+| [access-control.md](design/access-control.md) | Ma trận phân quyền vai trò → màn hình → thao tác → dữ liệu → khi thiếu quyền; khoảng trống và chính sách CS-1…CS-6 (đã chốt 15/11) |
+| [ui-release-standards.md](design/ui-release-standards.md) | Chuẩn giao diện (font tiếng Việt, theme, spacing, component, thông báo), chế độ phát hành `demo`/`staff`, tiêu chí chuẩn bị cho 500 nhân sự (đã duyệt 15/11) |
 
 ## Quy ước
 

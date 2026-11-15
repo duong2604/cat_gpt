@@ -4,7 +4,7 @@ Trạng thái: Chờ Review
 Người phụ trách: TL · Ưu tiên: P1 · Ước lượng: 1 ngày làm việc
 Phụ thuộc: Không. Không thay đổi code; bản demo 20/11 (`fbffd5b`, chạy tại `34b465d`) giữ nguyên
 Hạn bàn giao review: 15/11/2026 · Hạn hoàn tất: Không đặt
-Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review 15/11/2026 · hoàn tất —
+Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review 15/11/2026 (vòng 1, vòng 2) · hoàn tất —
 Chốt: 15/11/2026 (khách hàng giao 3 việc: dọn nhánh local, rà UI và phân quyền, chuẩn hóa tiêu chí UI và phát hành)
 SHA cơ sở: `origin/develop` @ `06a5a83`
 PR: Không — tài liệu TL tích hợp trực tiếp theo đợt được giao
@@ -32,10 +32,11 @@ Biết chắc ai được xem/sửa gì trên `develop`, chuẩn giao diện và
 | AC5 | Task SE theo thứ tự quyền → menu/chế độ → giao diện; phần chưa rõ ghi câu hỏi, không `Sẵn sàng` | SE-002…SE-004 |
 
 ## Quyết định còn mở
-CS-1…CS-6 ở [access-control mục 4](../design/access-control.md#4-chính-sách-cần-khách-hàng--cto-chốt); U1 ở [SE-004](SE-004-ui-consistency.md#quyết-định-còn-mở); hạn SE-002/SE-003 (đề xuất 23–26/11).
+CS-1…CS-6 ở [access-control mục 4](../design/access-control.md#4-chính-sách-đã-chốt); U1 ở [SE-004](SE-004-ui-consistency.md#quyết-định-còn-mở); hạn SE-002/SE-003 (đề xuất 23–26/11).
 
 ## Kết quả review
-Bàn giao vòng 1 ngày 15/11/2026, chờ khách hàng + CTO duyệt.
+- Vòng 1 (15/11/2026): khách hàng **duyệt** kết quả rà soát; chốt CS-1…CS-6 và U1; giao SE-002 ngay; yêu cầu ghi quyết định vào tài liệu/task, mở task kiểm chứng giới hạn đăng nhập chung IP, đặt hạn SE-002/SE-003 trong khung 23–26/11.
+- Vòng 2 (15/11/2026): đã bàn giao — [checklist vòng 2](#checklist-vòng-2). Chờ khách hàng xác nhận.
 
 ## Lịch sử review
 
@@ -62,6 +63,23 @@ Bàn giao vòng 1 ngày 15/11/2026, chờ khách hàng + CTO duyệt.
 **Kiểm tra đã chạy** — `pnpm dev` trên `develop` @ `06a5a83`; script curl 3 tài khoản (2 đợt, chờ 60 s vì giới hạn đăng nhập); trình duyệt: đăng nhập sai/đúng, `/chat`, `/chat/<id>`, `/profile` (Thông tin, Phiên đăng nhập), `/admin`, `/admin/users`, `/documents` với admin và NV1; khung 375px cho `/chat`, `/profile`, `/admin/users`; `git diff --check`; kiểm tra liên kết.
 **Dữ liệu thử** — tạo `audit.nv2@catgpt.local` (USER); dùng lại `se001.test@catgpt.local`; cả hai **đã khóa lại** (chưa có xóa cứng). Hội thoại thử đã xóa; ảnh đại diện thử đã xóa (URL → `404`). Phiên trình duyệt trả về admin như trước kiểm tra.
 **Trạng thái và bước tiếp theo** — Chờ Review; khách hàng + CTO chốt CS-1…CS-6, U1 và hạn SE-002/SE-003.
+
+### Checklist vòng 2
+**Task hoặc yêu cầu** — TL-003 vòng 2: ghi quyết định khách hàng 15/11/2026 vào ma trận quyền, tiêu chí UI và task · tài liệu trên `develop` (SHA ghi trong báo cáo gửi khách hàng) · cơ sở `dbc4d85` · vòng 2. Vòng trước: [checklist vòng 1](#checklist-vòng-1)
+**Kết luận** — Đã ghi đủ 6 quyết định; 5 task SE có phạm vi và tiêu chí theo quyết định; SE-002 đang làm, phạm vi đổi giữa chừng (Senior Dev cần điều chỉnh). Không đổi code; bản demo giữ `fbffd5b` (máy trình chiếu chạy `34b465d`).
+**Checklist**
+- [x] Ma trận quyền ghi CS-1…CS-6 đã chốt — Đạt — [access-control mục 4](../design/access-control.md#4-chính-sách-đã-chốt) (quyết định + phương án + task); dòng ma trận CS-2/CS-3/CS-4 và KT-1 trỏ đúng task
+- [x] Phương án khôi phục tài khoản admin trước thử nội bộ — Đạt — CS-2: ≥ 2 admin hoạt động; quên mật khẩu → admin khác hạ quyền → đặt lại → nâng lại; mất hết admin → lệnh `admin:recover` trên máy chủ, có nhật ký; tiêu chí bắt buộc [R-10](../design/ui-release-standards.md#4-tiêu-chí-chuẩn-bị-cho-500-nhân-sự) có diễn tập; làm ở SE-006
+- [x] Đổi email: xác nhận, email trùng, nhật ký, xử lý phiên — Đạt — CS-3: hộp thoại xác nhận; `USER_EMAIL_EXISTS` (đã có, `users.service.ts`); `audit_logs`; **thu hồi mọi phiên** của nhân viên khi email đổi (lý do ghi ở CS-3); SE-006 AC3–AC5
+- [x] Tiêu chí UI theo quyết định — Đạt — [ui-release-standards](../design/ui-release-standards.md): Be Vietnam Pro đã duyệt; `staff` ẩn Chat mẫu + Tài liệu; Swagger theo `SWAGGER_ENABLED` từng môi trường (mặc định tắt ở `staff`); màn quản trị không hiện SĐT, ảnh; thêm R-10
+- [x] SE-002 giao ngay, checklist URL ảnh trực tiếp — Đạt — [SE-002](SE-002-avatar-requires-login.md) hạn **23/11 / 24/11**; AC1–AC3: chưa đăng nhập `401`, chính chủ `200`, tài khoản khác + admin `404`, cho cả **ảnh tải trước thay đổi** (chuẩn bị trên `develop`) và ảnh mới. Senior Dev đã `Đang làm` từ 15/11 theo phạm vi cũ ("mọi người đã đăng nhập") — ghi chú đổi phạm vi trong task
+- [x] SE-003 cập nhật phạm vi — Đạt — [SE-003](SE-003-release-mode-navigation.md) hạn **25/11 / 26/11**; thêm ẩn Chat ở `staff` (thanh bên, `/chat` 404, API 404, trang chủ → Hồ sơ), Swagger theo môi trường
+- [x] SE-004 chuẩn bị — Đạt — [SE-004](SE-004-ui-consistency.md) `Sẵn sàng`: 4 màn đang dùng trước; bàn giao kèm ảnh trước/sau + checklist thao tác nhân viên và admin, desktop + mobile; hạn đề xuất 30/11 / 01/12 (chờ chốt)
+- [x] Task riêng kiểm chứng giới hạn đăng nhập chung IP — Đạt — [SE-005](SE-005-login-limit-shared-ip.md): script 200 tài khoản/5 phút/1 IP chạy trước và sau khi sửa. Phát hiện thêm khi soạn: mọi API giới hạn chung **120 request/phút/IP** (`app.module.ts`) — đưa vào KT-3 và SE-005
+- [x] Thứ tự task quyền → chế độ/menu → giao diện — Đạt — SE-002 → SE-003 → SE-006 → SE-005 → SE-004 ([mục lục](README.md)); hạn ngoài khung 23–26/11 là đề xuất, chờ chốt
+**Kiểm tra đã chạy** — đọc `admin-users.service.ts`, `users.service.ts`, `admin-seed.service.ts`, `app.module.ts`, `auth.controller.ts`, `users-management.tsx`, `user-form-dialog.tsx`; `git diff --check`; kiểm tra liên kết.
+**Ghi nhận quy trình** — Senior Dev đang làm SE-002 trên **cùng thư mục làm việc** với TL; tài liệu chưa commit của TL bị kéo sang nhánh `fix/avatar-requires-login`. TL đã chuyển phần của mình sang worktree riêng `../cat_gpt-tl`, không chạm code của Senior Dev. Từ nay TL và Senior Dev dùng worktree riêng.
+**Trạng thái và bước tiếp theo** — Chờ Review; khách hàng xác nhận vòng 2 và hạn đề xuất của SE-004/SE-005/SE-006.
 
 ## Phản hồi UI
 Chưa có.
