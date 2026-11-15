@@ -86,6 +86,15 @@ pnpm dev          # chạy song song shared (watch), API (4000) và Web (3000)
 - Swagger: http://localhost:4000/api/v1/docs
 - Lần chạy đầu, hệ thống tự tạo tài khoản admin từ `ADMIN_EMAIL` / `ADMIN_PASSWORD` (mặc định `admin@catgpt.local` / `Admin@123`). **Hãy đổi mật khẩu sau khi đăng nhập.**
 
+### Chế độ phát hành (`RELEASE_MODE`)
+
+Đặt `RELEASE_MODE` (apps/api) và `NEXT_PUBLIC_RELEASE_MODE` (apps/web) — cùng giá trị, mặc định `demo`:
+
+- `demo`: bản 20/11, có Chat mẫu, Swagger bật mặc định.
+- `staff`: thử nội bộ — ẩn Chat và Tài liệu (còn phản hồi mẫu), Swagger tắt mặc định. Đặt `SWAGGER_ENABLED=true` để bật lại khi cần.
+
+Đổi giá trị cần khởi động lại cả hai server (`pnpm dev`).
+
 ### Lệnh khác
 
 ```bash

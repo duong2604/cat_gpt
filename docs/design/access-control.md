@@ -42,7 +42,7 @@ Ký hiệu cột **Loại**: **XM** = hành vi đã xác minh (lệnh hoặc UI,
 | # | Khoảng trống | Ảnh hưởng | Mức | Xử lý |
 |---|---|---|---|---|
 | KT-1 | Ảnh đại diện phục vụ tĩnh, **không cần đăng nhập** (URL dạng UUID, cache 7 ngày) | Ai có link (kể cả người ngoài công ty nếu link lộ) xem được ảnh nhân viên. Không đoán được URL nên mức thấp; **không ảnh hưởng demo 20/11** | Trung bình | [SE-002](../tasks/SE-002-avatar-requires-login.md) — `Sẵn sàng` |
-| KT-2 | Swagger bật mặc định | Lộ danh sách API ở bản nhân viên | Thấp | [SE-003](../tasks/SE-003-release-mode-navigation.md) |
+| KT-2 | Swagger bật mặc định | Lộ danh sách API ở bản nhân viên | Thấp | Đã sửa — [SE-003](../tasks/SE-003-release-mode-navigation.md): `SWAGGER_ENABLED` không đặt → tắt ở `staff` |
 | KT-3 | Đăng nhập giới hạn **5 lần/phút/IP** (`@Throttle` ở `auth.controller.ts`); mọi API khác giới hạn chung **120 request/phút/IP** (`ThrottlerGuard` toàn cục, `app.module.ts`) | 500 nhân sự sau cùng một IP công ty (NAT) sẽ bị `429` khi đăng nhập đầu giờ và cùng chia 120 request/phút khi dùng. TL gặp `429` đăng nhập ngay khi kiểm tra với 3 tài khoản | **Chặn thử nội bộ** | [SE-005](../tasks/SE-005-login-limit-shared-ip.md) kiểm chứng và sửa; tiêu chí [R-3](ui-release-standards.md#4-tiêu-chí-chuẩn-bị-cho-500-nhân-sự) |
 | KT-4 | Giới hạn Chat (20 tin/phút/người) và trạng thái stream lưu trong bộ nhớ một tiến trình API; còn trùng hai lớp (`ChatThrottlerGuard` + `ChatService.assertRateLimit`) | Chạy nhiều instance thì giới hạn và nút Dừng không đúng | Chặn mở rộng | Tiêu chí [R-4](ui-release-standards.md#4-tiêu-chí-chuẩn-bị-cho-500-nhân-sự) |
 
