@@ -1,4 +1,5 @@
 import { Global, Module } from '@nestjs/common';
+import { UsersModule } from '../users/users.module.js';
 import { FilesController } from './files.controller.js';
 import { LocalStorageProvider } from './local-storage.provider.js';
 import { StorageService } from './storage.service.js';
@@ -9,6 +10,7 @@ import { StorageService } from './storage.service.js';
  */
 @Global()
 @Module({
+  imports: [UsersModule],
   controllers: [FilesController],
   providers: [
     LocalStorageProvider,

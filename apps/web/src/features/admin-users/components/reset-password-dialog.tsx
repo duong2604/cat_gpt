@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import type { UserDto } from "@cat-gpt/shared";
+import type { AdminUserDto } from "@cat-gpt/shared";
 import { FormFieldError } from "@/components/form/form-field-error";
 import { PasswordInput } from "@/components/form/password-input";
 import { Button } from "@/components/ui/button";
@@ -42,7 +42,7 @@ export function ResetPasswordDialog({
   user,
   onOpenChange,
 }: {
-  user: UserDto | null;
+  user: AdminUserDto | null;
   onOpenChange: (open: boolean) => void;
 }) {
   const t = useTranslations("adminUsers.reset");

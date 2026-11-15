@@ -17,15 +17,16 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { type Paginated, type UserDto, UserRole } from '@cat-gpt/shared';
+import { type AdminUserDto, type Paginated, UserRole } from '@cat-gpt/shared';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
 import type { AuthUser } from '../../common/types/auth-user.js';
-import { PaginatedUsersResponse, UserResponse } from '../users/dto/user.response.js';
 import { AdminUsersService } from './admin-users.service.js';
 import {
+  AdminUserResponse,
   CreateUserDto,
   ListUsersQueryDto,
+  PaginatedAdminUsersResponse,
   ResetPasswordDto,
   UpdateUserDto,
   UpdateUserStatusDto,
@@ -40,44 +41,44 @@ export class AdminUsersController {
 
   @Get()
   @ApiOperation({ summary: 'Danh sách người dùng (tìm kiếm, lọc, phân trang)' })
-  @ApiOkResponse({ type: PaginatedUsersResponse })
-  list(@Query() query: ListUsersQueryDto): Promise<Paginated<UserDto>> {
+  @ApiOkResponse({ type: PaginatedAdminUsersResponse })
+  list(@Query() query: ListUsersQueryDto): Promise<Paginated<AdminUserDto>> {
     return this.service.list(query);
   }
 
   @Post()
   @ApiOperation({ summary: 'Tạo tài khoản người dùng' })
-  @ApiCreatedResponse({ type: UserResponse })
-  create(@CurrentUser() admin: AuthUser, @Body() dto: CreateUserDto): Promise<UserDto> {
+  @ApiCreatedResponse({ type: AdminUserResponse })
+  create(@CurrentUser() admin: AuthUser, @Body() dto: CreateUserDto): Promise<AdminUserDto> {
     return this.service.create(admin, dto);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Chi tiết người dùng' })
-  @ApiOkResponse({ type: UserResponse })
-  get(@Param('id') id: string): Promise<UserDto> {
+  @ApiOkResponse({ type: AdminUserResponse })
+  get(@Param('id') id: string): Promise<AdminUserDto> {
     return this.service.get(id);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Cập nhật thông tin / vai trò người dùng' })
-  @ApiOkResponse({ type: UserResponse })
+  @ApiOkResponse({ type: AdminUserResponse })
   update(
     @CurrentUser() admin: AuthUser,
     @Param('id') id: string,
     @Body() dto: UpdateUserDto,
-  ): Promise<UserDto> {
+  ): Promise<AdminUserDto> {
     return this.service.update(admin, id, dto);
   }
 
   @Patch(':id/status')
   @ApiOperation({ summary: 'Khóa / mở khóa tài khoản (khóa sẽ đăng xuất mọi thiết bị)' })
-  @ApiOkResponse({ type: UserResponse })
+  @ApiOkResponse({ type: AdminUserResponse })
   setStatus(
     @CurrentUser() admin: AuthUser,
     @Param('id') id: string,
     @Body() dto: UpdateUserStatusDto,
-  ): Promise<UserDto> {
+  ): Promise<AdminUserDto> {
     return this.service.setStatus(admin, id, dto.status);
   }
 

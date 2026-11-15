@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import {
+  type AdminUserDto,
   ErrorCode,
   type Paginated,
-  type UserDto,
   UserRole,
   UserStatus,
 } from '@cat-gpt/shared';
@@ -35,7 +35,7 @@ export class AdminUsersService {
     private readonly presenter: UserPresenter,
   ) {}
 
-  async list(query: ListUsersQueryDto): Promise<Paginated<UserDto>> {
+  async list(query: ListUsersQueryDto): Promise<Paginated<AdminUserDto>> {
     const { items, total } = await this.users.list({
       search: query.search || undefined,
       role: query.role,
@@ -43,19 +43,19 @@ export class AdminUsersService {
       skip: query.skip,
       limit: query.pageSize,
     });
-    return { items: items.map((u) => this.presenter.toDto(u)), meta: query.toMeta(total) };
+    return { items: items.map((u) => this.presenter.toAdminDto(u)), meta: query.toMeta(total) };
   }
 
-  async get(id: string): Promise<UserDto> {
-    return this.presenter.toDto(await this.users.getByIdOrThrow(id));
+  async get(id: string): Promise<AdminUserDto> {
+    return this.presenter.toAdminDto(await this.users.getByIdOrThrow(id));
   }
 
-  async create(admin: AuthUser, dto: CreateUserDto): Promise<UserDto> {
+  async create(admin: AuthUser, dto: CreateUserDto): Promise<AdminUserDto> {
     const user = await this.users.create({ ...dto, createdBy: admin.userId });
-    return this.presenter.toDto(user);
+    return this.presenter.toAdminDto(user);
   }
 
-  async update(admin: AuthUser, id: string, dto: UpdateUserDto): Promise<UserDto> {
+  async update(admin: AuthUser, id: string, dto: UpdateUserDto): Promise<AdminUserDto> {
     const target = await this.users.getByIdOrThrow(id);
 
     if (dto.role && dto.role !== target.role) {
@@ -63,12 +63,12 @@ export class AdminUsersService {
       if (target.role === UserRole.ADMIN) await this.assertNotLastActiveAdmin(target);
     }
 
-    return this.presenter.toDto(await this.users.update(id, dto));
+    return this.presenter.toAdminDto(await this.users.update(id, dto));
   }
 
-  async setStatus(admin: AuthUser, id: string, status: UserStatus): Promise<UserDto> {
+  async setStatus(admin: AuthUser, id: string, status: UserStatus): Promise<AdminUserDto> {
     const target = await this.users.getByIdOrThrow(id);
-    if (target.status === status) return this.presenter.toDto(target);
+    if (target.status === status) return this.presenter.toAdminDto(target);
 
     if (status === UserStatus.BLOCKED) {
       this.assertNotSelf(admin, id);
@@ -77,7 +77,7 @@ export class AdminUsersService {
 
     const updated = await this.users.update(id, { status });
     if (status === UserStatus.BLOCKED) await this.sessions.revokeAllForUser(id);
-    return this.presenter.toDto(updated);
+    return this.presenter.toAdminDto(updated);
   }
 
   async resetPassword(id: string, dto: ResetPasswordDto): Promise<void> {

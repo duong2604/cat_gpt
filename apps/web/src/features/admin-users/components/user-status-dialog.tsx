@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { type UserDto, UserStatus } from "@cat-gpt/shared";
+import { type AdminUserDto, UserStatus } from "@cat-gpt/shared";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -22,7 +22,7 @@ export function UserStatusDialog({
   user,
   onOpenChange,
 }: {
-  user: UserDto | null;
+  user: AdminUserDto | null;
   onOpenChange: (open: boolean) => void;
 }) {
   const t = useTranslations("adminUsers.statusDialog");
