@@ -1,5 +1,7 @@
+import { isStaffMode } from "./release-mode";
+
 export const routes = {
-  home: "/chat",
+  home: isStaffMode ? "/profile" : "/chat",
   login: "/login",
   chat: "/chat",
   documents: "/documents",

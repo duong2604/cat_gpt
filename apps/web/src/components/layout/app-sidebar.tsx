@@ -21,6 +21,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { useCurrentUser } from "@/features/auth/hooks";
+import { isStaffMode } from "@/lib/release-mode";
 import { routes } from "@/lib/routes";
 import { NavUser } from "./nav-user";
 
@@ -34,10 +35,13 @@ interface NavItem {
   comingSoon?: boolean;
 }
 
-const WORKSPACE_ITEMS: NavItem[] = [
-  { key: "chat", href: routes.chat, icon: MessageSquareIcon },
-  { key: "documents", href: routes.documents, icon: FileTextIcon, comingSoon: true },
-];
+// Bản `staff`: ẩn Chat (còn phản hồi mẫu) và Tài liệu (chưa sẵn sàng) — CS-6.
+const WORKSPACE_ITEMS: NavItem[] = isStaffMode
+  ? []
+  : [
+      { key: "chat", href: routes.chat, icon: MessageSquareIcon },
+      { key: "documents", href: routes.documents, icon: FileTextIcon, comingSoon: true },
+    ];
 
 const ADMIN_ITEMS: NavItem[] = [{ key: "users", href: routes.adminUsers, icon: UsersIcon }];
 
@@ -101,7 +105,9 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        <NavGroup label={t("nav.workspace")} items={WORKSPACE_ITEMS} />
+        {WORKSPACE_ITEMS.length > 0 ? (
+          <NavGroup label={t("nav.workspace")} items={WORKSPACE_ITEMS} />
+        ) : null}
         {user.role === UserRole.ADMIN ? (
           <NavGroup label={t("nav.administration")} items={ADMIN_ITEMS} />
         ) : null}
