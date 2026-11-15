@@ -88,7 +88,10 @@
     "FILE_REQUIRED": "Please choose a file.",
     "FILE_TOO_LARGE": "File is too large (max 2MB).",
     "FILE_INVALID_TYPE": "Only JPG, PNG or WEBP images are allowed.",
-    "NETWORK_ERROR": "Cannot reach the server. Please check your connection."
+    "NETWORK_ERROR": "Cannot reach the server. Please check your connection.",
+    "CONVERSATION_NOT_FOUND": "Conversation not found.",
+    "CHAT_STREAM_IN_PROGRESS": "The assistant is still answering in this conversation. Please wait or press Stop.",
+    "CHAT_NOTHING_TO_REGENERATE": "There is no question to regenerate an answer for."
   },
   "roles": {
     "ADMIN": "Administrator",
@@ -99,8 +102,56 @@
     "BLOCKED": "Blocked"
   },
   "chat": {
-    "title": "Chat with AI",
-    "description": "Module 2 – the conversational assistant comes next: create conversations, send messages and receive real-time streaming replies."
+    "newChat": "New chat",
+    "history": "Chat history",
+    "searchPlaceholder": "Search chats...",
+    "emptyList": "No conversations yet.",
+    "emptySearch": "No matching conversations.",
+    "loadMore": "Load more",
+    "actions": "Actions",
+    "notFound": "Conversation not found",
+    "notFoundHint": "It may have been deleted.",
+    "greeting": "Hello, {name}!",
+    "greetingHint": "How can I help you today? Ask a question or pick a suggestion below.",
+    "suggestions": {
+      "email": "Write an email to my manager requesting 2 days of leave",
+      "summary": "Summarize the onboarding steps for new employees",
+      "compare": "Compare the pros and cons of remote and office work",
+      "ideas": "Suggest ideas for a year-end team building event"
+    },
+    "groups": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "last7Days": "Previous 7 days",
+      "last30Days": "Previous 30 days",
+      "older": "Older"
+    },
+    "input": {
+      "placeholder": "Message CAT GPT...",
+      "hint": "Enter to send · Shift + Enter for a new line",
+      "send": "Send",
+      "stop": "Stop"
+    },
+    "message": {
+      "copy": "Copy",
+      "copied": "Copied",
+      "regenerate": "Regenerate answer",
+      "stopped": "Stopped",
+      "error": "Failed to generate answer",
+      "empty": "No content."
+    },
+    "rename": {
+      "action": "Rename",
+      "title": "Rename conversation",
+      "done": "Conversation renamed."
+    },
+    "delete": {
+      "action": "Delete",
+      "title": "Delete conversation?",
+      "description": "\"{title}\" and all of its messages will be permanently deleted.",
+      "confirm": "Delete",
+      "done": "Conversation deleted."
+    }
   },
   "documents": {
     "title": "Document management",
