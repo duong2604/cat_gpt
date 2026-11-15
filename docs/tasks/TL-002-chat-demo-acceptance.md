@@ -1,13 +1,13 @@
 # TL-002 — Nghiệm thu bản demo Chat
 
-Trạng thái: Nháp
+Trạng thái: Chờ Review (chờ khách hàng thử theo checklist)
 Người phụ trách: TL · Ưu tiên: P1 · Ước lượng: 0,5 ngày làm việc mỗi vòng review
-Phụ thuộc: **[SE-001](SE-001-chat-integration.md)** ở `Chờ Review` (chặn)
+Phụ thuộc: [SE-001](SE-001-chat-integration.md) — đã `Done` 15/11/2026
 Hạn bàn giao review: **19/11/2026** (gửi khách hàng link bản chạy + checklist UI) · Hạn hoàn tất: **20/11/2026** (mốc demo dự kiến)
-Ngày thực tế: bắt đầu — · bàn giao review — · hoàn tất —
+Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review 15/11/2026 (gửi khách hàng link + checklist) · hoàn tất —
 Chốt: 15/11/2026 (khách hàng giao trong đợt chuẩn bị demo)
-SHA cơ sở: SHA đầu PR của SE-001 (ghi khi review)
-PR: PR của SE-001
+SHA cơ sở: SHA đầu PR SE-001 đã review `b01be16` · `develop` sau merge `fbffd5b`
+PR: https://github.com/duong2604/cat_gpt/pull/2 (của SE-001, đã merge)
 
 ## Mục tiêu
 Xác nhận bản Chat tích hợp vào `develop` đạt từng tiêu chí đã duyệt, rồi gửi khách hàng checklist thao tác để tự thử trên giao diện trước buổi demo.
@@ -37,10 +37,20 @@ Xác nhận bản Chat tích hợp vào `develop` đạt từng tiêu chí đã 
 D3 ở [plan](../project/plan.md#5-quyết-định-còn-mở) (khách hàng thử ở đâu) quyết định dạng "link bản chạy" trong AC4; không đổi các tiêu chí khác.
 
 ## Kết quả review
-Chưa bắt đầu — chờ SE-001.
+Đã gửi khách hàng link bản chạy và checklist UI ngày 15/11/2026 (D3 chưa chốt → dùng mặc định: chạy `develop` trên máy, mở http://localhost:3000). Chờ khách hàng thử; phản hồi ghi ở mục "Phản hồi UI". `Done` khi khách hàng xác nhận hoặc khi đã chạy lại checklist trên máy demo trước buổi demo (rủi ro "thiết bị demo khác máy kiểm thử" ở [plan mục 4](../project/plan.md#4-rủi-ro)).
 
 ## Lịch sử review
-Chưa có bàn giao.
+
+### Checklist vòng 1
+**Task hoặc yêu cầu** — TL-002 · PR https://github.com/duong2604/cat_gpt/pull/2 · SHA đã review `b01be16` · vòng 1
+**Kết luận** — Đạt AC1–AC4; còn chờ khách hàng thử.
+**Checklist**
+- [x] AC1 Mỗi AC của SE-001 có kết luận và bằng chứng TL tự kiểm tra — Đạt — [SE-001 "Review vòng 1"](SE-001-chat-integration.md#review-vòng-1): 12/12 AC; phần dựa vào bằng chứng Senior Dev (clipboard, đổi tên/xóa/tìm qua UI, đăng nhập lại, tiếng Anh) ghi rõ
+- [x] AC2 PR nhắm `develop`, SHA đầu PR trùng SHA đã review, mergeable — Đạt — `gh pr view 2`: `baseRefName: develop`, `headRefOid: b01be16…`, `MERGEABLE`, `CLEAN`, không có check; merge bằng `--match-head-commit b01be16…`
+- [x] AC3 Merge commit có trên `origin/develop`; checklist UI chạy lại đạt — Đạt — `git fetch`: `origin/develop` = `fbffd5b` (Merge pull request #2); cây trùng `b01be16`; trên `develop`: gửi → chạy dần + nút Dừng, Tạo lại → câu mới chạy dần. Dừng và mở lại lịch sử đã chạy trên cùng cây (SE-001 AC3/AC5)
+- [x] AC4 Khách hàng nhận link bản chạy + checklist ngắn, ghi rõ nội dung giả lập — Đạt — báo cáo 6.3 gửi 15/11/2026, dẫn về SE-001; link commit https://github.com/duong2604/cat_gpt/commit/fbffd5b
+**Kiểm tra đã chạy** — như SE-001 "Review vòng 1".
+**Trạng thái** — Chờ Review (khách hàng thử).
 
 ## Phản hồi UI
 Chưa có.
