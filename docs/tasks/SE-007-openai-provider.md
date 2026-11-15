@@ -1,13 +1,13 @@
 # SE-007 — Tích hợp OpenAI cho Chat (Responses API, streaming)
 
-Trạng thái: Chờ Review
+Trạng thái: Done
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 1 ngày làm việc
 Phụ thuộc: Không. **Không đổi bản demo 20/11** (máy trình chiếu chạy `34b465d`; `LLM_PROVIDER` mặc định `mock`). Merge theo quyết định của TL ([workflow 9.2](../project/workflow.md#92-điều-kiện-chặn-merge) điều 5)
 Hạn bàn giao review: Chờ chốt · Hạn hoàn tất: Chờ chốt
-Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review 15/11/2026 (vòng 1, vòng 2) · hoàn tất —
+Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review 15/11/2026 (vòng 1, vòng 2) · hoàn tất 16/11/2026
 Chốt: 15/11/2026 — khách hàng giao trực tiếp (yêu cầu "Triển khai task tích hợp OpenAI cho CAT GPT"); task lập theo yêu cầu đó, TL rà phạm vi khi nghiệm thu
 SHA cơ sở: `origin/develop` @ `796367c`
-PR: nhánh `feature/openai-provider` → `develop` (link và SHA đầu PR ghi trong bàn giao gửi TL)
+PR: https://github.com/duong2604/cat_gpt/pull/4 (nhắm `develop`) · SHA đầu PR `e1fda76` (vòng 2) · merge `d6832e0`
 
 ## Mục tiêu
 Chat trả lời bằng OpenAI thật khi bật cấu hình, giữ nguyên trải nghiệm Gửi → phản hồi hiện dần → Dừng → Tạo lại → mở lại lịch sử; demo và test local vẫn dùng phản hồi mẫu.
@@ -43,7 +43,8 @@ Chat trả lời bằng OpenAI thật khi bật cấu hình, giữ nguyên trả
 
 ## Kết quả review
 - Vòng 1 (`b9adc74`): TL **Cần sửa** — xem [Review vòng 1 (TL)](#review-vòng-1-tl).
-- Vòng 2: Senior Dev bàn giao 15/11/2026 — [Checklist vòng 2](#checklist-vòng-2). Kết luận review vòng 2 của TL ghi ở [báo cáo ngày 15/11](../reports/daily/2026-11-15.md) cho tới khi merge (ghi trên PR sẽ đổi SHA đã review); khi merge TL chép vào đây.
+- Vòng 2 (`e1fda76`): TL **Đạt** — [Review vòng 2 (TL)](#review-vòng-2-tl); khách hàng xác nhận đạt kỹ thuật 15/11/2026.
+- **Done 16/11/2026** — khách hàng cho merge sớm (không chờ hết demo; máy trình chiếu vẫn chạy `34b465d`). Merge sau PR #3: `gh pr merge 4 --merge --match-head-commit e1fda76…` → `d6832e0`. Xác minh trên `develop` @ `d6832e0` (16/11/2026, TL; API build chạy riêng cổng 4200, `LLM_PROVIDER=mock`, 2 tài khoản thử `tlverify1611.a@`/`.b@catgpt.local` — đã khóa, ảnh và hội thoại thử đã xóa): `pnpm install --frozen-lockfile`; `pnpm typecheck` 4/4; `pnpm lint` 3/3 (0 cảnh báo); `pnpm build` 3/3; `pnpm --filter @cat-gpt/api test` 12/12. Ba kết thúc với `mock` (SSE + mở lại hội thoại): `COMPLETED(364) → TRUNCATED(284) → STOPPED(53)` ký tự; `.env.example`: `LLM_PROVIDER=mock`, `OPENAI_API_KEY=` trống, `LLM_MAX_OUTPUT_TOKENS=1000`; mặc định 1.000 do unit test xác nhận. Bằng chứng hủy kết nối: unit test SDK thật + server SSE giả lập (trong 12/12). Lượt OpenAI thật bị dừng: **không nhận được usage cho lượt đó** (vòng 2). OpenAI thật không chạy lại trên `develop` (cây code `apps/`, `packages/` sau merge = PR #3 + `e1fda76`, đã thử thật ở vòng 2); nhãn "bị cắt" trên UI sau mở lại: theo vòng 2 (ảnh `docs/thesis/images/m2-05…`).
 
 ## Lịch sử review
 
@@ -105,3 +106,13 @@ Chat trả lời bằng OpenAI thật khi bật cấu hình, giữ nguyên trả
 
 **Ghi chú** — `.env` của máy chủ dự án đang đặt `LLM_MAX_OUTPUT_TOKENS=500` (ghi đè mặc định); lượt thử trên đặt biến này = 1000 cho tiến trình thử. Chủ dự án đổi trong `.env` nếu muốn dùng mặc định mới.
 **Trạng thái** — Chờ Review
+
+#### Review vòng 2 (TL)
+**Task** — SE-007 · PR https://github.com/duong2604/cat_gpt/pull/4 · SHA đã review `e1fda76` · vòng 2
+**Kết luận** — **Đạt** (15/11/2026). Chép từ [báo cáo ngày 15/11, vòng 3](../reports/daily/2026-11-15.md#vòng-3--1830) — mục "SE-007 — TL review vòng 2": diff vòng 2 đúng phạm vi; 12/12 test (gồm hủy ở kết nối < 300 ms); ba kết thúc mock `COMPLETED(423) → TRUNCATED(187) → STOPPED(46)` và OpenAI thật `COMPLETED(34) → TRUNCATED(3551) → STOPPED(23)`; nhãn "Câu trả lời bị cắt do đạt giới hạn độ dài" khi vừa xong và sau tải lại; token 76/17, 132/1.000, 91/1.000, lượt Dừng không có usage; typecheck/lint/build đạt.
+**Merge và xác minh** — xem "Kết quả review" (merge `d6832e0`, 16/11/2026).
+**Dọn nhánh sau merge** — remote `feature/openai-provider` đã xóa; local nhánh + worktree `cat_gpt-openai` đã gỡ (TL, 16/11/2026).
+**Trạng thái** — Done.
+
+## Phản hồi UI
+Chưa có.

@@ -1,6 +1,6 @@
 # CAT GPT — Context dự án
 
-> Đối chiếu với `origin/develop` @ `fbffd5b` (15/11/2026, sau merge PR #2). Khi `develop` thay đổi, cập nhật mục 3 và ghi lại SHA.
+> Đối chiếu với `origin/develop` @ `d6832e0` (16/11/2026, sau merge PR #3 và PR #4). Khi `develop` thay đổi, cập nhật mục 3 và ghi lại SHA.
 > Hướng dẫn cài đặt và chạy local: [README.md](../../README.md#chạy-dự-án).
 
 ## 1. Mục tiêu đồ án
@@ -25,8 +25,8 @@ Cột **Code trên `develop`** là kết quả kiểm tra trực tiếp mã ngu�
 
 | Module | Code trên `develop` (đã kiểm tra) | Tài liệu ghi | Tài liệu thiết kế |
 |---|---|---|---|
-| 1 | ✅ Đã tích hợp qua PR #1 (merge 27/10/2026). API có `auth`, `sessions`, `users`, `me`, `admin-users`, `storage`, `health`; web có `/login`, `/profile`, `/admin/users` | `module-1-auth.md`: "đã tích hợp vào `develop` qua PR #1". `README.md`: "Hoàn thành" | [module-1-auth.md](../design/module-1-auth.md) |
-| 2 | ✅ Đã tích hợp qua PR #2 ([SE-001](../tasks/SE-001-chat-integration.md), merge 15/11/2026, `fbffd5b`). API có `chat` (SSE `POST /chat/stream`, hội thoại, tạo lại, dừng, giới hạn 20 tin/phút/người) và `llm` (chỉ `MockLlmProvider` — phản hồi giả lập); web có `/chat`, `/chat/[id]` | `module-2-chat.md`: "Đã tích hợp vào `develop`… nội dung giả lập". `README.md`: "Hoàn thành (phản hồi giả lập)" | [module-2-chat.md](../design/module-2-chat.md) |
+| 1 | ✅ Đã tích hợp qua PR #1 (merge 27/10/2026). API có `auth`, `sessions`, `users`, `me`, `admin-users`, `storage`, `health`; web có `/login`, `/profile`, `/admin/users`. Ảnh đại diện chỉ chính chủ xem được (`GET /files/avatars/:file` cần đăng nhập; màn quản trị không có ảnh) — PR #3 / [SE-002](../tasks/SE-002-avatar-requires-login.md), merge `1674425` 16/11/2026 | `module-1-auth.md`: "đã tích hợp vào `develop` qua PR #1". `README.md`: "Hoàn thành" | [module-1-auth.md](../design/module-1-auth.md) |
+| 2 | ✅ Đã tích hợp qua PR #2 ([SE-001](../tasks/SE-001-chat-integration.md), merge 15/11/2026, `fbffd5b`). API có `chat` (SSE `POST /chat/stream`, hội thoại, tạo lại, dừng, giới hạn 20 tin/phút/người) và `llm` (`MockLlmProvider` mặc định; `OpenAiLlmProvider` khi `LLM_PROVIDER=openai` — PR #4 / [SE-007](../tasks/SE-007-openai-provider.md), merge `d6832e0` 16/11/2026; trạng thái `TRUNCATED` khi chạm 1.000 token); web có `/chat`, `/chat/[id]` | `module-2-chat.md`: "Đã tích hợp vào `develop`… nội dung giả lập". `README.md`: "Hoàn thành (phản hồi giả lập)" | [module-2-chat.md](../design/module-2-chat.md) |
 | 3 | ⏳ Chưa có. `/documents` chỉ là trang `ComingSoon`; storage mới có `LocalStorageProvider` | "Chưa bắt đầu (đã có trang giữ chỗ)" | — |
 | 4 | Chưa có | "Chưa bắt đầu" | — |
 | 5 | Chưa có | "Ngoài phạm vi cam kết" | — |

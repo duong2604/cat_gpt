@@ -1,13 +1,13 @@
 # SE-002 — Ảnh đại diện chỉ xem được khi đã đăng nhập
 
-Trạng thái: Chờ Review
+Trạng thái: Done
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 0,75 ngày làm việc (tăng 0,25 do phạm vi chính chủ + bỏ ảnh ở màn quản trị, 15/11/2026)
 Phụ thuộc: Không. **Merge sau buổi demo 20/11/2026** ([workflow 9.2](../project/workflow.md#92-điều-kiện-chặn-merge) điều 5); làm và bàn giao được ngay
 Hạn bàn giao review: **23/11/2026** · Hạn hoàn tất: **24/11/2026** (khung tích hợp 23–26/11, khách hàng chốt 15/11/2026)
-Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review 15/11/2026 · hoàn tất —
+Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review 15/11/2026 · hoàn tất 16/11/2026
 Chốt: 15/11/2026 — khách hàng duyệt TL-003, chốt CS-4 (ảnh chỉ chính chủ; màn quản trị chỉ hiện ảnh khi có nghiệp vụ) và giao SE-002 ngay
 SHA cơ sở: `origin/develop` @ `dbc4d85` (`06a5a83` → `dbc4d85` chỉ thêm tài liệu TL-003, không đổi `apps/`)
-PR: https://github.com/duong2604/cat_gpt/pull/3 (nhắm `develop`) · SHA đầu PR `977c03d`
+PR: https://github.com/duong2604/cat_gpt/pull/3 (nhắm `develop`) · SHA đầu PR `d60864a` (bàn giao vòng 1; dòng này ghi `977c03d` trước khi PR được cập nhật — TL sửa khi merge)
 
 > **Phạm vi đổi ngày 15/11/2026 sau khi Senior Dev đã bắt đầu** (khách hàng chốt CS-4): ảnh chỉ **chính chủ** xem được — không còn "mọi người đã đăng nhập". Phần đã làm (bỏ `useStaticAssets`, endpoint có xác thực, `getAbsolutePath`) giữ nguyên; bổ sung kiểm tra chủ sở hữu và bỏ ảnh khỏi màn quản trị.
 
@@ -53,7 +53,7 @@ PR: https://github.com/duong2604/cat_gpt/pull/3 (nhắm `develop`) · SHA đầu
 Không có. CS-4 đã chốt 15/11/2026.
 
 ## Kết quả review
-Senior Dev bàn giao vòng 1 ngày 15/11/2026, PR #3 nhắm `develop`, SHA đầu PR `977c03d`. Chờ TL review.
+**Done 16/11/2026** — TL review vòng 1 **đạt** tại `d60864a` (15/11/2026, chi tiết ở [báo cáo ngày 15/11 vòng 1–2](../reports/daily/2026-11-15.md#vòng-1--1720)). Khách hàng cho merge sớm, không chờ hết demo (16/11/2026; bản demo trên máy trình chiếu vẫn chạy `34b465d`). PR https://github.com/duong2604/cat_gpt/pull/3 merge bằng `gh pr merge 3 --merge --match-head-commit d60864a…` → merge commit `1674425`. Xác minh trên `develop` @ `d6832e0` (16/11/2026, TL; API build chạy riêng cổng 4200, `LLM_PROVIDER=mock`, 2 tài khoản thử `tlverify1611.a@`/`.b@catgpt.local` — đã khóa, ảnh và hội thoại thử đã xóa): `pnpm install --frozen-lockfile`; `pnpm typecheck` 4/4; `pnpm lint` 3/3 (0 cảnh báo); `pnpm build` 3/3; `pnpm --filter @cat-gpt/api test` 12/12. Kết quả: chủ ảnh `200` + `Cache-Control: private, no-store`; chưa đăng nhập `401`; người khác `404`; admin `404`; danh sách quản trị không có `avatarUrl`. Hoàn tất sớm 8 ngày so với hạn 24/11.
 
 ## Lịch sử review
 ### Checklist vòng 1
@@ -86,7 +86,7 @@ Senior Dev bàn giao vòng 1 ngày 15/11/2026, PR #3 nhắm `develop`, SHA đầ
 **Trạng thái** — Chờ Review
 
 #### Review vòng 1
-Chưa có — chờ TL.
+TL (15/11/2026): **Đạt** tại `d60864a` — checklist đầy đủ ở [báo cáo ngày 15/11, vòng 1](../reports/daily/2026-11-15.md#vòng-1--1720) (mục "SE-002 — TL review vòng 1") và AC7 bổ sung ở [vòng 2](../reports/daily/2026-11-15.md#vòng-2--1745). Merge 16/11/2026 → `1674425`; xác minh trên `develop` @ `d6832e0` như mục Kết quả review.
 
 ## Phản hồi UI
 Chưa có.

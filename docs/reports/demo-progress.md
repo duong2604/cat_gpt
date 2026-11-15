@@ -2,6 +2,17 @@
 
 Theo mốc của [plan.md](../project/plan.md#2-mốc). Chi tiết từng ngày: [báo cáo ngày](daily/README.md). TL cập nhật cuối mỗi ngày làm việc và ngay khi phát hiện nguy cơ trễ mốc; mục mới nhất ở trên, giữ các mục cũ ([workflow mục 11](../project/workflow.md#11-theo-dõi-tiến-độ)).
 
+## Cập nhật 16/11/2026 (tích hợp sớm PR #3, PR #4)
+
+Chi tiết: [16/11 vòng 3](daily/2026-11-16.md#vòng-3--0058).
+
+| Mốc / việc | Tình trạng |
+|---|---|
+| M4 Demo 20/11 | Đúng kế hoạch — máy trình chiếu giữ `34b465d` (không theo `develop`) |
+| SE-002, SE-007 | **Done 16/11** — merge `1674425`, `d6832e0` (khách hàng cho tích hợp sớm), xác minh trên `develop` |
+| SE-003 (PR #6) | Chờ Senior Dev ghép `develop` (có PR #4) — hạn 25/11 |
+| TL-004 vòng 4, TL-005 | Có thể làm sớm: bộ nguồn cập nhật theo `d6832e0`; Word nháp chờ mở phiên |
+
 ## Cập nhật 15/11/2026 (SE-007 đạt kỹ thuật; bộ nguồn đồ án)
 
 Chi tiết: [15/11 vòng 4](daily/2026-11-15.md#vòng-4--1900).
