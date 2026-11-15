@@ -34,6 +34,20 @@ TL viết task (Nháp) ─► Khách hàng + CTO chốt ─► TL: Sẵn sàng �
 5. **Review PR.** TL ghi SHA đầu PR đã review, đối chiếu từng tiêu chí với diff và bằng chứng, kiểm tra PR nhắm `develop`, check bắt buộc đã pass (nếu repo có cấu hình) và merge được (`gh pr view <số> --json baseRefName,headRefOid,mergeable,mergeStateStatus,statusCheckRollup`). Ghi review theo mục 6.2. Chưa đạt → `Cần sửa` + prompt theo mục 7.
 6. **Merge.** Mọi tiêu chí và check bắt buộc đạt → TL kiểm tra SHA đầu PR vẫn trùng SHA đã review (khác thì review lại phần thay đổi), rồi `gh pr merge <số> --merge --match-head-commit <sha>` (merge commit như PR #1; không squash/rebase, không push thẳng, không merge `main`). Bị chặn → giữ `Chờ Review`, báo lý do cụ thể (thông báo lỗi, `mergeStateStatus`) cho khách hàng và Senior Dev.
 7. **Xác nhận và Done.** TL `git fetch origin develop`, xác nhận merge commit trên `origin/develop`, xác minh lại các tiêu chí trên `develop`, ghi link PR, SHA merge và kết quả vào "Kết quả review", chuyển `Done`, cập nhật [context.md](context.md), cập nhật [docs/tasks/README.md](../tasks/README.md), báo cáo khách hàng theo mục 6.3 và CTO theo mục 6.2.
+8. **Dọn nhánh.** Ngay sau bước 7, TL dọn bản local của mình theo mục 2.1 và ghi kết quả vào review (mục 6.2). Senior Dev dọn bản local của mình theo mục 2.1 trước khi nhận task mới (mục 3.1).
+
+### 2.1. Dọn nhánh và worktree sau merge
+
+Áp dụng từ SE-001. Chỉ dọn nhánh/worktree của task đã `Done` mà PR đã có trên `origin/develop`.
+
+1. `git fetch --prune origin`.
+2. `git status --porcelain` rỗng (working tree sạch) → `git switch develop` rồi `git merge --ff-only origin/develop`. Không sạch → **dừng, không dọn**; ghi lý do (file nào đang sửa) và dọn ở phiên sau.
+3. Mỗi nhánh local của task (nhánh PR và nhánh tài liệu `docs/…` của đợt đó): kiểm tra `git merge-base --is-ancestor <nhánh> origin/develop` rồi `git branch -d <nhánh>`. Không dùng `-D`; `-d` từ chối nghĩa là còn commit chưa lên `develop` → giữ và ghi lý do.
+4. Worktree của task (`git worktree list`): `git worktree remove <đường dẫn>`, rồi `git worktree prune`. Windows báo "Filename too long" → `robocopy <thư mục rỗng> <đường dẫn> /MIR`, xóa thư mục, rồi `git worktree prune`.
+5. Nhánh trên remote: chỉ **TL** xóa, sau khi nhánh đã nằm trong `origin/develop` — `git push origin --delete <nhánh>`. Senior Dev không xóa nhánh remote.
+6. **Không bao giờ xóa:** `develop`, `main`, `preview/module-2-4-demo`, nhánh của task chưa `Done` (ghi lý do giữ).
+
+Ghi vào checklist (TL: mẫu 6.2; Senior Dev: mẫu 6.1 của lần bàn giao kế tiếp) một dòng: `develop` local đã cập nhật tới SHA nào; nhánh/worktree nào đã dọn (local, remote); nhánh/worktree nào còn giữ và lý do.
 
 ## 3. Nơi lưu task
 
@@ -54,7 +68,7 @@ Quy ước tài liệu đi kèm:
 
 - **TL giao task:** ghi trong file task và mục lục: người phụ trách (`TL` / `Senior Dev`), ưu tiên (`P1` cao nhất → `P3`), ước lượng (ngày làm việc), phụ thuộc, hạn bàn giao review, hạn hoàn tất. Hạn do khách hàng và CTO chốt; chưa chốt thì ghi `Chờ chốt`.
 - **Senior Dev nhận task khi bắt đầu phiên:**
-  1. `git fetch origin develop`, ghi SHA.
+  1. `git fetch origin develop`, ghi SHA. Task trước của mình đã `Done` → dọn bản local theo [mục 2.1](#21-dọn-nhánh-và-worktree-sau-merge) trước khi nhận task mới.
   2. Mở [docs/tasks/README.md](../tasks/README.md). Có task giao cho Senior Dev đang `Cần sửa` hoặc `Đang làm` → tiếp tục task đó (`Cần sửa` trước).
   3. Nếu không, lấy task `Sẵn sàng` giao cho Senior Dev có ưu tiên cao nhất (cùng ưu tiên: hạn bàn giao review sớm hơn, rồi ID nhỏ hơn).
   4. Chuyển `Đang làm` ở cả file task và mục lục, ghi ngày bắt đầu.
@@ -143,6 +157,7 @@ TL hoàn thành nhiệm vụ: gửi báo cáo ngắn (6.2 cho CTO, 6.3 cho khác
 - [x] AC1 <tiêu chí> — <kết quả thực tế> — <bằng chứng: lệnh + đầu ra, ảnh, file:dòng>
 - [ ] AC2 <tiêu chí> — <chưa đạt / chưa kiểm tra: lý do>
 **Kiểm tra đã chạy** — <lệnh và kết quả>
+**Dọn nhánh trước khi nhận task này** (mục 2.1) — `develop` local @ `<sha>`; đã dọn: <nhánh/worktree>; còn giữ: <nhánh — lý do> (task đầu tiên hoặc không có gì để dọn: ghi "Không có")
 **Trạng thái** — Chờ Review
 ```
 
@@ -157,6 +172,7 @@ Dùng khi review task của Senior Dev và khi báo cáo kỹ thuật cho CTO ho
 - [x] AC1 <tiêu chí> — Đạt — <bằng chứng TL tự kiểm tra>
 - [ ] AC2 <tiêu chí> — Chưa đạt — <bằng chứng / bước tái hiện>
 **Kiểm tra đã chạy** — <lệnh và kết quả>
+**Dọn nhánh sau merge** (mục 2.1, khi task `Done`) — `develop` local @ `<sha>`; đã dọn: <nhánh local / remote / worktree>; còn giữ: <nhánh — lý do>
 **Trạng thái và bước tiếp theo** — <Chờ Review | Cần sửa | Done>, hồ sơ: <link task>
 ```
 

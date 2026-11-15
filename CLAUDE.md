@@ -13,7 +13,7 @@ Trợ lý AI nội bộ (đồ án tốt nghiệp). Monorepo pnpm + Turborepo: `
 
 ## Bắt đầu phiên
 
-- **Senior Dev:** `git fetch origin develop` → tiếp tục task của mình đang `Cần sửa` / `Đang làm`, nếu không thì lấy task `Sẵn sàng` ưu tiên cao nhất giao cho Senior Dev → chuyển `Đang làm` ([mục 3.1](docs/project/workflow.md#31-phân-công-và-nhận-task)).
+- **Senior Dev:** `git fetch origin develop` → task trước đã `Done` thì dọn nhánh/worktree local ([mục 2.1](docs/project/workflow.md#21-dọn-nhánh-và-worktree-sau-merge)) → tiếp tục task của mình đang `Cần sửa` / `Đang làm`, nếu không thì lấy task `Sẵn sàng` ưu tiên cao nhất giao cho Senior Dev → chuyển `Đang làm` ([mục 3.1](docs/project/workflow.md#31-phân-công-và-nhận-task)).
 - **TL:** `git fetch origin develop` → đối chiếu [plan](docs/project/plan.md) và [mục lục task](docs/tasks/README.md) → review task `Chờ Review` → cập nhật [báo cáo tiến độ](docs/reports/demo-progress.md) ([mục 11](docs/project/workflow.md#11-theo-dõi-tiến-độ)).
 
 ## Bàn giao ở đâu
@@ -27,7 +27,7 @@ Trợ lý AI nội bộ (đồ án tốt nghiệp). Monorepo pnpm + Turborepo: `
 
 - Khách hàng + CTO chốt phạm vi và deadline; TL ghi lại, giao task và điều phối ([mục 1](docs/project/workflow.md#1-vai-trò)).
 - Chỉ TL chuyển `Sẵn sàng` / `Cần sửa` / `Done` ([mục 4](docs/project/workflow.md#4-trạng-thái-và-quyền-chuyển)). Mỗi tiêu chí task có nguồn yêu cầu, mục Function Spec / Basic Design và cách kiểm tra ([mục 9](docs/project/workflow.md#9-nghiệm-thu-kỹ-thuật-tl)).
-- TL merge: task đã chốt, mọi tiêu chí và check đạt, SHA đầu PR trùng SHA đã review → `gh pr merge --merge`, xác minh trên `develop`, ghi link PR + SHA rồi `Done`. Merge bị chặn → giữ `Chờ Review`, báo lý do ([mục 2](docs/project/workflow.md#2-luồng)).
+- TL merge: task đã chốt, mọi tiêu chí và check đạt, SHA đầu PR trùng SHA đã review → `gh pr merge --merge`, xác minh trên `develop`, ghi link PR + SHA rồi `Done`, sau đó đưa local về `develop` mới nhất và dọn nhánh/worktree của task ([mục 2.1](docs/project/workflow.md#21-dọn-nhánh-và-worktree-sau-merge)); giữ `preview/module-2-4-demo`. Merge bị chặn → giữ `Chờ Review`, báo lý do ([mục 2](docs/project/workflow.md#2-luồng)).
 
 ## Quy tắc
 
