@@ -2,14 +2,14 @@
 
 Điểm vào cho người (hoặc AI) viết báo cáo đồ án tốt nghiệp bằng Word. Bộ này **chỉ là nguồn**: nội dung đã đối chiếu với code, PR và hồ sơ kiểm thử, kèm đường dẫn để kiểm chứng. File Word do sinh viên tạo sau.
 
-Trạng thái bộ nguồn: **Vòng 1 — CTO duyệt để tiếp tục (15/11/2026)** tại `2f003a0`; đã chốt bố cục 4 chương và Module 3–4 = thiết kế và giao diện minh họa. Vòng 2 bàn giao 19/11; cập nhật theo `develop` sau tích hợp 25/11. Đề cương: **bản khách hàng chỉ định 15/11/2026** (file sửa lần cuối 30/09/2026) — căn cứ phê duyệt chưa có trong file (`CẦN BỔ SUNG`, mục 6). **Vòng 2 — Chờ Review** (15/11/2026, sau khi đọc hai file khách hàng chỉ định). Hồ sơ: [TL-004](../tasks/TL-004-thesis-source-pack.md), phần Senior Dev: [SE-008](../tasks/SE-008-thesis-implementation-evidence.md).
+Trạng thái bộ nguồn: **Vòng 3 — Chờ Review** (15/11/2026) tại `develop` @ SHA ghi trong [TL-004 checklist vòng 3](../tasks/TL-004-thesis-source-pack.md#checklist-vòng-3); đủ nguồn cho cả 4 chương (Chương 3 + bằng chứng từ SE-008). Vòng 1 CTO duyệt (`2f003a0`); vòng 2 (`71e1263`) đọc hai file khách hàng chỉ định. Cập nhật theo `develop` sau tích hợp PR #3 → PR #4: 25/11 (vòng 4). Đề cương: bản khách hàng chỉ định 15/11/2026 (file sửa 30/09/2026) — căn cứ phê duyệt chưa có (B1).
 
 ## 1. Phiên bản cơ sở
 
 | Mục | Giá trị |
 |---|---|
 | Ngày chốt nguồn | 15/11/2026 (giờ VN) |
-| `origin/develop` | `6ed0fbc` — code ứng dụng trùng `fbffd5b` (merge PR #2, Chat); các commit sau chỉ đổi tài liệu |
+| `origin/develop` | `8732458` (merge PR #5 / SE-008) — code ứng dụng trùng `fbffd5b` (merge PR #2, Chat); các commit sau đó chỉ đổi tài liệu |
 | Bản demo 20/11/2026 | `34b465d` (code `fbffd5b`), chạy local trên máy trình chiếu — không đổi |
 | PR mở, đã đạt review TL, chờ tích hợp sau demo (23–24/11) | PR #3 / SE-002 @ `d60864a` → PR #4 / SE-007 @ `e1fda76` (theo thứ tự này) |
 | Nhánh demo Module 3–4 | `origin/preview/module-2-4-demo` @ `b2a4b22` — giao diện dữ liệu giả, không tính là hiện thực |
@@ -22,7 +22,7 @@ Khi `develop` thay đổi, cập nhật bảng này và mục 3 trước khi dù
 2. [01-outline-and-sources.md](01-outline-and-sources.md) — đề tài, mục tiêu, phạm vi, bố cục chương, **nguồn và quy định áp dụng cho từng chương**, tài liệu tham khảo, quy định trình bày Q1–Q15 (có số trang PDF).
    - Bản chép nguồn gốc: [sources/](sources/README.md) — [đề cương](sources/de-cuong-datn.md), [quy định trình bày](sources/quy-dinh-trinh-bay-datn.md) (đã lược thông tin cá nhân; bản gốc chỉ trên máy).
 3. [02-requirements-and-design.md](02-requirements-and-design.md) — bài toán, yêu cầu, tác nhân, phân quyền, kiến trúc, dữ liệu, API, luồng.
-4. `03-implementation.md` — hiện thực Module 1–2 (*đang soạn — [SE-008](../tasks/SE-008-thesis-implementation-evidence.md), dự kiến 18/11*).
+4. [03-implementation.md](03-implementation.md) — hiện thực Module 1–2 (Senior Dev, [SE-008](../tasks/SE-008-thesis-implementation-evidence.md), TL review đạt, merge `8732458`); bằng chứng: [evidence/test-cases.md](evidence/test-cases.md), ảnh trong [images/](images/).
 5. [04-validation-and-results.md](04-validation-and-results.md) — kiểm thử, kết quả, danh mục hình, hạn chế, hướng phát triển.
 
 **Quy ước diễn giải** (áp dụng cho mọi file):
@@ -56,7 +56,7 @@ Bố cục tạm thời, chờ chốt ([01 mục 5](01-outline-and-sources.md#5-
 | Mở đầu | [01 mục 1–4](01-outline-and-sources.md) | Đề cương (ngoài repo) |
 | Chương 1 — Tổng quan và cơ sở lý thuyết | [01 mục 7](01-outline-and-sources.md#7-tài-liệu-tham-khảo-đề-xuất) (R1–R35, theo mục 1.2–1.5) | Bài báo, RFC, tài liệu chính thức; `CẦN BỔ SUNG` khảo sát cá nhân S1–S5 |
 | Chương 2 — Phân tích yêu cầu và thiết kế | [02](02-requirements-and-design.md) | [module-1-auth.md](../design/module-1-auth.md), [module-2-chat.md](../design/module-2-chat.md), [access-control.md](../design/access-control.md), [overview-and-decisions.md mục 3](../project/overview-and-decisions.md#3-quyết-định-kiến-trúc-chung-23102026) |
-| Chương 3 — Hiện thực hệ thống | `03-implementation.md` (SE-008) | Code tại SHA cơ sở; PR #1–#4 |
+| Chương 3 — Hiện thực hệ thống | [03](03-implementation.md) (gồm sơ đồ D9) | Code tại SHA cơ sở; PR #1–#4 |
 | Chương 4 — Kiểm thử và đánh giá | [04](04-validation-and-results.md) | Hồ sơ SE-001, SE-002, SE-007, TL-003; `evidence/` (SE-008) |
 | Kết luận và kiến nghị | [04 mục 5–6](04-validation-and-results.md#5-hạn-chế) + mục 3 ở trên | — |
 | Phụ lục | Hướng dẫn cài đặt: [README.md gốc](../../README.md#chạy-dự-án) | — |
@@ -65,7 +65,7 @@ Bố cục tạm thời, chờ chốt ([01 mục 5](01-outline-and-sources.md#5-
 
 | # | Thiếu | Ảnh hưởng chương | Ai xử lý | Khi nào |
 |---|---|---|---|---|
-| G1 | `03-implementation.md`, bảng ca kiểm thử, ảnh ổn định trong repo | 3, 4 | Senior Dev ([SE-008](../tasks/SE-008-thesis-implementation-evidence.md)) | Bàn giao 18/11 |
+| G1 | ~~`03-implementation.md`, bảng ca kiểm thử, ảnh ổn định trong repo~~ — **xong** 15/11 (SE-008 `Done`, merge `8732458`) | 3, 4 | Senior Dev | Xong |
 | G2 | Căn cứ phê duyệt đề cương: file chỉ định (30/09/2026) có 4 ô ký trống | Mở đầu | Sinh viên | `CẦN BỔ SUNG` — mục 6 |
 | G3 | Trạng thái SE-002, SE-007 trên `develop` | 2, 3, 4 | TL (merge PR #3 → PR #4, xác minh) | 23–24/11; cập nhật bộ nguồn 25/11 |
 | G4 | Khảo sát cá nhân S1–S5 (hiện trạng, so sánh giải pháp, tiêu chí chọn công nghệ/LLM, so sánh embedding). Nguồn lý thuyết R1–R35 đã có | 1 | Sinh viên cung cấp | `CẦN BỔ SUNG` — [01 mục 7.5](01-outline-and-sources.md#75-khảo-sát-cá-nhân--sinh-viên-cần-bổ-sung) |
@@ -88,8 +88,9 @@ Người (hoặc AI) viết Word **để chỗ trống** đúng dạng `[CẦN B
 | B5 | 1.4, 1.2 | S3 tiêu chí chọn công nghệ (khảo sát 21–26/09); S4 tiêu chí chọn LLM | Sinh viên | Trước khi viết Chương 1 |
 | B6 | 1.3, Kết luận | S5 so sánh embedding tiếng Việt — chỉ viết như kế hoạch (chưa có thực nghiệm) | Sinh viên (sau Module 4) | Hướng phát triển |
 | B7 | Chương 2 — hình thiết kế | Vẽ/xuất D1–D10 bằng phần mềm thiết kế và nộp file nguồn trên CD (Q12) | Sinh viên (TL cung cấp nội dung Mermaid) | Khi viết Word |
-| B8 | Chương 3 | Nội dung hiện thực Module 1–2 | Senior Dev — [SE-008](../tasks/SE-008-thesis-implementation-evidence.md) | 18/11/2026 |
-| B9 | Chương 4 — ca kiểm thử, hình | Bảng ca kiểm thử + ảnh có chú thích, vai trò, SHA | Senior Dev — SE-008; TL tổng hợp | 18–19/11/2026 |
+| B8 | Chương 3 | ~~Nội dung hiện thực Module 1–2~~ — **xong**: [03](03-implementation.md) | Senior Dev — SE-008 | Xong 15/11 |
+| B9 | Chương 4 — ca kiểm thử, hình | ~~Bảng ca kiểm thử + ảnh~~ — **xong**: [04 mục 3–4](04-validation-and-results.md#3-kết-quả-kiểm-thử) | Senior Dev — SE-008; TL tổng hợp | Xong 15/11 |
 | B10 | Chương 2–4 — trạng thái SE-002, SE-007 | Đổi "đã kiểm thử trên PR" thành "đã tích hợp" kèm SHA merge, nếu xác minh đạt trên `develop` | TL | 25/11/2026 |
 | B11 | Chương 4 — số liệu tải, unit test Module 1–2 | Chưa có số liệu; không viết số | TL / Senior Dev (SE-005 và task sau) | Chưa có lịch |
 | B12 | Danh mục viết tắt | Lập từ thuật ngữ thực dùng trong báo cáo (Q13) | Người viết Word | Khi viết Word |
+| B13 | Chương 4 — hình | Chụp lại ≥ 1280 px trên `develop` sau tích hợp: ảnh đại diện chính chủ (PR #3), Chat stream OpenAI, nhãn "bị cắt", nhãn "Đã dừng"; mobile 375 px nếu cần. Đến lúc đó H1-07, H1-08, H2-05 dùng tạm, H2-04 không dùng | TL | 24–25/11/2026 |

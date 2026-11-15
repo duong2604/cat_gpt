@@ -1,10 +1,10 @@
 # SE-008 — Tài liệu đồ án: hiện thực Module 1–2 và bảng bằng chứng kiểm thử
 
-Trạng thái: Chờ Review
+Trạng thái: Done
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 2 ngày làm việc
 Phụ thuộc: Không chặn. Làm **trước** [SE-003](SE-003-release-mode-navigation.md) (cùng P1, hạn bàn giao sớm hơn); SE-003 bắt đầu sau khi bàn giao SE-008, hạn SE-003 (25/11) không đổi
 Hạn bàn giao review: **18/11/2026** · Hạn hoàn tất: **19/11/2026** (TL review + tổng hợp) — khách hàng + CTO chốt 15/11/2026
-Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review 15/11/2026 · hoàn tất —
+Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review 15/11/2026 (vòng 1, vòng 2) · hoàn tất 15/11/2026
 Chốt: 15/11/2026 — CTO duyệt vòng 1 TL-004, giao SE-008 ngay; khách hàng giao SE hai đầu ra cho bộ nguồn đồ án ([TL-004](TL-004-thesis-source-pack.md)); chỉ tài liệu và ảnh
 SHA cơ sở: `origin/develop` @ `2f003a0` (15/11/2026, ghi lúc chuyển `Đang làm`)
 PR: https://github.com/duong2604/cat_gpt/pull/5 (nhắm `develop`) · SHA đầu PR `065d0d3` (vòng 2)
@@ -54,7 +54,7 @@ Senior Dev là người hiểu code nhất: viết phần **hiện thực** Modu
 | — | Không có | — | — |
 
 ## Kết quả review
-Vòng 1 (`9c21c18`): TL **Cần sửa** — xem [Review vòng 1 (TL)](#review-vòng-1-tl). Vòng 2: Senior Dev đã sửa đủ 5 mục TL yêu cầu, bàn giao lại ngày 15/11/2026, PR #5 nhắm `develop`, SHA đầu PR `065d0d3`. Chờ TL review lại.
+**Done 15/11/2026** — Vòng 1 (`bbfd59f`): TL **Cần sửa** ([Review vòng 1 (TL)](#review-vòng-1-tl)). Vòng 2 (`44bfbad`): TL **Đạt** ([Review vòng 2 (TL)](#review-vòng-2-tl)). PR https://github.com/duong2604/cat_gpt/pull/5 merge bằng `gh pr merge 5 --merge --match-head-commit 44bfbad…` → merge commit `8732458` trên `origin/develop`; các file `docs/thesis/03-implementation.md`, `evidence/`, `images/` và file task trên `develop` trùng SHA đã review (`git diff --quiet 44bfbad 8732458 -- …`). Hoàn tất sớm 4 ngày so với hạn 19/11.
 
 ## Lịch sử review
 
@@ -114,6 +114,22 @@ Vòng 1 (`9c21c18`): TL **Cần sửa** — xem [Review vòng 1 (TL)](#review-v�
 **Kiểm tra đã chạy** — Không sửa code. `git diff --stat origin/develop...HEAD` vẫn đúng 17 file (không đổi phạm vi so với vòng 1). Mở lại cả 13 ảnh, đối chiếu kích thước thật bằng `System.Drawing.Image` cho 4 ảnh PR tạm (768×348, 238×432, 768×320, 768×320). `grep -rniE "sk-|mật khẩu \`|Se008Thesis"` và kiểm thủ công: không còn mật khẩu, khóa API hay SĐT/email cá nhân trong `docs/thesis/`.
 **Dọn nhánh** — Không đổi so với vòng 1: `develop` local tại `71e1263` khi vòng 1 bàn giao, nay tại `f4bd76f` sau khi merge review của TL; không có nhánh/worktree nào đủ điều kiện dọn (SE-002 vẫn `Chờ Review`).
 **Trạng thái** — Chờ Review
+
+#### Review vòng 2 (TL)
+**Task** — SE-008 · PR https://github.com/duong2604/cat_gpt/pull/5 · SHA đã review `44bfbad` · `MERGEABLE`/`CLEAN` · vòng 2
+**Kết luận** — **Đạt.** Merge `8732458`.
+**Checklist** (TL tự kiểm tra tại `44bfbad`)
+- [x] 1. Bảo mật — Đạt — `test-cases.md` không còn mật khẩu; TL thử đăng nhập `se008.a@catgpt.local` bằng mật khẩu cũ trên API local → `401 AUTH_INVALID_CREDENTIALS` (mật khẩu đã đổi; nếu còn đúng sẽ là `AUTH_ACCOUNT_BLOCKED`). Ghi nhận: lệnh `grep` trong checklist vòng 2 chứa tiền tố mật khẩu cũ — không còn rủi ro vì mật khẩu đó đã vô hiệu
+- [x] 2. AC2 — Đạt — `03` §1: rewrite ở `apps/web/next.config.ts` (`rewrites()`); §3.3: `emitted === 20`; khớp code
+- [x] 3. AC4 — Đạt — TC-M1-02 ghi "kiểm qua code (M1-08), chưa đo"
+- [x] 4. AC5 chú thích ảnh — Đạt — `m1-05` (UserAvatar trên `develop`), `m2-01` (danh sách đánh số), `m1-08` (238 × 432), `m2-04` "Không dùng trong báo cáo"
+- [x] 5. Liên kết — Đạt — 4 trích dẫn SE-002 trỏ blob `d60864a`; script: 692 link, 0 lỗi
+- [x] Bản chép "Review vòng 1 (TL)" trùng nguyên văn bản trong TL-004 (`diff` rỗng); checklist vòng 1 giữ nguyên
+- [x] Phạm vi — Đạt — 17 file, chỉ `docs/thesis/03…`, `evidence/`, `images/`, file task, dòng SE-008 mục lục; không có SĐT/email cá nhân/`sk-`
+- [x] Xác minh sau merge — `origin/develop` = `8732458`; file SE-008 trùng `44bfbad`
+**Kiểm tra đã chạy** — `gh pr view 5`; `git diff --name-only origin/develop...44bfbad`; `git grep` các đoạn sửa; script link; `grep` SĐT/email/`sk-`; thử đăng nhập mật khẩu cũ; `gh pr merge 5 --merge --match-head-commit 44bfbad…`; `git diff --quiet 44bfbad 8732458 -- docs/thesis docs/tasks/SE-008…`
+**Dọn nhánh sau merge** (mục 2.1) — TL: worktree TL ở `develop` mới nhất; nhánh remote `docs/thesis-implementation` đã xóa (`git push origin --delete`). Không có nhánh local của TL cho task này. Senior Dev dọn nhánh local `docs/thesis-implementation` theo mục 2.1 trước khi nhận SE-003
+**Trạng thái và bước tiếp theo** — Done. TL tổng hợp vào `04` (TL-004 vòng 3). Senior Dev nhận SE-003.
 
 ## Phản hồi UI
 Không áp dụng (tài liệu).

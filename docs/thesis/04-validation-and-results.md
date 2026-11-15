@@ -1,6 +1,6 @@
 # 04 — Kiểm thử, kết quả và hướng phát triển
 
-Cơ sở: `origin/develop` @ `6ed0fbc` (code = `fbffd5b`) · Người lập: TL (tổng hợp) · Trạng thái: **Chờ Review (vòng 2, 15/11/2026)** — phần kết quả từ hồ sơ đã có; bảng ca kiểm thử và ảnh chờ SE-008 — bảng ca kiểm thử đầy đủ và ảnh do [SE-008](../tasks/SE-008-thesis-implementation-evidence.md) lập trong `evidence/`, TL tổng hợp vào đây sau review (dự kiến 19/11).
+Cơ sở: `origin/develop` @ `8732458` (code ứng dụng = `fbffd5b`) · Người lập: TL (tổng hợp từ [SE-008](../tasks/SE-008-thesis-implementation-evidence.md) và hồ sơ task) · Trạng thái: **Chờ Review (vòng 3, 15/11/2026)**
 
 ## 1. Phương pháp và môi trường
 
@@ -8,7 +8,7 @@ Cơ sở: `origin/develop` @ `6ed0fbc` (code = `fbffd5b`) · Người lập: TL 
 - **Công cụ:** trình duyệt (UI), `curl` với cookie riêng từng tài khoản (API, SSE), script Node (SSE, dừng sau N đoạn), Vitest (unit test — chỉ có trên PR #4), `pnpm build` / `typecheck` / `lint`.
 - **Môi trường:** máy phát triển Windows, Node.js ≥ 22, MongoDB Atlas; API http://localhost:4000, web http://localhost:3000 (khi review song song dùng cổng 4200/3200).
 - **Dữ liệu thử:** tài khoản riêng từng task (`se001.test@`, `audit.nv2@`, `se002.a@`/`se002.b@`, `se007.a@`/`se007.b@` thuộc miền `catgpt.local`), khóa lại sau kiểm thử; không dùng dữ liệu thật.
-- **Không có:** kiểm thử tải, kiểm thử tự động end-to-end, unit test cho Module 1–2 trên `develop` (G6, G7 trong [README](README.md#5-phần-còn-thiếu)).
+- **Không có:** kiểm thử tải, kiểm thử tự động end-to-end, unit test cho Module 1–2 trên `develop` (B11 trong [README](README.md#6-danh-sách-cần-bổ-sung-cho-người-viết-word)).
 
 ## 2. Phiên bản đã kiểm thử
 
@@ -20,61 +20,82 @@ Cơ sở: `origin/develop` @ `6ed0fbc` (code = `fbffd5b`) · Người lập: TL 
 | PR #3 @ `d60864a` | Ảnh đại diện chỉ chính chủ | SE + TL, 15/11 — **chưa tích hợp** | [SE-002](../tasks/SE-002-avatar-requires-login.md#lịch-sử-review) |
 | PR #4 @ `e1fda76` | OpenAI provider, nhãn "bị cắt" | SE + TL, 15/11 — **chưa tích hợp** | SE-007 @ [`e1fda76`](https://github.com/duong2604/cat_gpt/blob/e1fda76/docs/tasks/SE-007-openai-provider.md) |
 
-## 3. Kết quả kiểm thử (tổng hợp từ hồ sơ hiện có)
+## 3. Kết quả kiểm thử
 
-Bảng chi tiết theo mã ca `TC-M1-nn` / `TC-M2-nn` (vai trò, bước, mong đợi, thực tế, SHA, nguồn): `evidence/test-cases.md` — **đang lập ở SE-008**. Dưới đây là kết quả đã có trong hồ sơ, đủ để viết Chương 4 ở mức tổng quát.
+Nguồn chi tiết: [evidence/test-cases.md](evidence/test-cases.md) (Senior Dev, [SE-008](../tasks/SE-008-thesis-implementation-evidence.md), TL review đạt vòng 2, merge PR #5 → `develop` @ `8732458`). Bảng dưới là bản tổng hợp để đưa vào Chương 4; mỗi dòng giữ mã ca để tra lại bước thử và nguồn gốc. Cột **Phiên bản**: SHA chạy kiểm thử (`2f003a0`, `06a5a83`, `fbffd5b` đều cùng code ứng dụng với `develop` hiện tại; `d60864a` = PR #3; `e1fda76` = PR #4).
 
 ### 3.1. Module 1 — tài khoản và phân quyền [Đã tích hợp]
 
-| Nhóm | Kết quả thực tế | Nguồn |
-|---|---|---|
-| Chưa đăng nhập | Mọi trang trong app chuyển `/login?next=…`; API `401 AUTH_UNAUTHENTICATED` | [access-control mục 2](../design/access-control.md#2-ma-trận-vai-trò--màn-hình--thao-tác--dữ-liệu--khi-thiếu-quyền) |
-| Nhân viên vào trang/API quản trị | UI "Không có quyền truy cập"; 6 thao tác API → `403 FORBIDDEN` | như trên |
-| Hồ sơ | Sửa được thông tin của mình; gửi `role`/`email` → `400 VALIDATION_FAILED` | như trên |
-| Phiên | Đăng xuất từ xa được; thu hồi phiên người khác → `404 SESSION_NOT_FOUND` | như trên |
-| Khóa tài khoản | Request kế tiếp → `401 AUTH_ACCOUNT_BLOCKED`, refresh → `401` | như trên |
-| Đổi vai trò | Có hiệu lực ngay trên phiên đang mở (`403` → `200` → `403`) | như trên |
-| Tự khóa / tự đổi vai trò mình | `400 USER_CANNOT_MODIFY_SELF` | như trên |
-| Kịch bản lúc phát triển (23/10) | Đăng nhập đúng/sai, refresh rotation, dùng lại token trong ân hạn, avatar hợp lệ/không hợp lệ, 17 màn hình UI — chạy trên FerretDB, **chưa chạy lại toàn bộ với Atlas** | [module-1 §7](../design/module-1-auth.md#7-kiểm-thử-đã-làm) |
+| Mã ca | Vai trò | Nội dung kiểm thử | Kết quả | Phiên bản | Hình |
+|---|---|---|---|---|---|
+| TC-M1-01 | Khách | Đăng nhập đúng → `200`, cookie access/refresh/`cat_session` | Đạt | `2f003a0` | H1-01 |
+| TC-M1-02 | Khách | Đăng nhập sai / email không tồn tại → `401 AUTH_INVALID_CREDENTIALS` | Đạt phần thông báo lỗi; thời gian phản hồi đồng đều **chỉ kiểm qua code** (M1-08), chưa đo | `06a5a83` | — |
+| TC-M1-03 | Khách | `GET /me` chưa đăng nhập → `401 AUTH_UNAUTHENTICATED` | Đạt | `2f003a0` | — |
+| TC-M1-04 | ADMIN → NV | Khóa tài khoản đang mở phiên → bị đưa về `/login`, thông báo bị khóa, không chờ token hết hạn | Đạt | `2f003a0` | H1-06 |
+| TC-M1-05 | NV | Tab Phiên đăng nhập: thiết bị hiện tại; đăng xuất từ xa | Đạt (đăng xuất từ xa: theo [TL-003](../tasks/TL-003-access-ui-release-audit.md)) | `2f003a0` | H1-03 |
+| TC-M1-06 | NV | Vào thẳng `/admin/users` → "Không có quyền truy cập" | Đạt | `2f003a0` | H1-04 |
+| TC-M1-07 | NV | `GET /admin/users` → `403 FORBIDDEN` | Đạt | `2f003a0` | — |
+| TC-M1-08 | NV | Hồ sơ cá nhân, khu vực ảnh đại diện | Đạt | `2f003a0` | H1-02 |
+| — | ADMIN | Danh sách quản lý người dùng | Đạt (minh họa) | `2f003a0` | H1-05 |
+
+Kết quả rà phân quyền đầy đủ (hai nhân viên + một admin, mọi thao tác) ở [access-control mục 2](../design/access-control.md#2-ma-trận-vai-trò--màn-hình--thao-tác--dữ-liệu--khi-thiếu-quyền); kịch bản lúc phát triển 23/10 ở [module-1 §7](../design/module-1-auth.md#7-kiểm-thử-đã-làm) (chạy trên FerretDB).
 
 ### 3.2. Module 2 — Chat [Đã tích hợp, nội dung mẫu]
 
-| Nhóm | Kết quả thực tế | Nguồn |
-|---|---|---|
-| Gửi + streaming | Câu trả lời hiện dần, nút Gửi đổi thành Dừng | [SE-001 review vòng 1](../tasks/SE-001-chat-integration.md#review-vòng-1) |
-| Dừng | Phần đã sinh lưu `STOPPED`, nhãn "Đã dừng" | như trên |
-| Tạo lại | Câu trả lời mới chạy dần, lưu `COMPLETED` (xác minh lại trên `develop` sau merge) | [SE-001 Kết quả review](../tasks/SE-001-chat-integration.md#kết-quả-review) |
-| Mở lại hội thoại | Tải lại trang / đăng nhập lại vẫn thấy đủ tin | SE-001 |
-| Cách ly dữ liệu | 7 thao tác của NV1 trên hội thoại NV2 → `404 CONVERSATION_NOT_FOUND`; admin cũng không đọc được | [access-control mục 2](../design/access-control.md#2-ma-trận-vai-trò--màn-hình--thao-tác--dữ-liệu--khi-thiếu-quyền) |
-| Giới hạn 20 tin/phút/người | Lần gửi thứ 21 trong một phút → `429 TOO_MANY_REQUESTS`; tài khoản khác cùng máy không bị ảnh hưởng; câu hỏi > 4.000 ký tự → `400` | [SE-001 review vòng 1](../tasks/SE-001-chat-integration.md#review-vòng-1) AC7 |
+| Mã ca | Vai trò | Nội dung kiểm thử | Kết quả | Phiên bản | Hình |
+|---|---|---|---|---|---|
+| TC-M2-01 | NV | Gửi câu hỏi khi chưa có hội thoại → tạo hội thoại, chữ hiện dần, `COMPLETED` | Đạt | `2f003a0` | H2-01 |
+| TC-M2-02 | NV | Bấm Dừng khi đang stream → `STOPPED`, giữ phần đã sinh, nhãn "Đã dừng" | Đạt theo [SE-001 review](../tasks/SE-001-chat-integration.md#review-vòng-1) (API: `STOPPED`, 91 ký tự); **chưa có ảnh** chuẩn — `CẦN BỔ SUNG` B13 | `fbffd5b` | — |
+| TC-M2-03 | NV | Tạo lại → câu trả lời mới, `COMPLETED` | Đạt | `2f003a0` | H2-02 |
+| TC-M2-04 | NV | Đăng xuất/đăng nhập lại, mở hội thoại cũ → đủ lịch sử | Đạt | `2f003a0` | H2-01 |
+| TC-M2-05 | NV khác | Đọc hội thoại người khác → `404 CONVERSATION_NOT_FOUND` | Đạt | `2f003a0` | — |
+| TC-M2-06 | NV | Lần gửi thứ 21 trong một phút → `429`; người khác cùng máy không bị ảnh hưởng | Đạt | `fbffd5b` | — |
+| TC-M2-07 | NV | Lỗi LLM giữa chừng (`/error`) → `ERROR`, nhãn lỗi, Tạo lại được | Đạt | `2f003a0` | H2-03 |
 
 ### 3.3. Đã kiểm thử trên PR, chưa tích hợp
 
-**PR #3 — ảnh đại diện (SE-002):** chưa đăng nhập → `401`; người khác và admin → `404`; chính chủ xem được, ảnh tải trước thay đổi vẫn hiển thị. Nguồn: [SE-002](../tasks/SE-002-avatar-requires-login.md#lịch-sử-review).
+Chỉ trình bày là "đã kiểm thử trên nhánh PR"; đổi sang "đã tích hợp" sau khi TL xác minh trên `develop` (B10, 23–24/11).
 
-**PR #4 — OpenAI (SE-007),** model `gpt-5.4-mini`, giới hạn 1.000 token; trạng thái sau khi mở lại hội thoại:
+| Mã ca | Vai trò | Nội dung kiểm thử | Kết quả | Phiên bản | Hình |
+|---|---|---|---|---|---|
+| TC-M1-09 | Khách | Mở ảnh đại diện chưa đăng nhập → `401` | Đạt | PR #3 `d60864a` | — |
+| TC-M1-10 | NV chính chủ | Mở ảnh của mình → `200`, `Cache-Control: private, no-store` | Đạt | PR #3 `d60864a` | H1-07 |
+| TC-M1-11 | NV khác / ADMIN | Mở ảnh của người khác → `404` như nhau | Đạt | PR #3 `d60864a` | — |
+| TC-M1-12 | NV | Đăng xuất rồi tải lại URL ảnh → `401` thật, không lấy từ cache | Đạt | PR #3 `d60864a` | — |
+| TC-M2-08 | NV | Ba kết thúc với mock: `COMPLETED`(423) → `TRUNCATED`(187) → `STOPPED`(46) ký tự, đúng sau khi mở lại | Đạt | PR #4 `e1fda76` | — |
+| TC-M2-09 | NV | Ba kết thúc với OpenAI `gpt-5.4-mini`: `COMPLETED`(34) → `TRUNCATED`(3.551, chạm 1.000 token) → `STOPPED`(23) | Đạt | PR #4 `e1fda76` | H2-04 |
+| TC-M2-10 | — (unit test) | Hủy `signal` → kết nối HTTP tới provider đóng < 300 ms, server giả lập ngừng gửi (< 50/200 sự kiện) | Đạt | PR #4 `e1fda76` | — |
+| TC-M2-11 | NV | Bấm Dừng khi chờ OpenAI → **không nhận được usage cho lượt đó** | Đạt | PR #4 `e1fda76` | — |
 
-| Trường hợp | Phản hồi mẫu (`mock`) | OpenAI thật | Token vào / ra |
-|---|---|---|---|
-| Trả lời xong | `COMPLETED`, 423 ký tự | `COMPLETED`, 34 ký tự | 76 / 17 |
-| Chạm giới hạn | `TRUNCATED`, giữ 187 ký tự | `TRUNCATED`, giữ 3.551 ký tự | 132 / 1.000 (script); 91 / 1.000 (UI) |
-| Bấm Dừng | `STOPPED`, 46 ký tự | `STOPPED`, 23 ký tự | **Không nhận được usage cho lượt đó** (request đã hủy) |
+**Token khi thử OpenAI thật** (PR #4, `gpt-5.4-mini`; log API chỉ ghi số token, không ghi nội dung): câu ngắn 76 vào / 17 ra; bài dài chạm giới hạn 132 / 1.000 (script) và 91 / 1.000 (UI); lượt Dừng không có usage. Unit test PR #4: 12/12. Nguồn: SE-007 @ [`e1fda76`](https://github.com/duong2604/cat_gpt/blob/e1fda76/docs/tasks/SE-007-openai-provider.md#checklist-vòng-2).
 
-- Hủy ở kết nối: unit test dùng SDK `openai` thật nối tới server SSE giả lập trên máy; khi hủy sau 5 đoạn, server nhận đóng kết nối trong < 300 ms và ngừng gửi (< 50/200 sự kiện).
-- 12/12 unit test; `typecheck` 4/4, `lint` 3/3, `build` 3/3. Khách hàng xác nhận đạt nghiệm thu kỹ thuật vòng 2 ngày 15/11/2026.
-- Nguồn: SE-007 @ [`e1fda76`](https://github.com/duong2604/cat_gpt/blob/e1fda76/docs/tasks/SE-007-openai-provider.md#checklist-vòng-2); [báo cáo ngày 15/11 vòng 3](../reports/daily/2026-11-15.md#vòng-3--1830).
+### 3.4. Kiểm tra mã nguồn
+
+`pnpm build` 3/3, `pnpm typecheck` 4/4, `pnpm lint` 3/3 tại `fbffd5b` (SE-001) và `e1fda76` (SE-007). `develop` chưa có unit test cho Module 1–2 (B11).
 
 ## 4. Danh mục hình
 
-Quy ước: khi đưa vào Word đánh số theo chương và đặt tên hình **phía dưới** hình (Q8, Q9 — QĐ tr. 2–3 §2.4), ví dụ "Hình 4.3. …"; ở đây dùng mã ổn định `H<module>-<nn>`. Mỗi hình phải có: chú thích, màn hình, vai trò, SHA phiên bản chạy, đường dẫn ảnh trong repo. Ảnh do SE-008 chụp bằng dữ liệu thử; TL mở từng ảnh khi review (19/11).
+Đề xuất số hình cho Chương 4 khi dựng Word: tên hình đặt **phía dưới** hình, đánh số theo chương (Q8, Q9 — QĐ tr. 2–3 §2.4). Ảnh do hệ thống tự chụp bằng dữ liệu thử (tài khoản `*@catgpt.local`), không phải hình sao chép. Tất cả ảnh đã được TL mở và đối chiếu khi review SE-008.
 
-| Mã | Chú thích | Màn hình | Vai trò | SHA | Đường dẫn | Tình trạng |
-|---|---|---|---|---|---|---|
-| H1-xx | Đăng nhập, hồ sơ, phiên, quản trị người dùng, chặn quyền | `/login`, `/profile`, `/admin/users` | NV, QTV | `develop` | `images/m1-*.png` | `CẦN BỔ SUNG` (B9) — Senior Dev, SE-008, 18/11 |
-| H2-xx | Chat streaming, Dừng, Tạo lại, mở lại hội thoại | `/chat`, `/chat/<id>` | NV | `develop` | `images/m2-*.png` | `CẦN BỔ SUNG` (B9) — Senior Dev, SE-008, 18/11 |
-| H2-yy | Nhãn "Câu trả lời bị cắt…" (OpenAI) | `/chat/<id>` | NV thử | PR #4 `e1fda76` | `images/m2-*.png` | Có ảnh tạm 768 px (chưa vào repo) — SE-008 chọn hoặc chụp lại |
+| Mã | Đề xuất trong Word | Chú thích | Màn hình | Vai trò | SHA chạy | Ảnh | Dùng |
+|---|---|---|---|---|---|---|---|
+| H1-01 | Hình 4.1 | Màn hình đăng nhập (sau khi đăng xuất) | `/login` | Khách | `2f003a0` | [m1-01-login.png](images/m1-01-login.png) | Có |
+| H1-02 | Hình 4.2 | Hồ sơ cá nhân — tab Thông tin, khu vực ảnh đại diện | `/profile` | Nhân viên | `2f003a0` | [m1-02-profile-info.png](images/m1-02-profile-info.png) | Có |
+| H1-03 | Hình 4.3 | Hồ sơ cá nhân — tab Phiên đăng nhập | `/profile` | Nhân viên | `2f003a0` | [m1-03-profile-sessions.png](images/m1-03-profile-sessions.png) | Có |
+| H1-04 | Hình 4.4 | Nhân viên mở trang quản trị — "Không có quyền truy cập" | `/admin/users` | Nhân viên | `2f003a0` | [m1-04-admin-denied.png](images/m1-04-admin-denied.png) | Có |
+| H1-05 | Hình 4.5 | Quản lý người dùng — tìm kiếm, lọc vai trò/trạng thái (cột Người dùng hiện ảnh hoặc chữ cái đầu) | `/admin/users` | Quản trị viên | `2f003a0` | [m1-05-admin-users-list.png](images/m1-05-admin-users-list.png) | Có |
+| H1-06 | Hình 4.6 | Tài khoản bị khóa bị đưa về trang đăng nhập ngay | `/login` | Nhân viên | `2f003a0` | [m1-06-account-blocked.png](images/m1-06-account-blocked.png) | Có |
+| H2-01 | Hình 4.7 | Hội thoại mở lại — câu trả lời mẫu dạng danh sách, dòng "Đây là câu trả lời mẫu…" | `/chat/[id]` | Nhân viên | `2f003a0` | [m2-01-chat-reopened.png](images/m2-01-chat-reopened.png) | Có |
+| H2-02 | Hình 4.8 | Tạo lại câu trả lời — nội dung mới có khối mã | `/chat/[id]` | Nhân viên | `2f003a0` | [m2-02-chat-regenerate.png](images/m2-02-chat-regenerate.png) | Có |
+| H2-03 | Hình 4.9 | Lỗi khi sinh câu trả lời (`/error`) — nhãn lỗi và nút Tạo lại | `/chat/[id]` | Nhân viên | `2f003a0` | [m2-03-chat-error.png](images/m2-03-chat-error.png) | Có |
+| H1-07 | Hình 4.10 | Ảnh đại diện chính chủ [PR #3] | `/profile` | Quản trị viên thử | PR #3 `d60864a` | [m1-07-avatar-admin-pr3.png](images/m1-07-avatar-admin-pr3.png) (768 × 348) | Tạm — chụp lại sau tích hợp (B13) |
+| H1-08 | Hình 4.11 | Hồ sơ trên màn hình hẹp sau khi xóa ảnh [PR #3] | `/profile` | Quản trị viên thử | PR #3 `d60864a` | [m1-08-avatar-mobile-pr3.png](images/m1-08-avatar-mobile-pr3.png) (238 × 432) | Tạm (B13) |
+| H2-05 | Hình 4.12 | Nhãn "Câu trả lời bị cắt do đạt giới hạn độ dài" (OpenAI, 1.000 token) [PR #4] | `/chat/[id]` | Nhân viên thử | PR #4 `e1fda76` | [m2-05-openai-truncated-pr4.png](images/m2-05-openai-truncated-pr4.png) (768 × 320) | Tạm (B13) |
+| H2-04 | — | Chat đang stream bằng OpenAI [PR #4] | `/chat/[id]` | Nhân viên thử | PR #4 `e1fda76` | `images/m2-04-openai-stream-pr4.png` | **Không dùng** — thanh bên có tiêu đề lỗi mã hóa; chụp lại (B13) |
 
-Hình 1–14 của báo cáo 27/10 (ngoài repo): commit dùng để chụp **không xác định được**; Hình 7–14 là giao diện dữ liệu giả ([audit mục 5](../project/preview-progress-review.md#5-checklist-kiểm-chứng-của-tl)). Không tái sử dụng làm bằng chứng kiểm thử.
+Ảnh `m1-07`, `m1-08` hiển thị email tài khoản thử của TL (`tlrev.admin@catgpt.local`) và `m2-04`, `m2-05` hiển thị `se007.a@catgpt.local` — đều là tài khoản thử, đã khóa. `CẦN BỔ SUNG` B13 (TL, sau tích hợp 23–24/11): chụp ≥ 1280 px trên `develop` cho ảnh đại diện chính chủ, Chat stream OpenAI, nhãn "bị cắt", nhãn "Đã dừng"; mobile 375 px nếu báo cáo cần.
+
+Hình 1–14 của báo cáo 27/10 (ngoài repo): commit dùng để chụp **không xác định được**; Hình 7–14 là giao diện dữ liệu giả ([audit mục 5](../project/preview-progress-review.md#5-checklist-kiểm-chứng-của-tl)). Không dùng làm bằng chứng kiểm thử.
 
 ## 5. Hạn chế
 

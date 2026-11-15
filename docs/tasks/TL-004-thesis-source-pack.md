@@ -1,10 +1,10 @@
 # TL-004 — Bộ tài liệu nguồn cho báo cáo đồ án (Markdown)
 
-Trạng thái: Chờ Review (vòng 2, 15/11/2026) — vòng 3 (sau review SE-008) 19/11; vòng 4 (sau tích hợp) 25/11
+Trạng thái: Chờ Review (vòng 3, 15/11/2026 — sớm so với hạn 19/11); vòng 4 (sau tích hợp PR #3 → PR #4) 25/11
 Người phụ trách: TL · Ưu tiên: P1 · Ước lượng: 3,5 ngày làm việc, chia 4 mốc (bảng dưới)
 Phụ thuộc: [SE-008](SE-008-thesis-implementation-evidence.md) (`03-implementation.md` + bảng bằng chứng); cập nhật trạng thái Module 1–2 sau khi tích hợp PR #3 (SE-002) và PR #4 (SE-007)
 Hạn bàn giao review: **19/11/2026** (vòng 2, bộ nguồn trước demo) · cập nhật theo `develop` sau tích hợp: **25/11/2026** (CTO, 15/11/2026) · Hạn hoàn tất: Chờ chốt
-Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review 15/11/2026 (vòng 1, vòng 2) · hoàn tất —
+Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review 15/11/2026 (vòng 1, 2, 3) · hoàn tất —
 Chốt: 15/11/2026 — khách hàng giao: tạo task TL, xây dựng bộ nguồn Markdown trong `docs/thesis/` để AI khác viết báo cáo Word (file Word khách hàng tự tạo sau); chia việc với Senior Dev (SE sở hữu `03-implementation.md` và bảng bằng chứng); thứ tự sau demo PR #3 → PR #4
 SHA cơ sở: `origin/develop` @ `6ed0fbc` (15/11/2026)
 PR: Không — tài liệu TL tích hợp trực tiếp lên `develop` theo đợt được giao; phần SE qua PR của SE-008
@@ -60,7 +60,9 @@ Một bộ Markdown chính xác, truy vết được, đủ để một AI khác
 - Vòng 1 (`2f003a0`): **CTO duyệt để tiếp tục triển khai** (15/11/2026) — chốt T2, T3; T1 chờ khách hàng.
 - Vòng 2 (15/11/2026): đọc hai file khách hàng chỉ định, cập nhật `01`, `02`, `04`, README — [Checklist vòng 2](#checklist-vòng-2). Chờ khách hàng + CTO.
 - SE-008 vòng 1 (PR #5 @ `bbfd59f`): TL review **Cần sửa** 15/11 — [Review SE-008 vòng 1](#review-se-008-vòng-1-tl).
-- Vòng 3 (19/11): sau review SE-008 — [kế hoạch](#kế-hoạch-vòng-2) (đánh số lại: review SE-008 thành vòng 3, cập nhật sau tích hợp thành vòng 4).
+- SE-008 vòng 2 (`44bfbad`): TL **Đạt**, merge PR #5 → `8732458`, SE-008 `Done` 15/11.
+- Vòng 3 (15/11/2026, sớm so với hạn 19/11): đủ nguồn 4 chương, `04` tổng hợp từ SE-008 — [Checklist vòng 3](#checklist-vòng-3). Chờ khách hàng + CTO.
+- (Kế hoạch ban đầu) Vòng 3 (19/11): sau review SE-008 — [kế hoạch](#kế-hoạch-vòng-2) (đánh số lại: review SE-008 thành vòng 3, cập nhật sau tích hợp thành vòng 4).
 
 ## Lịch sử review
 ### Checklist vòng 1
@@ -141,6 +143,25 @@ Yêu cầu tiếp: giao SE-008 ngay (bàn giao 18/11, TL review + tổng hợp 1
 - [x] AC8 Dữ liệu thử đã khóa/xóa, không gọi OpenAI — Đạt theo bàn giao; bổ sung việc đặt lại mật khẩu ở AC5
 - [x] `.env.example` local — **TL chấp nhận** cách xử lý: bản sửa là nháp cũ (`LLM_PROVIDER=openai`, key trống — khớp điều TL ghi nhận trước đó), đã bị `.env.example` của PR #4 thay thế; Senior Dev stash rồi bỏ, không có giá trị thật. Không cần khôi phục
 **Trạng thái và bước tiếp theo** — Cần sửa → Senior Dev sửa trong cùng PR #5, chép mục review này vào "Lịch sử review" của SE-008 (`#### Review vòng 1 (TL)`), thêm `### Checklist vòng 2`, chuyển `Chờ Review`. Chưa nhận SE-003 cho tới khi bàn giao vòng 2 (ước lượng sửa 0,25 ngày; hạn 18/11 không đổi).
+
+### Checklist vòng 3
+**Task hoặc yêu cầu** — TL-004 · bộ nguồn [docs/thesis/README.md](../thesis/README.md) · `develop` sau merge PR #5 `8732458` (SHA bàn giao: commit vòng này, ghi trong tin gửi khách hàng + CTO) · vòng 3
+**Kết luận** — Bộ nguồn đủ cho Mở đầu, Chương 1–4, Kết luận; mục còn thiếu đều có mã `CẦN BỔ SUNG` (B1–B7, B10–B13) kèm người phụ trách. Sẵn sàng để khách hàng + CTO duyệt làm nguồn cho AI viết Word, với lưu ý trạng thái SE-002/SE-007 sẽ đổi sau tích hợp (vòng 4, 25/11).
+**Checklist**
+- [x] Hai file nguồn đúng file khách hàng chỉ định (đề cương MD5 `cf7b9248…`, quy định PDF MD5 `c972b9dc…`); bản chép trong [sources/](../thesis/sources/README.md) — Đạt (giữ từ vòng 2)
+- [x] Quy định trình bày có dẫn trang/mục (Q1–Q15) và bảng quy định theo từng phần — Đạt — [01 mục 5, 8](../thesis/01-outline-and-sources.md#8-quy-định-trình-bày-của-khoa-áp-dụng-khi-dựng-word)
+- [x] Nguồn theo chương — Đạt: Mở đầu ([01 mục 1–4](../thesis/01-outline-and-sources.md)); Chương 1 (R1–R35; khảo sát cá nhân B4–B6); Chương 2 ([02](../thesis/02-requirements-and-design.md)); Chương 3 ([03](../thesis/03-implementation.md), SE-008); Chương 4 ([04](../thesis/04-validation-and-results.md) mục 3–4, 23 ca từ [evidence](../thesis/evidence/test-cases.md)); Kết luận ([04](../thesis/04-validation-and-results.md) mục 5–6)
+- [x] `03` và bằng chứng do SE lập đã review 2 vòng, đối chiếu code — Đạt — [SE-008](SE-008-thesis-implementation-evidence.md#review-vòng-2-tl)
+- [x] Trạng thái module có bằng chứng, 4 mức; PR #3 `d60864a`, PR #4 `e1fda76` vẫn mở, chưa tích hợp; các ca PR ghi riêng ở 04 mục 3.3 — Đạt
+- [x] Mỗi kết quả kiểm thử có mã ca, vai trò, kết quả, phiên bản (SHA), nguồn; mỗi hình có chú thích, màn hình, vai trò, SHA, đường dẫn — Đạt — 04 mục 3–4
+- [x] Ảnh mở được: 13 ảnh trong `docs/thesis/images/`, TL đã mở từng ảnh; 12 ảnh có đề xuất số Hình 4.1–4.12, `m2-04` không dùng; 3 ảnh PR dùng tạm, chụp lại sau tích hợp (B13) — Đạt có ghi chú
+- [x] Sơ đồ: D1–D4 (Mermaid trong `02`), D9 (Mermaid trong `03`) hiển thị được; D5–D8, D10 cần vẽ mới (B7); D11 tùy chọn — Đạt có ghi chú
+- [x] Liên kết nội bộ — Đạt — script kiểm tra: 0 lỗi (số liệu trong commit vòng này)
+- [x] Không có SĐT/email cá nhân, mật khẩu, khóa API trong file đưa vào repo — Đạt — `grep`; bản gốc nguồn chỉ ở `sources/originals/` (`.gitignore`)
+- [ ] B1 căn cứ phê duyệt đề cương; B2–B7 do sinh viên — chưa có (không chặn duyệt bộ nguồn)
+- Sau khi khách hàng + CTO duyệt: TL tạo task riêng để AI viết `.docx` từ SHA bộ nguồn đã duyệt, áp dụng Q1–Q15, kèm checklist kiểm tra bản Word.
+
+**Trạng thái và bước tiếp theo** — Chờ Review (khách hàng + CTO). Vòng 4 (25/11): sau tích hợp PR #3 → PR #4 và xác minh trên `develop`, đổi nhãn [PR] → đã tích hợp kèm SHA merge; chụp lại ảnh B13.
 
 ## Phản hồi UI
 Không áp dụng (tài liệu).
