@@ -1,6 +1,6 @@
 # 04 — Kiểm thử, kết quả và hướng phát triển
 
-Cơ sở: `origin/develop` @ `6ed0fbc` (code = `fbffd5b`) · Người lập: TL (tổng hợp) · Trạng thái: **Khung vòng 1** — bảng ca kiểm thử đầy đủ và ảnh do [SE-008](../tasks/SE-008-thesis-implementation-evidence.md) lập trong `evidence/`, TL tổng hợp vào đây sau review (dự kiến 19/11).
+Cơ sở: `origin/develop` @ `6ed0fbc` (code = `fbffd5b`) · Người lập: TL (tổng hợp) · Trạng thái: **Chờ Review (vòng 2, 15/11/2026)** — phần kết quả từ hồ sơ đã có; bảng ca kiểm thử và ảnh chờ SE-008 — bảng ca kiểm thử đầy đủ và ảnh do [SE-008](../tasks/SE-008-thesis-implementation-evidence.md) lập trong `evidence/`, TL tổng hợp vào đây sau review (dự kiến 19/11).
 
 ## 1. Phương pháp và môi trường
 
@@ -66,12 +66,12 @@ Bảng chi tiết theo mã ca `TC-M1-nn` / `TC-M2-nn` (vai trò, bước, mong �
 
 ## 4. Danh mục hình
 
-Quy ước: đánh số theo chương khi đưa vào Word (ví dụ Hình 4.3); ở đây dùng mã ổn định `Hm<module>-<nn>`. Đường dẫn ảnh trong repo do SE-008 lập.
+Quy ước: khi đưa vào Word đánh số theo chương và đặt tên hình **phía dưới** hình (Q8, Q9 — QĐ tr. 2–3 §2.4), ví dụ "Hình 4.3. …"; ở đây dùng mã ổn định `H<module>-<nn>`. Mỗi hình phải có: chú thích, màn hình, vai trò, SHA phiên bản chạy, đường dẫn ảnh trong repo. Ảnh do SE-008 chụp bằng dữ liệu thử; TL mở từng ảnh khi review (19/11).
 
 | Mã | Chú thích | Màn hình | Vai trò | SHA | Đường dẫn | Tình trạng |
 |---|---|---|---|---|---|---|
-| H1-xx | Đăng nhập, hồ sơ, phiên, quản trị người dùng, chặn quyền | `/login`, `/profile`, `/admin/users` | NV, QTV | `develop` | `images/m1-*.png` | `CẦN BỔ SUNG` — SE-008 |
-| H2-xx | Chat streaming, Dừng, Tạo lại, mở lại hội thoại | `/chat`, `/chat/<id>` | NV | `develop` | `images/m2-*.png` | `CẦN BỔ SUNG` — SE-008 |
+| H1-xx | Đăng nhập, hồ sơ, phiên, quản trị người dùng, chặn quyền | `/login`, `/profile`, `/admin/users` | NV, QTV | `develop` | `images/m1-*.png` | `CẦN BỔ SUNG` (B9) — Senior Dev, SE-008, 18/11 |
+| H2-xx | Chat streaming, Dừng, Tạo lại, mở lại hội thoại | `/chat`, `/chat/<id>` | NV | `develop` | `images/m2-*.png` | `CẦN BỔ SUNG` (B9) — Senior Dev, SE-008, 18/11 |
 | H2-yy | Nhãn "Câu trả lời bị cắt…" (OpenAI) | `/chat/<id>` | NV thử | PR #4 `e1fda76` | `images/m2-*.png` | Có ảnh tạm 768 px (chưa vào repo) — SE-008 chọn hoặc chụp lại |
 
 Hình 1–14 của báo cáo 27/10 (ngoài repo): commit dùng để chụp **không xác định được**; Hình 7–14 là giao diện dữ liệu giả ([audit mục 5](../project/preview-progress-review.md#5-checklist-kiểm-chứng-của-tl)). Không tái sử dụng làm bằng chứng kiểm thử.

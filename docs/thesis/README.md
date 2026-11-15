@@ -2,7 +2,7 @@
 
 Điểm vào cho người (hoặc AI) viết báo cáo đồ án tốt nghiệp bằng Word. Bộ này **chỉ là nguồn**: nội dung đã đối chiếu với code, PR và hồ sơ kiểm thử, kèm đường dẫn để kiểm chứng. File Word do sinh viên tạo sau.
 
-Trạng thái bộ nguồn: **Vòng 1 — Chờ Review** (đề cương chương + trạng thái module + danh sách còn thiếu). Hồ sơ: [TL-004](../tasks/TL-004-thesis-source-pack.md), phần Senior Dev: [SE-008](../tasks/SE-008-thesis-implementation-evidence.md).
+Trạng thái bộ nguồn: **Vòng 1 — CTO duyệt để tiếp tục (15/11/2026)** tại `2f003a0`; đã chốt bố cục 4 chương và Module 3–4 = thiết kế và giao diện minh họa. Vòng 2 bàn giao 19/11; cập nhật theo `develop` sau tích hợp 25/11. Đề cương: **bản khách hàng chỉ định 15/11/2026** (file sửa lần cuối 30/09/2026) — căn cứ phê duyệt chưa có trong file (`CẦN BỔ SUNG`, mục 6). **Vòng 2 — Chờ Review** (15/11/2026, sau khi đọc hai file khách hàng chỉ định). Hồ sơ: [TL-004](../tasks/TL-004-thesis-source-pack.md), phần Senior Dev: [SE-008](../tasks/SE-008-thesis-implementation-evidence.md).
 
 ## 1. Phiên bản cơ sở
 
@@ -19,7 +19,8 @@ Khi `develop` thay đổi, cập nhật bảng này và mục 3 trước khi dù
 ## 2. Thứ tự đọc
 
 1. **README này** — phiên bản, trạng thái module, phần còn thiếu.
-2. [01-outline-and-sources.md](01-outline-and-sources.md) — đề tài, mục tiêu, phạm vi, bố cục chương, nguồn và tài liệu tham khảo, quy định trình bày của Khoa.
+2. [01-outline-and-sources.md](01-outline-and-sources.md) — đề tài, mục tiêu, phạm vi, bố cục chương, **nguồn và quy định áp dụng cho từng chương**, tài liệu tham khảo, quy định trình bày Q1–Q15 (có số trang PDF).
+   - Bản chép nguồn gốc: [sources/](sources/README.md) — [đề cương](sources/de-cuong-datn.md), [quy định trình bày](sources/quy-dinh-trinh-bay-datn.md) (đã lược thông tin cá nhân; bản gốc chỉ trên máy).
 3. [02-requirements-and-design.md](02-requirements-and-design.md) — bài toán, yêu cầu, tác nhân, phân quyền, kiến trúc, dữ liệu, API, luồng.
 4. `03-implementation.md` — hiện thực Module 1–2 (*đang soạn — [SE-008](../tasks/SE-008-thesis-implementation-evidence.md), dự kiến 18/11*).
 5. [04-validation-and-results.md](04-validation-and-results.md) — kiểm thử, kết quả, danh mục hình, hạn chế, hướng phát triển.
@@ -53,7 +54,7 @@ Bố cục tạm thời, chờ chốt ([01 mục 5](01-outline-and-sources.md#5-
 | Chương (đề xuất) | Nguồn chính trong bộ | Nguồn gốc để kiểm chứng |
 |---|---|---|
 | Mở đầu | [01 mục 1–4](01-outline-and-sources.md) | Đề cương (ngoài repo) |
-| Chương 1 — Tổng quan và cơ sở lý thuyết | [01 mục 7](01-outline-and-sources.md#7-tài-liệu-tham-khảo-đề-xuất) | Tài liệu tham khảo ngoài; `CẦN BỔ SUNG` phần khảo sát của sinh viên |
+| Chương 1 — Tổng quan và cơ sở lý thuyết | [01 mục 7](01-outline-and-sources.md#7-tài-liệu-tham-khảo-đề-xuất) (R1–R35, theo mục 1.2–1.5) | Bài báo, RFC, tài liệu chính thức; `CẦN BỔ SUNG` khảo sát cá nhân S1–S5 |
 | Chương 2 — Phân tích yêu cầu và thiết kế | [02](02-requirements-and-design.md) | [module-1-auth.md](../design/module-1-auth.md), [module-2-chat.md](../design/module-2-chat.md), [access-control.md](../design/access-control.md), [overview-and-decisions.md mục 3](../project/overview-and-decisions.md#3-quyết-định-kiến-trúc-chung-23102026) |
 | Chương 3 — Hiện thực hệ thống | `03-implementation.md` (SE-008) | Code tại SHA cơ sở; PR #1–#4 |
 | Chương 4 — Kiểm thử và đánh giá | [04](04-validation-and-results.md) | Hồ sơ SE-001, SE-002, SE-007, TL-003; `evidence/` (SE-008) |
@@ -65,11 +66,30 @@ Bố cục tạm thời, chờ chốt ([01 mục 5](01-outline-and-sources.md#5-
 | # | Thiếu | Ảnh hưởng chương | Ai xử lý | Khi nào |
 |---|---|---|---|---|
 | G1 | `03-implementation.md`, bảng ca kiểm thử, ảnh ổn định trong repo | 3, 4 | Senior Dev ([SE-008](../tasks/SE-008-thesis-implementation-evidence.md)) | Bàn giao 18/11 |
-| G2 | Xác nhận bản đề cương đã duyệt (T1) và bố cục chương (T2) | Mở đầu, toàn bộ | Khách hàng + CTO | Chờ chốt |
+| G2 | Căn cứ phê duyệt đề cương: file chỉ định (30/09/2026) có 4 ô ký trống | Mở đầu | Sinh viên | `CẦN BỔ SUNG` — mục 6 |
 | G3 | Trạng thái SE-002, SE-007 trên `develop` | 2, 3, 4 | TL (merge PR #3 → PR #4, xác minh) | 23–24/11; cập nhật bộ nguồn 25/11 |
-| G4 | Nội dung khảo sát/nghiên cứu (LLM, RAG, embedding, vector DB) — báo cáo 27/10 ghi "Hoàn thành" nhưng không có tài liệu trong repo | 1 | Sinh viên cung cấp | `CẦN BỔ SUNG` |
+| G4 | Khảo sát cá nhân S1–S5 (hiện trạng, so sánh giải pháp, tiêu chí chọn công nghệ/LLM, so sánh embedding). Nguồn lý thuyết R1–R35 đã có | 1 | Sinh viên cung cấp | `CẦN BỔ SUNG` — [01 mục 7.5](01-outline-and-sources.md#75-khảo-sát-cá-nhân--sinh-viên-cần-bổ-sung) |
 | G5 | Module 3–4 chưa có hiện thực; khung đánh giá RAG, Docker chưa có | 3, 4, Kết luận | Theo plan sau demo (khách hàng + CTO chốt) | Chưa có lịch |
 | G6 | Số liệu tải (500 nhân sự, tiêu chí R-1…R-10) chưa đo | 4 | [SE-005](../tasks/SE-005-login-limit-shared-ip.md) và task sau | Dự kiến 27/11 trở đi |
 | G7 | Unit test: `develop` chưa có file `*.spec.ts`; 12 test của SE-007 nằm trên PR #4 | 4 | Tích hợp PR #4; test Module 1–2 là việc sau | 24/11 (SE-007) |
-| G8 | Lời cảm ơn, thông tin bìa (lớp, khóa, năm), danh mục viết tắt | Phần đầu | Sinh viên | `CẦN BỔ SUNG` |
-| G9 | Sơ đồ phải vẽ bằng phần mềm thiết kế và nộp kèm file nguồn (quy định Khoa) — bộ nguồn có sơ đồ Mermaid, cần xuất/vẽ lại | 2 | Sinh viên khi làm Word | Khi làm Word |
+| G8 | Lời cảm ơn; năm trên bìa; danh mục viết tắt (lập từ báo cáo) | Phần đầu | Sinh viên | `CẦN BỔ SUNG` — mục 6 |
+| G9 | Sơ đồ phải vẽ bằng phần mềm thiết kế và nộp kèm file nguồn (quy định Khoa): D1–D4 có Mermaid cần xuất/vẽ lại; D5–D10 cần vẽ mới (gồm use case tổng quát) | 2, 3 | Sinh viên khi làm Word (TL cung cấp nội dung) | [02 mục 9](02-requirements-and-design.md#9-sơ-đồ-file-nguồn-hiện-có-và-việc-cần-xuất--vẽ-lại) |
+
+## 6. Danh sách `CẦN BỔ SUNG` cho người viết Word
+
+Người (hoặc AI) viết Word **để chỗ trống** đúng dạng `[CẦN BỔ SUNG: <mã> — <nội dung>]` tại vị trí ghi dưới đây; không tự viết thay.
+
+| Mã | Vị trí trong báo cáo | Nội dung cần cung cấp | Người phụ trách | Khi nào |
+|---|---|---|---|---|
+| B1 | Mở đầu (căn cứ đề tài) | Căn cứ phê duyệt đề cương: bản có chữ ký hoặc xác nhận của GVHD/Khoa (file chỉ định để trống ô ký) | Sinh viên | Trước khi viết Word |
+| B2 | Lời cảm ơn | Toàn bộ nội dung | Sinh viên | Khi viết Word |
+| B3 | Bìa, bìa phụ | Năm ghi trên bìa ("Hà Nội – 20.."); các trường khác đã có ở [01 mục 1](01-outline-and-sources.md#1-đề-tài) | Sinh viên | Khi viết Word |
+| B4 | Mở đầu, 1.1 | S1 hiện trạng tra cứu tài liệu; S2 so sánh giải pháp sẵn có | Sinh viên | Trước khi viết Chương 1 |
+| B5 | 1.4, 1.2 | S3 tiêu chí chọn công nghệ (khảo sát 21–26/09); S4 tiêu chí chọn LLM | Sinh viên | Trước khi viết Chương 1 |
+| B6 | 1.3, Kết luận | S5 so sánh embedding tiếng Việt — chỉ viết như kế hoạch (chưa có thực nghiệm) | Sinh viên (sau Module 4) | Hướng phát triển |
+| B7 | Chương 2 — hình thiết kế | Vẽ/xuất D1–D10 bằng phần mềm thiết kế và nộp file nguồn trên CD (Q12) | Sinh viên (TL cung cấp nội dung Mermaid) | Khi viết Word |
+| B8 | Chương 3 | Nội dung hiện thực Module 1–2 | Senior Dev — [SE-008](../tasks/SE-008-thesis-implementation-evidence.md) | 18/11/2026 |
+| B9 | Chương 4 — ca kiểm thử, hình | Bảng ca kiểm thử + ảnh có chú thích, vai trò, SHA | Senior Dev — SE-008; TL tổng hợp | 18–19/11/2026 |
+| B10 | Chương 2–4 — trạng thái SE-002, SE-007 | Đổi "đã kiểm thử trên PR" thành "đã tích hợp" kèm SHA merge, nếu xác minh đạt trên `develop` | TL | 25/11/2026 |
+| B11 | Chương 4 — số liệu tải, unit test Module 1–2 | Chưa có số liệu; không viết số | TL / Senior Dev (SE-005 và task sau) | Chưa có lịch |
+| B12 | Danh mục viết tắt | Lập từ thuật ngữ thực dùng trong báo cáo (Q13) | Người viết Word | Khi viết Word |
