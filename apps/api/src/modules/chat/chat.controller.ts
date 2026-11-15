@@ -9,6 +9,7 @@ import {
 import type { Response } from 'express';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import type { AuthUser } from '../../common/types/auth-user.js';
+import { ChatHiddenGuard } from './chat-hidden.guard.js';
 import { ChatThrottlerGuard } from './chat-throttler.guard.js';
 import { ChatService } from './chat.service.js';
 import { SendMessageDto } from './dto/chat.dto.js';
@@ -24,6 +25,7 @@ const STREAM_DESCRIPTION =
  */
 @ApiTags('Chat - Streaming')
 @ApiCookieAuth()
+@UseGuards(ChatHiddenGuard)
 @Controller()
 export class ChatController {
   constructor(private readonly chat: ChatService) {}
