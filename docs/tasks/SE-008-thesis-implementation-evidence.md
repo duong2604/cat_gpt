@@ -3,9 +3,9 @@
 Trạng thái: Sẵn sàng
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 2 ngày làm việc
 Phụ thuộc: Không chặn. Làm **trước** [SE-003](SE-003-release-mode-navigation.md) (cùng P1, hạn bàn giao sớm hơn); SE-003 bắt đầu sau khi bàn giao SE-008, hạn SE-003 (25/11) không đổi
-Hạn bàn giao review: 18/11/2026 (dự kiến) · Hạn hoàn tất: 19/11/2026 (dự kiến)
+Hạn bàn giao review: **18/11/2026** · Hạn hoàn tất: **19/11/2026** (TL review + tổng hợp) — khách hàng + CTO chốt 15/11/2026
 Ngày thực tế: bắt đầu — · bàn giao review — · hoàn tất —
-Chốt: 15/11/2026 — khách hàng giao SE hai đầu ra cho bộ nguồn đồ án ([TL-004](TL-004-thesis-source-pack.md)); chỉ tài liệu và ảnh
+Chốt: 15/11/2026 — CTO duyệt vòng 1 TL-004, giao SE-008 ngay; khách hàng giao SE hai đầu ra cho bộ nguồn đồ án ([TL-004](TL-004-thesis-source-pack.md)); chỉ tài liệu và ảnh
 SHA cơ sở: `origin/develop` @ SHA khi nhận task (ghi lúc chuyển `Đang làm`; tối thiểu `6ed0fbc`)
 PR: <link, Senior Dev ghi khi bàn giao>
 
@@ -25,6 +25,7 @@ Senior Dev là người hiểu code nhất: viết phần **hiện thực** Modu
   - `evidence/test-cases.md`: bảng `Mã ca | Module | Vai trò | Bước thử | Kết quả mong đợi | Kết quả thực tế | SHA | Nguồn`. Mã ca `TC-M1-nn`, `TC-M2-nn`. Ưu tiên lấy kết quả đã có trong hồ sơ (SE-001, SE-002, SE-007, TL-003, [access-control](../design/access-control.md)) — ghi nguồn tới đúng mục; chạy lại khi cần ảnh.
   - Ảnh: gom ảnh UI sẵn có hoặc chụp bổ sung bằng **dữ liệu thử** (tài khoản `*.test@catgpt.local` / `se008.*@catgpt.local`, nội dung hội thoại mẫu). Danh mục ảnh trong `evidence/test-cases.md`: `Mã hình | Chú thích | Màn hình (route) | Vai trò | SHA chạy | Đường dẫn`. Tên file `images/m<module>-<nn>-<slug>.png`. Desktop rộng ≥ 1280 px (mobile 375 px khi cần), ≤ 500 KB/ảnh.
   - Mục thiếu bằng chứng: ghi dòng với kết quả thực tế `THIẾU — <lý do>` để TL xử lý; không bịa kết quả.
+- **Sơ đồ:** khi `03` cần sơ đồ (cấu trúc module — D9 trong [02 mục 9](../thesis/02-requirements-and-design.md#9-sơ-đồ-file-nguồn-hiện-có-và-việc-cần-xuất--vẽ-lại)), viết bằng Mermaid ngay trong `03` và ghi mã D tương ứng; không chép hình từ tài liệu khác.
 - **Không làm:** sửa code; sửa `README.md`, `01`, `02`, `04` của `docs/thesis/` (TL sở hữu); sửa file đang có trong PR #3/#4; merge; thay đổi bản demo `34b465d`.
 
 **Ảnh tạm có sẵn** (TL chụp khi review 15/11, 768 px — chỉ dùng nếu không chụp lại được; ghi đúng SHA):

@@ -1,6 +1,6 @@
 # 02 — Yêu cầu và thiết kế hệ thống
 
-Cơ sở: `origin/develop` @ `6ed0fbc` (code = `fbffd5b`) · Người lập: TL · Trạng thái: Chờ Review (vòng 1)
+Cơ sở: `origin/develop` @ `6ed0fbc` (code = `fbffd5b`) · Người lập: TL · Trạng thái: **Chờ Review (vòng 2, 15/11/2026)**; bổ sung sau SE-008 (19/11) và sau tích hợp (25/11)
 Tài liệu này tóm tắt và dẫn về Function Spec / Basic Design đã có, không thay thế chúng. Mỗi mục ghi rõ **[Đã kiểm chứng]** (có code tại SHA cơ sở và có bằng chứng kiểm thử), **[PR]** (đã kiểm thử trên PR, chưa tích hợp) hoặc **[Dự kiến]** (thiết kế/đề cương, chưa có code).
 
 ## 1. Bài toán
@@ -245,4 +245,23 @@ Nguồn: SE-007 @ `e1fda76`; `docs/design/module-2-chat.md` §4.5 trên PR #4. C
 Chưa có Function Spec / Basic Design trong repo, chưa có code phía máy chủ. Báo cáo chỉ được trình bày ở mức **hướng thiết kế theo đề cương**:
 - Module 3: tải tệp lên (PDF text, DOCX, TXT) → lưu MinIO → hàng đợi Redis/BullMQ → bóc tách văn bản → chia đoạn → sinh embedding đa ngữ → lưu Qdrant; theo dõi trạng thái xử lý.
 - Module 4: truy hồi đoạn liên quan theo câu hỏi → LLM sinh câu trả lời kèm trích dẫn nguồn; tóm tắt tài liệu; dùng lại khung Chat (cùng `LlmProvider`, cùng SSE — [module-2 §1](../design/module-2-chat.md#1-bối-cảnh)).
+- Mô tả trong báo cáo: **thiết kế và giao diện minh họa** (CTO chốt 15/11/2026, T3).
 - Giao diện minh họa ở nhánh preview (Hình 7–14 của báo cáo 27/10) là **dữ liệu giả trong trình duyệt** — nếu đưa vào báo cáo phải chú thích "giao diện minh họa, chưa kết nối máy chủ" ([audit mục 3.3–3.4](../project/preview-progress-review.md#33-module-3--quản-lý-tài-liệu-hình-79)).
+
+## 9. Sơ đồ: file nguồn hiện có và việc cần xuất / vẽ lại
+
+Quy định Khoa: hình thiết kế phải **tự vẽ bằng phần mềm thiết kế**, nộp kèm file hình; cấm sao chép hình thiết kế từ tài liệu khác ([01 mục 8](01-outline-and-sources.md#8-quy-định-trình-bày-của-khoa-áp-dụng-khi-dựng-word) — Q12, nguồn: QĐ tr. 2 §2.4). Sơ đồ trong bộ nguồn viết bằng **Mermaid** (văn bản, xem được trên GitHub) — là nguồn nội dung, chưa phải hình nộp. Đề xuất: xuất SVG/PNG bằng Mermaid CLI (`npx -y @mermaid-js/mermaid-cli -i <file>.mmd -o <file>.svg`) hoặc vẽ lại bằng draw.io (diagrams.net), lưu file nguồn `.mmd` / `.drawio` cùng ảnh xuất trong `docs/thesis/diagrams/` để nộp kèm.
+
+| Mã | Sơ đồ | Chương | File nguồn hiện có | Trạng thái | Việc cần làm |
+|---|---|---|---|---|---|
+| D1 | Kiến trúc tổng thể Web – API – MongoDB – AI | 2.3 | Mermaid tại [mục 4](#4-kiến-trúc-tổng-thể) | Có nội dung, đã đối chiếu code @ `6ed0fbc` | Xuất hoặc vẽ lại; sau 24/11 bỏ nhãn [PR #4] nếu đã tích hợp |
+| D2 | ERD 4 collection | 2.4 | Mermaid tại [mục 5](#5-thiết-kế-dữ-liệu-mongodb) | Có nội dung, theo schema trong code | Xuất hoặc vẽ lại; trạng thái `TRUNCATED` sau khi tích hợp PR #4 |
+| D3 | Tuần tự đăng nhập / gia hạn phiên | 2.6 | Mermaid tại [mục 7.1](#71-đăng-nhập-gọi-api-và-gia-hạn-phiên-đã-kiểm-chứng) | Có nội dung | Xuất hoặc vẽ lại |
+| D4 | Tuần tự gửi tin nhắn + streaming | 2.6 | Mermaid tại [mục 7.2](#72-gửi-tin-nhắn-và-nhận-câu-trả-lời-streaming-đã-kiểm-chứng) | Có nội dung | Xuất hoặc vẽ lại |
+| D5 | Dừng giữa chừng | 2.6 | Văn bản tại [mục 7.3](#73-dừng-giữa-chừng-đã-kiểm-chứng) | Chưa có sơ đồ | Vẽ mới (tuần tự hoặc hoạt động) |
+| D6 | Trạng thái tin nhắn trợ lý (`COMPLETED` / `STOPPED` / `ERROR` / `TRUNCATED`) | 2.6 / 3.3 | Bảng tại [mục 7.4](#74-ba-cách-kết-thúc-khi-dùng-openai-pr-4) | Chưa có sơ đồ | Vẽ mới sau khi PR #4 tích hợp |
+| D7 | Use case tổng quát (Khách, Nhân viên, Quản trị viên) | 2.2 | Chưa có — dữ liệu ở [mục 2.1](#21-yêu-cầu-chức-năng), [mục 3](#3-tác-nhân-và-phân-quyền) | **Thiếu** | Vẽ mới (quy định Khoa lấy "sơ đồ use case tổng quát" làm ví dụ) |
+| D8 | Use case phân rã Module 1, Module 2 | 2.2 | Chưa có — FR-01…FR-14 | **Thiếu** | Vẽ mới |
+| D9 | Cấu trúc module backend / frontend | 3.1 | Bảng tại [context.md mục 4](../project/context.md#4-bản-đồ-mã-nguồn) | Chưa có sơ đồ | Vẽ mới (SE-008 mô tả, TL/sinh viên vẽ) |
+| D10 | Kiến trúc dự kiến Module 3–4 (MinIO, BullMQ, Qdrant) | 2.7 | Văn bản tại [mục 8](#8-thiết-kế-dự-kiến-module-34-dự-kiến) | Thiết kế dự kiến | Vẽ mới, chú thích "thiết kế dự kiến" |
+| D11 | Triển khai Docker / Nginx | Hướng phát triển | Chưa có | Hướng phát triển | Chỉ vẽ nếu báo cáo cần |
