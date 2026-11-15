@@ -63,6 +63,7 @@ Câu hỏi từ audit: Q1 (tích hợp Chat với nội dung giả lập trướ
 - Khi SE-001 sang `Chờ Review`: TL review trong ngày (TL-002); đạt → merge, xác minh trên `develop`, gửi khách hàng link bản chạy và checklist UI ngắn.
 - 15/11: SE-001 bàn giao và review đạt trong ngày; merge PR #2 → `develop` @ `fbffd5b`; SE-001 `Done`; TL-002 gửi khách hàng link + checklist, `Chờ Review`.
 - 15/11: khách hàng chốt ngày demo 20/11 (giờ cập nhật sau) và D3 (máy trình chiếu, localhost). TL-002 giữ `Chờ Review` đến khi khách hàng thử UI. Trước buổi demo: TL gửi SHA bản chạy + checklist ngắn (Gửi → phản hồi mẫu hiện dần → Dừng → Tạo lại → mở lại hội thoại cũ).
+- 15/11: [TL-003](../tasks/TL-003-access-ui-release-audit.md) rà quyền/UI/phát hành, không đổi bản demo. SE-002, SE-003 `Sẵn sàng` cho giai đoạn sau demo (merge sau 20/11); không thuộc đường găng demo.
 - Báo cáo tiến độ cập nhật cuối mỗi ngày làm việc và ngay khi có nguy cơ trễ mốc ([workflow mục 11](workflow.md#11-theo-dõi-tiến-độ)).
 
 ## 7. Lịch sử review

@@ -2,6 +2,16 @@
 
 Theo mốc của [plan.md](../project/plan.md#2-mốc). TL cập nhật cuối mỗi ngày làm việc và ngay khi phát hiện nguy cơ trễ mốc; mục mới nhất ở trên, giữ các mục cũ ([workflow mục 11](../project/workflow.md#11-theo-dõi-tiến-độ)).
 
+## Cập nhật 15/11/2026 (rà quyền, UI và phát hành — TL-003)
+
+Cơ sở kiểm tra: `origin/develop` @ `06a5a83` (code giống bản demo `fbffd5b`). **Bản demo 20/11 không đổi**: không có thay đổi code; các task mới chỉ merge sau buổi demo.
+
+- **Không có lỗi phân quyền hay lỗi chặn demo.** Nhân viên không xem được hội thoại của người khác; quản trị viên quản lý tài khoản nhưng không đọc được nội dung Chat. Chi tiết: [ma trận phân quyền](../design/access-control.md).
+- **Cần sửa trước khi mở cho nhân viên:** ảnh đại diện mở được khi chưa đăng nhập ([SE-002](../tasks/SE-002-avatar-requires-login.md)); ẩn tính năng chưa sẵn sàng ở bản nhân viên ([SE-003](../tasks/SE-003-release-mode-navigation.md)); đăng nhập bị giới hạn 5 lần/phút cho mỗi IP — 500 người chung mạng công ty sẽ bị chặn ([tiêu chí R-3](../design/ui-release-standards.md#4-tiêu-chí-chuẩn-bị-cho-500-nhân-sự)).
+- Task: TL-003 `Chờ Review`; SE-002, SE-003 `Sẵn sàng` (Senior Dev nhận ngay, merge sau 20/11); SE-004 `Nháp`.
+
+Cần khách hàng / CTO chốt: CS-1…CS-6 ([access-control mục 4](../design/access-control.md#4-chính-sách-cần-khách-hàng--cto-chốt)), U1 (chuẩn giao diện, font Be Vietnam Pro), hạn SE-002/SE-003 (đề xuất 23–26/11), giờ demo (D1).
+
 ## Cập nhật 15/11/2026 (chốt ngày demo và nơi chạy)
 
 Cơ sở: `origin/develop` @ `8666859` (code Chat như `fbffd5b`; sau đó chỉ có commit tài liệu). Khách hàng chốt:
