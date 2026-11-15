@@ -1,10 +1,10 @@
 # SE-002 — Ảnh đại diện chỉ xem được khi đã đăng nhập
 
-Trạng thái: Đang làm
+Trạng thái: Chờ Review
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 0,75 ngày làm việc (tăng 0,25 do phạm vi chính chủ + bỏ ảnh ở màn quản trị, 15/11/2026)
 Phụ thuộc: Không. **Merge sau buổi demo 20/11/2026** ([workflow 9.2](../project/workflow.md#92-điều-kiện-chặn-merge) điều 5); làm và bàn giao được ngay
 Hạn bàn giao review: **23/11/2026** · Hạn hoàn tất: **24/11/2026** (khung tích hợp 23–26/11, khách hàng chốt 15/11/2026)
-Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review — · hoàn tất —
+Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review 15/11/2026 · hoàn tất —
 Chốt: 15/11/2026 — khách hàng duyệt TL-003, chốt CS-4 (ảnh chỉ chính chủ; màn quản trị chỉ hiện ảnh khi có nghiệp vụ) và giao SE-002 ngay
 SHA cơ sở: `origin/develop` @ `dbc4d85` (`06a5a83` → `dbc4d85` chỉ thêm tài liệu TL-003, không đổi `apps/`)
 PR: <link, Senior Dev ghi khi bàn giao>

@@ -4,4 +4,4 @@ Một file mỗi ngày (giờ Việt Nam), mới nhất ở trên. Quy tắc và
 
 | Ngày | Báo cáo | Vòng | Trạng thái CTO review | Nội dung chính |
 |---|---|---|---|---|
-| 15/11/2026 (CN) | [2026-11-15](2026-11-15.md) | 1 | Chờ Review | Chat lên `develop`; TL review SE-002 đạt (merge sau demo); thứ tự task sau demo; bắt đầu báo cáo ngày và prompt onboarding |
+| 15/11/2026 (CN) | [2026-11-15](2026-11-15.md) | 1, 2 | Vòng 1: CTO đã kết luận (cần bổ sung) · Vòng 2: Chờ Review | Chat lên `develop`; TL review SE-002 đạt (merge sau demo); thứ tự task sau demo; bắt đầu báo cáo ngày và prompt onboarding |

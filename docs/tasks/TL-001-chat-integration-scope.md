@@ -117,7 +117,7 @@ Trên nhánh SE-001 so với `develop`:
 Q3 là điều kiện để SE-001 sang `Sẵn sàng`. Quyết định của mốc demo (D1, D2, D3) ghi ở [plan.md](../project/plan.md#5-quyết-định-còn-mở).
 
 ## Kết quả review
-**Đạt** — khách hàng duyệt phạm vi và chốt Q3 ngày 15/11/2026 ([Review vòng 1](#review-vòng-1)). TL chuyển `Done` 15/11/2026; tài liệu có trên `develop` @ `6f9d3e4`. SE-001 chuyển `Sẵn sàng` cùng ngày.
+**Đạt** — khách hàng duyệt phạm vi và chốt Q3 ngày 15/11/2026 ([Review vòng 1](#review-vòng-1)). Quyết định ghi ở [plan mục 7 — Lịch sử review](../project/plan.md#7-lịch-sử-review) ("Khách hàng (15/11/2026): duyệt TL-001 và Q3…") và [Q3 trong SE-001](SE-001-chat-integration.md#quyết-định-còn-mở). TL chuyển `Done` 15/11/2026; tài liệu có trên `develop` @ `6f9d3e4`. SE-001 chuyển `Sẵn sàng` cùng ngày.
 
 ## Lịch sử review
 

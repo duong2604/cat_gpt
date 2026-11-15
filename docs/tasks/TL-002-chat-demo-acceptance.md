@@ -3,7 +3,7 @@
 Trạng thái: Chờ Review (chờ khách hàng thử theo checklist)
 Người phụ trách: TL · Ưu tiên: P1 · Ước lượng: 0,5 ngày làm việc mỗi vòng review
 Phụ thuộc: [SE-001](SE-001-chat-integration.md) — đã `Done` 15/11/2026
-Hạn bàn giao review: **19/11/2026** (gửi khách hàng link bản chạy + checklist UI) · Hạn hoàn tất: **20/11/2026** (mốc demo dự kiến)
+Hạn bàn giao review: **19/11/2026** (gửi khách hàng link bản chạy + checklist UI) · Hạn hoàn tất: **20/11/2026** — demo **local trên máy trình chiếu** ngày 20/11/2026, giờ cập nhật sau (D1)
 Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review 15/11/2026 (gửi khách hàng link + checklist) · hoàn tất —
 Chốt: 15/11/2026 (khách hàng giao trong đợt chuẩn bị demo)
 SHA cơ sở: SHA đầu PR SE-001 đã review `b01be16` · `develop` sau merge `fbffd5b`

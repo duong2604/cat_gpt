@@ -5,6 +5,8 @@ Chốt: 15/11/2026 (phạm vi giao trực tiếp qua yêu cầu của chủ dự
 SHA cơ sở: `origin/develop` @ `a860437f45124636f4eea87b3209635f4e2d4d7d`
 Loại: tài liệu TL soạn, chủ dự án và CTO phê duyệt. Vòng 1–6 review trên diff local nhánh `docs/reorganize-project-docs`; từ vòng 7 tích hợp vào `develop` theo quyền khách hàng giao ngày 15/11/2026, nội dung vẫn chờ duyệt
 
+> **Onboarding hiện hành** (15/11/2026, CTO xác nhận dùng được): prompt [Team Leader](../project/onboarding/team-leader.md), [Senior Dev](../project/onboarding/senior-dev.md); khởi động phiên ở [workflow 3.2](../project/workflow.md#32-khởi-động-phiên-tl-và-senior-dev).
+
 ## Mục tiêu
 Sắp xếp `docs/` theo nội dung, tạo tài liệu onboarding và quy trình làm việc để TL và Senior Dev đọc khi bắt đầu phiên.
 

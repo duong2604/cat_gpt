@@ -38,6 +38,7 @@ CS-1…CS-6 ở [access-control mục 4](../design/access-control.md#4-chính-s�
 - Vòng 1 (15/11/2026): khách hàng **duyệt** kết quả rà soát; chốt CS-1…CS-6 và U1; giao SE-002 ngay; yêu cầu ghi quyết định vào tài liệu/task, mở task kiểm chứng giới hạn đăng nhập chung IP, đặt hạn SE-002/SE-003 trong khung 23–26/11.
 - Vòng 2 (15/11/2026): khách hàng xác nhận; yêu cầu Senior Dev tiếp tục SE-002 theo phạm vi mới, giữ hạn SE-002/SE-003, chốt thu hồi phiên khi đổi email, thay luồng khôi phục admin bằng quy trình riêng, đưa SE-005 lên trước SE-006, bổ sung kiểm tra SE-002/SE-003/SE-005.
 - Vòng 3 (15/11/2026): đã bàn giao — [checklist vòng 3](#checklist-vòng-3). Chờ khách hàng xác nhận.
+- **CTO duyệt phần rà soát** (15/11/2026, qua [báo cáo ngày 15/11 vòng 1](../reports/daily/2026-11-15.md#vòng-1--1720)). Còn mở: **R1** (người phê duyệt / người thực hiện khôi phục admin) và **Q1** (chặn tạm theo IP khi dò mật khẩu). SE-006: phần code (CS-2, CS-3, CS-4, nhật ký, lệnh `admin:recover`, buộc đổi mật khẩu) **Sẵn sàng**; phần chờ R1 là danh sách người phê duyệt/thực hiện, kênh xác minh, nơi lưu phiếu và **diễn tập chính thức** (R-10) — xem [SE-006](SE-006-account-admin-rules.md#phần-sẵn-sàng-và-phần-chờ-r1). Mốc SE-005, SE-006, SE-004 vẫn là **dự kiến** cho tới khi khách hàng + CTO chốt.
 
 ## Lịch sử review
 

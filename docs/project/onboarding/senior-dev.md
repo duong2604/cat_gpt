@@ -4,6 +4,8 @@ Mở một phiên Claude Code mới **trong thư mục Senior Dev** `D:\workspac
 
 Quy tắc đầy đủ nằm ở [workflow.md](../workflow.md); prompt chỉ dẫn tới đúng mục.
 
+> **CTO xác nhận prompt dùng được ngay** (15/11/2026, [báo cáo ngày 15/11 vòng 1](../../reports/daily/2026-11-15.md#cto-review)).
+
 ## Prompt (copy nguyên khối)
 
 ```text

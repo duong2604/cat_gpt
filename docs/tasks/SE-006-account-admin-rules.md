@@ -9,6 +9,13 @@ Chốt: 15/11/2026 — khách hàng chốt CS-2, CS-3 (gồm **thu hồi mọi p
 SHA cơ sở: `origin/develop` @ SHA khi nhận task
 PR: <link, Senior Dev ghi khi bàn giao>
 
+## Phần sẵn sàng và phần chờ R1
+| Phần | Trạng thái |
+|---|---|
+| Output 1–4 (chặn đặt lại mật khẩu admin + đường vòng 24 giờ, đổi email có xác nhận + thu hồi phiên, nhật ký `audit_logs`, bỏ SĐT ở màn quản trị) | **Sẵn sàng** — quyết định đã chốt (CS-2, CS-3, CS-4) |
+| Output 5 — lệnh `admin:recover` (tham số `--ticket`, `--approved-by`, buộc đổi mật khẩu, nhật ký) và diễn tập trên máy dev (AC7) | **Sẵn sàng** — không phụ thuộc người cụ thể |
+| Người phê duyệt, danh sách người thực hiện, kênh xác minh danh tính, nơi lưu phiếu; **diễn tập chính thức** trên môi trường thử có biên bản (R-10) | **Chờ R1** — khách hàng + CTO chốt; không chặn code và bàn giao task này |
+
 ## Mục tiêu
 Admin quản trị được tài khoản nhân viên nhưng không chiếm được tài khoản admin khác, mọi thay đổi định danh có xác nhận và nhật ký, màn quản trị chỉ hiện trường cần thiết, và luôn có đường khôi phục khi admin mất quyền truy cập.
 
