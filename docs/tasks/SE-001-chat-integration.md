@@ -1,13 +1,13 @@
 # SE-001 — Tích hợp luồng Chat từ preview
 
-Trạng thái: Đang làm
+Trạng thái: Chờ Review
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 2 ngày làm việc (1,5 tích hợp + kiểm tra; 0,5 giới hạn theo người dùng)
 Phụ thuộc: không còn phụ thuộc chặn — [TL-001](TL-001-chat-integration-scope.md) đã duyệt, Q3 đã chốt (15/11/2026)
 Hạn bàn giao review: **18/11/2026** (dự kiến 17/11) · Hạn hoàn tất: **19/11/2026** (mốc demo dự kiến 20/11 — [plan mục 2](../project/plan.md#2-mốc))
-Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review — · hoàn tất —
+Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review 15/11/2026 · hoàn tất —
 Chốt: 15/11/2026 (khách hàng duyệt TL-001 và Q3; demo dùng phản hồi mẫu; giữ Module 3–4 ở preview)
 SHA cơ sở: `origin/develop` @ `9c426f2` (cập nhật từ `a860437` — `develop` chỉ có thêm commit tài liệu giữa lúc đó và lúc nhận task, không đổi `apps/`; xem `git diff --stat a860437 origin/develop`) · nguồn: `origin/preview/module-2-4-demo` @ `b2a4b22d40804f246c8505e66bad9e7a2b483ca4`
-PR: <link, Senior Dev ghi khi bàn giao>
+PR: https://github.com/duong2604/cat_gpt/pull/2 (nhắm `develop`) · SHA đầu PR `8238926`
 
 > **Phản hồi của trợ lý trong task này là nội dung giả lập** (`MockLlmProvider`, model `mock-1`): chọn ngẫu nhiên từ các câu trả lời mẫu, không liên quan câu hỏi. Việc chạy dần từng phần là streaming thật từ máy chủ. Khách hàng đã chốt (15/11/2026): demo đầu tiên dùng phản hồi mẫu; AI thật không thuộc task này.
 
@@ -66,10 +66,32 @@ Kiểm tra trên `pnpm dev` của nhánh PR, đăng nhập tài khoản admin tr
 | Q3 | (từ TL-001) Xác nhận đề xuất mặc định mục 3 Module 2 làm yêu cầu đã duyệt, và đưa giới hạn 20 tin/phút/người vào task này | Đồng ý cả hai | Đồng ý — khách hàng, 15/11/2026 |
 
 ## Kết quả review
-Chưa có bàn giao. TL chuyển `Sẵn sàng` ngày 15/11/2026 sau khi khách hàng duyệt phạm vi.
+Senior Dev bàn giao vòng 1 ngày 15/11/2026, PR #2 nhắm `develop`, SHA đầu PR `8238926`. Chờ TL review.
 
 ## Lịch sử review
-Chưa có bàn giao.
+
+### Checklist vòng 1
+**Task** — SE-001 · PR https://github.com/duong2604/cat_gpt/pull/2 · SHA đầu PR `8238926` · vòng 1
+**Kết quả** — Tích hợp Chat (Module 2) vào `develop`: 3 commit cherry-pick từ preview (shared types, API SSE + mock LLM, UI chat) không đổi; chép tay chuỗi dịch + bố cục toàn màn hình + bỏ nhãn "Đang phát triển" của mục Chat (3 phần này nằm trong commit demo Module 3–4 nên không cherry-pick riêng được); thêm giới hạn 20 tin/phút/người (độc lập với bucket IP 120 req/phút chung); cập nhật `module-2-chat.md` và `README.md`.
+**Checklist**
+- [x] AC1 Gửi tin nhắn tạo hội thoại mới, URL đổi `/chat/<id>`, tiêu đề lấy từ tin nhắn đầu — Đạt — UI: gửi "Xin chao, ban co the gioi thieu ve CAT GPT khong?" → URL chuyển `/chat/6af96c7947e11402c14b325e`, hội thoại lên đầu danh sách với tiêu đề đúng câu hỏi
+- [x] AC2 Phản hồi xuất hiện từng phần, nút Gửi thành Dừng khi đang trả lời — Đạt — UI: 2 ảnh chụp cách nhau 1s cho thấy nội dung markdown tăng dần (tiêu đề → danh sách), nút chuyển thành ô vuông Dừng trong lúc stream
+- [x] AC3 Dừng giữa chừng giữ nhãn "Đã dừng", tải lại trang vẫn còn — Đạt — UI: bấm Dừng khi đang stream → nhãn "Đã dừng" xuất hiện kèm nội dung dở dang; tải lại trang (`navigate` lại cùng URL) vẫn thấy đúng nhãn và nội dung đó
+- [x] AC4 Tạo lại thay câu trả lời cuối; Sao chép — Đạt — UI: bấm "Tạo lại câu trả lời" → câu trả lời cũ bị xóa, hiện "..." rồi stream câu trả lời mới (mẫu khác); bấm nút Sao chép không báo lỗi console
+- [x] AC5 Mở lại lịch sử; đổi tên; xóa (xác nhận); tìm kiếm; nhóm theo thời gian — Đạt — UI: đổi tên → toast "Đã đổi tên cuộc trò chuyện."; tìm "email" → danh sách chỉ còn hội thoại khớp; xóa → dialog xác nhận "Xóa cuộc trò chuyện? ... bị xóa vĩnh viễn" → toast "Đã xóa cuộc trò chuyện."; nhóm "Hôm nay" / "30 ngày trước" hiển thị đúng
+- [x] AC6 Không truy cập được hội thoại của user khác → `CONVERSATION_NOT_FOUND` (404) — Đạt — Tạo user thử `se001.test@catgpt.local` ở `/admin/users`, đăng nhập user này, mở `/chat/<id của admin>`: UI hiện "Conversation not found / It may have been deleted.", network `GET /api/v1/conversations/<id>` → 404 và `GET .../messages` → 404 (không phải 403); đã xóa dữ liệu thử sau khi kiểm tra (xóa hội thoại test, khóa tài khoản thử vì hệ thống chưa có xóa cứng user)
+- [x] AC7 Giới hạn 4.000 ký tự và 20 tin/phút/người; user khác cùng IP không ảnh hưởng — Đạt — `curl` với cookie jar riêng cho từng user trên cùng máy: 21 request `POST /chat/stream` liên tiếp của user thử → 20 request đầu `200`, request 21 `429` (`{"code":"TOO_MANY_REQUESTS","message":"Too many requests"}`, FE dịch qua `errors.TOO_MANY_REQUESTS`); ngay sau đó admin (user khác, cùng máy/IP) gửi vẫn `200`; tin nhắn 4001 ký tự → `400 VALIDATION_FAILED` (`details.content:["maxLength"]`)
+- [x] AC8 Lỗi LLM (`/error`) có nhãn lỗi, Tạo lại được — Đạt — UI: gửi `/error` → nhãn đỏ "Lỗi khi tạo câu trả lời" (en: "Failed to generate answer"), nút Tạo lại vẫn hoạt động
+- [x] AC9 Không kéo theo Module 3–4 — Đạt — `git diff --name-only origin/develop...HEAD` không có `features/ask`, `features/documents`, `app/(app)/ask`, `app/(app)/documents`, `coming-soon.tsx`, `docs/ket-qua-tam-thoi.md`; `git grep '"/ask"\|ask:' -- apps/web/src/lib/routes.ts` và tìm key `ask` trong `messages/*.json` đều rỗng; UI: thanh bên chỉ có Trò chuyện/Tài liệu (nhãn "Đang phát triển")/Người dùng, `/documents` vẫn trang giữ chỗ
+- [x] AC10 Giao diện tối, tiếng Anh — Đạt — UI: dark mode là mặc định trong suốt phiên kiểm tra; chuyển ngôn ngữ EN → toàn bộ nhãn dịch đúng (nav, nhóm hội thoại, lỗi, placeholder, hint phím tắt). Màn hình hẹp (~375px, danh sách dạng `Sheet`) — **chưa xác minh bằng ảnh chụp**: công cụ `resize_window` không đổi được kích thước cửa sổ trình duyệt trong môi trường kiểm tra này; xác nhận qua code `chat-layout.tsx` (Sheet + breakpoint `md`, không chỉnh sửa trong PR này, giữ nguyên từ preview) — TL hoặc khách hàng có thể tự thử bằng cách thu nhỏ cửa sổ trình duyệt
+- [x] AC11 `pnpm build`/`typecheck`/`lint` đạt; PR không chứa thay đổi ngoài phạm vi — Đạt — `pnpm build` 3/3, `pnpm typecheck` 4/4, `pnpm lint` 3/3 (API 0 cảnh báo/0 lỗi trên 67 file); `git diff --stat origin/develop...HEAD` chỉ gồm 3 commit cherry-pick + 3 commit của PR này (packages/shared, apps/api/chat+llm, apps/web/chat UI, docs)
+- [x] AC12 Tài liệu khớp code — Đạt — `module-2-chat.md`: trạng thái "Đã tích hợp", mục 3 ghi "Đã chốt 15/11/2026 theo Q3 của TL-001", 4.6 mô tả đúng `ChatThrottlerGuard`, 5.2 đổi theo tên file thực tế, mục 8 đánh dấu đạt, mục 9 ghi việc đã làm, có ghi rõ phản hồi là giả lập; `README.md` Module 2 → "Hoàn thành"
+
+**Kiểm tra đã chạy** — `pnpm build`; `pnpm typecheck`; `pnpm lint`; `pnpm dev` (UI thủ công qua trình duyệt, tài khoản `admin@catgpt.local`); tạo + xóa tài khoản thử `se001.test@catgpt.local`; `curl` kiểm tra AC6/AC7 với cookie jar riêng từng user; `git diff --stat`, `git grep` cho AC9/AC11. `pnpm --filter @cat-gpt/api test`: repo chưa có file `*.spec.ts` nào (kể cả Module 1) — không phải do PR này, không chạy được.
+**Trạng thái** — Chờ Review
+
+#### Review vòng 1
+Chưa có — chờ TL.
 
 ## Phản hồi UI
 Chưa có.
