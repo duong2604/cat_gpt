@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, HttpStatus, Param, Post, Res } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Param, Post, Res, UseGuards } from '@nestjs/common';
 import {
   ApiCookieAuth,
   ApiNoContentResponse,
@@ -9,6 +9,7 @@ import {
 import type { Response } from 'express';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import type { AuthUser } from '../../common/types/auth-user.js';
+import { ChatThrottlerGuard } from './chat-throttler.guard.js';
 import { ChatService } from './chat.service.js';
 import { SendMessageDto } from './dto/chat.dto.js';
 import { SseStream } from './sse-stream.js';
@@ -28,6 +29,7 @@ export class ChatController {
   constructor(private readonly chat: ChatService) {}
 
   @Post('chat/stream')
+  @UseGuards(ChatThrottlerGuard)
   @ApiOperation({ summary: 'Gửi tin nhắn và nhận câu trả lời streaming', description: STREAM_DESCRIPTION })
   @ApiProduces('text/event-stream')
   send(
@@ -39,6 +41,7 @@ export class ChatController {
   }
 
   @Post('conversations/:id/regenerate')
+  @UseGuards(ChatThrottlerGuard)
   @ApiOperation({ summary: 'Tạo lại câu trả lời cuối (streaming)', description: STREAM_DESCRIPTION })
   @ApiProduces('text/event-stream')
   regenerate(
