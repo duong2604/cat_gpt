@@ -32,7 +32,7 @@ TL viết task (Nháp) ─► Khách hàng + CTO chốt ─► TL: Sẵn sàng �
 3. **Nhận và triển khai.** Senior Dev nhận task theo mục 3.1, chuyển `Đang làm`, tạo nhánh `feature/module-<n>-<tên>` (hoặc `fix/…`, `docs/…`) từ SHA cơ sở, commit theo Conventional Commits.
 4. **Bàn giao.** Senior Dev mở PR nhắm vào `develop`, ghi bàn giao theo mục 6.1 vào "Lịch sử review" của task, chuyển `Chờ Review`.
 5. **Review PR.** TL ghi SHA đầu PR đã review, đối chiếu từng tiêu chí với diff và bằng chứng, kiểm tra PR nhắm `develop`, check bắt buộc đã pass (nếu repo có cấu hình) và merge được (`gh pr view <số> --json baseRefName,headRefOid,mergeable,mergeStateStatus,statusCheckRollup`). Ghi review theo mục 6.2. Chưa đạt → `Cần sửa` + prompt theo mục 7.
-6. **Merge.** Mọi tiêu chí và check bắt buộc đạt → TL kiểm tra SHA đầu PR vẫn trùng SHA đã review (khác thì review lại phần thay đổi), rồi `gh pr merge <số> --merge --match-head-commit <sha>` (merge commit như PR #1; không squash/rebase, không push thẳng, không merge `main`). Bị chặn → giữ `Chờ Review`, báo lý do cụ thể (thông báo lỗi, `mergeStateStatus`) cho khách hàng và Senior Dev.
+6. **Merge.** Không vướng điều kiện chặn ở [mục 9.2](#92-điều-kiện-chặn-merge), mọi tiêu chí và check bắt buộc đạt → TL kiểm tra SHA đầu PR vẫn trùng SHA đã review (khác thì review lại phần thay đổi), rồi `gh pr merge <số> --merge --match-head-commit <sha>` (merge commit như PR #1; không squash/rebase, không push thẳng, không merge `main`). Bị chặn → giữ `Chờ Review`, báo lý do cụ thể (thông báo lỗi, `mergeStateStatus`) cho khách hàng và Senior Dev.
 7. **Xác nhận và Done.** TL `git fetch origin develop`, xác nhận merge commit trên `origin/develop`, xác minh lại các tiêu chí trên `develop`, ghi link PR, SHA merge và kết quả vào "Kết quả review", chuyển `Done`, cập nhật [context.md](context.md), cập nhật [docs/tasks/README.md](../tasks/README.md), báo cáo khách hàng theo mục 6.3 và CTO theo mục 6.2.
 8. **Dọn nhánh.** Ngay sau bước 7, TL dọn bản local của mình theo mục 2.1 và ghi kết quả vào review (mục 6.2). Senior Dev dọn bản local của mình theo mục 2.1 trước khi nhận task mới (mục 3.1).
 
@@ -225,6 +225,39 @@ Sau khi sửa: cập nhật cùng PR, thêm checklist vòng <n+1> theo mục 8, 
 - **Khi soạn task:** mỗi tiêu chí ghi nguồn yêu cầu hoặc quyết định đã duyệt, mục Function Spec và Basic Design áp dụng, và cách kiểm tra. Các nội dung nằm chung trong tài liệu module thì dẫn tới đúng heading (ví dụ `docs/design/module-1-auth.md#21-token-so-sánh-và-lựa-chọn`).
 - **Nguồn chưa rõ hoặc mâu thuẫn:** ghi câu hỏi cụ thể vào "Quyết định còn mở" (nêu các nguồn đang lệch) và để khách hàng chốt trước khi kết luận tiêu chí đó đạt.
 - **Khi review:** mỗi tiêu chí có kết luận riêng và bằng chứng TL tự kiểm tra; không dựa duy nhất vào báo cáo của Senior Dev.
+
+### 9.1. Trách nhiệm hai vai về phân quyền, giao diện và phát hành
+
+Chuẩn áp dụng: [ma trận phân quyền](../design/access-control.md) và [chuẩn giao diện + tiêu chí phát hành](../design/ui-release-standards.md).
+
+| Việc | Senior Dev | TL |
+|---|---|---|
+| Phân quyền | Mọi endpoint mới mặc định yêu cầu đăng nhập; dữ liệu cá nhân lọc theo `userId` người gọi; quyền quản trị tài khoản không mở quyền đọc nội dung Chat/tài liệu; cập nhật ma trận khi thêm màn hình/API | Viết tiêu chí quyền vào task; tự kiểm tra ca được phép và bị từ chối bằng **hai tài khoản cùng vai** + một tài khoản khác vai; ghi chính sách chưa rõ vào "Quyết định còn mở" |
+| Giao diện | Theo chuẩn mục 1 của tài liệu giao diện; tự kiểm tra trạng thái trống/tải/lỗi/thành công, desktop + mobile 375px, sáng + tối, vi + en | Kiểm tra lại trên UI; ghi phản hồi theo mục 10 |
+| Chế độ phát hành | Tính năng chưa sẵn sàng phải ẩn được ở chế độ `staff`; không đổi hành vi chế độ `demo` đã chốt | Đối chiếu bảng tính năng theo chế độ trước khi merge |
+| Dữ liệu thử | Tạo tài khoản/dữ liệu thử có tên nhận diện được; xóa hoặc khóa sau kiểm tra, ghi lại trong checklist | Như Senior Dev |
+
+**Checklist hai vai** — thêm vào checklist bàn giao (Senior Dev, mẫu 6.1) và review (TL, mẫu 6.2) của mọi task có API hoặc giao diện; mục không áp dụng ghi "Không áp dụng — lý do":
+- [ ] Quyền: ca được phép — <lệnh/ảnh>; ca bị từ chối (chưa đăng nhập `401`, sai vai `403`, dữ liệu người khác `404`) — <lệnh/ảnh>
+- [ ] Đường dẫn trực tiếp tới màn hình không có quyền hiển thị đúng thông báo — <ảnh>
+- [ ] Trạng thái trống / tải / lỗi / thành công — <ảnh hoặc file:dòng>
+- [ ] Desktop + mobile 375px, sáng + tối, vi + en — <ảnh>
+- [ ] Chế độ `demo` / `staff` hiển thị đúng bảng tính năng — <ảnh hoặc "Không áp dụng">
+- [ ] Ma trận quyền / chuẩn giao diện đã cập nhật nếu có thay đổi — <link diff>
+- [ ] Dữ liệu thử đã dọn — <tài khoản/dữ liệu, cách dọn>
+
+### 9.2. Điều kiện chặn merge
+
+TL **không merge** (giữ `Chờ Review` hoặc chuyển `Cần sửa`) khi có một trong các điều sau:
+1. Có tiêu chí chưa đạt hoặc chưa xác minh, hoặc thiếu checklist hai vai cho task có API/giao diện.
+2. Lỗi phân quyền: đọc/sửa được dữ liệu của người khác, vai `USER` gọi được API quản trị, endpoint mới không yêu cầu đăng nhập mà không có lý do đã duyệt.
+3. Chính sách quyền liên quan còn ở "Quyết định còn mở" mà task đã cài hành vi khác đề xuất mặc định.
+4. `pnpm build`, `pnpm typecheck` hoặc `pnpm lint` lỗi; PR chứa thay đổi ngoài phạm vi.
+5. Thay đổi hành vi chế độ `demo` trong khi bản demo đang chốt (đến hết buổi demo), trừ khi sửa lỗi chặn demo và khách hàng đồng ý.
+6. SHA đầu PR khác SHA đã review, PR không nhắm `develop`, hoặc `mergeStateStatus` không phải `CLEAN`.
+7. Tài liệu thiết kế/ma trận quyền chưa khớp code.
+
+Phát hiện lỗi chặn demo hoặc lỗi phân quyền ở bất kỳ đâu: TL báo khách hàng + CTO ngay (ảnh hưởng, phạm vi, đề xuất xử lý), không chờ báo cáo cuối ngày.
 
 ## 10. Phản hồi UI
 
