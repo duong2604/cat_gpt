@@ -1,6 +1,18 @@
 # Báo cáo tiến độ demo Chat
 
-Theo mốc của [plan.md](../project/plan.md#2-mốc). TL cập nhật cuối mỗi ngày làm việc và ngay khi phát hiện nguy cơ trễ mốc; mục mới nhất ở trên, giữ các mục cũ ([workflow mục 11](../project/workflow.md#11-theo-dõi-tiến-độ)).
+Theo mốc của [plan.md](../project/plan.md#2-mốc). Chi tiết từng ngày: [báo cáo ngày](daily/README.md). TL cập nhật cuối mỗi ngày làm việc và ngay khi phát hiện nguy cơ trễ mốc; mục mới nhất ở trên, giữ các mục cũ ([workflow mục 11](../project/workflow.md#11-theo-dõi-tiến-độ)).
+
+## Cập nhật 15/11/2026 (SE-002 đạt review — báo cáo ngày)
+
+Từ 15/11/2026 chi tiết hằng ngày ở [báo cáo ngày](daily/README.md); mục này chỉ tóm tắt theo mốc. Chi tiết: [15/11 vòng 1](daily/2026-11-15.md#vòng-1--1720).
+
+| Mốc | Tình trạng |
+|---|---|
+| M0–M3 | Đạt 15/11 |
+| M4 Demo 20/11 (giờ chờ chốt) | Đúng kế hoạch — bản `34b465d` không đổi |
+| Sau demo: SE-002 | Bàn giao 15/11, TL review đạt; merge dự kiến 23/11 (hạn hoàn tất 24/11) |
+| Sau demo: SE-003 | Sẵn sàng; hạn 25/11 / 26/11 |
+| Sau demo: SE-005, SE-006, SE-004 | Sẵn sàng; lịch dự kiến, chưa duyệt |
 
 ## Cập nhật 15/11/2026 (TL-003 vòng 3 — xếp lại task sau demo)
 
