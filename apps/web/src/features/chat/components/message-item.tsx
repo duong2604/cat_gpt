@@ -51,6 +51,7 @@ export function AssistantMessage({
           <div className="flex items-center gap-1">
             {status === MessageStatus.STOPPED ? <Badge variant="secondary">{t("stopped")}</Badge> : null}
             {status === MessageStatus.ERROR ? <Badge variant="destructive">{t("error")}</Badge> : null}
+            {status === MessageStatus.TRUNCATED ? <Badge variant="outline">{t("truncated")}</Badge> : null}
             {content ? <CopyButton text={content} /> : null}
             {onRegenerate ? (
               <Tooltip>
