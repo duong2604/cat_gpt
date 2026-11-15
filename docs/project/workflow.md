@@ -76,6 +76,14 @@ Quy ước tài liệu đi kèm:
   4. Chuyển `Đang làm` ở cả file task và mục lục, ghi ngày bắt đầu.
   5. Không có task phù hợp → báo TL; không tự tạo task, không nhận task `Nháp`.
 
+### 3.2. Khởi động phiên (TL và Senior Dev)
+
+Mở phiên mới bằng prompt ngắn ở [onboarding/team-leader.md](onboarding/team-leader.md) hoặc [onboarding/senior-dev.md](onboarding/senior-dev.md). Mỗi phiên, trước khi làm việc:
+1. **Xác nhận vai trò** (TL hoặc Senior Dev) và thư mục làm việc của vai đó — TL và Senior Dev **không dùng chung working tree** ([mục 2.1](#21-dọn-nhánh-và-worktree-sau-merge)). Mặc định trên máy hiện tại: Senior Dev `D:\workspace\buggysoft\cat_gpt`, TL `D:\workspace\buggysoft\cat_gpt-tl` (worktree).
+2. `git status`, `git branch --show-current`, `git worktree list`. Có thay đổi local: xác định **của ai** (nhánh, task, tác giả commit) — của mình thì tiếp tục trên đúng nhánh; của vai khác thì dừng, không commit, không `restore`, báo lại.
+3. `git fetch --prune origin` rồi đọc quy trình và trạng thái trên `origin/develop` (`git show origin/develop:<file>` hoặc chuyển worktree TL về `origin/develop`), vì bản local có thể cũ.
+4. Khôi phục bối cảnh từ: [plan](plan.md), [mục lục task](../tasks/README.md), hồ sơ task đang làm / `Chờ Review`, PR đang mở (`gh pr list`), và [báo cáo ngày](../reports/daily/README.md) gần nhất.
+
 ## 4. Trạng thái và quyền chuyển
 
 | Từ → Sang | Ai chuyển | Điều kiện |
@@ -274,7 +282,40 @@ Phát hiện lỗi chặn demo hoặc lỗi phân quyền ở bất kỳ đâu: 
   - Task đang mở — so ngày dự kiến với hạn gần nhất chưa qua: `Đúng kế hoạch` (dự kiến ≤ hạn); `Có nguy cơ trễ` (dự kiến > hạn, hoặc phụ thuộc chặn chưa xong khi còn ≤ 1 ngày làm việc); `Quá hạn` (đã qua hạn mà chưa đạt mốc). Hạn `Chờ chốt` → `Chưa đánh giá (chờ chốt hạn)`.
   - Task đã xong — ghi ngày thực tế và kết luận so với hạn hoàn tất: `Sớm`, `Đúng hạn` hoặc `Trễ`.
   - Senior Dev đã bàn giao nhưng task chưa `Done` → ghi rõ "Senior Dev đã bàn giao <ngày>; chờ TL review" hoặc "… chờ tích hợp", để biết ai giữ bước tiếp theo.
-- **Báo cáo tiến độ** ở [docs/reports/demo-progress.md](../reports/demo-progress.md), theo mốc của plan. Giai đoạn demo: TL cập nhật cuối mỗi ngày làm việc và ngay khi phát hiện nguy cơ trễ mốc. Mỗi lần thêm một mục mới ở đầu, giữ các mục cũ.
+- **Báo cáo tổng hợp theo mốc** ở [docs/reports/demo-progress.md](../reports/demo-progress.md): tình trạng từng mốc của plan, mục mới ở đầu, giữ mục cũ; mỗi mục dẫn tới báo cáo ngày liên quan. Chi tiết hằng ngày nằm ở báo cáo ngày (mục 11.1).
+
+### 11.1. Báo cáo ngày
+
+Áp dụng từ 15/11/2026. Ngày tính theo **giờ Việt Nam (UTC+7)**.
+
+- **Một file mỗi ngày:** `docs/reports/daily/YYYY-MM-DD.md`; thêm dòng vào mục lục [docs/reports/daily/README.md](../reports/daily/README.md) (mới nhất ở trên).
+- **Mỗi ngày đều có báo cáo**, kể cả ngày không có hoạt động (ghi ngắn tình trạng và việc tiếp theo). Ngày không có phiên TL: phiên TL kế tiếp **lập bù** từng ngày còn thiếu, ghi đầu file `Lập bù lúc YYYY-MM-DD HH:mm (giờ VN)`, chỉ ghi điều kiểm chứng được qua Git/PR/hồ sơ task.
+- **Ít nhất một lần mỗi ngày**, và bổ sung **ngay** khi có: bàn giao của Senior Dev, kết quả review hoặc merge, nguy cơ trễ hạn, blocker, thay đổi phạm vi ảnh hưởng plan.
+- **Nhiều lần trong ngày:** cập nhật phần tổng quan đầu file và thêm `## Vòng N — HH:mm` vào cùng file. **Không sửa** checklist, nhận xét, kết luận review của các vòng trước.
+- **Mẫu mỗi vòng:**
+
+```markdown
+## Vòng <N> — <HH:mm>
+Trạng thái vòng: Chờ Review · SHA `develop`: `<sha>` · Người lập: TL
+
+### Tóm tắt cho khách hàng
+<Hôm nay có gì; thử ở đâu (mở ở đâu → làm gì → sẽ thấy gì); cần thử gì / cần quyết định gì. Chưa có thay đổi trên UI: một dòng "Chưa có thay đổi trên giao diện.">
+
+### Tiến độ theo plan
+| Task | Người phụ trách | Trạng thái | Hạn bàn giao | Hạn hoàn tất | Dự kiến / thực tế | Đánh giá | Bước tiếp theo (ai giữ) |
+|---|---|---|---|---|---|---|---|
+| [<ID>](../../tasks/<file>.md) | … | … | … | … | … | Đúng kế hoạch / Có nguy cơ trễ / Quá hạn / Sớm / Đúng hạn / Trễ / Chưa chốt hạn | … |
+
+### Checklist vòng hiện tại
+- [x] <kết luận> — <Đạt/Không đạt> — <bằng chứng: task / PR / SHA / lệnh + kết quả> — **Nguồn: TL kiểm tra** | **Nguồn: bàn giao SE**
+- [ ] <mục chưa xác minh> — <lý do>
+
+### CTO review
+Chờ Review — gửi khách hàng + CTO: link tới vòng này, SHA, tóm tắt.
+```
+
+- **CTO review:** vòng mới luôn ở `Chờ Review`. Khi CTO kết luận: ghi **nguyên văn** kết luận và các mục CTO đã duyệt vào mục "CTO review" của đúng vòng đó. CTO yêu cầu sửa → sửa trong cùng file, thêm vòng mới có checklist mới; vòng cũ giữ nguyên.
+- **Đánh giá tiến độ** theo mục 11 ở trên; hạn chưa chốt ghi `Chưa chốt hạn` và ghi rõ là lịch dự kiến.
 
 ## 12. Nguyên tắc chung
 

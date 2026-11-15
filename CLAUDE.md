@@ -11,10 +11,18 @@ Trợ lý AI nội bộ (đồ án tốt nghiệp). Monorepo pnpm + Turborepo: `
 5. [README.md](README.md) (công nghệ, chạy local, quy ước Git) và [docs/README.md](docs/README.md) (mục lục tài liệu).
 6. Sửa code `apps/web`: đọc [apps/web/AGENTS.md](apps/web/AGENTS.md) (Next.js 16 có thay đổi phá vỡ).
 
+## Mở phiên mới
+
+Dán prompt của vai vào phiên Claude Code mới:
+- **Team Leader:** [docs/project/onboarding/team-leader.md](docs/project/onboarding/team-leader.md)
+- **Senior Fullstack Developer:** [docs/project/onboarding/senior-dev.md](docs/project/onboarding/senior-dev.md)
+
+Quy tắc khởi động chung: [workflow mục 3.2](docs/project/workflow.md#32-khởi-động-phiên-tl-và-senior-dev). TL và Senior Dev làm ở **thư mục riêng**.
+
 ## Bắt đầu phiên
 
 - **Senior Dev:** `git fetch origin develop` → task trước đã `Done` thì dọn nhánh/worktree local ([mục 2.1](docs/project/workflow.md#21-dọn-nhánh-và-worktree-sau-merge)) → tiếp tục task của mình đang `Cần sửa` / `Đang làm`, nếu không thì lấy task `Sẵn sàng` ưu tiên cao nhất giao cho Senior Dev → chuyển `Đang làm` ([mục 3.1](docs/project/workflow.md#31-phân-công-và-nhận-task)).
-- **TL:** `git fetch origin develop` → đối chiếu [plan](docs/project/plan.md) và [mục lục task](docs/tasks/README.md) → review task `Chờ Review` → cập nhật [báo cáo tiến độ](docs/reports/demo-progress.md) ([mục 11](docs/project/workflow.md#11-theo-dõi-tiến-độ)).
+- **TL:** `git fetch origin develop` → đối chiếu [plan](docs/project/plan.md) và [mục lục task](docs/tasks/README.md) → review task `Chờ Review` → cập nhật [báo cáo ngày](docs/reports/daily/README.md) ([mục 11.1](docs/project/workflow.md#111-báo-cáo-ngày)) và [báo cáo theo mốc](docs/reports/demo-progress.md).
 
 ## Bàn giao ở đâu
 
