@@ -19,6 +19,47 @@ Hai dòng đánh dấu **[PR]** ở trên mô tả đúng những gì đã kiể
 
 Monorepo pnpm + Turborepo: `apps/api` (NestJS 12), `apps/web` (Next.js 16 App Router), `packages/shared` (enum, mã lỗi, kiểu DTO dùng chung cho cả hai, ví dụ `UserRole`, `ErrorCode`, `MessageStatus`, `AVATAR_MAX_SIZE_BYTES`, `CHAT_MAX_MESSAGE_LENGTH`). Chạy `pnpm dev` ở gốc khởi động cả hai ứng dụng; `apps/web/src/proxy.ts` rewrite `/api/*` sang NestJS nên trình duyệt chỉ nói chuyện với một origin, cookie httpOnly hoạt động không cần CORS — xem kiến trúc tổng thể ở [02 mục 4](02-requirements-and-design.md#4-kiến-trúc-tổng-thể).
 
+**Sơ đồ D9** ([02 mục 9](02-requirements-and-design.md#9-sơ-đồ-file-nguồn-hiện-có-và-việc-cần-xuất--vẽ-lại)) — cấu trúc module của riêng Module 1–2, theo đúng tên thư mục/file thật tại SHA cơ sở (đối chiếu [context.md mục 4](../project/context.md#4-bản-đồ-mã-nguồn)):
+
+```mermaid
+flowchart TB
+  subgraph API["apps/api/src/modules/ (NestJS)"]
+    direction TB
+    subgraph M1B["Module 1"]
+      auth["auth/<br/>auth.controller · auth.service · jwt.strategy"]
+      sessions["sessions/<br/>sessions.service · refresh-token"]
+      users["users/<br/>users.service · user.presenter"]
+      me["me/<br/>me.controller · me.service"]
+      admin["admin-users/<br/>admin-users.controller · .service"]
+      storage["storage/<br/>local-storage.provider · files.controller [PR #3]"]
+    end
+    subgraph M2B["Module 2"]
+      chat["chat/<br/>chat.controller · chat.service · conversations.service"]
+      llm["llm/<br/>llm.provider · mock-llm.provider · openai-llm.provider [PR #4]"]
+    end
+  end
+  subgraph WEB["apps/web/src/features/ (Next.js)"]
+    direction TB
+    fauth["auth/"]
+    fprofile["profile/"]
+    fadmin["admin-users/"]
+    fchat["chat/"]
+  end
+  SH["packages/shared/<br/>enums · error-codes · types"]
+
+  fauth --> auth
+  fprofile --> me
+  fadmin --> admin
+  fchat --> chat
+  chat --> llm
+  auth --> sessions
+  admin --> users
+  me --> users
+  me --> storage
+  WEB -. import .-> SH
+  API -. import .-> SH
+```
+
 `apps/api/src/app.module.ts` đăng ký guard toàn cục theo đúng thứ tự (chống spam → xác thực → phân quyền):
 
 ```ts
