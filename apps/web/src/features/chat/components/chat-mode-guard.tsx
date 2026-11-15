@@ -4,7 +4,6 @@ import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { NotFoundContent } from "@/components/not-found-content";
 import { useCurrentFeatures } from "@/features/auth/hooks";
-import { routes } from "@/lib/routes";
 
 /**
  * Chat ẩn ở bản `staff` khi còn dùng LLM mẫu (CS-6). Nguồn quyết định duy nhất là
@@ -17,12 +16,7 @@ export function ChatModeGuard({ children }: { children: ReactNode }) {
 
   if (!chatEnabled) {
     return (
-      <NotFoundContent
-        title={t("title")}
-        description={t("description")}
-        homeLabel={t("home")}
-        homeHref={routes.profile}
-      />
+      <NotFoundContent title={t("title")} description={t("description")} homeLabel={t("home")} />
     );
   }
   return children;

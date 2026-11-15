@@ -25,8 +25,9 @@ export function proxy(request: NextRequest) {
   }
 
   // Có ?reason=... nghĩa là vừa bị đăng xuất: luôn cho xem trang đăng nhập (tránh vòng lặp chuyển hướng).
+  // Chuyển về "/" (không phải thẳng /chat): trang chủ cần hỏi API Chat còn bật hay không trước khi chọn /chat hay /profile.
   if (hasSession && isPublic && !searchParams.has("reason")) {
-    return NextResponse.redirect(new URL(routes.home, request.url));
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   return NextResponse.next();

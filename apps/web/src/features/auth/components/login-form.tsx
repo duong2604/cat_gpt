@@ -48,11 +48,15 @@ export function LoginForm({ reason, next }: { reason?: LoginReason; next?: strin
       onSuccess: async () => {
         // Vừa đăng nhập xong mới có phiên để gọi /me/features — quyết định Chat còn bật hay không
         // phải lấy từ API (nguồn duy nhất), không suy từ biến môi trường phía web.
-        const features = await queryClient.fetchQuery({
-          queryKey: queryKeys.myFeatures,
-          queryFn: authApi.features,
-        });
-        router.replace(safeNextPath(next, features.chatEnabled ? routes.chat : routes.profile));
+        let chatEnabled = false;
+        try {
+          chatEnabled = (
+            await queryClient.fetchQuery({ queryKey: queryKeys.myFeatures, queryFn: authApi.features })
+          ).chatEnabled;
+        } catch {
+          // Không lấy được cấu hình: về Hồ sơ cho an toàn thay vì kẹt lại ở form đã đăng nhập.
+        }
+        router.replace(safeNextPath(next, chatEnabled ? routes.chat : routes.profile));
       },
       onError: () => form.resetField("password"),
     }),
