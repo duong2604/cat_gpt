@@ -2,6 +2,17 @@
 
 Theo mốc của [plan.md](../project/plan.md#2-mốc). Chi tiết từng ngày: [báo cáo ngày](daily/README.md). TL cập nhật cuối mỗi ngày làm việc và ngay khi phát hiện nguy cơ trễ mốc; mục mới nhất ở trên, giữ các mục cũ ([workflow mục 11](../project/workflow.md#11-theo-dõi-tiến-độ)).
 
+## Cập nhật 15/11/2026 (SE-007 đạt kỹ thuật; bộ nguồn đồ án)
+
+Chi tiết: [15/11 vòng 4](daily/2026-11-15.md#vòng-4--1900).
+
+| Mốc / việc | Tình trạng |
+|---|---|
+| M4 Demo 20/11 (giờ chờ chốt) | Đúng kế hoạch — bản `34b465d` không đổi |
+| Sau demo 23–24/11: PR #3 / SE-002 → PR #4 / SE-007 | Cả hai đạt review TL; SE-007 khách hàng xác nhận đạt kỹ thuật 15/11; chờ tích hợp |
+| TL-004 bộ nguồn đồ án | Vòng 1 Chờ Review; dự kiến bộ nguồn 19/11, cập nhật sau tích hợp 25/11 (hạn chờ chốt) |
+| SE-008 tài liệu hiện thực + bằng chứng | Sẵn sàng; dự kiến bàn giao 18/11, trước SE-003 (hạn SE-003 25/11 không đổi) |
+
 ## Cập nhật 15/11/2026 (SE-002 đạt review — báo cáo ngày)
 
 Từ 15/11/2026 chi tiết hằng ngày ở [báo cáo ngày](daily/README.md); mục này chỉ tóm tắt theo mốc. Chi tiết: [15/11 vòng 1](daily/2026-11-15.md#vòng-1--1720).

@@ -13,6 +13,7 @@ Hướng dẫn cài đặt và chạy local nằm ở [README.md](../README.md) 
 | Tiến độ theo mốc demo | [reports/demo-progress.md](reports/demo-progress.md) |
 | Audit tiến độ so với báo cáo 27/10/2026 | [project/preview-progress-review.md](project/preview-progress-review.md) |
 | Quy trình làm việc TL / Senior Dev | [project/workflow.md](project/workflow.md) |
+| Nguồn để viết báo cáo đồ án (Word) | [thesis/README.md](thesis/README.md) |
 | Ai được xem/sửa gì; chuẩn giao diện và phát hành | [design/access-control.md](design/access-control.md), [design/ui-release-standards.md](design/ui-release-standards.md) |
 
 ## Dự án — `project/`
