@@ -9,7 +9,7 @@ Hệ thống trợ lý AI nội bộ hỗ trợ hội thoại và khai thác th�
 | Module | Nội dung | Trạng thái |
 |---|---|---|
 | 1 | Xác thực & quản lý người dùng | ✅ Hoàn thành |
-| 2 | Trợ lý hội thoại (AI Chat) + streaming | ⏳ Giao diện giữ chỗ |
+| 2 | Trợ lý hội thoại (AI Chat) + streaming | ✅ Hoàn thành (phản hồi hiện là nội dung giả lập, chưa gắn LLM thật) |
 | 3 | Quản lý tài liệu + pipeline bất đồng bộ | ⏳ Giao diện giữ chỗ |
 | 4 | Khai thác tài liệu bằng AI (RAG) | Chưa bắt đầu |
 

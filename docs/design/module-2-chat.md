@@ -1,6 +1,6 @@
 # Module 2 — Trợ lý hội thoại (AI Chat)
 
-> Trạng thái: 📝 Đã lập kế hoạch chi tiết (27/10/2026) · Chờ sinh viên xác nhận mục 3 rồi mới code
+> Trạng thái: ✅ Đã tích hợp vào `develop` qua [SE-001](../tasks/SE-001-chat-integration.md) (bàn giao 15/11/2026). Phản hồi trợ lý là nội dung giả lập (`MockLlmProvider`, model `mock-1`) — chưa gắn LLM thật.
 > Phạm vi theo đề cương: tạo và quản lý cuộc hội thoại (đổi tên, xóa), gửi/nhận tin nhắn, phản hồi theo thời gian thực (streaming), lưu trữ lịch sử trò chuyện.
 > Kế hoạch đề cương: 19/10 – 01/11/2026 · Nhánh: `feature/module-2-chat` (tách từ `develop` sau khi merge Module 1)
 
@@ -30,6 +30,8 @@
 - Đính kèm tài liệu vào chat (thuộc Module 4).
 
 ## 3. Câu hỏi cần sinh viên xác nhận
+
+**Đã chốt 15/11/2026** theo Q3 của [TL-001](../tasks/TL-001-chat-integration-scope.md#quyết-định-còn-mở): toàn bộ đề xuất mặc định dưới đây (gồm 3 thư viện markdown ở câu 7) là yêu cầu đã duyệt, dùng làm nguồn nghiệm thu cho [SE-001](../tasks/SE-001-chat-integration.md).
 
 Mỗi câu đều có sẵn đề xuất mặc định. Nếu sinh viên đồng ý tất cả thì chỉ cần trả lời "OK".
 
@@ -131,7 +133,7 @@ export abstract class LlmProvider {
 - Biến môi trường mới: `LLM_PROVIDER=mock`, `LLM_MODEL=mock-1`, `LLM_SYSTEM_PROMPT`. Khi có LLM thật thì thêm `LLM_BASE_URL` và `LLM_API_KEY`.
 
 ### 4.6. Giới hạn tần suất
-- `@Throttle` 20 lần/phút cho 2 endpoint SSE. Cần một `ThrottlerGuard` con với `getTracker()` trả về `userId` thay vì IP. Phần này dùng lại `@nestjs/throttler` sẵn có.
+- 20 lần/phút **theo người dùng** cho 2 endpoint SSE (`POST /chat/stream`, `POST /conversations/:id/regenerate`). Triển khai: `ChatThrottlerGuard` (`modules/chat/chat-throttler.guard.ts`) áp bằng `@UseGuards()` ở method — chạy sau `JwtAuthGuard` (guard toàn cục chạy trước khi xác thực nên không dùng được `req.user`) — dùng lại `ThrottlerStorage`/`ThrottlerException` sẵn có của `@nestjs/throttler` với khóa riêng `chat-user:<userId>`, độc lập với bucket IP 120 req/phút chung (`AllExceptionsFilter` map `ThrottlerException` → 429 `TOO_MANY_REQUESTS`, FE dịch qua `errors.TOO_MANY_REQUESTS`).
 - Độ dài tin nhắn được validate bằng `class-validator`, dùng chung hằng số `CHAT_MAX_MESSAGE_LENGTH` trong `packages/shared`.
 
 ## 5. Thiết kế frontend
@@ -144,16 +146,17 @@ export abstract class LlmProvider {
 
 Danh sách hội thoại nằm trong `app/(app)/chat/layout.tsx` (cột trái thứ hai), nên chuyển giữa các hội thoại không bị tải lại danh sách. Trên mobile, danh sách hiển thị dạng `Sheet`.
 
-### 5.2. Cấu trúc (`apps/web/src/features/chat/`)
+### 5.2. Cấu trúc (`apps/web/src/features/chat/`) — theo tên file thực tế trên `develop`
 ```
 api.ts          # axios: list / rename / delete / messages
 stream.ts       # fetch + parser SSE, tự refresh khi gặp 401 (dùng lại refreshSession của lib/api/client.ts)
 hooks.ts        # useConversations (useInfiniteQuery), useMessages, useRenameConversation,
                 # useDeleteConversation, useChatStream (trạng thái stream, stop, regenerate)
+chat-stream-provider.tsx   # context giữ trạng thái stream dùng chung giữa các component
 components/
-  conversation-list.tsx   conversation-item.tsx   rename-dialog.tsx   delete-dialog.tsx
-  chat-view.tsx           message-list.tsx        message-item.tsx    chat-input.tsx
-  markdown.tsx            empty-chat.tsx
+  conversation-list.tsx   conversation-view.tsx   chat-layout.tsx   chat-input.tsx
+  conversation-dialogs.tsx (đổi tên + xóa)        message-list.tsx   message-item.tsx
+  markdown.tsx            new-chat.tsx
 ```
 
 ### 5.3. Hành vi chính
@@ -188,18 +191,21 @@ Commit dự kiến: `feat(shared): add chat types` · `feat(api): add conversati
 
 ## 8. Checklist nghiệm thu
 
-- [ ] Tạo hội thoại bằng tin nhắn đầu tiên; tiêu đề tự đặt từ tin nhắn.
-- [ ] Phản hồi chạy dần qua giao diện web (không chỉ qua curl).
-- [ ] Dừng giữa chừng: phần đã sinh vẫn được lưu và có nhãn "Đã dừng".
-- [ ] Tạo lại câu trả lời cuối; sao chép câu trả lời.
-- [ ] Đổi tên, xóa (có xác nhận), tìm kiếm hội thoại.
-- [ ] F5 hoặc đăng nhập lại vẫn thấy lịch sử.
-- [ ] Không truy cập được hội thoại của user khác.
-- [ ] Giới hạn 4.000 ký tự và 20 tin/phút hoạt động, lỗi được dịch vi/en.
-- [ ] Dark mode, mobile, tiếng Anh.
-- [ ] `pnpm build`, `pnpm typecheck`, `pnpm lint` đạt.
+- [x] Tạo hội thoại bằng tin nhắn đầu tiên; tiêu đề tự đặt từ tin nhắn.
+- [x] Phản hồi chạy dần qua giao diện web (không chỉ qua curl).
+- [x] Dừng giữa chừng: phần đã sinh vẫn được lưu và có nhãn "Đã dừng".
+- [x] Tạo lại câu trả lời cuối; sao chép câu trả lời.
+- [x] Đổi tên, xóa (có xác nhận), tìm kiếm hội thoại.
+- [x] F5 hoặc đăng nhập lại vẫn thấy lịch sử.
+- [x] Không truy cập được hội thoại của user khác.
+- [x] Giới hạn 4.000 ký tự và 20 tin/phút hoạt động, lỗi được dịch vi/en.
+- [x] Dark mode, tiếng Anh. Mobile (danh sách dạng `Sheet`, breakpoint `md`): xác nhận qua code, chưa chụp được màn hình hẹp trong môi trường kiểm tra lần này.
+- [x] `pnpm build`, `pnpm typecheck`, `pnpm lint` đạt.
+
+Chi tiết bằng chứng từng mục: checklist bàn giao của [SE-001](../tasks/SE-001-chat-integration.md#lịch-sử-review).
 
 ## 9. Công việc đã thực hiện
 
 - 24/10/2026: Lập phương án sơ bộ và gửi bộ câu hỏi chốt yêu cầu.
 - 27/10/2026: Lập kế hoạch chi tiết (thiết kế BE/FE, giao thức SSE, lịch theo ngày, rủi ro, checklist).
+- 15/11/2026: [TL-001](../tasks/TL-001-chat-integration-scope.md) khoanh phạm vi tích hợp từ `origin/preview/module-2-4-demo`; khách hàng chốt Q3 (mục 3 ở trên). [SE-001](../tasks/SE-001-chat-integration.md) tích hợp vào `develop`: cherry-pick 3 commit Chat từ preview, chép tay chuỗi dịch + bố cục toàn màn hình + bỏ nhãn "Đang phát triển" (phần Chat nằm trong commit demo Module 3–4, không cherry-pick được riêng), thêm giới hạn 20 tin/phút/người (mục 4.6), loại trừ toàn bộ phần Module 3–4.
