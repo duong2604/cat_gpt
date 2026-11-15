@@ -2,7 +2,7 @@ import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { ErrorCode, MessageRole, MessageStatus } from '@cat-gpt/shared';
 import { AppException } from '../../common/exceptions/app.exception.js';
 import { AppConfigService } from '../../config/app-config.service.js';
-import { type LlmMessage, LlmProvider } from '../llm/llm.provider.js';
+import { type LlmFinishReason, type LlmMessage, LlmProvider } from '../llm/llm.provider.js';
 import { toConversationDto, toMessageDto } from './chat.presenter.js';
 import { ConversationsService } from './conversations.service.js';
 import type { SendMessageDto } from './dto/chat.dto.js';
@@ -129,13 +129,18 @@ export class ChatService {
 
       let content = '';
       let status: MessageStatus = MessageStatus.COMPLETED;
+      let truncated = false;
+      const onFinish = (reason: LlmFinishReason) => {
+        truncated = reason === 'max_output_tokens';
+      };
       try {
-        for await (const chunk of this.llm.stream(messages, { signal: controller.signal })) {
+        for await (const chunk of this.llm.stream(messages, { signal: controller.signal, onFinish })) {
           content += chunk;
           sse.send({ type: 'delta', text: chunk });
           if (controller.signal.aborted) break;
         }
         if (controller.signal.aborted) status = MessageStatus.STOPPED;
+        else if (truncated) status = MessageStatus.TRUNCATED;
       } catch (error) {
         status = controller.signal.aborted ? MessageStatus.STOPPED : MessageStatus.ERROR;
         if (status === MessageStatus.ERROR) {

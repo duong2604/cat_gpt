@@ -1,5 +1,7 @@
+import { createServer, type Server } from 'node:http';
+import type { AddressInfo } from 'node:net';
 import { Logger } from '@nestjs/common';
-import { RateLimitError } from 'openai';
+import OpenAI, { RateLimitError } from 'openai';
 import { describe, expect, it, vi } from 'vitest';
 import { LlmProviderName, validateEnv } from '../../config/env.validation.js';
 import type { LlmMessage } from './llm.provider.js';
@@ -124,8 +126,74 @@ describe('validateEnv — LLM', () => {
   it('openai thiếu key → lỗi rõ', () => {
     expect(() => validateEnv({ ...base, LLM_PROVIDER: 'openai' })).toThrow(/OPENAI_API_KEY/);
   });
-  it('openai có key → hợp lệ, LLM_MAX_OUTPUT_TOKENS mặc định 500', () => {
-    const env = validateEnv({ ...base, LLM_PROVIDER: 'openai', OPENAI_API_KEY: 'sk-test' });
-    expect(env.LLM_MAX_OUTPUT_TOKENS).toBe(500);
+  it('openai có key → hợp lệ, LLM_MAX_OUTPUT_TOKENS mặc định 1000 (O1), cấu hình được', () => {
+    expect(validateEnv({ ...base, LLM_PROVIDER: 'openai', OPENAI_API_KEY: 'sk-test' }).LLM_MAX_OUTPUT_TOKENS).toBe(1000);
+    expect(validateEnv({ ...base, LLM_MAX_OUTPUT_TOKENS: '1500' }).LLM_MAX_OUTPUT_TOKENS).toBe(1500);
+  });
+});
+
+describe('OpenAiLlmProvider — lý do kết thúc', () => {
+  const run = async (finalEvent: unknown) => {
+    vi.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
+    const { client } = fakeClient(async function* () {
+      yield { type: 'response.output_text.delta', delta: 'abc' };
+      yield finalEvent;
+    });
+    const onFinish = vi.fn();
+    const out = await collect(
+      new OpenAiLlmProvider(settings, client).stream(messages, { signal: new AbortController().signal, onFinish }),
+    );
+    return { out, onFinish };
+  };
+  it('hoàn tất → onFinish("completed")', async () => {
+    const { onFinish } = await run({ type: 'response.completed', response: { usage: null, incomplete_details: null } });
+    expect(onFinish).toHaveBeenCalledWith('completed');
+  });
+  it('chạm giới hạn → giữ phần đã sinh, onFinish("max_output_tokens")', async () => {
+    const { out, onFinish } = await run({
+      type: 'response.incomplete',
+      response: { usage: null, incomplete_details: { reason: 'max_output_tokens' } },
+    });
+    expect(out.join('')).toBe('abc');
+    expect(onFinish).toHaveBeenCalledWith('max_output_tokens');
+  });
+});
+
+describe('OpenAiLlmProvider — Dừng cắt kết nối tới provider (SDK thật + server SSE cục bộ)', () => {
+  it('hủy signal → server nhận đóng kết nối, không chờ hết câu trả lời', async () => {
+    let closedAt = 0;
+    let sent = 0;
+    const server: Server = createServer((req, res) => {
+      res.writeHead(200, { 'content-type': 'text/event-stream' });
+      const timer = setInterval(() => {
+        sent++;
+        res.write(`event: response.output_text.delta
+data: ${JSON.stringify({ type: 'response.output_text.delta', delta: 'x', sequence_number: sent })}
+
+`);
+        if (sent >= 200) { clearInterval(timer); res.end(); }
+      }, 20);
+      req.on('close', () => { clearInterval(timer); closedAt = Date.now(); });
+    });
+    await new Promise<void>((r) => server.listen(0, '127.0.0.1', r));
+    const { port } = server.address() as AddressInfo;
+    const client = new OpenAI({ apiKey: 'sk-test', baseURL: `http://127.0.0.1:${port}/v1`, maxRetries: 0 });
+    const controller = new AbortController();
+    const provider = new OpenAiLlmProvider(settings, client);
+
+    let received = 0;
+    const abortedAt = await (async () => {
+      for await (const _ of provider.stream(messages, { signal: controller.signal })) {
+        if (++received === 5) { controller.abort(); return Date.now(); }
+      }
+      return 0;
+    })();
+    await new Promise((r) => setTimeout(r, 300));
+    server.close();
+
+    expect(abortedAt).toBeGreaterThan(0);
+    expect(closedAt).toBeGreaterThan(0);
+    expect(closedAt - abortedAt).toBeLessThan(300);
+    expect(sent).toBeLessThan(50); // server ngừng gửi ngay, không chạy tới 200
   });
 });

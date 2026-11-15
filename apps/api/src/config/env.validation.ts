@@ -114,7 +114,7 @@ export class EnvironmentVariables {
   @IsInt()
   @Min(16)
   @Max(8192)
-  LLM_MAX_OUTPUT_TOKENS = 500;
+  LLM_MAX_OUTPUT_TOKENS = 1000;
 
   /** Ngân sách token (ước lượng) cho lịch sử hội thoại gửi lại mỗi lượt. */
   @Transform(({ value }) => Number(value))

@@ -57,7 +57,7 @@ export class OpenAiLlmProvider extends LlmProvider {
     this.model = settings.model;
   }
 
-  async *stream(messages: LlmMessage[], { signal }: LlmStreamOptions): AsyncIterable<string> {
+  async *stream(messages: LlmMessage[], { signal, onFinish }: LlmStreamOptions): AsyncIterable<string> {
     const instructions = messages
       .filter((m) => m.role === 'system')
       .map((m) => m.content)
@@ -93,6 +93,7 @@ export class OpenAiLlmProvider extends LlmProvider {
             this.logger.log(
               `usage model=${this.model} input_tokens=${usage?.input_tokens ?? '-'} output_tokens=${usage?.output_tokens ?? '-'} messages=${input.length} end=${reason}`,
             );
+            onFinish?.(reason === 'max_output_tokens' ? 'max_output_tokens' : 'completed');
             break;
           }
           case 'response.failed':

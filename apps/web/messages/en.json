@@ -138,6 +138,7 @@
       "regenerate": "Regenerate answer",
       "stopped": "Stopped",
       "error": "Failed to generate answer",
+      "truncated": "Answer cut off at the length limit",
       "empty": "No content."
     },
     "rename": {

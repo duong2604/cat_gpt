@@ -138,6 +138,7 @@
       "regenerate": "Tạo lại câu trả lời",
       "stopped": "Đã dừng",
       "error": "Lỗi khi tạo câu trả lời",
+      "truncated": "Câu trả lời bị cắt do đạt giới hạn độ dài",
       "empty": "Không có nội dung."
     },
     "rename": {

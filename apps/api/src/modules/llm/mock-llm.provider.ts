@@ -6,6 +6,8 @@ import { MOCK_ANSWERS } from './mock-answers.js';
 
 /** Câu hỏi chứa chuỗi này → giả lập LLM lỗi giữa chừng (để demo nhánh xử lý lỗi). */
 const FAILURE_TRIGGER = '/error';
+/** Câu hỏi chứa chuỗi này → giả lập chạm giới hạn token đầu ra (để thử nhãn "bị cắt"). */
+const LIMIT_TRIGGER = '/limit';
 const QUESTION_PREVIEW_LENGTH = 60;
 
 const randomInt = (min: number, max: number) => min + Math.floor(Math.random() * (max - min + 1));
@@ -23,7 +25,7 @@ export class MockLlmProvider extends LlmProvider {
     this.model = config.llm.model;
   }
 
-  async *stream(messages: LlmMessage[], { signal }: LlmStreamOptions): AsyncIterable<string> {
+  async *stream(messages: LlmMessage[], { signal, onFinish }: LlmStreamOptions): AsyncIterable<string> {
     const question = messages.findLast((m) => m.role === 'user')?.content.trim() ?? '';
     const preview =
       question.length > QUESTION_PREVIEW_LENGTH
@@ -31,11 +33,16 @@ export class MockLlmProvider extends LlmProvider {
         : question;
     const answer = MOCK_ANSWERS[randomInt(0, MOCK_ANSWERS.length - 1)].replaceAll('{question}', preview);
     const shouldFail = question.includes(FAILURE_TRIGGER);
+    const shouldTruncate = question.includes(LIMIT_TRIGGER);
 
     // Tách theo khoảng trắng nhưng giữ lại khoảng trắng để ghép lại đúng định dạng markdown.
     const tokens = answer.split(/(\s+)/);
     for (let i = 0, emitted = 0; i < tokens.length; emitted++) {
       if (shouldFail && emitted === 20) throw new Error('Mock LLM failure');
+      if (shouldTruncate && emitted === 20) {
+        onFinish?.('max_output_tokens');
+        return;
+      }
 
       const size = randomInt(1, 3) * 2;
       yield tokens.slice(i, i + size).join('');
@@ -47,5 +54,6 @@ export class MockLlmProvider extends LlmProvider {
         return; // signal bị hủy → dừng sinh câu trả lời.
       }
     }
+    onFinish?.('completed');
   }
 }

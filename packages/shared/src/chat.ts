@@ -11,6 +11,8 @@ export const MessageStatus = {
   COMPLETED: 'COMPLETED',
   STOPPED: 'STOPPED',
   ERROR: 'ERROR',
+  /** Provider dừng vì chạm giới hạn token đầu ra — giữ phần đã sinh. */
+  TRUNCATED: 'TRUNCATED',
 } as const;
 export type MessageStatus = (typeof MessageStatus)[keyof typeof MessageStatus];
 
