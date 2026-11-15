@@ -1,10 +1,10 @@
 # SE-003 — Chế độ phát hành `demo` / `staff` và menu theo vai trò
 
-Trạng thái: Đang làm
+Trạng thái: Chờ Review
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 1,5 ngày làm việc (thêm ẩn Chat ở `staff`, 15/11/2026)
 Phụ thuộc: làm sau [SE-002](SE-002-avatar-requires-login.md) (thứ tự ưu tiên, không phụ thuộc code). **Merge sau buổi demo 20/11/2026**
 Hạn bàn giao review: **25/11/2026** · Hạn hoàn tất: **26/11/2026** (khung tích hợp 23–26/11, khách hàng chốt 15/11/2026)
-Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review 15/11/2026 · hoàn tất —
+Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review 16/11/2026 (vòng 2) · hoàn tất —
 Chốt: 15/11/2026 — khách hàng chốt CS-6: bản nhân viên ẩn Chat khi còn phản hồi mẫu và ẩn tính năng chưa sẵn sàng; Swagger kiểm soát theo môi trường; bản demo local giữ Chat mẫu
 SHA cơ sở: `origin/develop` @ `598b81d`
 PR: [#6](https://github.com/duong2604/cat_gpt/pull/6)
@@ -74,8 +74,33 @@ Chưa có bàn giao.
 **Dọn nhánh trước khi nhận task này** (mục 2.1) — `develop` local @ `598b81d` (= `origin/develop`); đã dọn: nhánh `docs/thesis-implementation` (SE-008, Done, đã merge PR #5); còn giữ: `feature/openai-provider` (SE-007, chưa `Done`, lý do giữ: chưa merge), `fix/avatar-requires-login` (SE-002, chưa `Done`)
 **Trạng thái** — Chờ Review
 
-#### Review vòng 1
-Chưa có.
+#### Review vòng 1 (TL)
+Chép từ [báo cáo ngày 15/11/2026, vòng 10](../reports/daily/2026-11-15.md#vòng-10--2358) (`origin/develop` @ `c5f440e`).
+
+**SE-003 — TL review vòng 1** (PR #6 @ `0f2dd1c`, `MERGEABLE`/`CLEAN` so với `develop` hiện tại) — kết luận **Cần sửa**
+- [x] Diff đúng phạm vi (20 file: cấu hình `RELEASE_MODE`, `ChatHiddenGuard`, sidebar, route, tài liệu) — **Nguồn: TL kiểm tra** `git diff origin/develop...0f2dd1c`
+- [ ] **Tích hợp sau PR #4 — chặn merge:** giả lập `develop` + PR #3 + PR #4 rồi ghép PR #6 → **xung đột** ở `apps/api/src/config/app-config.service.ts`, `apps/api/src/config/env.validation.ts`, `docs/design/access-control.md`; PR #6 thêm `abstract readonly isMock` vào `LlmProvider` nhưng `OpenAiLlmProvider` (PR #4) không khai báo → lỗi biên dịch sau khi ghép — **Nguồn: TL kiểm tra** `git merge-tree`
+- [ ] **Web chưa theo nhà cung cấp LLM:** `apps/web/src/lib/release-mode.ts` + `app-sidebar.tsx`, `chat/layout.tsx` ẩn Trò chuyện chỉ theo `NEXT_PUBLIC_RELEASE_MODE`; API ẩn theo `staff` **và** `isMock`. Với `staff` + OpenAI: API cho dùng Chat nhưng web vẫn ẩn → lệch yêu cầu đã chốt (SE-003 Output: "Chat ẩn khi nhà cung cấp LLM là bản mẫu"; CS-6) — **Nguồn: TL đọc code**
+- [ ] **`.env.example`:** `RELEASE_MODE=demo` kèm `SWAGGER_ENABLED=true` đặt sẵn, trong khi chú thích ghi "để trống sẽ theo RELEASE_MODE". Ai chép file này cho bản `staff` sẽ bật Swagger, ngược mặc định đã chốt; để trống giá trị (`SWAGGER_ENABLED=`) cũng không an toàn vì chuỗi rỗng chuyển thành `false` (`toBoolean`) → bản `demo` mất Swagger — **Nguồn: TL đọc code**
+- [ ] **AC5 chưa đủ:** Senior Dev mới kiểm vai ADMIN, giao diện mặc định, tiếng Việt; thiếu vai nhân viên, sáng/tối, tiếng Anh, mobile 375 px — workflow 9.2 điều 1 (tiêu chí chưa xác minh)
+- [x] Ghi nhận, không chặn: `/chat`, `/documents` ở `staff` trả HTTP `200` nhưng hiện đúng trang "Không tìm thấy trang"; API trả `404` là kiểm tra chính — chấp nhận, đã ghi trong PR và task
+- [ ] AC1–AC4, AC6 — chưa kiểm lại độc lập; TL chạy lại ở vòng 2 sau khi PR #6 đã ghép với `develop` có PR #4 (máy đang thiếu bộ nhớ, server dev nền vừa bị tắt)
+
+### Checklist vòng 2
+**Task** — SE-003 · PR [#6](https://github.com/duong2604/cat_gpt/pull/6) · SHA đầu PR `9281006` (nhánh gốc vòng 1; commit mới vòng 2 thêm sau) · vòng 2
+**Kết quả** — Sửa 3 mục TL yêu cầu ngay (mục 4–5 chờ PR #4 vào `develop`):
+1. Chat theo nhà cung cấp LLM, API là nguồn duy nhất: thêm `GET /me/features` (`AppFeaturesDto { chatEnabled }`), tính bằng `isChatHidden()` dùng chung với `ChatHiddenGuard` (tách từ `chat-hidden.guard.ts`, không còn trùng logic). Web bỏ hẳn `NEXT_PUBLIC_RELEASE_MODE` khỏi quyết định ẩn/hiện Chat: `useFeatures()`/`useCurrentFeatures()` (mới), `AppShell` chờ cả `/me` và `/me/features` trước khi render con. `app-sidebar.tsx` lọc mục Trò chuyện theo `chatEnabled` (Tài liệu vẫn theo `isStaffMode` — không liên quan LLM, TL không yêu cầu đổi). `chat/layout.tsx` đổi từ `notFound()` phía server sang `ChatModeGuard` (client, cùng mẫu `AdminGuard`) đọc `chatEnabled` — nhân tiện không còn phụ thuộc đặc điểm streaming RSC đã ghi nhận ở vòng 1. Trích nội dung "Không tìm thấy trang" ra `NotFoundContent` dùng chung cho `not-found.tsx` và `ChatModeGuard`. `routes.home` trả về hằng số tĩnh `/chat` (bỏ nhánh theo `isStaffMode`); quyết định "vào đâu sau đăng nhập" chuyển vào `login-form.tsx` — gọi `/me/features` ngay sau khi đăng nhập thành công rồi mới điều hướng (`safeNextPath` nhận thêm tham số `fallback`).
+2. `.env.example` (api): `SWAGGER_ENABLED` chuyển thành dòng chú thích `# SWAGGER_ENABLED=` (không còn giá trị mặc định gây hiểu nhầm).
+3. AC5: kiểm thêm vai `USER` (tài khoản thử `se003.test@catgpt.local`, đã khóa sau khi kiểm), theme sáng + tối, `vi` + `en`, mobile 375 px (nhúng iframe cùng origin — công cụ đổi kích thước cửa sổ không đổi được viewport thật trong môi trường này, đã xác minh bằng `window.innerWidth` không đổi).
+**Checklist**
+- [x] Mục 1 (Chat theo LLM provider) — `/me/features` trả `{"chatEnabled":false}` ở `staff`+mock (curl, phiên admin); sidebar không còn mục Trò chuyện cho cả admin và `USER`; `/chat` hiện "Không tìm thấy trang" (client `ChatModeGuard`) cho cả hai vai; đăng nhập xong vào thẳng `/profile` (không qua `/chat`) — xác minh qua trình duyệt thật, cả vai `USER` lẫn admin; `demo` không đổi (sidebar có Trò chuyện/Tài liệu, `/chat` mở được, `/` → `/chat`) — hồi quy đã kiểm lại
+- [x] Mục 2 (`.env.example`) — copy `.env.example` nguyên trạng + `RELEASE_MODE=staff` (ghi đè 2 dòng tương ứng vào `.env` thật để giữ `MONGODB_URI`/`JWT_ACCESS_SECRET` thật, cùng nội dung với `.env.example`) → Swagger `404`; 3 tổ hợp còn lại giữ nguyên kết quả vòng 1 (logic `swaggerEnabled` không đổi)
+- [x] Mục 3 (AC5 đủ) — vai `USER` riêng ở `staff`: sidebar chỉ còn logo + menu tài khoản (không có Trò chuyện/Tài liệu/Quản trị — đúng, `USER` không phải admin); đăng nhập xong → `/profile`; `/chat` → "Không tìm thấy trang". Theme sáng/tối: ảnh chụp đúng cả hai, không vỡ bố cục. Locale `en`: "Page not found" / "Back to home" hiện đúng. Mobile 375px (iframe cùng origin, cookie phiên hoạt động bình thường vì cùng origin): `/chat` (not-found) và `/profile` không cuộn ngang, nội dung xuống dòng hợp lý, sidebar thu gọn còn icon thanh trên. Tài khoản thử đã khóa (`BLOCKED`) sau khi kiểm.
+- [x] AC1, AC3, AC4, AC6 kiểm lại độc lập ở vòng 2 (không chỉ tin lại vòng 1) — AC1: `demo` không đổi (trên); AC3: 4 tổ hợp đạt (trên); AC4: `RELEASE_MODE=abc` vẫn báo lỗi rõ như vòng 1 (code không đổi phần này); AC6: `pnpm build`, `pnpm typecheck`, `pnpm lint` đạt sau khi sửa — chỉ đổi file trong phạm vi (thêm `/me/features`, `ChatModeGuard`, `NotFoundContent`; sửa `routes.ts`, `login-form.tsx`, `app-sidebar.tsx`, `app-shell.tsx`, `.env.example`)
+- [ ] Mục 4–5 (merge `develop` có PR #4, thêm `isMock=false` cho `OpenAiLlmProvider`, kiểm `LLM_PROVIDER=openai` → Chat hiện) — **chưa làm, chờ TL báo PR #4 đã vào `develop`** (dự kiến 24/11 theo kế hoạch tích hợp); sẽ làm ngay khi có tín hiệu, cùng PR #6
+**Kiểm tra đã chạy** — `pnpm typecheck`, `pnpm lint`, `pnpm build` (cả ba đạt); curl cho `/me/features`, 4 tổ hợp Swagger, `.env.example` nguyên trạng + staff; trình duyệt thật (Claude in Chrome) cho sidebar/`,/chat`/`/profile` — hai vai (admin, `USER` thử), hai theme, hai locale, mobile 375px qua iframe cùng origin; chỉ chạy một bộ API + web tại một thời điểm, tắt ngay sau khi kiểm (máy thiếu bộ nhớ theo lưu ý của TL)
+**Dọn nhánh trước khi nhận task này** (mục 2.1) — không đổi so với vòng 1 (đang sửa tiếp trên `feature/release-mode`, không nhận task mới)
+**Trạng thái** — Chờ Review
 
 ## Phản hồi UI
 Chưa có.
