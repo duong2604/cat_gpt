@@ -2,6 +2,37 @@
 
 Theo mốc của [plan.md](../project/plan.md#2-mốc). TL cập nhật cuối mỗi ngày làm việc và ngay khi phát hiện nguy cơ trễ mốc; mục mới nhất ở trên, giữ các mục cũ ([workflow mục 11](../project/workflow.md#11-theo-dõi-tiến-độ)).
 
+## Cập nhật 15/11/2026 (sau quyết định của khách hàng)
+
+Cơ sở: `origin/develop` @ `6f9d3e4`. Khách hàng chốt: duyệt TL-001 và Q3; demo đầu tiên dùng phản hồi mẫu; giữ Module 3–4 ở preview; mốc demo dự kiến **20/11/2026**, giờ chốt sau ([plan mục 5](../project/plan.md#5-quyết-định-còn-mở)).
+
+### Theo mốc
+
+| Mốc | Hạn | Tình trạng | Ai giữ bước tiếp theo |
+|---|---|---|---|
+| M0 Tài liệu + TL-001 | 15/11 | Đạt 15/11 | — |
+| M1 Chốt phạm vi | 16/11 | Đạt 15/11 — sớm 1 ngày | — |
+| M2 SE-001 bàn giao | 18/11 | Đúng kế hoạch — SE-001 `Sẵn sàng`, dự kiến bàn giao 17/11 | **Senior Dev** |
+| M3 Chat lên `develop` + gửi khách hàng link và checklist | 19/11 | Đúng kế hoạch — chờ M2 | TL |
+| M4 Demo | 20/11 (giờ: Chờ chốt) | Đúng kế hoạch | Khách hàng (chốt giờ) |
+
+### Thử được ngay
+Không đổi so với mục dưới: Module 1 trên `develop`; Chat chỉ xem trước được trên preview.
+
+### Task
+
+| Task | Trạng thái | Tiến độ |
+|---|---|---|
+| [TL-001](../tasks/TL-001-chat-integration-scope.md) | Done 15/11 | Đúng hạn |
+| [SE-001](../tasks/SE-001-chat-integration.md) | Sẵn sàng | Đúng kế hoạch (dự kiến 17/11 ≤ hạn 18/11) |
+| [TL-002](../tasks/TL-002-chat-demo-acceptance.md) | Nháp (chờ SE-001) | Đúng kế hoạch |
+
+Dự phòng: đủ cho một vòng `Cần sửa`. Bàn giao muộn hơn 17/11 kèm cần sửa, hoặc vòng sửa thứ hai → `Có nguy cơ trễ` mốc 20/11.
+
+### Cần khách hàng / CTO chốt
+1. **D1 — Giờ demo** ngày 20/11.
+2. **D3 — Thử bản Chat ở đâu?** Chưa có môi trường chung. Mặc định: chạy trên máy anh/chị hoặc máy demo, mở http://localhost:3000; TL gửi link commit và hướng dẫn chạy. Nếu cần một đường link mở được từ xa, cần thêm việc triển khai (~1 ngày, cần tài khoản hosting) — xin chốt trước 18/11.
+
 ## Cập nhật 15/11/2026 (cuối ngày)
 
 Cơ sở: `origin/develop` @ `a860437` (trước đợt tài liệu). Báo cáo này nằm trong chính đợt tài liệu được tích hợp vào `develop`; SHA tích hợp ghi trong báo cáo gửi khách hàng và ở lần cập nhật kế tiếp.

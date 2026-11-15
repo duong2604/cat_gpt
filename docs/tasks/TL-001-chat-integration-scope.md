@@ -1,10 +1,10 @@
 # TL-001 — Khoanh phạm vi tích hợp Chat
 
-Trạng thái: Chờ Review
+Trạng thái: Done
 Người phụ trách: TL · Ưu tiên: P1 · Ước lượng: 0,5 ngày làm việc
 Phụ thuộc: Không
-Hạn bàn giao review: 15/11/2026 (giao trong ngày) · Hạn hoàn tất: Chờ chốt
-Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review 15/11/2026 · hoàn tất —
+Hạn bàn giao review: 15/11/2026 (giao trong ngày) · Hạn hoàn tất: không đặt (trước mốc M1 16/11/2026)
+Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review 15/11/2026 · hoàn tất 15/11/2026
 Chốt: 15/11/2026 (khách hàng giao trực tiếp, yêu cầu "thực hiện ngay")
 SHA cơ sở: `origin/develop` @ `a860437f45124636f4eea87b3209635f4e2d4d7d` · nguồn: `origin/preview/module-2-4-demo` @ `b2a4b22d40804f246c8505e66bad9e7a2b483ca4`
 PR: Không áp dụng (task phân tích; tài liệu tích hợp cùng đợt tài liệu 15/11/2026)
@@ -112,12 +112,12 @@ Trên nhánh SE-001 so với `develop`:
 ## Quyết định còn mở
 | # | Câu hỏi | Đề xuất mặc định | Chốt |
 |---|---|---|---|
-| Q3 | Xác nhận 11 đề xuất mặc định ở [mục 3 Module 2](../design/module-2-chat.md#3-câu-hỏi-cần-sinh-viên-xác-nhận) (gồm 3 thư viện markdown mới) làm yêu cầu đã duyệt, và đưa giới hạn 20 tin/phút/người (G1) vào SE-001 | Đồng ý cả hai | |
+| Q3 | Xác nhận 11 đề xuất mặc định ở [mục 3 Module 2](../design/module-2-chat.md#3-câu-hỏi-cần-sinh-viên-xác-nhận) (gồm 3 thư viện markdown mới) làm yêu cầu đã duyệt, và đưa giới hạn 20 tin/phút/người (G1) vào SE-001 | Đồng ý cả hai | **Đồng ý** — khách hàng, 15/11/2026 |
 
-Q3 là điều kiện để SE-001 sang `Sẵn sàng`. Hai quyết định của mốc demo (D1 ngày giờ demo, D2 AI thật) ghi ở [plan.md](../project/plan.md#5-quyết-định-còn-mở); SE-001 không phụ thuộc D1, D2.
+Q3 là điều kiện để SE-001 sang `Sẵn sàng`. Quyết định của mốc demo (D1, D2, D3) ghi ở [plan.md](../project/plan.md#5-quyết-định-còn-mở).
 
 ## Kết quả review
-Chưa có kết luận của khách hàng / CTO. Bàn giao mới nhất: [Checklist vòng 1](#checklist-vòng-1).
+**Đạt** — khách hàng duyệt phạm vi và chốt Q3 ngày 15/11/2026 ([Review vòng 1](#review-vòng-1)). TL chuyển `Done` 15/11/2026; tài liệu có trên `develop` @ `6f9d3e4`. SE-001 chuyển `Sẵn sàng` cùng ngày.
 
 ## Lịch sử review
 
@@ -134,6 +134,9 @@ Chưa có kết luận của khách hàng / CTO. Bàn giao mới nhất: [Checkl
 
 **Kiểm tra đã chạy** — `git fetch origin`; `git cherry-pick` trong worktree tạm; `pnpm install --frozen-lockfile`; `pnpm typecheck`; `pnpm lint`; `pnpm build`; `npx tsc --noEmit` (web); `git diff b2a4b22 -- …`; worktree đã gỡ.
 **Trạng thái và bước tiếp theo** — Chờ Review. Khách hàng/CTO duyệt phạm vi và chốt Q3 → TL chuyển [SE-001](SE-001-chat-integration.md) sang `Sẵn sàng`.
+
+#### Review vòng 1
+Khách hàng (15/11/2026): duyệt TL-001 và Q3. Demo đầu tiên dùng phản hồi mẫu; giữ Module 3–4 ở preview. Kết quả: TL chuyển `Done`, SE-001 sang `Sẵn sàng`.
 
 ## Phản hồi UI
 Không áp dụng (task phân tích, không có giao diện mới).
