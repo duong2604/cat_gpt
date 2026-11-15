@@ -32,18 +32,22 @@ PR: <link, Senior Dev ghi khi bàn giao>
 - Basic Design: [access-control mục 1](../design/access-control.md#1-nguyên-tắc-đang-áp-dụng-đã-xác-minh-trong-code).
 
 ## Checklist nghiệm thu
-**Chuẩn bị bắt buộc:** trên `develop` (trước khi chuyển sang nhánh PR), cho tài khoản nhân viên A tải một ảnh và ghi lại URL — "**ảnh cũ**". Trên nhánh PR, A tải thêm một ảnh khác — "**ảnh mới**" (ghi URL; ảnh cũ bị thay nên kiểm tra ảnh cũ **trước** khi tải ảnh mới). Tài khoản: A (chính chủ, USER), B (USER khác), admin.
+**Dữ liệu thử riêng (bắt buộc):** tạo 2 tài khoản nhân viên chỉ dùng cho task này — A `se002.a@catgpt.local` (chính chủ), B `se002.b@catgpt.local` (nhân viên khác) — cùng admin seed. Không dùng tài khoản thử của task khác. Khóa A, B sau khi kiểm tra; ghi vào bàn giao.
+
+**Ảnh theo phiên bản cũ:** chạy `pnpm dev` trên phiên bản **trước khi sửa** (`origin/develop` @ `2636714` hoặc SHA `develop` lúc bàn giao — chưa có commit SE-002), đăng nhập A, tải "**ảnh cũ**", ghi URL. Sau đó chuyển sang nhánh PR (cùng DB, cùng thư mục `uploads`), kiểm tra ảnh cũ; rồi A tải "**ảnh mới**" (ghi URL) và kiểm tra ảnh mới. Ảnh mới thay ảnh cũ, nên ảnh cũ phải kiểm tra **trước** khi tải ảnh mới.
 
 | # | Tiêu chí | Nguồn | Cách kiểm tra |
 |---|---|---|---|
-| AC1 | **URL ảnh trực tiếp, chưa đăng nhập** → `401`, không trả nội dung ảnh — cho cả ảnh cũ và ảnh mới, qua cả `localhost:4000` và `localhost:3000` | KT-1 | `curl -i` không cookie, 2 URL × 2 cổng |
-| AC2 | **Chính chủ A** → `200`, đúng `Content-Type`, `Cache-Control: private, no-store` — ảnh cũ (trước khi tải ảnh mới) và ảnh mới | CS-4 | `curl -i` kèm cookie A |
-| AC3 | **Tài khoản khác** B và **admin** mở URL ảnh của A → `404` (cả ảnh cũ và ảnh mới) | CS-4 | `curl -i` kèm cookie B, admin |
-| AC4 | Sau khi A xóa ảnh hoặc thay ảnh: URL cũ → `404` với cả A; key có `..` hoặc ngoài thư mục lưu → `404`, không đọc file ngoài `uploads` | Bảo mật | `curl`, gồm `..%2F..%2Fpackage.json` |
-| AC5 | UI chính chủ: ảnh hiện ở Hồ sơ và menu người dùng; tải ảnh mới, xóa ảnh vẫn chạy (nhân viên + admin, desktop + mobile) | Không hồi quy Module 1 | Ảnh chụp |
-| AC6 | UI quản trị: danh sách và hộp thoại sửa người dùng không hiện ảnh; `GET /admin/users` không có `avatarUrl` | CS-4 | Ảnh chụp; `curl` |
-| AC7 | Checklist hai vai đủ | [workflow 9.1](../project/workflow.md#91-trách-nhiệm-hai-vai-về-phân-quyền-giao-diện-và-phát-hành) | Bàn giao 6.1 |
-| AC8 | `pnpm build`, `pnpm typecheck`, `pnpm lint` đạt; chỉ đổi file trong phạm vi | Quy ước repo | Lệnh; `git diff --stat origin/develop...HEAD` |
+| AC1 | **Chưa đăng nhập** mở URL ảnh trực tiếp → `401`, không trả nội dung ảnh — ảnh cũ và ảnh mới, cổng `4000` và `3000` | KT-1 | `curl -i` không cookie (4 lệnh) |
+| AC2 | **Chính chủ A** → `200`, đúng `Content-Type`, `Cache-Control: private, no-store` — ảnh cũ (trước khi tải ảnh mới) và ảnh mới | CS-4 | `curl -i` cookie A |
+| AC3 | **Nhân viên khác B** → `404` — ảnh cũ và ảnh mới | CS-4 | `curl -i` cookie B |
+| AC4 | **Admin** → `404` — ảnh cũ và ảnh mới | CS-4 | `curl -i` cookie admin |
+| AC5 | **Cùng trình duyệt:** A mở URL ảnh mới trong tab (thấy ảnh) → **đăng xuất** → tải lại tab đó → không thấy ảnh (`401`, không lấy từ cache). Đăng nhập lại bằng **B** trên cùng trình duyệt → tải lại tab → không thấy ảnh (`404`); menu người dùng hiện chữ cái đầu của B, không còn ảnh A | CS-4 | Trình duyệt + DevTools Network (trạng thái, không có "from cache"), ảnh chụp từng bước |
+| AC6 | Sau khi A xóa ảnh hoặc thay ảnh: URL cũ → `404` với cả A; key có `..` hoặc ngoài thư mục lưu → `404`, không đọc file ngoài `uploads` | Bảo mật | `curl`, gồm `..%2F..%2Fpackage.json` |
+| AC7 | UI chính chủ: ảnh hiện ở Hồ sơ và menu người dùng; tải ảnh mới, xóa ảnh vẫn chạy (nhân viên + admin, desktop + mobile) | Không hồi quy Module 1 | Ảnh chụp |
+| AC8 | UI quản trị: danh sách và hộp thoại sửa người dùng không hiện ảnh; `GET /admin/users` không có `avatarUrl` | CS-4 | Ảnh chụp; `curl` |
+| AC9 | Checklist hai vai đủ; tài khoản A, B đã khóa | [workflow 9.1](../project/workflow.md#91-trách-nhiệm-hai-vai-về-phân-quyền-giao-diện-và-phát-hành) | Bàn giao 6.1 |
+| AC10 | `pnpm build`, `pnpm typecheck`, `pnpm lint` đạt; chỉ đổi file trong phạm vi | Quy ước repo | Lệnh; `git diff --stat origin/develop...HEAD` |
 
 ## Quyết định còn mở
 Không có. CS-4 đã chốt 15/11/2026.
