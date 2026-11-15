@@ -39,6 +39,11 @@ export class LocalStorageProvider extends StorageService {
     return `${LOCAL_FILES_ROUTE}/${key}`;
   }
 
+  /** Đường dẫn tuyệt đối trên đĩa cho key, để endpoint có xác thực đọc file. Ném lỗi nếu key cố thoát khỏi rootDir. */
+  getAbsolutePath(key: string): string {
+    return this.resolveKey(key);
+  }
+
   /** Chặn path traversal: key phải nằm trong rootDir. */
   private resolveKey(key: string): string {
     const fullPath = resolve(join(this.rootDir, key));

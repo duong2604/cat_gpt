@@ -1,12 +1,12 @@
 # SE-002 — Ảnh đại diện chỉ xem được khi đã đăng nhập
 
-Trạng thái: Sẵn sàng
+Trạng thái: Đang làm
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 0,5 ngày làm việc
 Phụ thuộc: Không. **Merge sau buổi demo 20/11/2026** ([workflow 9.2](../project/workflow.md#92-điều-kiện-chặn-merge) điều 5); làm và bàn giao được ngay
 Hạn bàn giao review: Chờ chốt (đề xuất 23/11/2026) · Hạn hoàn tất: Chờ chốt (đề xuất 24/11/2026)
-Ngày thực tế: bắt đầu — · bàn giao review — · hoàn tất —
+Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review — · hoàn tất —
 Chốt: 15/11/2026 — khách hàng giao rà quyền và cho phép đưa phần đã rõ sang `Sẵn sàng` (yêu cầu TL-003); hạn chờ khách hàng + CTO chốt
-SHA cơ sở: `origin/develop` @ `06a5a83`
+SHA cơ sở: `origin/develop` @ `dbc4d85` (`06a5a83` → `dbc4d85` chỉ thêm tài liệu TL-003, không đổi `apps/`)
 PR: <link, Senior Dev ghi khi bàn giao>
 
 ## Mục tiêu
@@ -19,7 +19,7 @@ Người chưa đăng nhập không mở được ảnh đại diện của nhâ
 
 ## Phạm vi
 - **Làm:** như Output.
-- **Không làm:** phân quyền xem ảnh theo phòng ban/đồng nghiệp ([CS-4](../design/access-control.md#4-chính-sách-cần-khách-hàng--cto-chốt) — mặc định mọi người đã đăng nhập đều xem được); chuyển sang MinIO; đổi giao diện tải ảnh.
+- **Không làm:** phân quyền xem ảnh theo phòng ban/đồng nghiệp ([CS-4](../design/access-control.md#4-chính-sách-đã-chốt) — mặc định mọi người đã đăng nhập đều xem được); chuyển sang MinIO; đổi giao diện tải ảnh.
 
 ## Nguồn yêu cầu
 - Yêu cầu: khách hàng 15/11/2026 (rà quyền, cách ly dữ liệu cá nhân); khoảng trống [KT-1](../design/access-control.md#3-khoảng-trống-đã-xác-minh) đã xác minh: `curl` không cookie tới `/api/v1/files/avatars/<uuid>.png` → `200` qua cả cổng 4000 và 3000.

@@ -19,7 +19,7 @@ Ký hiệu cột **Loại**: **XM** = hành vi đã xác minh (lệnh hoặc UI,
 |---|---|---|---|---|---|---|
 | Chưa đăng nhập | `/login` | Đăng nhập | — | Sai mật khẩu: thông báo "Email hoặc mật khẩu không đúng." | XM | UI ảnh chụp |
 | Chưa đăng nhập | Mọi trang trong app (`/chat`, `/profile`, `/admin/users`) | Mở trực tiếp | Không | UI: chuyển `/login?next=…`. API: `401 AUTH_UNAUTHENTICATED` cho `/me`, `/me/sessions`, `/conversations`, `/admin/users`, `POST /chat/stream` | XM | UI `/chat` → `/login?next=%2Fchat`; curl |
-| Chưa đăng nhập | — | Mở URL ảnh đại diện `/api/v1/files/avatars/<uuid>.png` | **Ảnh đại diện của nhân viên** | **Không bị chặn: `200`** qua cả cổng API và web; cache 7 ngày | **KT** | curl không cookie → 200; sau khi xóa ảnh → 404. Sửa ở [SE-002](../tasks/SE-002-avatar-requires-login.md) |
+| Chưa đăng nhập | — | Mở URL ảnh đại diện `/api/v1/files/avatars/<uuid>.png` | Không | `401 AUTH_UNAUTHENTICATED`, không trả nội dung ảnh, qua cả cổng API và web | XM | [SE-002](../tasks/SE-002-avatar-requires-login.md) checklist vòng 1: curl không cookie → `401`; đã đăng nhập → `200` |
 | USER | `/chat`, `/chat/<id>` | Gửi, dừng, tạo lại, đổi tên, xóa, tìm hội thoại **của mình** | Hội thoại + tin nhắn của mình | — | XM | SE-001 review vòng 1; trạng thái trống "Chưa có cuộc trò chuyện nào." |
 | USER | `/chat/<id của người khác>` | Xem, đọc tin, đổi tên, xóa, dừng, tạo lại, gửi tiếp vào hội thoại | Không | UI: "Không tìm thấy cuộc trò chuyện". API: cả 7 thao tác → `404 CONVERSATION_NOT_FOUND`; hội thoại NV2 giữ nguyên tiêu đề; danh sách của NV1 không chứa hội thoại NV2 | XM | curl NV1 → hội thoại NV2; UI NV1 mở `/chat/<id admin>` |
 | USER | `/profile` › Thông tin | Sửa họ tên, SĐT, phòng ban; tải/xóa ảnh | Hồ sơ của mình | Gửi `role` hoặc `email` → `400 VALIDATION_FAILED` (không tự nâng quyền, không tự đổi email) | XM | curl `PATCH /me` |
@@ -40,7 +40,7 @@ Ký hiệu cột **Loại**: **XM** = hành vi đã xác minh (lệnh hoặc UI,
 
 | # | Khoảng trống | Ảnh hưởng | Mức | Xử lý |
 |---|---|---|---|---|
-| KT-1 | Ảnh đại diện phục vụ tĩnh, **không cần đăng nhập** (URL dạng UUID, cache 7 ngày) | Ai có link (kể cả người ngoài công ty nếu link lộ) xem được ảnh nhân viên. Không đoán được URL nên mức thấp; **không ảnh hưởng demo 20/11** | Trung bình | [SE-002](../tasks/SE-002-avatar-requires-login.md) — `Sẵn sàng` |
+| KT-1 | ~~Ảnh đại diện phục vụ tĩnh, không cần đăng nhập~~ — **Đã sửa**: endpoint `GET /api/v1/files/*` yêu cầu đăng nhập (`FilesController`, không `@Public()`), đọc qua `LocalStorageProvider.getAbsolutePath` (giữ chặn path traversal), `Cache-Control: private, max-age=3600` | Đã khắc phục | — | [SE-002](../tasks/SE-002-avatar-requires-login.md) — Đã sửa, bàn giao `Chờ Review` |
 | KT-2 | Swagger bật mặc định | Lộ danh sách API ở bản nhân viên | Thấp | [SE-003](../tasks/SE-003-release-mode-navigation.md) |
 | KT-3 | Đăng nhập giới hạn **5 lần/phút/IP** (`@Throttle` ở `auth.controller.ts`) | 500 nhân sự sau cùng một IP công ty (NAT) sẽ bị `429` khi đăng nhập đầu giờ. TL gặp ngay khi kiểm tra với 3 tài khoản | **Chặn thử nội bộ** | Tiêu chí phát hành [R-3](ui-release-standards.md#4-tiêu-chí-chuẩn-bị-cho-500-nhân-sự); task tạo sau khi chốt CS-5 |
 | KT-4 | Giới hạn Chat (20 tin/phút/người) và trạng thái stream lưu trong bộ nhớ một tiến trình API; còn trùng hai lớp (`ChatThrottlerGuard` + `ChatService.assertRateLimit`) | Chạy nhiều instance thì giới hạn và nút Dừng không đúng | Chặn mở rộng | Tiêu chí [R-4](ui-release-standards.md#4-tiêu-chí-chuẩn-bị-cho-500-nhân-sự) |
