@@ -4,7 +4,7 @@ Trạng thái: Chờ Review
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 1,5 ngày làm việc (thêm ẩn Chat ở `staff`, 15/11/2026)
 Phụ thuộc: làm sau [SE-002](SE-002-avatar-requires-login.md) (thứ tự ưu tiên, không phụ thuộc code). **Merge sau buổi demo 20/11/2026**
 Hạn bàn giao review: **25/11/2026** · Hạn hoàn tất: **26/11/2026** (khung tích hợp 23–26/11, khách hàng chốt 15/11/2026)
-Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review 16/11/2026 (vòng 2) · hoàn tất —
+Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review 16/11/2026 (vòng 3) · hoàn tất —
 Chốt: 15/11/2026 — khách hàng chốt CS-6: bản nhân viên ẩn Chat khi còn phản hồi mẫu và ẩn tính năng chưa sẵn sàng; Swagger kiểm soát theo môi trường; bản demo local giữ Chat mẫu
 SHA cơ sở: `origin/develop` @ `598b81d`
 PR: [#6](https://github.com/duong2604/cat_gpt/pull/6)
@@ -100,6 +100,42 @@ Chép từ [báo cáo ngày 15/11/2026, vòng 10](../reports/daily/2026-11-15.md
 - [ ] Mục 4–5 (merge `develop` có PR #4, thêm `isMock=false` cho `OpenAiLlmProvider`, kiểm `LLM_PROVIDER=openai` → Chat hiện) — **chưa làm, chờ TL báo PR #4 đã vào `develop`** (dự kiến 24/11 theo kế hoạch tích hợp); sẽ làm ngay khi có tín hiệu, cùng PR #6
 **Kiểm tra đã chạy** — `pnpm typecheck`, `pnpm lint`, `pnpm build` (cả ba đạt); curl cho `/me/features`, 4 tổ hợp Swagger, `.env.example` nguyên trạng + staff; trình duyệt thật (Claude in Chrome) cho sidebar/`,/chat`/`/profile` — hai vai (admin, `USER` thử), hai theme, hai locale, mobile 375px qua iframe cùng origin; chỉ chạy một bộ API + web tại một thời điểm, tắt ngay sau khi kiểm (máy thiếu bộ nhớ theo lưu ý của TL)
 **Dọn nhánh trước khi nhận task này** (mục 2.1) — không đổi so với vòng 1 (đang sửa tiếp trên `feature/release-mode`, không nhận task mới)
+**Trạng thái** — Chờ Review
+
+#### Review vòng 2 (TL)
+Chép từ [báo cáo ngày 16/11/2026, vòng 1](../reports/daily/2026-11-16.md#vòng-1--0030) (`origin/develop` @ `76e77c1`).
+
+**SE-003 — TL review vòng 2** (PR #6 @ `bc16b1a`, `MERGEABLE`/`CLEAN` với `develop` hiện tại) — kết luận **Cần sửa**
+- [x] Mục 2 vòng 1 (web theo nhà cung cấp LLM) — Đạt về thiết kế: `GET /me/features` (cần đăng nhập, guard toàn cục) trả `chatEnabled` từ `isChatHidden()` dùng chung với `ChatHiddenGuard`; sidebar, `/chat` (`ChatModeGuard`), trang sau đăng nhập đọc cùng cờ; Tài liệu vẫn theo `RELEASE_MODE` (đúng yêu cầu) — **Nguồn: TL đọc diff `0f2dd1c..bc16b1a`**
+- [x] Mục 3 vòng 1 (`.env.example`) — Đạt — `# SWAGGER_ENABLED=` (để dạng chú thích), chú thích rõ
+- [x] Mục 4 vòng 1 (AC5) — Đạt theo bàn giao SE (tài khoản USER riêng, sáng/tối, vi/en, iframe 375 px; tài khoản đã khóa); TL chưa chạy lại (máy thiếu bộ nhớ) — kiểm ở vòng sau cùng với bước ghép PR #4
+- [ ] **Điều hướng trang chủ ở `staff` + LLM mẫu — Chưa đạt (AC2, dòng "Màn vào sau đăng nhập" → `/profile`):** `routes.home` cố định `/chat`, nên `apps/web/src/app/page.tsx` (`redirect(routes.home)`) và `apps/web/src/proxy.ts:29` (đã đăng nhập mà mở `/login`) đưa người dùng tới `/chat` → trang "Không tìm thấy"; nút "Về trang chủ" của `not-found.tsx` cũng trỏ `/chat` → quay lại đúng trang không tìm thấy — **Nguồn: TL đọc code @ `bc16b1a`**
+- [ ] Nhỏ: `login-form.tsx` gọi `/me/features` trong `onSuccess`; nếu lời gọi lỗi thì không chuyển trang (người dùng kẹt ở form đã đăng nhập) — nên rơi về `routes.profile` khi lỗi
+- [ ] Mục 1 vòng 1 (ghép PR #4, `isMock` cho `OpenAiLlmProvider`, thử `staff` + `openai`) — chưa làm, đúng kế hoạch (sau khi PR #4 vào `develop` 24/11)
+
+### Checklist vòng 3
+**Task** — SE-003 · PR [#6](https://github.com/duong2604/cat_gpt/pull/6) · SHA đầu PR `fb34758` · vòng 3
+**Kết quả** — Sửa 2 mục TL yêu cầu ngay (mục 3 — ghép PR #4 — vẫn chờ):
+1. Trang chủ ở MỌI lối vào giờ đọc `/me/features` trước khi chọn `/chat` hay `/profile`, không còn hằng số tĩnh `routes.home`:
+   - `app/page.tsx` ("/"): chuyển thành Client Component, `useFeatures()` rồi `router.replace(...)` (hiện `FullPageSpinner` trong lúc chờ); lỗi/chưa có dữ liệu → mặc định `/profile` (biểu thức `data?.chatEnabled ? chat : profile` tự rơi về `profile` khi lỗi, không cần nhánh riêng).
+   - `proxy.ts` dòng 29 (đã đăng nhập mà mở `/login`): đổi đích từ `routes.home` thành `"/"` — để `page.tsx` tự quyết định, middleware (Edge) không gọi API.
+   - `not-found.tsx` (nút "Về trang chủ"): `NotFoundContent` tự đọc `useFeatures()` để chọn href thay vì nhận `homeHref` cố định từ nơi gọi — dùng chung cho `not-found.tsx` (route không tồn tại, mọi chế độ) và `ChatModeGuard` (Chat bị ẩn, `homeHref` trước đây luôn là `/profile` nên kết quả không đổi).
+   - `routes.home` bị xóa khỏi `routes` (không còn nơi nào dùng); `safeNextPath` đổi `fallback` thành bắt buộc (trước đây mặc định `routes.home`, nay không còn khái niệm "trang chủ" tĩnh).
+2. `login-form.tsx`: bọc lời gọi `/me/features` trong `try/catch`; lỗi → `chatEnabled = false` → về `routes.profile` qua `safeNextPath`, không còn kẹt ở form.
+3. Mục 1 vòng 1 (ghép PR #4) — **chưa làm, vẫn chờ TL báo PR #4 đã vào `develop`** (dự kiến 24/11).
+**Checklist**
+- [x] Mục 1 — 3 lối vào × 2 chế độ, ghi URL cuối (trình duyệt thật, phiên admin):
+
+  | Lối vào | `staff` + mock | `demo` |
+  |---|---|---|
+  | Mở `/` | `/profile` | `/chat` |
+  | Đã đăng nhập, mở `/login` | `/profile` (qua `/` → proxy không còn đi thẳng `/chat`) | `/chat` |
+  | Nút "Về trang chủ" ở trang không tìm thấy (`href` và sau khi bấm) | `/profile` | `/chat` |
+- [x] Mục 2 — giả lập `/me/features` lỗi (ghi đè `XMLHttpRequest` trong console để trả lỗi mạng cho đúng request này, các request khác không đổi) rồi đăng nhập: không kẹt ở form, chuyển thẳng `/profile` (xác nhận qua tab context sau khi đăng nhập xong)
+- [x] AC1–AC6 không hồi quy: `pnpm build`, `pnpm typecheck`, `pnpm lint` đạt sau khi sửa; `demo` giữ nguyên ở cả 3 lối vào (trên); Swagger/`.env.example`/AC5 không đổi code nên không kiểm lại toàn bộ, chỉ xác nhận không file nào trong phạm vi đó bị đụng (`git diff bc16b1a..HEAD` chỉ gồm `routes.ts`, `proxy.ts`, `page.tsx`, `not-found.tsx`, `not-found-content.tsx`, `chat-mode-guard.tsx`, `login-form.tsx`)
+- [ ] Mục 3 (ghép `develop` có PR #4, `isMock=false` cho `OpenAiLlmProvider`, thử `staff`+`openai`) — **chưa làm, chờ TL báo PR #4 đã vào `develop`**
+**Kiểm tra đã chạy** — `pnpm typecheck`, `pnpm lint`, `pnpm build` (cả ba đạt); trình duyệt thật (Claude in Chrome) cho 3 lối vào × 2 chế độ và kịch bản lỗi `/me/features`; chỉ chạy một bộ API (cổng 4001) + web (cổng 3000) tại một thời điểm, tắt ngay sau khi kiểm từng chế độ (máy thiếu bộ nhớ theo lưu ý của TL)
+**Dọn nhánh trước khi nhận task này** (mục 2.1) — không đổi so với vòng 1–2 (đang sửa tiếp trên `feature/release-mode`, không nhận task mới)
 **Trạng thái** — Chờ Review
 
 ## Phản hồi UI
