@@ -1,16 +1,17 @@
 # Ma trận phân quyền
 
-> Trạng thái: **Chờ Review** (TL soạn qua [TL-003](../tasks/TL-003-access-ui-release-audit.md), 15/11/2026). Kiểm tra trên `develop` @ `06a5a83` (code giống bản demo `fbffd5b`), API http://localhost:4000, web http://localhost:3000.
+> Trạng thái: **Đã duyệt** kết quả rà soát; chính sách CS-1…CS-6 **đã chốt** (khách hàng, 15/11/2026 — [mục 4](#4-chính-sách-đã-chốt)). Lập qua [TL-003](../tasks/TL-003-access-ui-release-audit.md).
+> Cột **Loại** dưới đây ghi hiện trạng trên `develop` lúc kiểm tra; hành vi đích theo mục 4 và các task SE. Kiểm tra trên `develop` @ `06a5a83` (code giống bản demo `fbffd5b`), API http://localhost:4000, web http://localhost:3000.
 > Tài khoản kiểm tra: admin seed (`ADMIN`), nhân viên thử NV1 `se001.test@catgpt.local` và NV2 `audit.nv2@catgpt.local` (`USER`). Hai tài khoản thử được khóa lại sau kiểm tra; hệ thống chưa có xóa cứng người dùng.
 
-Ký hiệu cột **Loại**: **XM** = hành vi đã xác minh (lệnh hoặc UI, có kết quả); **KT** = khoảng trống cần sửa (có task); **CS** = chính sách cần khách hàng + CTO chốt (mục 4).
+Ký hiệu cột **Loại**: **XM** = hành vi đã xác minh (lệnh hoặc UI, có kết quả); **KT** = khoảng trống cần sửa (có task); **CS** = chính sách đã chốt ở mục 4, hành vi hiện tại khác chính sách → có task.
 
 ## 1. Nguyên tắc đang áp dụng (đã xác minh trong code)
 
 - Mọi endpoint yêu cầu đăng nhập, trừ `POST /auth/login|refresh|logout` và `GET /health` (`JwtAuthGuard` toàn cục + `@Public()`).
 - Mỗi request đọc lại người dùng và phiên trong DB (`jwt.strategy.ts`): tài khoản bị khóa hoặc phiên bị thu hồi bị chặn **ngay**, vai trò mới có hiệu lực **ngay** (không chờ token hết hạn).
 - Vai trò chỉ có `ADMIN` và `USER`. `RolesGuard` chỉ gắn ở `admin/users` (`@Roles(ADMIN)`).
-- **Quyền quản trị tài khoản tách khỏi quyền đọc nội dung:** dữ liệu Chat lọc theo `userId` của người gọi (`getOwnedOrThrow`), không có ngoại lệ cho `ADMIN` và không có API quản trị nào đọc hội thoại. Hội thoại của người khác luôn trả `404 CONVERSATION_NOT_FOUND` (không lộ việc tồn tại). Tài liệu (Module 3–4) chưa có trên `develop`; khi làm phải theo cùng nguyên tắc (mục 4, CS-1).
+- **Quyền quản trị tài khoản tách khỏi quyền đọc nội dung:** dữ liệu Chat lọc theo `userId` của người gọi (`getOwnedOrThrow`), không có ngoại lệ cho `ADMIN` và không có API quản trị nào đọc hội thoại. Hội thoại của người khác luôn trả `404 CONVERSATION_NOT_FOUND` (không lộ việc tồn tại). Tài liệu (Module 3–4) chưa có trên `develop`; quyền đọc tài liệu sẽ cấp theo **chính sách dữ liệu riêng**, không suy ra từ vai trò `ADMIN` (CS-1).
 - Lớp giao diện (`AdminGuard`, ẩn nhóm "Quản trị" trên thanh bên) chỉ là UX; quyền thật do API kiểm tra.
 
 ## 2. Ma trận vai trò → màn hình → thao tác → dữ liệu → khi thiếu quyền
@@ -19,22 +20,22 @@ Ký hiệu cột **Loại**: **XM** = hành vi đã xác minh (lệnh hoặc UI,
 |---|---|---|---|---|---|---|
 | Chưa đăng nhập | `/login` | Đăng nhập | — | Sai mật khẩu: thông báo "Email hoặc mật khẩu không đúng." | XM | UI ảnh chụp |
 | Chưa đăng nhập | Mọi trang trong app (`/chat`, `/profile`, `/admin/users`) | Mở trực tiếp | Không | UI: chuyển `/login?next=…`. API: `401 AUTH_UNAUTHENTICATED` cho `/me`, `/me/sessions`, `/conversations`, `/admin/users`, `POST /chat/stream` | XM | UI `/chat` → `/login?next=%2Fchat`; curl |
-| Chưa đăng nhập | — | Mở URL ảnh đại diện `/api/v1/files/avatars/<uuid>.png` | **Ảnh đại diện của nhân viên** | **Không bị chặn: `200`** qua cả cổng API và web; cache 7 ngày | **KT** | curl không cookie → 200; sau khi xóa ảnh → 404. Sửa ở [SE-002](../tasks/SE-002-avatar-requires-login.md) |
+| Chưa đăng nhập | — | Mở URL ảnh đại diện `/api/v1/files/avatars/<uuid>.png` | **Ảnh đại diện của nhân viên** | **Không bị chặn: `200`** qua cả cổng API và web; cache 7 ngày. Đích: chỉ chính chủ xem được (CS-4) | **KT** | curl không cookie → 200; sau khi xóa ảnh → 404. Sửa ở [SE-002](../tasks/SE-002-avatar-requires-login.md) |
 | USER | `/chat`, `/chat/<id>` | Gửi, dừng, tạo lại, đổi tên, xóa, tìm hội thoại **của mình** | Hội thoại + tin nhắn của mình | — | XM | SE-001 review vòng 1; trạng thái trống "Chưa có cuộc trò chuyện nào." |
 | USER | `/chat/<id của người khác>` | Xem, đọc tin, đổi tên, xóa, dừng, tạo lại, gửi tiếp vào hội thoại | Không | UI: "Không tìm thấy cuộc trò chuyện". API: cả 7 thao tác → `404 CONVERSATION_NOT_FOUND`; hội thoại NV2 giữ nguyên tiêu đề; danh sách của NV1 không chứa hội thoại NV2 | XM | curl NV1 → hội thoại NV2; UI NV1 mở `/chat/<id admin>` |
 | USER | `/profile` › Thông tin | Sửa họ tên, SĐT, phòng ban; tải/xóa ảnh | Hồ sơ của mình | Gửi `role` hoặc `email` → `400 VALIDATION_FAILED` (không tự nâng quyền, không tự đổi email) | XM | curl `PATCH /me` |
 | USER | `/profile` › Mật khẩu | Đổi mật khẩu (cần mật khẩu hiện tại) | Mật khẩu của mình | — | XM (code) | `change-password.dto.ts` |
 | USER | `/profile` › Phiên đăng nhập | Xem, đăng xuất từng thiết bị / tất cả thiết bị khác | Phiên của mình (thiết bị, IP, thời gian) | Thu hồi phiên của người khác → `404 SESSION_NOT_FOUND`; admin vẫn đăng nhập | XM | curl NV1 `DELETE /me/sessions/<phiên admin>` |
 | USER | `/admin`, `/admin/users` | Mở trực tiếp | Không | UI: "Không có quyền truy cập — Trang này chỉ dành cho quản trị viên."; thanh bên không có nhóm "Quản trị". API: `403 FORBIDDEN` cho xem danh sách, xem chi tiết, tạo, sửa vai trò (kể cả của mình), khóa, đặt lại mật khẩu | XM | UI NV1; curl 6 thao tác |
-| USER | `/documents` | Mở | Trang giữ chỗ "Đang phát triển" | — | XM | UI; đề xuất ẩn ở bản nhân viên ([SE-003](../tasks/SE-003-release-mode-navigation.md)) |
-| ADMIN | `/admin/users` | Xem danh sách, tìm, lọc vai trò/trạng thái | Email, họ tên, SĐT, phòng ban, ảnh, vai trò, trạng thái, lần đăng nhập cuối của **mọi** tài khoản; không có `passwordHash` | — | XM; phạm vi xem SĐT/phòng ban là **CS-4** | curl `GET /admin/users` (danh sách khóa trường) |
-| ADMIN | `/admin/users` | Tạo tài khoản, sửa thông tin (gồm email), đổi vai trò | Tài khoản người khác | Tự đổi vai trò của mình → `400 USER_CANNOT_MODIFY_SELF`; hạ quyền admin cuối cùng → `400 USER_LAST_ADMIN` (code) | XM; đổi email là **CS-3** | curl; `admin-users.service.ts` |
+| USER | `/documents` | Mở | Trang giữ chỗ "Đang phát triển" | — | XM | UI; ẩn ở bản nhân viên (CS-6, [SE-003](../tasks/SE-003-release-mode-navigation.md)) |
+| ADMIN | `/admin/users` | Xem danh sách, tìm, lọc vai trò/trạng thái | Email, họ tên, SĐT, phòng ban, ảnh, vai trò, trạng thái, lần đăng nhập cuối của **mọi** tài khoản; không có `passwordHash`. Đích (CS-4): bỏ SĐT và ảnh khỏi màn quản trị | — | **CS-4** → [SE-002](../tasks/SE-002-avatar-requires-login.md) (ảnh), [SE-006](../tasks/SE-006-account-admin-rules.md) (SĐT) | curl `GET /admin/users` (danh sách khóa trường) |
+| ADMIN | `/admin/users` | Tạo tài khoản, sửa thông tin (gồm email), đổi vai trò | Tài khoản người khác | Tự đổi vai trò của mình → `400 USER_CANNOT_MODIFY_SELF`; hạ quyền admin cuối cùng → `400 USER_LAST_ADMIN` (code); email trùng → `USER_EMAIL_EXISTS` (code). Đổi email chưa có xác nhận, nhật ký, xử lý phiên | XM; đổi email **CS-3** → [SE-006](../tasks/SE-006-account-admin-rules.md) | curl; `admin-users.service.ts` |
 | ADMIN | `/admin/users` | Khóa / mở khóa | Trạng thái tài khoản | Tự khóa mình → `400 USER_CANNOT_MODIFY_SELF`. Khóa có hiệu lực ngay: request kế tiếp của NV2 → `401 AUTH_ACCOUNT_BLOCKED`, refresh → `401` | XM | curl |
 | ADMIN | `/admin/users` | Đổi vai trò USER ↔ ADMIN | Vai trò | Hiệu lực ngay trên phiên đang mở: NV2 `403` → `200` sau khi nâng, `403` lại sau khi hạ | XM | curl |
-| ADMIN | `/admin/users` | Đặt lại mật khẩu | Mật khẩu người khác, thu hồi mọi phiên của họ | **Không chặn** đặt lại cho admin khác hoặc cho chính mình qua trang quản trị (không cần mật khẩu hiện tại) | **CS-2** | `admin-users.service.ts` `resetPassword` (không chạy thử trên admin để giữ phiên demo) |
+| ADMIN | `/admin/users` | Đặt lại mật khẩu | Mật khẩu người khác, thu hồi mọi phiên của họ | **Không chặn** đặt lại cho admin khác hoặc cho chính mình qua trang quản trị (không cần mật khẩu hiện tại). Đích: chặn cả hai | **CS-2** → [SE-006](../tasks/SE-006-account-admin-rules.md) | `admin-users.service.ts` `resetPassword` (không chạy thử trên admin để giữ phiên demo) |
 | ADMIN | `/chat/<id của nhân viên>` | Xem, đọc tin | Không | UI/API như USER: `404 CONVERSATION_NOT_FOUND`; danh sách của admin không chứa hội thoại nhân viên. Một admin vừa được nâng quyền (NV2) cũng chỉ thấy hội thoại của mình | XM | curl admin → hội thoại NV2 |
 | ADMIN | `/profile` | Như USER | Hồ sơ của mình | — | XM | UI |
-| Mọi vai trò | Swagger `/api/v1/docs` | Mở | Danh sách API | Bật mặc định (`SWAGGER_ENABLED=true`), không cần đăng nhập để xem | **KT** (phát hành) | `env.validation.ts`; tắt ở bản nhân viên ([SE-003](../tasks/SE-003-release-mode-navigation.md)) |
+| Mọi vai trò | Swagger `/api/v1/docs` | Mở | Danh sách API | Bật mặc định (`SWAGGER_ENABLED=true`), không cần đăng nhập để xem | **KT** (phát hành) | `env.validation.ts`; kiểm soát theo môi trường ([SE-003](../tasks/SE-003-release-mode-navigation.md)) |
 
 ## 3. Khoảng trống đã xác minh
 
@@ -42,21 +43,23 @@ Ký hiệu cột **Loại**: **XM** = hành vi đã xác minh (lệnh hoặc UI,
 |---|---|---|---|---|
 | KT-1 | Ảnh đại diện phục vụ tĩnh, **không cần đăng nhập** (URL dạng UUID, cache 7 ngày) | Ai có link (kể cả người ngoài công ty nếu link lộ) xem được ảnh nhân viên. Không đoán được URL nên mức thấp; **không ảnh hưởng demo 20/11** | Trung bình | [SE-002](../tasks/SE-002-avatar-requires-login.md) — `Sẵn sàng` |
 | KT-2 | Swagger bật mặc định | Lộ danh sách API ở bản nhân viên | Thấp | [SE-003](../tasks/SE-003-release-mode-navigation.md) |
-| KT-3 | Đăng nhập giới hạn **5 lần/phút/IP** (`@Throttle` ở `auth.controller.ts`) | 500 nhân sự sau cùng một IP công ty (NAT) sẽ bị `429` khi đăng nhập đầu giờ. TL gặp ngay khi kiểm tra với 3 tài khoản | **Chặn thử nội bộ** | Tiêu chí phát hành [R-3](ui-release-standards.md#4-tiêu-chí-chuẩn-bị-cho-500-nhân-sự); task tạo sau khi chốt CS-5 |
+| KT-3 | Đăng nhập giới hạn **5 lần/phút/IP** (`@Throttle` ở `auth.controller.ts`); mọi API khác giới hạn chung **120 request/phút/IP** (`ThrottlerGuard` toàn cục, `app.module.ts`) | 500 nhân sự sau cùng một IP công ty (NAT) sẽ bị `429` khi đăng nhập đầu giờ và cùng chia 120 request/phút khi dùng. TL gặp `429` đăng nhập ngay khi kiểm tra với 3 tài khoản | **Chặn thử nội bộ** | [SE-005](../tasks/SE-005-login-limit-shared-ip.md) kiểm chứng và sửa; tiêu chí [R-3](ui-release-standards.md#4-tiêu-chí-chuẩn-bị-cho-500-nhân-sự) |
 | KT-4 | Giới hạn Chat (20 tin/phút/người) và trạng thái stream lưu trong bộ nhớ một tiến trình API; còn trùng hai lớp (`ChatThrottlerGuard` + `ChatService.assertRateLimit`) | Chạy nhiều instance thì giới hạn và nút Dừng không đúng | Chặn mở rộng | Tiêu chí [R-4](ui-release-standards.md#4-tiêu-chí-chuẩn-bị-cho-500-nhân-sự) |
 
 Không phát hiện lỗi phân quyền chặn demo hoặc cho phép đọc/sửa dữ liệu người khác qua API đã đăng nhập.
 
-## 4. Chính sách cần khách hàng + CTO chốt
+## 4. Chính sách đã chốt
 
-| # | Câu hỏi | Hiện trạng (đã xác minh) | Đề xuất của TL |
+Khách hàng chốt 15/11/2026 (duyệt TL-003). Cột **Phương án / làm rõ** là đề xuất của TL để thực hiện quyết định; TL nghiệm thu theo cột này.
+
+| # | Quyết định | Phương án / làm rõ | Task |
 |---|---|---|---|
-| CS-1 | Quản trị viên có được đọc nội dung Chat và tài liệu của nhân viên không (kiểm toán, điều tra)? | Không đọc được | Giữ **không**. Nếu cần kiểm toán: vai trò riêng (ví dụ `AUDITOR`), chỉ đọc, có nhật ký truy cập |
-| CS-2 | Admin có được đặt lại mật khẩu cho **admin khác** và cho **chính mình** qua trang quản trị? | Được | Chặn cả hai: admin tự đổi qua Hồ sơ › Mật khẩu; đặt lại cho admin khác cần chính sách riêng |
-| CS-3 | Admin có được đổi email đăng nhập của nhân viên? | Được (giao diện Hồ sơ ghi "Liên hệ quản trị viên nếu cần đổi email") | Giữ, ghi nhật ký thay đổi |
-| CS-4 | Ai được xem SĐT, phòng ban, ảnh của người khác? | Chỉ admin xem qua trang quản trị; Hồ sơ ghi "Thông tin hiển thị với đồng nghiệp" nhưng chưa có màn hình đồng nghiệp | Admin xem toàn bộ; nhân viên chỉ thấy của mình cho tới khi có màn hình danh bạ. Sửa câu chữ ở [SE-004](../tasks/SE-004-ui-consistency.md) |
-| CS-5 | Quy mô thử nội bộ: số người đăng nhập cùng lúc, có chung IP không, hạ tầng chạy ở đâu | Chỉ chạy local, một tiến trình API | Xem [tiêu chí 500 nhân sự](ui-release-standards.md#4-tiêu-chí-chuẩn-bị-cho-500-nhân-sự) |
-| CS-6 | Bản nhân viên có hiển thị Chat khi câu trả lời vẫn là văn bản mẫu? | Chat bật cho mọi người | Ẩn Chat ở bản nhân viên cho tới khi có AI thật; bản demo giữ Chat mẫu ([SE-003](../tasks/SE-003-release-mode-navigation.md)) |
+| CS-1 | Admin quản trị tài khoản. Quyền admin **không** tự cấp quyền đọc Chat hoặc tài liệu của nhân viên. Quyền tài liệu cấp theo chính sách dữ liệu riêng | Giữ như hiện tại (đã xác minh). Mọi API nội dung lọc theo người gọi; không có ngoại lệ theo vai trò. Chính sách dữ liệu tài liệu viết khi mở Module 3 | Không cần sửa code; điều kiện chặn merge [workflow 9.2](../project/workflow.md#92-điều-kiện-chặn-merge) điều 2 |
+| CS-2 | Trang quản trị **chặn đặt lại mật khẩu cho chính mình hoặc cho admin khác**. Giữ luồng tự đổi mật khẩu trong Hồ sơ | API `POST /admin/users/:id/reset-password` trả `400` (mã mới, ví dụ `USER_CANNOT_RESET_ADMIN`) khi đích là chính mình hoặc có vai trò `ADMIN`; UI ẩn mục "Đặt lại mật khẩu" ở các dòng đó. **Khôi phục tài khoản admin** (bắt buộc có trước thử nội bộ, R-10): (1) luôn có **ít nhất 2 admin hoạt động**; (2) admin quên mật khẩu → admin còn lại **hạ quyền** người đó xuống `USER`, đặt lại mật khẩu, rồi nâng lại `ADMIN`, cả ba bước ghi nhật ký; (3) mất hết admin → người vận hành có quyền máy chủ chạy lệnh `pnpm --filter @cat-gpt/api admin:recover <email>` (đặt mật khẩu tạm, thu hồi mọi phiên, ghi nhật ký), không mở qua web | [SE-006](../tasks/SE-006-account-admin-rules.md) |
+| CS-3 | Admin **được** đổi email đăng nhập của nhân viên, có **xác nhận**, **kiểm tra email trùng** và **nhật ký thay đổi** | Hộp thoại xác nhận nêu email cũ → mới; trùng → `409`/`USER_EMAIL_EXISTS` (đã có ở DB, giữ); nhật ký ghi người đổi, người bị đổi, giá trị cũ/mới, thời điểm. **Phiên đang hoạt động:** đổi email → **thu hồi mọi phiên** của nhân viên đó (request kế tiếp `401`, đăng nhập lại bằng email mới); lý do: email là định danh đăng nhập, tránh phiên cũ tồn tại sau khi chuyển giao tài khoản | [SE-006](../tasks/SE-006-account-admin-rules.md) |
+| CS-4 | Nhân viên **chỉ xem hồ sơ của mình**. Admin chỉ xem trường cần cho quản trị tài khoản. **SĐT và ảnh** chỉ hiển thị trong màn quản trị khi có nghiệp vụ cụ thể | Hiện chưa có nghiệp vụ → màn quản trị và API `admin/users` **bỏ SĐT và ảnh** (giữ email, họ tên, phòng ban, vai trò, trạng thái, lần đăng nhập cuối). File ảnh đại diện chỉ **chính chủ** mở được | [SE-002](../tasks/SE-002-avatar-requires-login.md) (ảnh), [SE-006](../tasks/SE-006-account-admin-rules.md) (SĐT), [SE-004](../tasks/SE-004-ui-consistency.md) (câu chữ Hồ sơ) |
+| CS-5 | Quy mô thử nội bộ 500 nhân sự | Ngưỡng ở [tiêu chí R-1…R-10](ui-release-standards.md#4-tiêu-chí-chuẩn-bị-cho-500-nhân-sự); hạ tầng còn chờ (chưa chốt nơi chạy) | [SE-005](../tasks/SE-005-login-limit-shared-ip.md) (đăng nhập chung IP) |
+| CS-6 | Bản nhân viên **ẩn Chat** khi còn phản hồi mẫu và ẩn tính năng chưa sẵn sàng; **Swagger kiểm soát theo môi trường**; bản demo local giữ Chat mẫu | Chế độ `staff`: ẩn Chat, Tài liệu; Swagger theo `SWAGGER_ENABLED` của từng môi trường (mặc định tắt ở `staff`) | [SE-003](../tasks/SE-003-release-mode-navigation.md) |
 
 ## 5. Cách kiểm tra lại
 
