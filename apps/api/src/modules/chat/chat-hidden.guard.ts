@@ -4,9 +4,14 @@ import { ReleaseMode } from '../../config/env.validation.js';
 import { AppException } from '../../common/exceptions/app.exception.js';
 import { LlmProvider } from '../llm/llm.provider.js';
 
+/** Bản `staff` ẩn Chat khi còn dùng LLM mẫu (CS-6) — nguồn quyết định duy nhất, dùng lại ở `/me/features`. */
+export function isChatHidden(config: AppConfigService, llm: LlmProvider): boolean {
+  return config.releaseMode === ReleaseMode.Staff && llm.isMock;
+}
+
 /**
- * Bản `staff` ẩn Chat khi còn dùng LLM mẫu (CS-6): trả 404 như route không tồn tại,
- * giống hành vi "không tìm thấy" dùng cho hội thoại của người khác.
+ * Trả 404 như route không tồn tại khi Chat bị ẩn, giống hành vi "không tìm thấy"
+ * dùng cho hội thoại của người khác.
  */
 @Injectable()
 export class ChatHiddenGuard implements CanActivate {
@@ -16,7 +21,7 @@ export class ChatHiddenGuard implements CanActivate {
   ) {}
 
   canActivate(): boolean {
-    if (this.config.releaseMode === ReleaseMode.Staff && this.llm.isMock) {
+    if (isChatHidden(this.config, this.llm)) {
       throw AppException.notFound();
     }
     return true;
