@@ -67,7 +67,7 @@ Thiếu P2 thì Chat vẫn biên dịch được nhưng bị đóng khung trong 
 |---|---|---|---|
 | G1 | [4.6](../design/module-2-chat.md#46-giới-hạn-tần-suất): 20 tin/phút **theo người dùng** cho 2 endpoint SSE; [mục 8](../design/module-2-chat.md#8-checklist-nghiệm-thu) dòng 8 | **Chưa có.** Chỉ có giới hạn chung 120 request/phút/IP (`app.module.ts:25`); `chat.controller.ts` không có `@Throttle` | Làm trong SE-001 (ước lượng 0,5 ngày) — cần chốt Q3 |
 | G2 | [4.5](../design/module-2-chat.md#45-đầu-chờ-llm): `LLM_PROVIDER=mock` chọn provider | Chưa có biến này, `llm.module.ts` cố định `MockLlmProvider` | Không làm ở SE-001; để cho task provider (nếu có) |
-| G3 | [5.2](../design/module-2-chat.md#52-cấu-trúc-appswebsrcfeatureschat): tên file component | Tên file thực tế khác (`chat-stream-provider.tsx`, `conversation-view.tsx`, …) | Chấp nhận; SE-001 cập nhật tài liệu theo code |
+| G3 | [5.2](../design/module-2-chat.md#52-cấu-trúc-appswebsrcfeatureschat--theo-tên-file-thực-tế-trên-develop): tên file component | Tên file thực tế khác (`chat-stream-provider.tsx`, `conversation-view.tsx`, …) | Chấp nhận; SE-001 cập nhật tài liệu theo code |
 | G4 | [Mục 3](../design/module-2-chat.md#3-câu-hỏi-cần-sinh-viên-xác-nhận): 11 đề xuất mặc định "chờ xác nhận" | Preview đã làm theo các đề xuất mặc định | Cần khách hàng xác nhận để làm nguồn nghiệm thu (Q3) |
 
 ### 6. Công thức tích hợp đã chạy thử

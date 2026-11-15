@@ -2,6 +2,37 @@
 
 Theo mốc của [plan.md](../project/plan.md#2-mốc). TL cập nhật cuối mỗi ngày làm việc và ngay khi phát hiện nguy cơ trễ mốc; mục mới nhất ở trên, giữ các mục cũ ([workflow mục 11](../project/workflow.md#11-theo-dõi-tiến-độ)).
 
+## Cập nhật 15/11/2026 (Chat lên `develop`)
+
+Cơ sở: `origin/develop` @ `fbffd5b` (merge PR #2). SE-001 bàn giao và đạt review trong ngày; Chat đã có trên `develop`, nội dung trả lời vẫn là văn bản mẫu.
+
+### Theo mốc
+
+| Mốc | Hạn | Tình trạng | Ai giữ bước tiếp theo |
+|---|---|---|---|
+| M0 Tài liệu + TL-001 | 15/11 | Đạt 15/11 | — |
+| M1 Chốt phạm vi | 16/11 | Đạt 15/11 | — |
+| M2 SE-001 bàn giao | 18/11 | Đạt 15/11 — sớm 3 ngày | — |
+| M3 Chat lên `develop` + gửi link và checklist | 19/11 | Đạt 15/11 — sớm 4 ngày | — |
+| M4 Demo | 20/11 (giờ: Chờ chốt) | Đúng kế hoạch | **Khách hàng** (thử checklist, chốt giờ D1 và nơi thử D3) |
+
+### Thử được ngay
+- **Trên `develop` @ `fbffd5b`:** đăng nhập, hồ sơ, quản trị người dùng và **Trò chuyện** (http://localhost:3000/chat sau khi chạy theo [README](../../README.md#chạy-dự-án)). Checklist thao tác Chat: [SE-001](../tasks/SE-001-chat-integration.md#checklist-nghiệm-thu) (phần "Checklist UI dự kiến cho khách hàng").
+
+### Task
+
+| Task | Trạng thái | Tiến độ |
+|---|---|---|
+| [TL-001](../tasks/TL-001-chat-integration-scope.md) | Done 15/11 | Đúng hạn |
+| [SE-001](../tasks/SE-001-chat-integration.md) | Done 15/11 | Sớm (hạn hoàn tất 19/11) |
+| [TL-002](../tasks/TL-002-chat-demo-acceptance.md) | Chờ Review (khách hàng thử) | Đúng kế hoạch |
+
+Không còn nguy cơ trễ mốc 20/11 từ phía code. Việc còn lại trước demo: khách hàng thử checklist; TL chạy lại checklist trên máy demo.
+
+### Cần khách hàng / CTO chốt
+1. **D1 — Giờ demo** ngày 20/11.
+2. **D3 — Thử bản Chat ở đâu?** Hiện dùng mặc định (chạy trên máy, mở http://localhost:3000). Cần link mở được từ xa thì báo trước 18/11 (thêm ~1 ngày triển khai, cần tài khoản hosting).
+
 ## Cập nhật 15/11/2026 (sau quyết định của khách hàng)
 
 Cơ sở: `origin/develop` @ `6f9d3e4`. Khách hàng chốt: duyệt TL-001 và Q3; demo đầu tiên dùng phản hồi mẫu; giữ Module 3–4 ở preview; mốc demo dự kiến **20/11/2026**, giờ chốt sau ([plan mục 5](../project/plan.md#5-quyết-định-còn-mở)).

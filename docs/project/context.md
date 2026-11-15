@@ -1,6 +1,6 @@
 # CAT GPT — Context dự án
 
-> Đối chiếu với `origin/develop` @ `a860437` (15/11/2026). Khi `develop` thay đổi, cập nhật mục 3 và ghi lại SHA.
+> Đối chiếu với `origin/develop` @ `fbffd5b` (15/11/2026, sau merge PR #2). Khi `develop` thay đổi, cập nhật mục 3 và ghi lại SHA.
 > Hướng dẫn cài đặt và chạy local: [README.md](../../README.md#chạy-dự-án).
 
 ## 1. Mục tiêu đồ án
@@ -26,12 +26,12 @@ Cột **Code trên `develop`** là kết quả kiểm tra trực tiếp mã ngu�
 | Module | Code trên `develop` (đã kiểm tra) | Tài liệu ghi | Tài liệu thiết kế |
 |---|---|---|---|
 | 1 | ✅ Đã tích hợp qua PR #1 (merge 27/10/2026). API có `auth`, `sessions`, `users`, `me`, `admin-users`, `storage`, `health`; web có `/login`, `/profile`, `/admin/users` | `module-1-auth.md`: "đã tích hợp vào `develop` qua PR #1". `README.md`: "Hoàn thành" | [module-1-auth.md](../design/module-1-auth.md) |
-| 2 | ⏳ Chưa có. `/chat` chỉ là trang `ComingSoon`; API chưa có module `chat`/`llm` | `module-2-chat.md`: "đã lập kế hoạch, chờ xác nhận". `README.md`: "Giao diện giữ chỗ" | [module-2-chat.md](../design/module-2-chat.md) |
+| 2 | ✅ Đã tích hợp qua PR #2 ([SE-001](../tasks/SE-001-chat-integration.md), merge 15/11/2026, `fbffd5b`). API có `chat` (SSE `POST /chat/stream`, hội thoại, tạo lại, dừng, giới hạn 20 tin/phút/người) và `llm` (chỉ `MockLlmProvider` — phản hồi giả lập); web có `/chat`, `/chat/[id]` | `module-2-chat.md`: "Đã tích hợp vào `develop`… nội dung giả lập". `README.md`: "Hoàn thành (phản hồi giả lập)" | [module-2-chat.md](../design/module-2-chat.md) |
 | 3 | ⏳ Chưa có. `/documents` chỉ là trang `ComingSoon`; storage mới có `LocalStorageProvider` | "Chưa bắt đầu (đã có trang giữ chỗ)" | — |
 | 4 | Chưa có | "Chưa bắt đầu" | — |
 | 5 | Chưa có | "Ngoài phạm vi cam kết" | — |
 
-**Ngoài `develop`:** nhánh `origin/preview/module-2-4-demo` có code Module 2 (API SSE + mock LLM, giao diện chat), giao diện demo Module 3–4 với dữ liệu giả và tài liệu `docs/ket-qua-tam-thoi.md`. Nhánh này **chưa được tích hợp**, nên chưa tính vào trạng thái ở trên.
+**Ngoài `develop`:** nhánh `origin/preview/module-2-4-demo` còn giao diện demo Module 3–4 với dữ liệu giả và tài liệu `docs/ket-qua-tam-thoi.md` — giữ ở preview theo quyết định khách hàng 15/11/2026, không tính vào trạng thái ở trên. Phần Module 2 của nhánh này đã lên `develop` qua SE-001.
 
 ## 4. Bản đồ mã nguồn
 

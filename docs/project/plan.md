@@ -1,6 +1,6 @@
 # Kế hoạch demo Chat
 
-Trạng thái: Đã chốt phạm vi và mốc dự kiến (khách hàng, 15/11/2026) · Còn mở: giờ demo (D1), môi trường để khách hàng thử (D3)
+Trạng thái: Đã chốt phạm vi và mốc dự kiến (khách hàng, 15/11/2026) · Chat đã lên `develop` @ `fbffd5b` (15/11) · Còn mở: giờ demo (D1), môi trường để khách hàng thử (D3)
 Người lập: TL · Lập: 15/11/2026 · Cơ sở: `origin/develop` @ `6f9d3e4`, `origin/preview/module-2-4-demo` @ `b2a4b22`
 Vai trò: **khách hàng và CTO chốt phạm vi và deadline**; TL ghi lại, giao task và điều phối ([workflow mục 1](workflow.md#1-vai-trò)). Tiến độ hằng ngày: [báo cáo tiến độ demo](../reports/demo-progress.md).
 
@@ -22,8 +22,8 @@ Mốc demo dự kiến **thứ Sáu 20/11/2026** (giờ chốt sau). Hạn tính
 |---|---|---|---|---|
 | M0 | Tài liệu quy trình, audit, plan lên `develop`; TL-001 bàn giao | Commit có trên `origin/develop` | 15/11/2026 | Đạt 15/11 (`6f9d3e4`) |
 | M1 | Chốt phạm vi | Duyệt [TL-001](../tasks/TL-001-chat-integration-scope.md), chốt Q3, D2 → SE-001 `Sẵn sàng` | 16/11/2026 | Đạt 15/11 |
-| M2 | Senior Dev bàn giao SE-001 | PR nhắm `develop`, checklist đủ, `Chờ Review` | **18/11/2026** (dự kiến 17/11) | Chưa đến hạn |
-| M3 | Chat có trên `develop` | [TL-002](../tasks/TL-002-chat-demo-acceptance.md): review đạt, merge, xác minh; gửi khách hàng link bản chạy + checklist UI | **19/11/2026** | Chưa đến hạn |
+| M2 | Senior Dev bàn giao SE-001 | PR nhắm `develop`, checklist đủ, `Chờ Review` | **18/11/2026** (dự kiến 17/11) | Đạt 15/11 — sớm 3 ngày (PR #2, `b01be16`) |
+| M3 | Chat có trên `develop` | [TL-002](../tasks/TL-002-chat-demo-acceptance.md): review đạt, merge, xác minh; gửi khách hàng link bản chạy + checklist UI | **19/11/2026** | Đạt 15/11 — sớm 4 ngày (merge `fbffd5b`; đã gửi link + checklist) |
 | M4 | Demo | Khách hàng đã thử checklist UI; không có tiêu chí chưa đạt | **20/11/2026** (dự kiến), giờ: Chờ chốt | Chưa đến hạn |
 
 Dự phòng: bàn giao dự kiến 17/11, sớm hơn hạn M2 một ngày, đủ cho **một** vòng `Cần sửa` (review và sửa trong 18/11, merge 19/11). Vòng sửa thứ hai hoặc bàn giao sau 17/11 kèm `Cần sửa` → `Có nguy cơ trễ` mốc 20/11; TL báo ngay khi xảy ra.
@@ -33,8 +33,8 @@ Dự phòng: bàn giao dự kiến 17/11, sớm hơn hạn M2 một ngày, đủ
 | Thứ tự | Task | Người phụ trách | Ước lượng | Phụ thuộc | Hạn bàn giao review / hoàn tất | Trạng thái |
 |---|---|---|---|---|---|---|
 | 1 | [TL-001 — Khoanh phạm vi tích hợp Chat](../tasks/TL-001-chat-integration-scope.md) | TL | 0,5 ngày | Không | 15/11 / — | Done 15/11 |
-| 2 | [SE-001 — Tích hợp luồng Chat từ preview](../tasks/SE-001-chat-integration.md) | Senior Dev | 2 ngày (16–17/11) | Không còn phụ thuộc chặn | 18/11 / 19/11 | **Sẵn sàng** |
-| 3 | [TL-002 — Nghiệm thu bản demo Chat](../tasks/TL-002-chat-demo-acceptance.md) | TL | 0,5 ngày/vòng | SE-001 `Chờ Review` (chặn) | 19/11 / 20/11 | Nháp |
+| 2 | [SE-001 — Tích hợp luồng Chat từ preview](../tasks/SE-001-chat-integration.md) | Senior Dev | 2 ngày (16–17/11) | Không còn phụ thuộc chặn | 18/11 / 19/11 | Done 15/11 |
+| 3 | [TL-002 — Nghiệm thu bản demo Chat](../tasks/TL-002-chat-demo-acceptance.md) | TL | 0,5 ngày/vòng | SE-001 (đã Done) | 19/11 / 20/11 | **Chờ Review** (khách hàng thử) |
 
 Đường găng: SE-001 → TL-002 → demo 20/11. Không có task AI thật trong mốc này (D2). Nếu sau này cần AI thật, TL tạo task provider riêng cho mốc sau (ước lượng 2–3 ngày, cần chọn nhà cung cấp — audit Q4).
 
@@ -61,6 +61,7 @@ Câu hỏi từ audit: Q1 (tích hợp Chat với nội dung giả lập trướ
 
 - 15/11: TL-001 `Done`; SE-001 chuyển `Sẵn sàng`, Senior Dev nhận theo [workflow mục 3.1](workflow.md#31-phân-công-và-nhận-task) ở phiên kế tiếp.
 - Khi SE-001 sang `Chờ Review`: TL review trong ngày (TL-002); đạt → merge, xác minh trên `develop`, gửi khách hàng link bản chạy và checklist UI ngắn.
+- 15/11: SE-001 bàn giao và review đạt trong ngày; merge PR #2 → `develop` @ `fbffd5b`; SE-001 `Done`; TL-002 gửi khách hàng link + checklist, `Chờ Review`. Trước demo: chạy lại checklist trên máy demo.
 - Báo cáo tiến độ cập nhật cuối mỗi ngày làm việc và ngay khi có nguy cơ trễ mốc ([workflow mục 11](workflow.md#11-theo-dõi-tiến-độ)).
 
 ## 7. Lịch sử review
