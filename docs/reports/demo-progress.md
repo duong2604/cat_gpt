@@ -2,6 +2,25 @@
 
 Theo mốc của [plan.md](../project/plan.md#2-mốc). TL cập nhật cuối mỗi ngày làm việc và ngay khi phát hiện nguy cơ trễ mốc; mục mới nhất ở trên, giữ các mục cũ ([workflow mục 11](../project/workflow.md#11-theo-dõi-tiến-độ)).
 
+## Cập nhật 15/11/2026 (chốt ngày demo và nơi chạy)
+
+Cơ sở: `origin/develop` @ `8666859` (code Chat như `fbffd5b`; sau đó chỉ có commit tài liệu). Khách hàng chốt:
+- **D1:** demo **20/11/2026**; giờ cụ thể khách hàng cập nhật sau.
+- **D3:** khách hàng chạy sẵn CAT GPT trên **máy trình chiếu**, mở Chat qua http://localhost:3000. Không cần task triển khai.
+- TL-002 giữ `Chờ Review` đến khi khách hàng thử UI.
+
+| Mốc | Hạn | Tình trạng | Ai giữ bước tiếp theo |
+|---|---|---|---|
+| M0–M3 | 15/11–19/11 | Đạt 15/11 | — |
+| M4 Demo | **20/11** (giờ: Chờ chốt) | Đúng kế hoạch | Khách hàng (thử UI, báo giờ); TL (gửi SHA bản chạy + checklist trước demo) |
+
+| Task | Trạng thái | Tiến độ |
+|---|---|---|
+| [SE-001](../tasks/SE-001-chat-integration.md) | Done 15/11 | Sớm |
+| [TL-002](../tasks/TL-002-chat-demo-acceptance.md) | Chờ Review (đến khi khách hàng thử UI) | Đúng kế hoạch |
+
+Cần khách hàng chốt: **giờ demo** ngày 20/11.
+
 ## Cập nhật 15/11/2026 (Chat lên `develop`)
 
 Cơ sở: `origin/develop` @ `fbffd5b` (merge PR #2). SE-001 bàn giao và đạt review trong ngày; Chat đã có trên `develop`, nội dung trả lời vẫn là văn bản mẫu.

@@ -1,6 +1,6 @@
 # Kế hoạch demo Chat
 
-Trạng thái: Đã chốt phạm vi và mốc dự kiến (khách hàng, 15/11/2026) · Chat đã lên `develop` @ `fbffd5b` (15/11) · Còn mở: giờ demo (D1), môi trường để khách hàng thử (D3)
+Trạng thái: Đã chốt phạm vi, ngày demo **20/11/2026** và nơi chạy demo (khách hàng, 15/11/2026) · Chat đã lên `develop` @ `fbffd5b` (15/11) · Còn mở: giờ demo (D1)
 Người lập: TL · Lập: 15/11/2026 · Cơ sở: `origin/develop` @ `6f9d3e4`, `origin/preview/module-2-4-demo` @ `b2a4b22`
 Vai trò: **khách hàng và CTO chốt phạm vi và deadline**; TL ghi lại, giao task và điều phối ([workflow mục 1](workflow.md#1-vai-trò)). Tiến độ hằng ngày: [báo cáo tiến độ demo](../reports/demo-progress.md).
 
@@ -24,7 +24,7 @@ Mốc demo dự kiến **thứ Sáu 20/11/2026** (giờ chốt sau). Hạn tính
 | M1 | Chốt phạm vi | Duyệt [TL-001](../tasks/TL-001-chat-integration-scope.md), chốt Q3, D2 → SE-001 `Sẵn sàng` | 16/11/2026 | Đạt 15/11 |
 | M2 | Senior Dev bàn giao SE-001 | PR nhắm `develop`, checklist đủ, `Chờ Review` | **18/11/2026** (dự kiến 17/11) | Đạt 15/11 — sớm 3 ngày (PR #2, `b01be16`) |
 | M3 | Chat có trên `develop` | [TL-002](../tasks/TL-002-chat-demo-acceptance.md): review đạt, merge, xác minh; gửi khách hàng link bản chạy + checklist UI | **19/11/2026** | Đạt 15/11 — sớm 4 ngày (merge `fbffd5b`; đã gửi link + checklist) |
-| M4 | Demo | Khách hàng đã thử checklist UI; không có tiêu chí chưa đạt | **20/11/2026** (dự kiến), giờ: Chờ chốt | Chưa đến hạn |
+| M4 | Demo | Khách hàng đã thử checklist UI; không có tiêu chí chưa đạt | **20/11/2026** (đã chốt), giờ: Chờ chốt | Chưa đến hạn |
 
 Dự phòng: bàn giao dự kiến 17/11, sớm hơn hạn M2 một ngày, đủ cho **một** vòng `Cần sửa` (review và sửa trong 18/11, merge 19/11). Vòng sửa thứ hai hoặc bàn giao sau 17/11 kèm `Cần sửa` → `Có nguy cơ trễ` mốc 20/11; TL báo ngay khi xảy ra.
 
@@ -43,17 +43,17 @@ Dự phòng: bàn giao dự kiến 17/11, sớm hơn hạn M2 một ngày, đủ
 | Rủi ro | Ảnh hưởng | Phương án |
 |---|---|---|
 | SE-001 cần hơn một vòng sửa | Trễ M3, sát mốc demo | TL review trong ngày nhận bàn giao; báo nguy cơ trễ ngay trong báo cáo tiến độ |
-| Chưa có môi trường chung (D3) | Khách hàng chỉ thử được trên máy đã cài dự án | Chốt D3 trước 18/11; mặc định chạy local |
-| Thiết bị demo khác máy kiểm thử | Lỗi môi trường trong buổi demo | Chạy lại toàn bộ checklist UI trên máy demo trước buổi demo (TL-002 AC3) |
+| Chưa có môi trường chung (D3) | Khách hàng chỉ thử được trên máy đã cài dự án | Đã chốt D3: khách hàng chạy sẵn trên máy trình chiếu, mở qua localhost; không cần triển khai |
+| Thiết bị demo khác máy kiểm thử | Lỗi môi trường trong buổi demo | Trước buổi demo TL gửi SHA bản chạy + checklist ngắn; khách hàng chạy checklist trên máy trình chiếu (TL-002) |
 
 ## 5. Quyết định còn mở
 
 | # | Câu hỏi | Ảnh hưởng | Đề xuất của TL | Chốt (khách hàng + CTO) |
 |---|---|---|---|---|
-| **D1** | **Ngày giờ demo?** | Hạn M2–M4 | — | **Ngày dự kiến 20/11/2026** (khách hàng, 15/11); **giờ: Chờ chốt** |
+| **D1** | **Ngày giờ demo?** | Hạn M2–M4 | — | **Ngày: 20/11/2026 — đã chốt** (khách hàng, 15/11); **giờ: Chờ chốt** (khách hàng cập nhật sau) |
 | **D2** | **Demo có bắt buộc AI trả lời thật không?** | Có → thêm task provider | Không bắt buộc | **Không** — demo đầu tiên dùng phản hồi mẫu (khách hàng, 15/11) |
 | Q3 | Xác nhận đề xuất mặc định mục 3 Module 2 và đưa giới hạn 20 tin/phút/người vào SE-001 | Điều kiện SE-001 `Sẵn sàng` | Đồng ý cả hai | **Đồng ý** (khách hàng, 15/11) |
-| **D3** | **Khách hàng thử bản Chat ở đâu?** Hiện chưa có môi trường chung, chỉ chạy được local | "Link bản chạy" ở TL-002 | Mặc định: chạy `develop` trên máy khách hàng hoặc máy demo, mở http://localhost:3000 (TL gửi kèm link commit và hướng dẫn chạy). Nếu cần một đường link mở được từ xa → thêm task triển khai riêng (khoảng 1 ngày, cần tài khoản hosting), làm song song với SE-001 | Chờ chốt, trước 18/11 |
+| **D3** | **Khách hàng thử bản Chat ở đâu?** Hiện chưa có môi trường chung, chỉ chạy được local | "Link bản chạy" ở TL-002 | Mặc định: chạy `develop` trên máy khách hàng hoặc máy demo, mở http://localhost:3000 (TL gửi kèm link commit và hướng dẫn chạy). Nếu cần một đường link mở được từ xa → thêm task triển khai riêng (khoảng 1 ngày, cần tài khoản hosting), làm song song với SE-001 | **Chốt: chạy local trên máy trình chiếu** — khách hàng chạy sẵn CAT GPT, mở Chat qua http://localhost:3000; không có task triển khai (khách hàng, 15/11) |
 
 Câu hỏi từ audit: Q1 (tích hợp Chat với nội dung giả lập trước) — **đã chốt có** cùng D2; Q2 (giữ demo Module 3–4 ở preview) — **đã chốt có**; Q4 (chọn LLM) — chưa cần cho mốc này. Xem [audit mục 1](preview-progress-review.md#1-kết-luận-và-quyết-định-cần-chốt).
 
@@ -61,7 +61,8 @@ Câu hỏi từ audit: Q1 (tích hợp Chat với nội dung giả lập trướ
 
 - 15/11: TL-001 `Done`; SE-001 chuyển `Sẵn sàng`, Senior Dev nhận theo [workflow mục 3.1](workflow.md#31-phân-công-và-nhận-task) ở phiên kế tiếp.
 - Khi SE-001 sang `Chờ Review`: TL review trong ngày (TL-002); đạt → merge, xác minh trên `develop`, gửi khách hàng link bản chạy và checklist UI ngắn.
-- 15/11: SE-001 bàn giao và review đạt trong ngày; merge PR #2 → `develop` @ `fbffd5b`; SE-001 `Done`; TL-002 gửi khách hàng link + checklist, `Chờ Review`. Trước demo: chạy lại checklist trên máy demo.
+- 15/11: SE-001 bàn giao và review đạt trong ngày; merge PR #2 → `develop` @ `fbffd5b`; SE-001 `Done`; TL-002 gửi khách hàng link + checklist, `Chờ Review`.
+- 15/11: khách hàng chốt ngày demo 20/11 (giờ cập nhật sau) và D3 (máy trình chiếu, localhost). TL-002 giữ `Chờ Review` đến khi khách hàng thử UI. Trước buổi demo: TL gửi SHA bản chạy + checklist ngắn (Gửi → phản hồi mẫu hiện dần → Dừng → Tạo lại → mở lại hội thoại cũ).
 - Báo cáo tiến độ cập nhật cuối mỗi ngày làm việc và ngay khi có nguy cơ trễ mốc ([workflow mục 11](workflow.md#11-theo-dõi-tiến-độ)).
 
 ## 7. Lịch sử review

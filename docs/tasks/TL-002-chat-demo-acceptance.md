@@ -37,7 +37,7 @@ Xác nhận bản Chat tích hợp vào `develop` đạt từng tiêu chí đã 
 D3 ở [plan](../project/plan.md#5-quyết-định-còn-mở) (khách hàng thử ở đâu) quyết định dạng "link bản chạy" trong AC4; không đổi các tiêu chí khác.
 
 ## Kết quả review
-Đã gửi khách hàng link bản chạy và checklist UI ngày 15/11/2026 (D3 chưa chốt → dùng mặc định: chạy `develop` trên máy, mở http://localhost:3000). Chờ khách hàng thử; phản hồi ghi ở mục "Phản hồi UI". `Done` khi khách hàng xác nhận hoặc khi đã chạy lại checklist trên máy demo trước buổi demo (rủi ro "thiết bị demo khác máy kiểm thử" ở [plan mục 4](../project/plan.md#4-rủi-ro)).
+Đã gửi khách hàng link bản chạy và checklist UI ngày 15/11/2026 (D3 chưa chốt → dùng mặc định: chạy `develop` trên máy, mở http://localhost:3000). Chờ khách hàng thử; phản hồi ghi ở mục "Phản hồi UI". Khách hàng chốt 15/11/2026: D3 = chạy sẵn trên máy trình chiếu, mở qua localhost; **giữ `Chờ Review` đến khi khách hàng thử UI**, chỉ chuyển `Done` sau khi khách hàng xác nhận. Trước buổi demo TL gửi SHA bản chạy + checklist ngắn ([plan mục 4](../project/plan.md#4-rủi-ro)).
 
 ## Lịch sử review
 
