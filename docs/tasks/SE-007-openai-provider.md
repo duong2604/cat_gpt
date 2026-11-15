@@ -4,7 +4,7 @@ Trạng thái: Chờ Review
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 1 ngày làm việc
 Phụ thuộc: Không. **Không đổi bản demo 20/11** (máy trình chiếu chạy `34b465d`; `LLM_PROVIDER` mặc định `mock`). Merge theo quyết định của TL ([workflow 9.2](../project/workflow.md#92-điều-kiện-chặn-merge) điều 5)
 Hạn bàn giao review: Chờ chốt · Hạn hoàn tất: Chờ chốt
-Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review 15/11/2026 · hoàn tất —
+Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review 15/11/2026 (vòng 1, vòng 2) · hoàn tất —
 Chốt: 15/11/2026 — khách hàng giao trực tiếp (yêu cầu "Triển khai task tích hợp OpenAI cho CAT GPT"); task lập theo yêu cầu đó, TL rà phạm vi khi nghiệm thu
 SHA cơ sở: `origin/develop` @ `796367c`
 PR: nhánh `feature/openai-provider` → `develop` (link và SHA đầu PR ghi trong bàn giao gửi TL)
@@ -13,6 +13,7 @@ PR: nhánh `feature/openai-provider` → `develop` (link và SHA đầu PR ghi t
 Chat trả lời bằng OpenAI thật khi bật cấu hình, giữ nguyên trải nghiệm Gửi → phản hồi hiện dần → Dừng → Tạo lại → mở lại lịch sử; demo và test local vẫn dùng phản hồi mẫu.
 
 ## Phạm vi
+- **Bổ sung vòng 2 (khách hàng chốt O1, 15/11/2026):** đầu ra mặc định **1.000 token** (cấu hình được); chạm giới hạn → giữ phần đã sinh, trạng thái `TRUNCATED`, nhãn "Câu trả lời bị cắt do đạt giới hạn độ dài" — cả khi đang xem và sau khi mở lại; kiểm tra riêng 3 trường hợp hoàn tất / chạm giới hạn / Dừng; kiểm tra hủy ở mức kết nối tới provider.
 - **Làm:** OpenAI provider bằng SDK `openai` chính thức, Responses API streaming, `store: false`; cấu hình `LLM_PROVIDER`, `LLM_MODEL`, `OPENAI_API_KEY`, `LLM_MAX_OUTPUT_TOKENS` (+ `LLM_HISTORY_TOKEN_BUDGET`); validate thiếu key; Dừng hủy request tới provider; giới hạn lịch sử theo ngân sách token; log số token, không log nội dung/key; test với provider giả lập; smoke test thật.
 - **Không làm:** đa phương thức, công cụ (tools), lưu hội thoại phía OpenAI, đổi giao diện, hạn mức theo người dùng (R-6).
 
@@ -30,15 +31,19 @@ Chat trả lời bằng OpenAI thật khi bật cấu hình, giữ nguyên trả
 | AC6 | Lịch sử gửi lại theo ngân sách token; đầu ra mặc định 500 token; log `input_tokens`/`output_tokens`; không log nội dung, key | Unit test + log |
 | AC7 | Quyền hội thoại theo tài khoản giữ nguyên | Script user B |
 | AC8 | `pnpm build`, `pnpm typecheck`, `pnpm lint`, `pnpm --filter @cat-gpt/api test` đạt | Lệnh |
+| AC9 | (O1) Đầu ra mặc định 1.000 token, đổi được qua `LLM_MAX_OUTPUT_TOKENS`; `.env.example` chỉ có giá trị mẫu, `mock` mặc định | Unit test + đọc file |
+| AC10 | Ba trường hợp kết thúc tách biệt: hoàn tất → `COMPLETED`; chạm giới hạn → `TRUNCATED` + giữ phần đã sinh + nhãn, còn sau khi mở lại; bấm Dừng → `STOPPED` | Script (mock + OpenAI) + UI |
+| AC11 | Kiểm tra ở kết nối provider: hủy `signal` → kết nối HTTP tới provider bị đóng ngay | Unit test SDK thật + server SSE cục bộ |
 
 ## Quyết định còn mở
 | # | Câu hỏi | Đề xuất | Chốt |
 |---|---|---|---|
-| O1 | Câu trả lời chạm 500 token bị cắt giữa câu nhưng lưu `COMPLETED`, UI không báo. Có tăng `LLM_MAX_OUTPUT_TOKENS` hoặc thêm nhãn "Câu trả lời bị cắt"? | Tăng mặc định lên 1.000–1.500 cho Chat văn bản; nhãn riêng làm ở task sau | Chờ khách hàng + CTO |
-| O2 | Hạn bàn giao / hoàn tất, thời điểm merge so với demo 20/11 | Merge sau demo cùng đợt SE-002 | Chờ TL |
+| O1 | Câu trả lời chạm 500 token bị cắt giữa câu nhưng lưu `COMPLETED`, UI không báo | Tăng mặc định; thêm nhãn | **Chốt 15/11/2026:** mặc định 1.000, cấu hình được; giữ phần đã sinh + thông báo rõ, cả sau khi mở lại — làm trong cùng PR (vòng 2) |
+| O2 | Hạn bàn giao / hoàn tất, thời điểm merge so với demo 20/11 | Merge sau demo cùng đợt SE-002 | **Chốt 15/11/2026:** chỉ merge sau demo, khi mọi tiêu chí đạt và đã kiểm với `develop` mới nhất |
 
 ## Kết quả review
-Senior Dev bàn giao vòng 1 ngày 15/11/2026. Chờ TL review.
+- Vòng 1 (`b9adc74`): TL **Cần sửa** — xem [Review vòng 1 (TL)](#review-vòng-1-tl).
+- Vòng 2: Senior Dev bàn giao 15/11/2026 — [Checklist vòng 2](#checklist-vòng-2). Kết luận review vòng 2 của TL ghi ở [báo cáo ngày 15/11](../reports/daily/2026-11-15.md) cho tới khi merge (ghi trên PR sẽ đổi SHA đã review); khi merge TL chép vào đây.
 
 ## Lịch sử review
 
@@ -68,4 +73,35 @@ Senior Dev bàn giao vòng 1 ngày 15/11/2026. Chờ TL review.
 
 **Kiểm tra đã chạy** — vitest; script curl (`mock`, `openai`, server giả 429); Chrome trên http://localhost:3200; `pnpm typecheck/lint/build`.
 **Ghi chú** — (1) Khi gửi tiếng Việt bằng tham số dòng lệnh `curl` trên Git Bash, Windows đổi bảng mã làm hỏng chữ (một hội thoại thử bị lưu "H�y gi?i…", đã xóa); kiểm tra đúng phải gửi body từ file UTF-8 — lỗi của cách test, không phải của ứng dụng. (2) Câu trả lời dài bị cắt ở 500 token (O1). (3) `.env` của máy chủ dự án đang đặt `LLM_PROVIDER=openai`: chạy `develop` sau khi merge sẽ gọi OpenAI thật; bản demo 20/11 ở `34b465d` không đọc biến này.
+**Trạng thái** — Chờ Review
+
+#### Review vòng 1 (TL)
+**Task** — SE-007 · PR https://github.com/duong2604/cat_gpt/pull/4 · SHA đã review `b9adc74` · vòng 1
+**Kết luận** — **Cần sửa.** AC1–AC8 đạt theo bằng chứng vòng 1 (TL đọc diff: provider, `LlmModule`, cấu hình, test; `.env.example` chỉ giá trị mẫu — `OPENAI_API_KEY=` trống, `LLM_PROVIDER=mock`). Phải sửa theo quyết định khách hàng 15/11/2026:
+1. O1: đầu ra mặc định 1.000 token, cấu hình được.
+2. Provider kết thúc vì chạm giới hạn (`response.incomplete`, `max_output_tokens`) đang lưu `COMPLETED` → giữ phần đã sinh, trạng thái riêng, thông báo rõ trên UI, còn sau khi mở lại. Kiểm riêng hoàn tất / chạm giới hạn / Dừng.
+3. Thêm kiểm tra ở mức kết nối provider chứng minh Dừng cắt request (vòng 1 chỉ suy ra từ việc không có log usage).
+**Trạng thái** — Cần sửa → Senior Dev sửa trong cùng PR.
+
+### Checklist vòng 2
+**Task** — SE-007 · PR https://github.com/duong2604/cat_gpt/pull/4 · SHA đầu PR: ghi trong bàn giao · vòng 2
+**Kết quả** — Thêm `MessageStatus.TRUNCATED` (`packages/shared`), `LlmStreamOptions.onFinish(reason)`; OpenAI provider báo `max_output_tokens` khi `response.incomplete`; `ChatService` lưu `TRUNCATED` (Dừng vẫn ưu tiên `STOPPED`); web hiện nhãn "Câu trả lời bị cắt do đạt giới hạn độ dài" / "Answer cut off at the length limit"; mock thêm `/limit` để thử không cần mạng; `LLM_MAX_OUTPUT_TOKENS` mặc định 1.000.
+**Checklist** (API cổng 4200, web 3200; tài khoản thử `se007.a@`/`se007.b@` đã khóa lại, hội thoại thử đã xóa)
+- [x] AC9 Mặc định 1.000, cấu hình được; `.env.example` chỉ giá trị mẫu, `mock` mặc định — Đạt — unit test (`1000`; đặt `1500` → `1500`); `.env.example`: `LLM_PROVIDER=mock`, `OPENAI_API_KEY=` trống, `LLM_MAX_OUTPUT_TOKENS=1000`
+- [x] AC10 Ba trường hợp với **mock** — Đạt — hoàn tất `COMPLETED` (423 ký tự); `/limit` → SSE `done` `TRUNCATED`, giữ 187 ký tự; Dừng sau 5 delta → `STOPPED` 46 ký tự; mở lại: `COMPLETED(423) → TRUNCATED(187) → STOPPED(46)`
+- [x] AC10 Ba trường hợp với **OpenAI thật** (`gpt-5.4-mini`, 1.000 token) — Đạt — câu ngắn "thủ đô Việt Nam" → `COMPLETED`; bài hướng dẫn 2.000 từ → 997 delta, `TRUNCATED`, giữ 3.551 ký tự; Dừng sau 5 delta (1.306 ms) → `STOPPED` 23 ký tự, không có log usage; mở lại: `COMPLETED(34) → TRUNCATED(3551) → STOPPED(23)`
+- [x] AC10 UI — Đạt — gửi yêu cầu dài trên http://localhost:3200 → chữ chạy dần, kết thúc sau ~7,4 s với nhãn "Câu trả lời bị cắt do đạt giới hạn độ dài"; tải lại trang nhãn vẫn còn
+- [x] AC11 Hủy ở kết nối provider — Đạt — unit test dùng **SDK `openai` thật** trỏ tới server SSE cục bộ: hủy sau 5 delta → server nhận `close` < 300 ms và ngừng gửi (< 50/200 sự kiện)
+- [x] AC1–AC8 không hồi quy — Đạt — `pnpm --filter @cat-gpt/api test` 12/12; `pnpm typecheck` 4/4; `pnpm lint` 3/3 (0 cảnh báo); `pnpm build` 3/3; log không chứa nội dung hay `sk-` (0 dòng)
+
+**Token vòng 2** (`gpt-5.4-mini`)
+
+| Lượt | input_tokens | output_tokens | Kết thúc |
+|---|---|---|---|
+| Câu ngắn "thủ đô Việt Nam" | 76 | 17 | completed |
+| Bài hướng dẫn 2.000 từ (script) | 132 | 1.000 | max_output_tokens → `TRUNCATED` |
+| Bài hướng dẫn 2.000 từ (UI) | 91 | 1.000 | max_output_tokens → `TRUNCATED` |
+| Dừng sau 5 delta | — | — | không có usage (đã hủy) |
+
+**Ghi chú** — `.env` của máy chủ dự án đang đặt `LLM_MAX_OUTPUT_TOKENS=500` (ghi đè mặc định); lượt thử trên đặt biến này = 1000 cho tiến trình thử. Chủ dự án đổi trong `.env` nếu muốn dùng mặc định mới.
 **Trạng thái** — Chờ Review
