@@ -1,6 +1,6 @@
 # Module 2 — Trợ lý hội thoại (AI Chat)
 
-> Trạng thái: ✅ Đã tích hợp vào `develop` qua [SE-001](../tasks/SE-001-chat-integration.md) (bàn giao 15/11/2026). Phản hồi trợ lý là nội dung giả lập (`MockLlmProvider`, model `mock-1`) — chưa gắn LLM thật.
+> Trạng thái: ✅ Đã tích hợp vào `develop` qua [SE-001](../tasks/SE-001-chat-integration.md) (bàn giao 15/11/2026). Mặc định phản hồi là nội dung giả lập (`MockLlmProvider`, model `mock-1`); đặt `LLM_PROVIDER=openai` để dùng OpenAI (`gpt-5.4-mini`) — [SE-007](../tasks/SE-007-openai-provider.md).
 > Phạm vi theo đề cương: tạo và quản lý cuộc hội thoại (đổi tên, xóa), gửi/nhận tin nhắn, phản hồi theo thời gian thực (streaming), lưu trữ lịch sử trò chuyện.
 > Kế hoạch đề cương: 19/10 – 01/11/2026 · Nhánh: `feature/module-2-chat` (tách từ `develop` sau khi merge Module 1)
 
@@ -130,7 +130,9 @@ export abstract class LlmProvider {
 ```
 
 - `MockLlmProvider`: chọn ngẫu nhiên câu trả lời mẫu tiếng Việt có markdown, trả từng đoạn 1–3 từ với độ trễ 20–40ms, tôn trọng `signal`. Có thể giả lập lỗi khi tin nhắn chứa `/error` để demo nhánh xử lý lỗi.
-- Biến môi trường mới: `LLM_PROVIDER=mock`, `LLM_MODEL=mock-1`, `LLM_SYSTEM_PROMPT`. Khi có LLM thật thì thêm `LLM_BASE_URL` và `LLM_API_KEY`.
+- `OpenAiLlmProvider` (`openai-llm.provider.ts`, [SE-007](../tasks/SE-007-openai-provider.md)): SDK `openai` chính thức, **Responses API** `stream: true`, **`store: false`** (lịch sử chỉ lưu trong CAT GPT). System prompt → `instructions`; lịch sử user/assistant → `input`, cắt theo ngân sách token (`fitHistory`, ước lượng ~3 ký tự/token, luôn giữ câu hỏi hiện tại). `max_output_tokens` = `LLM_MAX_OUTPUT_TOKENS`. Sự kiện `response.output_text.delta` → `delta`; `response.completed` / `response.incomplete` → ghi log **chỉ** `input_tokens`, `output_tokens`, số tin nhắn, lý do kết thúc. `signal` truyền vào request của SDK: bấm Dừng hủy cả request HTTP tới OpenAI. Lỗi API (401, 429 `insufficient_quota`, 5xx, `response.failed`) → `LlmError` chỉ chứa mã trạng thái + mã lỗi → ChatService lưu tin `ERROR`, UI hiện "Lỗi khi tạo câu trả lời" và cho Tạo lại.
+- Chọn provider ở `LlmModule` theo `LLM_PROVIDER` (`mock` mặc định | `openai`). Biến môi trường: `LLM_PROVIDER`, `LLM_MODEL` (mặc định theo provider), `OPENAI_API_KEY` (bắt buộc khi `openai` — thiếu thì API không khởi động, báo lỗi rõ), `LLM_MAX_OUTPUT_TOKENS` (500), `LLM_HISTORY_TOKEN_BUDGET` (4000), `LLM_SYSTEM_PROMPT`.
+- Giới hạn đã biết: câu trả lời chạm `max_output_tokens` bị cắt và vẫn lưu `COMPLETED` (log ghi `end=max_output_tokens`); chưa có nhãn riêng trên UI.
 
 ### 4.6. Giới hạn tần suất
 - 20 lần/phút **theo người dùng** cho 2 endpoint SSE (`POST /chat/stream`, `POST /conversations/:id/regenerate`). Triển khai: `ChatThrottlerGuard` (`modules/chat/chat-throttler.guard.ts`) áp bằng `@UseGuards()` ở method — chạy sau `JwtAuthGuard` (guard toàn cục chạy trước khi xác thực nên không dùng được `req.user`) — dùng lại `ThrottlerStorage`/`ThrottlerException` sẵn có của `@nestjs/throttler` với khóa riêng `chat-user:<userId>`, độc lập với bucket IP 120 req/phút chung (`AllExceptionsFilter` map `ThrottlerException` → 429 `TOO_MANY_REQUESTS`, FE dịch qua `errors.TOO_MANY_REQUESTS`).
