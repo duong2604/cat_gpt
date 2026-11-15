@@ -1,12 +1,12 @@
 # SE-008 — Tài liệu đồ án: hiện thực Module 1–2 và bảng bằng chứng kiểm thử
 
-Trạng thái: Sẵn sàng
+Trạng thái: Đang làm
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 2 ngày làm việc
 Phụ thuộc: Không chặn. Làm **trước** [SE-003](SE-003-release-mode-navigation.md) (cùng P1, hạn bàn giao sớm hơn); SE-003 bắt đầu sau khi bàn giao SE-008, hạn SE-003 (25/11) không đổi
 Hạn bàn giao review: 18/11/2026 (dự kiến) · Hạn hoàn tất: 19/11/2026 (dự kiến)
-Ngày thực tế: bắt đầu — · bàn giao review — · hoàn tất —
+Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review — · hoàn tất —
 Chốt: 15/11/2026 — khách hàng giao SE hai đầu ra cho bộ nguồn đồ án ([TL-004](TL-004-thesis-source-pack.md)); chỉ tài liệu và ảnh
-SHA cơ sở: `origin/develop` @ SHA khi nhận task (ghi lúc chuyển `Đang làm`; tối thiểu `6ed0fbc`)
+SHA cơ sở: `origin/develop` @ `2f003a0` (15/11/2026, ghi lúc chuyển `Đang làm`)
 PR: <link, Senior Dev ghi khi bàn giao>
 
 ## Mục tiêu

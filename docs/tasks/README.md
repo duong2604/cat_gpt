@@ -20,7 +20,7 @@ Cập nhật: 15/11/2026.
 | [2026-11-15-reorganize-project-docs](2026-11-15-reorganize-project-docs.md) | Refactor `docs/`, quy trình làm việc và onboarding TL / Senior Dev | TL | P1 | 15/11/2026 | Không đặt hạn | Chờ Review | Đã bàn giao vòng 7 ngày 15/11; chờ khách hàng + CTO duyệt |
 | [2026-11-15-preview-progress-review](../project/preview-progress-review.md) | Audit tiến độ so với báo cáo 27/10/2026 (lịch sử checklist ở mục 5 của báo cáo) | TL | P1 | 15/11/2026 | Không đặt hạn | Chờ Review | Đã bàn giao vòng 2 ngày 15/11; chờ khách hàng + CTO duyệt |
 | [TL-004](TL-004-thesis-source-pack.md) | Bộ tài liệu nguồn cho báo cáo đồ án (`docs/thesis/`, Markdown) | TL | P1 | Chờ chốt (dự kiến 19/11 trước demo; 25/11 sau tích hợp) | Chờ chốt | Chờ Review | Vòng 1 bàn giao 15/11 (đề cương chương + trạng thái module + phần còn thiếu); tiếp tục M2 16–17/11 — Chưa đánh giá (chờ chốt hạn) |
-| [SE-008](SE-008-thesis-implementation-evidence.md) | Tài liệu đồ án: hiện thực Module 1–2 + bảng bằng chứng kiểm thử | Senior Dev | P1 | Dự kiến 18/11/2026 | Dự kiến 19/11/2026 | **Sẵn sàng** | Chưa bắt đầu — làm trước SE-003 (chỉ tài liệu + ảnh); hạn SE-003 không đổi |
+| [SE-008](SE-008-thesis-implementation-evidence.md) | Tài liệu đồ án: hiện thực Module 1–2 + bảng bằng chứng kiểm thử | Senior Dev | P1 | Dự kiến 18/11/2026 | Dự kiến 19/11/2026 | **Đang làm** | Bắt đầu 15/11 trên nhánh `docs/thesis-implementation` @ `2f003a0`; làm trước SE-003 (chỉ tài liệu + ảnh), hạn SE-003 không đổi |
 
 **SE-007** (OpenAI cho Chat, PR #4 @ `e1fda76`): hồ sơ nằm trong PR, dòng mục lục vào `develop` khi merge. Trạng thái **Chờ Review — đã đạt kỹ thuật, chờ tích hợp sau demo** (khách hàng xác nhận 15/11/2026); thứ tự tích hợp 23–24/11: PR #3 (SE-002) → PR #4 (SE-007).
 
