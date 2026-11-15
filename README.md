@@ -105,6 +105,10 @@ pnpm lint         # lint
 - Axios interceptor tự refresh khi gặp 401. Nhiều request lỗi cùng lúc chỉ refresh một lần.
 - Giới hạn đăng nhập **5 lần/phút/IP**; toàn API **120 request/phút/IP**.
 
+## Tài liệu
+
+Mục lục tài liệu dự án, thiết kế module và quy trình làm việc: [docs/README.md](docs/README.md).
+
 ## Quy ước Git
 
 - Nhánh `main` (ổn định) ← `develop` ← `feature/module-<n>-<tên>`.

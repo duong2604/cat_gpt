@@ -5,12 +5,14 @@
 > Sinh viên: Bùi Văn Dương (5250026, CNTT1 K29.1) · GVHD: ThS. Bùi Minh Thảo
 > Repo: https://github.com/duong2604/cat_gpt
 
-## 1. Trạng thái các module
+> **Lưu ý (15/11/2026):** bảng mục 1 là ảnh chụp ngày 24/10/2026 và đã cũ. Trạng thái hiện hành xem [context.md](context.md). Quy trình làm việc giữa TL và Senior Dev xem [workflow.md](workflow.md).
+
+## 1. Trạng thái các module (tại 24/10/2026)
 
 | Module | Nội dung | Kế hoạch (đề cương) | Trạng thái | Tài liệu |
 |---|---|---|---|---|
-| 1 | Xác thực & quản lý người dùng | 04/10 – 18/10 | ✅ Hoàn thành code, chờ review PR | [module-1-auth.md](module-1-auth.md) |
-| 2 | Trợ lý hội thoại (AI Chat) + streaming | 19/10 – 01/11 | 📝 Đã lập kế hoạch, chờ xác nhận | [module-2-chat.md](module-2-chat.md) |
+| 1 | Xác thực & quản lý người dùng | 04/10 – 18/10 | ✅ Hoàn thành code, chờ review PR | [module-1-auth.md](../design/module-1-auth.md) |
+| 2 | Trợ lý hội thoại (AI Chat) + streaming | 19/10 – 01/11 | 📝 Đã lập kế hoạch, chờ xác nhận | [module-2-chat.md](../design/module-2-chat.md) |
 | 3 | Quản lý tài liệu + pipeline bất đồng bộ | 02/11 – 15/11 | Chưa bắt đầu (đã có trang giữ chỗ) | — |
 | 4 | RAG: embedding, truy hồi, hỏi–đáp, tóm tắt | 16/11 – 29/11 | Chưa bắt đầu | — |
 | 5 | Dịch tài liệu (mở rộng) | 14/12 – 31/12 | Ngoài phạm vi cam kết | — |

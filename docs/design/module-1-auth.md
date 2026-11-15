@@ -1,6 +1,6 @@
 # Module 1 — Xác thực & Quản lý người dùng
 
-> Trạng thái: ✅ Hoàn thành code (23/10/2026) · Chờ review PR `feature/module-1-auth-user` → `develop`
+> Trạng thái: ✅ Đã tích hợp vào `develop` qua PR #1 (`feature/module-1-auth-user` → `develop`, merge 27/10/2026). Hoàn thành code ngày 23/10/2026.
 > Phạm vi theo đề cương: đăng nhập/đăng xuất, thông tin cá nhân, đổi mật khẩu, quản lý phiên; quản trị viên quản lý tài khoản, khóa/mở khóa và phân quyền.
 
 ## 1. Yêu cầu đã chốt với sinh viên
@@ -103,7 +103,7 @@ Responsive cho mobile (ẩn bớt cột trên màn hình nhỏ), hỗ trợ vi/e
 | `2d154fa` | `feat(web): add app shell, login, profile and user management UI (module 1)` |
 | `422b809` | `docs: add setup guide and authentication design notes` |
 
-Nhánh: `feature/module-1-auth-user` (tách từ `develop`, đã push, **chưa merge**).
+Nhánh: `feature/module-1-auth-user` (tách từ `develop`). Tại 23/10/2026: đã push, chưa merge. Đã merge vào `develop` qua PR #1 ngày 27/10/2026.
 
 ## 7. Kiểm thử đã làm
 
@@ -115,7 +115,7 @@ Nhánh: `feature/module-1-auth-user` (tách từ `develop`, đã push, **chưa m
 ## 8. Việc còn lại / nợ kỹ thuật
 
 - [ ] Sinh viên chạy kiểm thử với MongoDB Atlas thật (đã sửa xong lỗi DNS ngày 24/10).
-- [ ] Review và merge PR `feature/module-1-auth-user` → `develop`.
+- [x] Review và merge PR `feature/module-1-auth-user` → `develop` (PR #1, 27/10/2026).
 - [ ] (Để sau) Bắt đổi mật khẩu ở lần đăng nhập đầu sau khi admin tạo user hoặc đặt lại mật khẩu.
 - [ ] (Để sau) Unit test cho AuthService, SessionsService, AdminUsersService.
 - [ ] (Module 3) Thay `LocalStorageProvider` bằng `MinioStorageProvider`.
