@@ -7,7 +7,7 @@ Hạn bàn giao review: **18/11/2026** (dự kiến 17/11) · Hạn hoàn tất:
 Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review 15/11/2026 · hoàn tất —
 Chốt: 15/11/2026 (khách hàng duyệt TL-001 và Q3; demo dùng phản hồi mẫu; giữ Module 3–4 ở preview)
 SHA cơ sở: `origin/develop` @ `9c426f2` (cập nhật từ `a860437` — `develop` chỉ có thêm commit tài liệu giữa lúc đó và lúc nhận task, không đổi `apps/`; xem `git diff --stat a860437 origin/develop`) · nguồn: `origin/preview/module-2-4-demo` @ `b2a4b22d40804f246c8505e66bad9e7a2b483ca4`
-PR: https://github.com/duong2604/cat_gpt/pull/2 (nhắm `develop`) · SHA đầu PR `8238926`
+PR: https://github.com/duong2604/cat_gpt/pull/2 (nhắm `develop`) · SHA đầu PR `8744f0b`
 
 > **Phản hồi của trợ lý trong task này là nội dung giả lập** (`MockLlmProvider`, model `mock-1`): chọn ngẫu nhiên từ các câu trả lời mẫu, không liên quan câu hỏi. Việc chạy dần từng phần là streaming thật từ máy chủ. Khách hàng đã chốt (15/11/2026): demo đầu tiên dùng phản hồi mẫu; AI thật không thuộc task này.
 
@@ -66,12 +66,12 @@ Kiểm tra trên `pnpm dev` của nhánh PR, đăng nhập tài khoản admin tr
 | Q3 | (từ TL-001) Xác nhận đề xuất mặc định mục 3 Module 2 làm yêu cầu đã duyệt, và đưa giới hạn 20 tin/phút/người vào task này | Đồng ý cả hai | Đồng ý — khách hàng, 15/11/2026 |
 
 ## Kết quả review
-Senior Dev bàn giao vòng 1 ngày 15/11/2026, PR #2 nhắm `develop`, SHA đầu PR `8238926`. Chờ TL review.
+Senior Dev bàn giao vòng 1 ngày 15/11/2026, PR #2 nhắm `develop`, SHA đầu PR `8744f0b`. Chờ TL review.
 
 ## Lịch sử review
 
 ### Checklist vòng 1
-**Task** — SE-001 · PR https://github.com/duong2604/cat_gpt/pull/2 · SHA đầu PR `8238926` · vòng 1
+**Task** — SE-001 · PR https://github.com/duong2604/cat_gpt/pull/2 · SHA đầu PR `8744f0b` · vòng 1
 **Kết quả** — Tích hợp Chat (Module 2) vào `develop`: 3 commit cherry-pick từ preview (shared types, API SSE + mock LLM, UI chat) không đổi; chép tay chuỗi dịch + bố cục toàn màn hình + bỏ nhãn "Đang phát triển" của mục Chat (3 phần này nằm trong commit demo Module 3–4 nên không cherry-pick riêng được); thêm giới hạn 20 tin/phút/người (độc lập với bucket IP 120 req/phút chung); cập nhật `module-2-chat.md` và `README.md`.
 **Checklist**
 - [x] AC1 Gửi tin nhắn tạo hội thoại mới, URL đổi `/chat/<id>`, tiêu đề lấy từ tin nhắn đầu — Đạt — UI: gửi "Xin chao, ban co the gioi thieu ve CAT GPT khong?" → URL chuyển `/chat/6af96c7947e11402c14b325e`, hội thoại lên đầu danh sách với tiêu đề đúng câu hỏi
