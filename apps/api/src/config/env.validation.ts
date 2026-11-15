@@ -19,6 +19,17 @@ export enum NodeEnv {
   Test = 'test',
 }
 
+export enum LlmProviderName {
+  Mock = 'mock',
+  OpenAi = 'openai',
+}
+
+/** Model mặc định theo provider khi không đặt LLM_MODEL. */
+export const DEFAULT_LLM_MODEL: Record<LlmProviderName, string> = {
+  [LlmProviderName.Mock]: 'mock-1',
+  [LlmProviderName.OpenAi]: 'gpt-5.4-mini',
+};
+
 const toBoolean = ({ value }: { value: unknown }) =>
   value === true || value === 'true' || value === '1';
 
@@ -84,9 +95,33 @@ export class EnvironmentVariables {
   @IsString()
   ADMIN_FULL_NAME = 'Administrator';
 
+  /** `mock` (mặc định, dùng cho demo và test local) hoặc `openai`. */
+  @IsEnum(LlmProviderName)
+  LLM_PROVIDER: LlmProviderName = LlmProviderName.Mock;
+
+  /** Để trống → theo DEFAULT_LLM_MODEL của provider. */
+  @IsOptional()
   @IsString()
   @IsNotEmpty()
-  LLM_MODEL = 'mock-1';
+  LLM_MODEL?: string;
+
+  /** Bắt buộc khi LLM_PROVIDER=openai (kiểm tra ở validateEnv). Không bao giờ ghi ra log. */
+  @IsOptional()
+  @IsString()
+  OPENAI_API_KEY?: string;
+
+  @Transform(({ value }) => Number(value))
+  @IsInt()
+  @Min(16)
+  @Max(8192)
+  LLM_MAX_OUTPUT_TOKENS = 500;
+
+  /** Ngân sách token (ước lượng) cho lịch sử hội thoại gửi lại mỗi lượt. */
+  @Transform(({ value }) => Number(value))
+  @IsInt()
+  @Min(500)
+  @Max(100_000)
+  LLM_HISTORY_TOKEN_BUDGET = 4000;
 
   @IsString()
   @IsNotEmpty()
@@ -100,8 +135,11 @@ export function validateEnv(config: Record<string, unknown>): EnvironmentVariabl
   });
   const errors = validateSync(validated, { skipMissingProperties: false });
 
-  if (errors.length > 0) {
-    const lines = errors.flatMap((e) => Object.values(e.constraints ?? {}).map((m) => `  - ${m}`));
+  const lines = errors.flatMap((e) => Object.values(e.constraints ?? {}).map((m) => `  - ${m}`));
+  if (validated.LLM_PROVIDER === LlmProviderName.OpenAi && !validated.OPENAI_API_KEY?.trim()) {
+    lines.push('  - LLM_PROVIDER=openai cần OPENAI_API_KEY (đặt trong apps/api/.env, không commit)');
+  }
+  if (lines.length > 0) {
     throw new Error(`Cấu hình môi trường không hợp lệ:\n${lines.join('\n')}`);
   }
   return validated;
