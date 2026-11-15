@@ -59,6 +59,7 @@ Một bộ Markdown chính xác, truy vết được, đủ để một AI khác
 ## Kết quả review
 - Vòng 1 (`2f003a0`): **CTO duyệt để tiếp tục triển khai** (15/11/2026) — chốt T2, T3; T1 chờ khách hàng.
 - Vòng 2 (15/11/2026): đọc hai file khách hàng chỉ định, cập nhật `01`, `02`, `04`, README — [Checklist vòng 2](#checklist-vòng-2). Chờ khách hàng + CTO.
+- SE-008 vòng 1 (PR #5 @ `bbfd59f`): TL review **Cần sửa** 15/11 — [Review SE-008 vòng 1](#review-se-008-vòng-1-tl).
 - Vòng 3 (19/11): sau review SE-008 — [kế hoạch](#kế-hoạch-vòng-2) (đánh số lại: review SE-008 thành vòng 3, cập nhật sau tích hợp thành vòng 4).
 
 ## Lịch sử review
@@ -116,6 +117,30 @@ Yêu cầu tiếp: giao SE-008 ngay (bàn giao 18/11, TL review + tổng hợp 1
 - Ghi chú: sau khi khách hàng + CTO duyệt bộ nguồn, TL tạo task riêng để AI viết `.docx` từ SHA bộ nguồn đã duyệt, áp dụng Q1–Q15, kèm checklist kiểm tra bản Word.
 
 **Trạng thái và bước tiếp theo** — Chờ Review (khách hàng + CTO); TL review SE-008 18–19/11 (vòng 3), cập nhật sau tích hợp 25/11 (vòng 4).
+
+#### Review SE-008 vòng 1 (TL)
+**Task** — SE-008 · PR https://github.com/duong2604/cat_gpt/pull/5 · SHA đã review `bbfd59f` (đầu PR thực tế; checklist SE ghi `9c21c18` vì commit `bbfd59f` chỉ ghi bàn giao) · `MERGEABLE`/`CLEAN` · vòng 1
+**Kết luận** — **Cần sửa.** Phạm vi đúng, `03` đầy đủ và phần lớn nhận định khớp code; bảng ca kiểm thử đủ cột. Phải sửa 1 lỗi bảo mật, 2 nhận định sai trong `03`, 1 ca ghi quá bằng chứng, chú thích ảnh và 1 liên kết gãy.
+**Checklist** (TL tự kiểm tra trên worktree TL, `git show`/`git grep` tại `bbfd59f`, `origin/fix/avatar-requires-login` @ `d60864a`, `origin/feature/openai-provider` @ `e1fda76`)
+- [ ] AC1 `03` đủ Module 1–2, Web–API–DB, các quyết định — nội dung đạt; **2 nhận định sai** (AC2)
+- [ ] AC2 Dẫn chứng khớp code — đối chiếu hơn 30 dẫn chứng (guard toàn cục `app.module.ts:35-37`; `DUMMY_PASSWORD_HASH`, `signAccessToken`; `rotate`, `REFRESH_REUSE_GRACE_MS`, `findActive`, `revokeAllForUser(userId, exceptSessionId)`; `randomBytes(32)`/`hashSecret`; `assertNotSelf`, `assertNotLastActiveAdmin`, `countActiveAdmins`; `setStatus` thu hồi phiên khi `BLOCKED`; `USER_SAME_PASSWORD`, `detectImageType`, `AVATAR_MAX_SIZE_BYTES`, `storage.delete`; `randomUUID`, chặn path traversal; `useStaticAssets` `dotfiles:'deny'`, `maxAge:'7d'`; `refreshPromise`/`refreshSession`, `recoverFromUnauthorized`; `inFlight`, `assertNotStreaming` → `CHAT_STREAM_IN_PROGRESS`, `assertRateLimit`/`sendLog`, chú thích `ponytail`, `makeTitle`, `recentMessages`, `deleteMessage`; `split(/(\s+)/)`, 20–40 ms; PR #3: `FilesController`, `findById`, `getAbsolutePath`, `Cache-Control: private, no-store` + `cacheControl:false`, `AdminUserDto`, `toAdminDto`, `AdminUserResponse`; PR #4: `store:false`, `LlmError`, `ponytail`, `aborted` → `STOPPED` trước `TRUNCATED`) — các dẫn chứng còn lại khớp, **2 sai**:
+  - §1: "`apps/web/src/proxy.ts` rewrite `/api/*`" — sai: rewrite nằm ở `apps/web/next.config.ts` (`rewrites()` → `${API_INTERNAL_URL}/api/:path*`); `proxy.ts` chỉ đọc cookie `cat_session` để điều hướng (đúng như §2.1 đã viết).
+  - §3.3: mock `/error` "ném lỗi giữa chừng (ở khoảng 40% nội dung)" — sai: `mock-llm.provider.ts` ném lỗi khi đã phát **20 đoạn** (`emitted === 20`), không theo tỷ lệ.
+- [x] AC3 Phân biệt `develop` / PR #3 / PR #4 — Đạt — bảng đầu `03` + nhãn tại chỗ; SHA PR khớp `gh pr view`
+- [ ] AC4 Bảng ca kiểm thử — đủ 8 cột, 23 ca, đủ nhóm yêu cầu; **TC-M1-02 ghi quá bằng chứng**: "thời gian phản hồi như nhau" — `module-1-auth §7` và TL-003 không đo thời gian; bằng chứng hiện có là code (M1-08: luôn chạy `verifyPassword` với `DUMMY_PASSWORD_HASH`). Ghi đúng mức: "kiểm qua code; chưa đo thời gian phản hồi"
+- [ ] AC5 Ảnh và dữ liệu — mở đủ 13 ảnh: đúng màn hình, vai trò, chỉ tài khoản thử; **chưa đạt**:
+  - **Bảo mật:** `evidence/test-cases.md` dòng 5 ghi **mật khẩu của tài khoản thử** `se008.a@` dạng chữ thường — repo công khai. Xóa khỏi file; admin **đặt lại mật khẩu** `se008.a@` (giữ `BLOCKED`) để mật khẩu đã lộ trong lịch sử commit vô hiệu; ghi vào checklist
+  - `m1-05`: chú thích "không cột ảnh… cột ảnh cũng chưa có trên `develop`" — sai: `users-management.tsx` trên `develop` hiện `UserAvatar` (ảnh hoặc chữ cái đầu) ở cột Người dùng (ảnh chụp đúng là thấy chữ cái đầu); PR #3 mới bỏ
+  - `m2-01`: chú thích "câu trả lời markdown (bảng so sánh)" — ảnh hiện danh sách đánh số + dòng "Đây là câu trả lời mẫu…"; "sau khi tải lại" không thấy được trong ảnh → chú thích theo đúng nội dung nhìn thấy
+  - `m1-08`: ghi "768px" — thực tế 238 × 432 (mobile)
+  - `m2-04`: thanh bên có tiêu đề hội thoại lỗi mã hóa ("H◆y giải thích…", rác từ lần thử curl) → đánh dấu **không dùng trong báo cáo** (hoặc cắt bỏ thanh bên); TL chụp lại sau tích hợp PR #4
+  - Đạt: kích thước ≤ 392 KB; 9 ảnh `develop` 1536 × 695; không có `sk-`, SĐT, email cá nhân
+- [x] AC6 Mục thiếu ghi `THIẾU — <lý do>` — Đạt (TC-M2-02 ảnh "Đã dừng"; mobile 375 px). TL nhận chụp lại sau tích hợp (B10)
+- [ ] AC6/liên kết — **1 liên kết gãy**: `test-cases.md` → `../../tasks/SE-002-avatar-requires-login.md#checklist-vòng-1` (checklist vòng 1 SE-002 chỉ có trên PR #3) → trỏ `https://github.com/duong2604/cat_gpt/blob/d60864a/docs/tasks/SE-002-avatar-requires-login.md#checklist-vòng-1`. Kiểm: 687 link, 1 lỗi
+- [x] AC7 Phạm vi — Đạt — `gh pr view 5`: 17 file, đúng danh sách cho phép
+- [x] AC8 Dữ liệu thử đã khóa/xóa, không gọi OpenAI — Đạt theo bàn giao; bổ sung việc đặt lại mật khẩu ở AC5
+- [x] `.env.example` local — **TL chấp nhận** cách xử lý: bản sửa là nháp cũ (`LLM_PROVIDER=openai`, key trống — khớp điều TL ghi nhận trước đó), đã bị `.env.example` của PR #4 thay thế; Senior Dev stash rồi bỏ, không có giá trị thật. Không cần khôi phục
+**Trạng thái và bước tiếp theo** — Cần sửa → Senior Dev sửa trong cùng PR #5, chép mục review này vào "Lịch sử review" của SE-008 (`#### Review vòng 1 (TL)`), thêm `### Checklist vòng 2`, chuyển `Chờ Review`. Chưa nhận SE-003 cho tới khi bàn giao vòng 2 (ước lượng sửa 0,25 ngày; hạn 18/11 không đổi).
 
 ## Phản hồi UI
 Không áp dụng (tài liệu).
