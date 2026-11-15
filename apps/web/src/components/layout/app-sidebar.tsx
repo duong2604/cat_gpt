@@ -35,7 +35,7 @@ interface NavItem {
 }
 
 const WORKSPACE_ITEMS: NavItem[] = [
-  { key: "chat", href: routes.chat, icon: MessageSquareIcon, comingSoon: true },
+  { key: "chat", href: routes.chat, icon: MessageSquareIcon },
   { key: "documents", href: routes.documents, icon: FileTextIcon, comingSoon: true },
 ];
 

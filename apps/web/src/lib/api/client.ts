@@ -48,6 +48,29 @@ function refreshSession(): Promise<void> {
   return refreshPromise;
 }
 
+/**
+ * Dùng cho request không đi qua axios (fetch streaming) khi gặp 401.
+ * Trả về true nếu đã refresh thành công và nên gửi lại request.
+ */
+export async function recoverFromUnauthorized(code: string | undefined): Promise<boolean> {
+  if (code === ErrorCode.AUTH_ACCOUNT_BLOCKED) {
+    onAuthFailure("blocked");
+    return false;
+  }
+  if (!code || !REFRESHABLE_CODES.has(code)) {
+    onAuthFailure("expired");
+    return false;
+  }
+  try {
+    await refreshSession();
+    return true;
+  } catch (refreshError) {
+    const refreshCode = refreshError instanceof AxiosError ? errorCodeOf(refreshError) : undefined;
+    onAuthFailure(refreshCode === ErrorCode.AUTH_ACCOUNT_BLOCKED ? "blocked" : "expired");
+    return false;
+  }
+}
+
 function errorCodeOf(error: AxiosError): string | undefined {
   return (error.response?.data as Partial<ApiErrorBody> | undefined)?.code;
 }
