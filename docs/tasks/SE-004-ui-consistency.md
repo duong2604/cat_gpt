@@ -2,8 +2,8 @@
 
 Trạng thái: Sẵn sàng
 Người phụ trách: Senior Dev · Ưu tiên: P2 · Ước lượng: 1,5 ngày làm việc
-Phụ thuộc: làm sau [SE-005](SE-005-login-limit-shared-ip.md) theo thứ tự quyền → chế độ/menu → giao diện; cần SE-003 đã merge (sửa cùng `app-sidebar.tsx`, `layout.tsx`)
-Hạn bàn giao review: Chờ chốt (đề xuất 30/11/2026, sau khung 23–26/11) · Hạn hoàn tất: Chờ chốt (đề xuất 01/12/2026)
+Phụ thuộc: làm sau [SE-006](SE-006-account-admin-rules.md) (thứ tự SE-002 → SE-003 → SE-005 → SE-006 → SE-004); cần SE-003 đã merge (sửa cùng `app-sidebar.tsx`, `layout.tsx`)
+Hạn bàn giao review: Dự kiến 04/12/2026 (thứ Sáu) · Hạn hoàn tất: Dự kiến 07/12/2026 (thứ Hai) — chưa duyệt
 Ngày thực tế: bắt đầu — · bàn giao review — · hoàn tất —
 Chốt: 15/11/2026 — khách hàng duyệt Be Vietnam Pro, yêu cầu chuẩn hóa các màn đang dùng trước, bàn giao kèm ảnh trước/sau
 SHA cơ sở: `origin/develop` @ SHA khi nhận task
@@ -47,7 +47,7 @@ Các màn đang dùng hiển thị tiếng Việt đồng đều trên mọi má
 | # | Câu hỏi | Đề xuất mặc định | Chốt |
 |---|---|---|---|
 | U1 | Chuẩn giao diện và font Be Vietnam Pro | Đồng ý | **Đồng ý** — khách hàng, 15/11/2026 |
-| H1 | Hạn bàn giao / hoàn tất (ngoài khung 23–26/11) | 30/11 / 01/12 | Chờ khách hàng + CTO |
+| H1 | Mốc (dự kiến) | Bàn giao 04/12, hoàn tất 07/12 | Chờ duyệt |
 
 ## Kết quả review
 Chưa có bàn giao.

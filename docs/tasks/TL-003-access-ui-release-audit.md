@@ -4,7 +4,7 @@ Trạng thái: Chờ Review
 Người phụ trách: TL · Ưu tiên: P1 · Ước lượng: 1 ngày làm việc
 Phụ thuộc: Không. Không thay đổi code; bản demo 20/11 (`fbffd5b`, chạy tại `34b465d`) giữ nguyên
 Hạn bàn giao review: 15/11/2026 · Hạn hoàn tất: Không đặt
-Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review 15/11/2026 (vòng 1, vòng 2) · hoàn tất —
+Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review 15/11/2026 (vòng 1, 2, 3) · hoàn tất —
 Chốt: 15/11/2026 (khách hàng giao 3 việc: dọn nhánh local, rà UI và phân quyền, chuẩn hóa tiêu chí UI và phát hành)
 SHA cơ sở: `origin/develop` @ `06a5a83`
 PR: Không — tài liệu TL tích hợp trực tiếp theo đợt được giao
@@ -36,7 +36,8 @@ CS-1…CS-6 ở [access-control mục 4](../design/access-control.md#4-chính-s�
 
 ## Kết quả review
 - Vòng 1 (15/11/2026): khách hàng **duyệt** kết quả rà soát; chốt CS-1…CS-6 và U1; giao SE-002 ngay; yêu cầu ghi quyết định vào tài liệu/task, mở task kiểm chứng giới hạn đăng nhập chung IP, đặt hạn SE-002/SE-003 trong khung 23–26/11.
-- Vòng 2 (15/11/2026): đã bàn giao — [checklist vòng 2](#checklist-vòng-2). Chờ khách hàng xác nhận.
+- Vòng 2 (15/11/2026): khách hàng xác nhận; yêu cầu Senior Dev tiếp tục SE-002 theo phạm vi mới, giữ hạn SE-002/SE-003, chốt thu hồi phiên khi đổi email, thay luồng khôi phục admin bằng quy trình riêng, đưa SE-005 lên trước SE-006, bổ sung kiểm tra SE-002/SE-003/SE-005.
+- Vòng 3 (15/11/2026): đã bàn giao — [checklist vòng 3](#checklist-vòng-3). Chờ khách hàng xác nhận.
 
 ## Lịch sử review
 
@@ -80,6 +81,21 @@ CS-1…CS-6 ở [access-control mục 4](../design/access-control.md#4-chính-s�
 **Kiểm tra đã chạy** — đọc `admin-users.service.ts`, `users.service.ts`, `admin-seed.service.ts`, `app.module.ts`, `auth.controller.ts`, `users-management.tsx`, `user-form-dialog.tsx`; `git diff --check`; kiểm tra liên kết.
 **Ghi nhận quy trình** — Senior Dev đang làm SE-002 trên **cùng thư mục làm việc** với TL; tài liệu chưa commit của TL bị kéo sang nhánh `fix/avatar-requires-login`. TL đã chuyển phần của mình sang worktree riêng `../cat_gpt-tl`, không chạm code của Senior Dev. Từ nay TL và Senior Dev dùng worktree riêng.
 **Trạng thái và bước tiếp theo** — Chờ Review; khách hàng xác nhận vòng 2 và hạn đề xuất của SE-004/SE-005/SE-006.
+
+### Checklist vòng 3
+**Task hoặc yêu cầu** — TL-003 vòng 3 · tài liệu trên `develop` (SHA ghi trong báo cáo gửi khách hàng) · cơ sở `2636714` · vòng 3. Lịch sử: [vòng 1](#checklist-vòng-1), [vòng 2](#checklist-vòng-2)
+**Kết luận** — Senior Dev đã nhận phạm vi mới của SE-002 trong phiên đang làm; tài liệu và task cập nhật theo 6 yêu cầu. Không đổi code; bản demo giữ `fbffd5b` (máy trình chiếu `34b465d`).
+**Checklist**
+- [x] Senior Dev tiếp tục SE-002 theo phạm vi mới, đọc bản `2636714`, giữ code dở, worktree riêng — Đạt — nhánh `fix/avatar-requires-login` chứa `2636714` (`git merge-base --is-ancestor 2636714 977c03d`), file task trên nhánh trùng `develop` (`git diff --quiet 2636714 977c03d -- docs/tasks/SE-002-…`); code dở giữ qua merge `bc5516b` rồi commit phạm vi mới `977c03d` "avatars are owner-only, drop avatarUrl from admin DTO"; PR #3 mở nhắm `develop`, trên GitHub đầu PR còn `02f31f5` (chưa đẩy `977c03d`), chưa bàn giao. Working tree: Senior Dev `D:\workspace\buggysoft\cat_gpt`, TL `../cat_gpt-tl` (`git worktree list`). Chưa có xác nhận bằng lời của Senior Dev — prompt gửi kèm báo cáo này
+- [x] Giữ hạn SE-002 23/11 – 24/11, SE-003 25/11 – 26/11 — Đạt — file task + [mục lục](README.md)
+- [x] SE-002: dữ liệu thử riêng, ảnh theo phiên bản cũ, 4 vai, đăng xuất / đổi tài khoản cùng trình duyệt — Đạt — [SE-002 checklist](SE-002-avatar-requires-login.md#checklist-nghiệm-thu): tài khoản `se002.a@`, `se002.b@` riêng; ảnh cũ tạo trên `2636714` trước khi chuyển nhánh; AC1–AC4 (chưa đăng nhập `401`, chính chủ `200`, nhân viên khác `404`, admin `404`); AC5 cùng trình duyệt: đăng xuất → `401`, đăng nhập B → `404`, không lấy từ cache
+- [x] SE-003: màn vào sau đăng nhập, menu, truy cập trực tiếp, cả hai vai, Swagger — Đạt — [SE-003 checklist](SE-003-release-mode-navigation.md#checklist-nghiệm-thu): bảng 2 chế độ × 2 vai × 6 kiểm tra; Swagger 4 cấu hình
+- [x] Chốt thu hồi mọi phiên khi đổi email — Đạt — [access-control CS-3](../design/access-control.md#4-chính-sách-đã-chốt); [SE-006](SE-006-account-admin-rules.md) Output 2, AC4 (2 thiết bị)
+- [x] Quy trình khôi phục admin riêng thay hạ quyền → nâng quyền — Đạt — [access-control 4.1](../design/access-control.md#41-quy-trình-khôi-phục-tài-khoản-admin-đề-xuất--chờ-duyệt): 3 vai (người yêu cầu, người phê duyệt CTO, người thực hiện do CTO chỉ định), 5 bước, nhật ký `ADMIN_RECOVERED`, diễn tập có biên bản trước thử nội bộ (R-10). Chặn thêm đường vòng: không đặt lại mật khẩu tài khoản vừa bị hạ từ ADMIN trong 24 giờ (SE-006 AC1). R1 (ai phê duyệt/thực hiện) chờ chốt
+- [x] SE-005 lên trước SE-006; kịch bản kiểm chứng — Đạt — [SE-005 kịch bản](SE-005-login-limit-shared-ip.md#kịch-bản-kiểm-chứng): 200 tài khoản hợp lệ, 1 IP, đăng nhập dồn 5 phút + thao tác 5 phút (~1.200 request/phút), bậc 10/20/50 luồng; ngưỡng `429` 0%, `5xx` < 1%, p95 ≤ 1 s; 4 bước xác nhận chống dò mật khẩu. Q1 (chặn tạm theo IP) chờ chốt
+- [x] Xếp lại mốc theo ngày làm việc, mốc chưa duyệt để dự kiến — Đạt — SE-005 dự kiến 27/11 (T6) / 30/11 (T2); SE-006 dự kiến 02/12 (T4) / 03/12 (T5); SE-004 dự kiến 04/12 (T6) / 07/12 (T2); bỏ qua thứ Bảy, Chủ nhật
+**Kiểm tra đã chạy** — `git fetch`; `git worktree list`; `git merge-base`, `git diff --quiet`, `git show --stat 977c03d`; `gh pr list --head fix/avatar-requires-login`; `git diff --check`; kiểm tra liên kết.
+**Trạng thái và bước tiếp theo** — Chờ Review; khách hàng xác nhận vòng 3, chốt R1 (quy trình khôi phục) và Q1 (chặn tạm theo IP), duyệt mốc dự kiến.
 
 ## Phản hồi UI
 Chưa có.

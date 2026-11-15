@@ -56,11 +56,36 @@ Khách hàng chốt 15/11/2026 (duyệt TL-003). Cột **Phương án / làm rõ
 | # | Quyết định | Phương án / làm rõ | Task |
 |---|---|---|---|
 | CS-1 | Admin quản trị tài khoản. Quyền admin **không** tự cấp quyền đọc Chat hoặc tài liệu của nhân viên. Quyền tài liệu cấp theo chính sách dữ liệu riêng | Giữ như hiện tại (đã xác minh). Mọi API nội dung lọc theo người gọi; không có ngoại lệ theo vai trò. Chính sách dữ liệu tài liệu viết khi mở Module 3 | Không cần sửa code; điều kiện chặn merge [workflow 9.2](../project/workflow.md#92-điều-kiện-chặn-merge) điều 2 |
-| CS-2 | Trang quản trị **chặn đặt lại mật khẩu cho chính mình hoặc cho admin khác**. Giữ luồng tự đổi mật khẩu trong Hồ sơ | API `POST /admin/users/:id/reset-password` trả `400` (mã mới, ví dụ `USER_CANNOT_RESET_ADMIN`) khi đích là chính mình hoặc có vai trò `ADMIN`; UI ẩn mục "Đặt lại mật khẩu" ở các dòng đó. **Khôi phục tài khoản admin** (bắt buộc có trước thử nội bộ, R-10): (1) luôn có **ít nhất 2 admin hoạt động**; (2) admin quên mật khẩu → admin còn lại **hạ quyền** người đó xuống `USER`, đặt lại mật khẩu, rồi nâng lại `ADMIN`, cả ba bước ghi nhật ký; (3) mất hết admin → người vận hành có quyền máy chủ chạy lệnh `pnpm --filter @cat-gpt/api admin:recover <email>` (đặt mật khẩu tạm, thu hồi mọi phiên, ghi nhật ký), không mở qua web | [SE-006](../tasks/SE-006-account-admin-rules.md) |
-| CS-3 | Admin **được** đổi email đăng nhập của nhân viên, có **xác nhận**, **kiểm tra email trùng** và **nhật ký thay đổi** | Hộp thoại xác nhận nêu email cũ → mới; trùng → `409`/`USER_EMAIL_EXISTS` (đã có ở DB, giữ); nhật ký ghi người đổi, người bị đổi, giá trị cũ/mới, thời điểm. **Phiên đang hoạt động:** đổi email → **thu hồi mọi phiên** của nhân viên đó (request kế tiếp `401`, đăng nhập lại bằng email mới); lý do: email là định danh đăng nhập, tránh phiên cũ tồn tại sau khi chuyển giao tài khoản | [SE-006](../tasks/SE-006-account-admin-rules.md) |
+| CS-2 | Trang quản trị **chặn đặt lại mật khẩu cho chính mình hoặc cho admin khác**. Giữ luồng tự đổi mật khẩu trong Hồ sơ. Khôi phục admin qua **quy trình riêng** (khách hàng, 15/11/2026: thay luồng hạ quyền → đặt lại → nâng quyền) | API `POST /admin/users/:id/reset-password` → `400 USER_CANNOT_RESET_ADMIN` khi đích là chính mình, có vai trò `ADMIN`, **hoặc vừa bị hạ từ `ADMIN` trong 24 giờ** (chặn đường vòng hạ quyền rồi đặt lại); UI ẩn "Đặt lại mật khẩu" ở các dòng đó. Khôi phục admin: [mục 4.1](#41-quy-trình-khôi-phục-tài-khoản-admin-đề-xuất--chờ-duyệt) | [SE-006](../tasks/SE-006-account-admin-rules.md) |
+| CS-3 | Admin **được** đổi email đăng nhập của nhân viên, có **xác nhận**, **kiểm tra email trùng** và **nhật ký thay đổi**. **Đổi email → thu hồi mọi phiên** của nhân viên đó (khách hàng chốt 15/11/2026) | Hộp thoại xác nhận nêu email cũ → mới; trùng → `409`/`USER_EMAIL_EXISTS` (đã có ở DB, giữ); nhật ký ghi người đổi, người bị đổi, giá trị cũ/mới, thời điểm; sau khi đổi, mọi phiên của nhân viên bị thu hồi — request kế tiếp `401`, đăng nhập lại bằng email mới | [SE-006](../tasks/SE-006-account-admin-rules.md) |
 | CS-4 | Nhân viên **chỉ xem hồ sơ của mình**. Admin chỉ xem trường cần cho quản trị tài khoản. **SĐT và ảnh** chỉ hiển thị trong màn quản trị khi có nghiệp vụ cụ thể | Hiện chưa có nghiệp vụ → màn quản trị và API `admin/users` **bỏ SĐT và ảnh** (giữ email, họ tên, phòng ban, vai trò, trạng thái, lần đăng nhập cuối). File ảnh đại diện chỉ **chính chủ** mở được | [SE-002](../tasks/SE-002-avatar-requires-login.md) (ảnh), [SE-006](../tasks/SE-006-account-admin-rules.md) (SĐT), [SE-004](../tasks/SE-004-ui-consistency.md) (câu chữ Hồ sơ) |
 | CS-5 | Quy mô thử nội bộ 500 nhân sự | Ngưỡng ở [tiêu chí R-1…R-10](ui-release-standards.md#4-tiêu-chí-chuẩn-bị-cho-500-nhân-sự); hạ tầng còn chờ (chưa chốt nơi chạy) | [SE-005](../tasks/SE-005-login-limit-shared-ip.md) (đăng nhập chung IP) |
 | CS-6 | Bản nhân viên **ẩn Chat** khi còn phản hồi mẫu và ẩn tính năng chưa sẵn sàng; **Swagger kiểm soát theo môi trường**; bản demo local giữ Chat mẫu | Chế độ `staff`: ẩn Chat, Tài liệu; Swagger theo `SWAGGER_ENABLED` của từng môi trường (mặc định tắt ở `staff`) | [SE-003](../tasks/SE-003-release-mode-navigation.md) |
+
+### 4.1. Quy trình khôi phục tài khoản admin (đề xuất — chờ duyệt)
+
+Thay luồng "admin khác hạ quyền → đặt lại → nâng quyền" (khách hàng bỏ ngày 15/11/2026). Bắt buộc có và **đã diễn tập trước đợt thử nội bộ** ([R-10](ui-release-standards.md#4-tiêu-chí-chuẩn-bị-cho-500-nhân-sự)). Công cụ làm ở [SE-006](../tasks/SE-006-account-admin-rules.md).
+
+**Khi dùng:** một admin không đăng nhập được (quên mật khẩu, tài khoản bị khóa, mất thiết bị) và không tự đổi được qua Hồ sơ. Admin khác **không** đặt lại mật khẩu qua web (CS-2).
+
+| Vai | Ai (đề xuất) | Quyền |
+|---|---|---|
+| Người yêu cầu | Chính admin mất truy cập, hoặc trưởng bộ phận của họ | Mở phiếu yêu cầu khôi phục (mã phiếu) |
+| Người phê duyệt | **CTO** hoặc người CTO ủy quyền bằng văn bản; không được là người thực hiện | Duyệt phiếu sau khi xác minh danh tính |
+| Người thực hiện | Người vận hành có quyền vào máy chủ, nằm trong **danh sách do CTO chỉ định** (ít nhất 2 người) | Chạy lệnh khôi phục trên máy chủ; không có đường web |
+
+**Các bước**
+1. Người yêu cầu mở phiếu: tài khoản cần khôi phục, lý do.
+2. Người phê duyệt xác minh danh tính qua **kênh thứ hai** (gặp trực tiếp hoặc gọi lại số điện thoại đã đăng ký trước), ghi kết quả vào phiếu, duyệt.
+3. Người thực hiện chạy trên máy chủ: `pnpm --filter @cat-gpt/api admin:recover --email <email> --ticket <mã phiếu> --approved-by <email người duyệt>`. Lệnh: kiểm tra tài khoản tồn tại và có vai trò `ADMIN` (không nâng quyền tài khoản thường); đặt **mật khẩu tạm ngẫu nhiên** (in một lần, không lưu); đặt trạng thái `ACTIVE`; **buộc đổi mật khẩu ở lần đăng nhập đầu**; thu hồi mọi phiên; ghi nhật ký.
+4. Người thực hiện giao mật khẩu tạm trực tiếp cho admin qua kênh riêng (không qua email/chat chung).
+5. Admin đăng nhập, đổi mật khẩu ngay; người thực hiện đóng phiếu, đính bản ghi nhật ký.
+
+**Nhật ký:** `audit_logs` bản ghi `ADMIN_RECOVERED` gồm tài khoản, mã phiếu, người duyệt, người thực hiện (tài khoản hệ điều hành + máy), thời điểm; không ghi mật khẩu. Phiếu lưu cùng nhật ký.
+
+**Diễn tập (trước thử nội bộ):** trên môi trường thử, với tài khoản admin thử; đi đủ 5 bước; biên bản ghi người tham gia, thời gian từng bước, bản ghi nhật ký, vấn đề gặp. Lặp lại khi đổi người thực hiện hoặc hạ tầng.
+
+**Cần khách hàng + CTO chốt (R1):** người phê duyệt, danh sách người thực hiện, kênh xác minh danh tính, nơi lưu phiếu.
 
 ## 5. Cách kiểm tra lại
 

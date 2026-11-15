@@ -2,6 +2,20 @@
 
 Theo mốc của [plan.md](../project/plan.md#2-mốc). TL cập nhật cuối mỗi ngày làm việc và ngay khi phát hiện nguy cơ trễ mốc; mục mới nhất ở trên, giữ các mục cũ ([workflow mục 11](../project/workflow.md#11-theo-dõi-tiến-độ)).
 
+## Cập nhật 15/11/2026 (TL-003 vòng 3 — xếp lại task sau demo)
+
+Bản demo 20/11 **không đổi** (code `fbffd5b`, máy trình chiếu `34b465d`); giờ demo chờ chốt. Senior Dev đã nhận phạm vi mới của SE-002 (commit local `977c03d`; PR #3 mở, trên GitHub còn `02f31f5`, chưa bàn giao).
+
+| Thứ tự | Task | Trạng thái | Bàn giao / hoàn tất | Tiến độ |
+|---|---|---|---|---|
+| 1 | [SE-002](../tasks/SE-002-avatar-requires-login.md) ảnh chỉ chính chủ | **Đang làm** | 23/11 / 24/11 | Đúng kế hoạch |
+| 2 | [SE-003](../tasks/SE-003-release-mode-navigation.md) bản `demo`/`staff` | Sẵn sàng | 25/11 / 26/11 | Đúng kế hoạch |
+| 3 | [SE-005](../tasks/SE-005-login-limit-shared-ip.md) đăng nhập chung IP | Sẵn sàng | Dự kiến 27/11 / 30/11 | Chưa bắt đầu |
+| 4 | [SE-006](../tasks/SE-006-account-admin-rules.md) quản trị tài khoản + công cụ khôi phục | Sẵn sàng | Dự kiến 02/12 / 03/12 | Chưa bắt đầu |
+| 5 | [SE-004](../tasks/SE-004-ui-consistency.md) giao diện nhất quán | Sẵn sàng | Dự kiến 04/12 / 07/12 | Chưa bắt đầu |
+
+Cần khách hàng / CTO chốt: giờ demo (D1); R1 — người phê duyệt và người thực hiện [khôi phục admin](../design/access-control.md#41-quy-trình-khôi-phục-tài-khoản-admin-đề-xuất--chờ-duyệt); Q1 — chặn tạm theo IP khi dò mật khẩu ([SE-005](../tasks/SE-005-login-limit-shared-ip.md#quyết-định-còn-mở)); duyệt mốc dự kiến SE-005, SE-006, SE-004.
+
 ## Cập nhật 15/11/2026 (quyết định quyền và UI — TL-003 vòng 2)
 
 Bản demo 20/11 **không đổi** (code `fbffd5b`, máy trình chiếu chạy `34b465d`); giờ demo chờ chốt. Khách hàng duyệt TL-003, chốt CS-1…CS-6 và font Be Vietnam Pro.

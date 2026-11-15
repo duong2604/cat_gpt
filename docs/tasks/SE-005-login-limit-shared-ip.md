@@ -2,8 +2,8 @@
 
 Trạng thái: Sẵn sàng
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 1,5 ngày làm việc (0,5 script kiểm chứng; 1 sửa giới hạn + chạy lại)
-Phụ thuộc: làm sau [SE-006](SE-006-account-admin-rules.md) (thứ tự ưu tiên); **chặn thử nội bộ** ([R-3](../design/ui-release-standards.md#4-tiêu-chí-chuẩn-bị-cho-500-nhân-sự)). Không ảnh hưởng demo 20/11
-Hạn bàn giao review: Chờ chốt (đề xuất 28/11/2026) · Hạn hoàn tất: Chờ chốt (đề xuất 29/11/2026)
+Phụ thuộc: làm sau [SE-003](SE-003-release-mode-navigation.md), **trước** [SE-006](SE-006-account-admin-rules.md) (khách hàng xếp lại 15/11/2026); **chặn thử nội bộ** ([R-3](../design/ui-release-standards.md#4-tiêu-chí-chuẩn-bị-cho-500-nhân-sự)). Không ảnh hưởng demo 20/11
+Hạn bàn giao review: Dự kiến 27/11/2026 (thứ Sáu) · Hạn hoàn tất: Dự kiến 30/11/2026 (thứ Hai) — chưa duyệt
 Ngày thực tế: bắt đầu — · bàn giao review — · hoàn tất —
 Chốt: 15/11/2026 — khách hàng duyệt TL-003 (gồm tiêu chí R-3) và yêu cầu task riêng kiểm chứng giới hạn đăng nhập khi nhiều tài khoản dùng chung IP
 SHA cơ sở: `origin/develop` @ SHA khi nhận task
@@ -17,16 +17,34 @@ Nhân viên trong cùng mạng công ty (cùng một IP ra ngoài) đăng nhập
 - Mọi API khác: `ThrottlerGuard` toàn cục **120 request/phút/IP** (`app.module.ts`) — cả công ty chung IP sẽ cùng chia 120 request/phút. Chỉ `/health` được bỏ qua.
 - `trust proxy` đã có cấu hình (`TRUST_PROXY`) — dùng khi chạy sau proxy.
 
+## Kịch bản kiểm chứng
+Chạy từ **một máy** (một IP), chế độ `demo`, script `apps/api/scripts/shared-ip-check.mjs` (Node chuẩn, không thêm thư viện). Chạy **trước khi sửa** (SHA cơ sở) và **sau khi sửa**, cùng tham số.
+
+| Bước | Nội dung | Tham số mặc định |
+|---|---|---|
+| Chuẩn bị | Tạo N tài khoản nhân viên **hợp lệ** `loadtest+NNN@catgpt.local` qua API admin (cùng mật khẩu thử) | N = 200 |
+| A. Đăng nhập dồn | Mỗi tài khoản đăng nhập 1 lần, rải đều trong T phút, tối đa C yêu cầu song song | T = 5 phút; C = 20 |
+| B. Thao tác | Mỗi tài khoản đã đăng nhập, trong 5 phút, cứ ~10 giây gọi 1 trong `GET /me`, `GET /me/sessions`, `GET /conversations`; 10% tài khoản gửi 1 tin Chat mỗi phút (≈ 1.200 request/phút từ một IP) | — |
+| Bậc đồng thời | Lặp A + B với C = 10, 20, 50 (bậc 50 để biết giới hạn, không bắt buộc đạt) | — |
+| Dọn | Khóa toàn bộ `loadtest+…` | — |
+
+**Đo và in ra** theo từng bước và bậc: tổng request; tỷ lệ `2xx`, `401`, `429`, `5xx`; p50/p95 thời gian đăng nhập và thao tác.
+
+**Ngưỡng đạt (sau khi sửa, C = 20):** tài khoản hợp lệ bị từ chối `429` = **0%**; `5xx` < 1%; đăng nhập p95 ≤ 1 s. Trước khi sửa: ghi tỷ lệ `429` để làm bằng chứng tái hiện.
+
+**Xác nhận chống dò mật khẩu vẫn hoạt động** (sau khi sửa, chạy song song với bước B để chứng minh không ảnh hưởng người dùng hợp lệ):
+1. Một email nhập sai mật khẩu 5 lần trong 15 phút → lần 6 `429` (kể cả khi mật khẩu đúng) với thông báo đã dịch; hết 15 phút đăng nhập lại được.
+2. Một email khác cùng IP đăng nhập đúng ngay sau đó → `200`.
+3. Dò rải: một IP thử sai trên 100 email khác nhau (mỗi email 1 lần) trong 1 phút → bị chặn khi vượt ngưỡng số lần **sai** theo IP (đề xuất 30 lần sai/phút/IP); ghi lại ảnh hưởng tới tài khoản hợp lệ cùng IP (xem Q1).
+4. Tỷ lệ `429` của tài khoản hợp lệ trong bước B vẫn 0%.
+
 ## Output
 - PR từ `fix/shared-ip-throttling` vào `develop`.
-- **Script kiểm chứng** `apps/api/scripts/shared-ip-check.mjs` (Node chuẩn, không thêm thư viện): tạo N tài khoản thử có tiền tố `loadtest+` qua API admin, đăng nhập lần lượt từ một máy trong T phút, mỗi tài khoản gọi thêm `GET /me` và `GET /conversations` K lần; in số `2xx`/`401`/`429`/`5xx`; cuối cùng **khóa** các tài khoản thử. Tham số qua dòng lệnh, mặc định N=200, T=5, K=3.
-- **Chạy trước khi sửa** (trên SHA cơ sở) và ghi kết quả — bằng chứng tái hiện.
+- Script kiểm chứng như trên; kết quả trước/sau ghi vào bàn giao (bảng số liệu).
 - **Sửa giới hạn:**
-  - Đăng nhập: chống dò mật khẩu theo **email** (5 lần **sai**/15 phút/email → `429`), cộng giới hạn IP rộng (mặc định 300 lần/phút/IP).
-  - API đã đăng nhập: giới hạn theo **người dùng** (mặc định 120 request/phút/người); request chưa đăng nhập giữ giới hạn theo IP.
-  - Ngưỡng đặt qua biến môi trường, có giá trị mặc định; ghi `.env.example`.
-  - Giữ nguyên giới hạn Chat 20 tin/phút/người (SE-001).
-- **Chạy lại sau khi sửa** và ghi kết quả.
+  - Đăng nhập: chặn theo **email** (5 lần **sai**/15 phút/email); theo IP chỉ đếm lần **sai** (đề xuất 30/phút/IP) cộng trần tổng rộng (đề xuất 300 lần/phút/IP).
+  - API đã đăng nhập: giới hạn theo **người dùng** (đề xuất 120 request/phút/người); request chưa đăng nhập giữ giới hạn theo IP.
+  - Ngưỡng đặt qua biến môi trường, có giá trị mặc định; ghi `.env.example`. Giữ giới hạn Chat 20 tin/phút/người (SE-001).
 - Tài liệu: [access-control](../design/access-control.md) KT-3 → "Đã sửa"; [ui-release-standards R-3](../design/ui-release-standards.md#4-tiêu-chí-chuẩn-bị-cho-500-nhân-sự) hiện trạng; `module-1-auth.md` phần giới hạn đăng nhập.
 
 ## Phạm vi
@@ -39,21 +57,21 @@ Nhân viên trong cùng mạng công ty (cùng một IP ra ngoài) đăng nhập
 ## Checklist nghiệm thu
 | # | Tiêu chí | Nguồn | Cách kiểm tra |
 |---|---|---|---|
-| AC1 | Kết quả **trước khi sửa** (SHA cơ sở): có `429` khi N=200 | Tái hiện KT-3 | Đầu ra script |
-| AC2 | **Sau khi sửa**, N=200, T=5, K=3 từ một máy: 0 `429`, 0 `5xx`, mọi đăng nhập `200` | R-3 | Đầu ra script |
-| AC3 | Một email sai mật khẩu 6 lần trong 15 phút → lần 6 `429` với thông báo đã dịch; **email khác cùng IP** đăng nhập ngay sau đó vẫn `200` | R-3 | `curl` |
-| AC4 | Một người dùng gửi > 120 request/phút → `429`; người khác cùng IP không bị ảnh hưởng | R-3 | Script hoặc `curl` lặp |
-| AC5 | Giới hạn Chat 20 tin/phút/người vẫn đúng (SE-001 AC7) | Không hồi quy | `curl` 21 request |
-| AC6 | Tài khoản thử `loadtest+…` đã khóa sau khi chạy; ghi số lượng | Dữ liệu thử | Đầu ra script + màn quản trị |
-| AC7 | Checklist hai vai đủ | [workflow 9.1](../project/workflow.md#91-trách-nhiệm-hai-vai-về-phân-quyền-giao-diện-và-phát-hành) | Bàn giao 6.1 |
-| AC8 | `pnpm build`, `pnpm typecheck`, `pnpm lint` đạt | Quy ước repo | Lệnh |
+| AC1 | **Trước khi sửa:** kịch bản A + B (C = 20) có `429` — ghi tỷ lệ | Tái hiện KT-3 | Đầu ra script |
+| AC2 | **Sau khi sửa,** C = 20: `429` tài khoản hợp lệ 0%, `5xx` < 1%, đăng nhập p95 ≤ 1 s; ghi thêm số liệu C = 10 và C = 50 | R-3 | Đầu ra script |
+| AC3 | Chống dò mật khẩu: bước 1–4 của kịch bản đạt | R-3 | `curl` + đầu ra script |
+| AC4 | Giới hạn Chat 20 tin/phút/người vẫn đúng (SE-001 AC7) | Không hồi quy | `curl` 21 request |
+| AC5 | Tài khoản `loadtest+…` đã khóa; ghi số lượng | Dữ liệu thử | Đầu ra script + màn quản trị |
+| AC6 | Checklist hai vai đủ | [workflow 9.1](../project/workflow.md#91-trách-nhiệm-hai-vai-về-phân-quyền-giao-diện-và-phát-hành) | Bàn giao 6.1 |
+| AC7 | `pnpm build`, `pnpm typecheck`, `pnpm lint` đạt | Quy ước repo | Lệnh |
 
 ## Quyết định còn mở
 | # | Câu hỏi | Đề xuất mặc định | Chốt |
 |---|---|---|---|
-| H1 | Hạn bàn giao / hoàn tất (ngoài khung 23–26/11) | 28/11 / 29/11 | Chờ khách hàng + CTO |
+| Q1 | Một máy trong mạng công ty dò mật khẩu trên nhiều email → chặn theo IP sẽ ảnh hưởng người khác cùng IP. Chấp nhận chặn tạm cả IP? | Chặn tạm 5 phút **chỉ các lần đăng nhập sai** từ IP đó; đăng nhập đúng vẫn qua; ghi log cảnh báo | Chờ khách hàng + CTO (không chặn phần còn lại) |
+| H1 | Mốc (dự kiến) | Bàn giao 27/11, hoàn tất 30/11 | Chờ duyệt |
 
-Ngưỡng mặc định ở Output là đề xuất của TL theo R-3; đổi được qua biến môi trường, không chặn task.
+Ngưỡng ở Output là đề xuất của TL; đổi được qua biến môi trường.
 
 ## Kết quả review
 Chưa có bàn giao.

@@ -33,18 +33,25 @@ Cùng một mã nguồn chạy được hai chế độ: `demo` (giống hệt b
 - Thiết kế: [ui-release-standards mục 3](../design/ui-release-standards.md#3-chế-độ-phát-hành-và-tính-năng-hiển-thị); [access-control KT-2](../design/access-control.md#3-khoảng-trống-đã-xác-minh).
 
 ## Checklist nghiệm thu
-Kiểm tra bằng tài khoản **nhân viên và admin**, desktop + mobile 375px.
+Kiểm tra bằng **cả hai vai** — nhân viên (tài khoản thử riêng của task) và admin — ở **cả hai chế độ**, desktop + mobile 375px. Ghi kết quả theo bảng dưới (mỗi ô: thấy gì + ảnh hoặc mã HTTP).
+
+| Kiểm tra | `demo` · nhân viên | `demo` · admin | `staff` · nhân viên | `staff` · admin |
+|---|---|---|---|---|
+| **Màn vào sau đăng nhập** | `/chat` | `/chat` | `/profile` | `/profile` |
+| **Menu** | Trò chuyện, Tài liệu (Đang phát triển) | + Quản trị › Người dùng | Không có Trò chuyện, Tài liệu (chỉ còn menu tài khoản → Hồ sơ) | Quản trị › Người dùng |
+| **Mở trực tiếp** `/chat`, `/chat/<id>` | Mở được | Mở được | Trang "Không tìm thấy trang"; API `404` | Như nhân viên |
+| **Mở trực tiếp** `/documents` | Trang "Đang phát triển" | Như nhân viên | "Không tìm thấy trang" | Như nhân viên |
+| **Mở trực tiếp** `/admin/users` | "Không có quyền truy cập"; API `403` | Mở được | "Không có quyền truy cập"; API `403` | Mở được |
+| **Mở trực tiếp** `/profile` | Mở được | Mở được | Mở được | Mở được |
 
 | # | Tiêu chí | Nguồn | Cách kiểm tra |
 |---|---|---|---|
-| AC1 | Không đặt biến (mặc định `demo`): thanh bên, `/chat` (gửi → phản hồi mẫu chạy dần), `/documents`, Swagger giống `dbc4d85` | Giữ bản demo | UI so với ảnh TL-003; `curl /api/v1/docs` → 200 |
-| AC2 | `staff`: thanh bên không có Trò chuyện, Tài liệu; nhân viên chỉ thấy Hồ sơ; admin thấy thêm Quản trị; sau đăng nhập vào `/profile` | CS-6 | UI nhân viên + admin |
-| AC3 | `staff`: mở trực tiếp `/chat`, `/chat/<id>`, `/documents` → trang "Không tìm thấy trang"; API `POST /chat/stream`, `GET /conversations` → `404` | CS-6 | UI + `curl` |
-| AC4 | Swagger: `staff` không đặt biến → `/api/v1/docs` `404`; `staff` + `SWAGGER_ENABLED=true` → `200`; `demo` + `SWAGGER_ENABLED=false` → `404` | CS-6 | `curl` 3 cấu hình |
-| AC5 | Nhân viên không thấy nhóm Quản trị ở cả hai chế độ; mở `/admin/users` → "Không có quyền truy cập"; API `403` | access-control mục 2 | UI + `curl` |
-| AC6 | `RELEASE_MODE=abc` → API không khởi động, lỗi rõ | Cấu hình an toàn | Chạy thử |
-| AC7 | Checklist hai vai đủ (desktop + mobile, sáng + tối, vi + en) | [workflow 9.1](../project/workflow.md#91-trách-nhiệm-hai-vai-về-phân-quyền-giao-diện-và-phát-hành) | Bàn giao 6.1 |
-| AC8 | `pnpm build`, `pnpm typecheck`, `pnpm lint` đạt; chỉ đổi file trong phạm vi | Quy ước repo | Lệnh |
+| AC1 | Không đặt biến (mặc định `demo`): 2 cột `demo` khớp bảng và giống `2636714` (gửi Chat → phản hồi mẫu chạy dần) | Giữ bản demo | UI so với ảnh TL-003 |
+| AC2 | `RELEASE_MODE=staff`: 2 cột `staff` khớp bảng | CS-6 | UI + `curl` (`POST /chat/stream`, `GET /conversations` → `404`) |
+| AC3 | **Swagger** `/api/v1/docs`: `demo` không đặt biến → `200`; `demo` + `SWAGGER_ENABLED=false` → `404`; `staff` không đặt biến → `404`; `staff` + `SWAGGER_ENABLED=true` → `200` | CS-6 | `curl -i` 4 cấu hình |
+| AC4 | `RELEASE_MODE=abc` → API không khởi động, lỗi rõ | Cấu hình an toàn | Chạy thử |
+| AC5 | Checklist hai vai đủ (sáng + tối, vi + en); tài khoản thử đã khóa | [workflow 9.1](../project/workflow.md#91-trách-nhiệm-hai-vai-về-phân-quyền-giao-diện-và-phát-hành) | Bàn giao 6.1 |
+| AC6 | `pnpm build`, `pnpm typecheck`, `pnpm lint` đạt; chỉ đổi file trong phạm vi | Quy ước repo | Lệnh |
 
 ## Quyết định còn mở
 Không có. CS-6 đã chốt 15/11/2026.
