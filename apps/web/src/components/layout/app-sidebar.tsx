@@ -20,7 +20,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { useCurrentUser } from "@/features/auth/hooks";
+import { useCurrentFeatures, useCurrentUser } from "@/features/auth/hooks";
 import { isStaffMode } from "@/lib/release-mode";
 import { routes } from "@/lib/routes";
 import { NavUser } from "./nav-user";
@@ -34,14 +34,6 @@ interface NavItem {
   /** Module chưa triển khai → hiển thị nhãn "Sắp có". */
   comingSoon?: boolean;
 }
-
-// Bản `staff`: ẩn Chat (còn phản hồi mẫu) và Tài liệu (chưa sẵn sàng) — CS-6.
-const WORKSPACE_ITEMS: NavItem[] = isStaffMode
-  ? []
-  : [
-      { key: "chat", href: routes.chat, icon: MessageSquareIcon },
-      { key: "documents", href: routes.documents, icon: FileTextIcon, comingSoon: true },
-    ];
 
 const ADMIN_ITEMS: NavItem[] = [{ key: "users", href: routes.adminUsers, icon: UsersIcon }];
 
@@ -83,6 +75,15 @@ function NavGroup({ label, items }: { label: string; items: NavItem[] }) {
 export function AppSidebar() {
   const t = useTranslations();
   const user = useCurrentUser();
+  // Chat theo cấu hình LLM của máy chủ (CS-6); Tài liệu theo RELEASE_MODE (chưa sẵn sàng, không liên quan LLM).
+  const { chatEnabled } = useCurrentFeatures();
+  const homeHref = chatEnabled ? routes.chat : routes.profile;
+  const workspaceItems: NavItem[] = [
+    ...(chatEnabled ? [{ key: "chat" as const, href: routes.chat, icon: MessageSquareIcon }] : []),
+    ...(isStaffMode
+      ? []
+      : [{ key: "documents" as const, href: routes.documents, icon: FileTextIcon, comingSoon: true }]),
+  ];
 
   return (
     <Sidebar collapsible="icon">
@@ -90,7 +91,7 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link href={routes.home}>
+              <Link href={homeHref}>
                 <AppLogo />
                 <div className="grid flex-1 text-left leading-tight">
                   <span className="truncate font-semibold">{t("common.appName")}</span>
@@ -105,8 +106,8 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        {WORKSPACE_ITEMS.length > 0 ? (
-          <NavGroup label={t("nav.workspace")} items={WORKSPACE_ITEMS} />
+        {workspaceItems.length > 0 ? (
+          <NavGroup label={t("nav.workspace")} items={workspaceItems} />
         ) : null}
         {user.role === UserRole.ADMIN ? (
           <NavGroup label={t("nav.administration")} items={ADMIN_ITEMS} />

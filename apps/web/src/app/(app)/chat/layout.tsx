@@ -1,8 +1,10 @@
-import { notFound } from "next/navigation";
 import { ChatLayout } from "@/features/chat/components/chat-layout";
-import { isStaffMode } from "@/lib/release-mode";
+import { ChatModeGuard } from "@/features/chat/components/chat-mode-guard";
 
 export default function Layout({ children }: LayoutProps<"/chat">) {
-  if (isStaffMode) notFound();
-  return <ChatLayout>{children}</ChatLayout>;
+  return (
+    <ChatModeGuard>
+      <ChatLayout>{children}</ChatLayout>
+    </ChatModeGuard>
+  );
 }

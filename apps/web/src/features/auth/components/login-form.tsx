@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { AlertCircleIcon, InfoIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -15,8 +16,10 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { useErrorMessage } from "@/hooks/use-error-message";
 import { useHydrated } from "@/hooks/use-hydrated";
-import { safeNextPath } from "@/lib/routes";
+import { queryKeys } from "@/lib/api/query-keys";
+import { routes, safeNextPath } from "@/lib/routes";
 import { rules } from "@/lib/validation";
+import { authApi } from "../api";
 import { useLogin } from "../hooks";
 
 const loginSchema = z.object({
@@ -31,6 +34,7 @@ export function LoginForm({ reason, next }: { reason?: LoginReason; next?: strin
   const t = useTranslations("auth");
   const errorMessage = useErrorMessage();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const login = useLogin();
   const hydrated = useHydrated();
 
@@ -41,7 +45,15 @@ export function LoginForm({ reason, next }: { reason?: LoginReason; next?: strin
 
   const onSubmit = form.handleSubmit((values) =>
     login.mutate(values, {
-      onSuccess: () => router.replace(safeNextPath(next)),
+      onSuccess: async () => {
+        // Vừa đăng nhập xong mới có phiên để gọi /me/features — quyết định Chat còn bật hay không
+        // phải lấy từ API (nguồn duy nhất), không suy từ biến môi trường phía web.
+        const features = await queryClient.fetchQuery({
+          queryKey: queryKeys.myFeatures,
+          queryFn: authApi.features,
+        });
+        router.replace(safeNextPath(next, features.chatEnabled ? routes.chat : routes.profile));
+      },
       onError: () => form.resetField("password"),
     }),
   );

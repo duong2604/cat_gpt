@@ -1,7 +1,6 @@
-import { isStaffMode } from "./release-mode";
-
 export const routes = {
-  home: isStaffMode ? "/profile" : "/chat",
+  /** Mặc định chung (proxy, not-found…); nơi quyết định theo Chat còn bật hay không dùng `fallback` của `safeNextPath`. */
+  home: "/chat",
   login: "/login",
   chat: "/chat",
   documents: "/documents",
@@ -10,7 +9,7 @@ export const routes = {
 } as const;
 
 /** Chỉ chấp nhận đường dẫn nội bộ để tránh open redirect qua ?next=. */
-export function safeNextPath(next: string | null | undefined): string {
-  if (!next || !next.startsWith("/") || next.startsWith("//")) return routes.home;
+export function safeNextPath(next: string | null | undefined, fallback: string = routes.home): string {
+  if (!next || !next.startsWith("/") || next.startsWith("//")) return fallback;
   return next;
 }

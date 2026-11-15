@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import { FullPageSpinner } from "@/components/full-page-spinner";
 import { Button } from "@/components/ui/button";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { useMe } from "@/features/auth/hooks";
+import { useFeatures, useMe } from "@/features/auth/hooks";
 import { useErrorMessage } from "@/hooks/use-error-message";
 import { routes } from "@/lib/routes";
 import { AppHeader } from "./app-header";
@@ -27,18 +27,26 @@ export function AppShell({
   defaultSidebarOpen: boolean;
 }) {
   const me = useMe();
+  const features = useFeatures();
   const pathname = usePathname();
   const fullBleed = FULL_BLEED_ROUTES.some((r) => pathname === r || pathname.startsWith(`${r}/`));
   const tCommon = useTranslations("common");
   const errorMessage = useErrorMessage();
 
-  if (me.isPending) return <FullPageSpinner />;
+  if (me.isPending || features.isPending) return <FullPageSpinner />;
 
-  if (me.isError) {
+  if (me.isError || features.isError) {
+    const error = me.error ?? features.error;
     return (
       <div className="flex min-h-svh flex-col items-center justify-center gap-4 p-6 text-center">
-        <p className="text-sm text-muted-foreground">{errorMessage(me.error)}</p>
-        <Button variant="outline" onClick={() => me.refetch()}>
+        <p className="text-sm text-muted-foreground">{errorMessage(error)}</p>
+        <Button
+          variant="outline"
+          onClick={() => {
+            void me.refetch();
+            void features.refetch();
+          }}
+        >
           {tCommon("retry")}
         </Button>
       </div>
