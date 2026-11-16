@@ -15,7 +15,7 @@ Một lệnh dựng được Redis, MinIO, Qdrant trên máy dev; mọi PR vào 
 ## Output
 - `docker-compose.yml` ở gốc repo: `redis`, `minio`, `qdrant` — image có tag phiên bản cố định, healthcheck, volume có tên, cổng chỉ bind `127.0.0.1` (không mở ra mạng). Tên project compose `cat-gpt` (không đụng container/volume của dự án khác).
 - MinIO: credential đọc từ biến môi trường; **không** bật bucket public. (Bucket do API tạo ở SE-011.)
-- **Image (TL kiểm 16/11/2026):** `minio/minio` đã bị gỡ khỏi Docker Hub (404) và repo upstream `minio/minio` đã archive — không còn image cộng đồng. Dùng `bitnamilegacy/minio:2025.7.23-debian-12-r5` (bản MinIO đóng băng 08/2025, chỉ cho dev, bind `127.0.0.1`) cho tới khi CTO chốt Q-INF-1. Redis `redis:7.4-alpine` (7.4.10), Qdrant `qdrant/qdrant:v1.20.2` — TL đã chạy thử đạt cả ba (báo cáo ngày 16/11 vòng 5).
+- **Image (TL kiểm 16/11/2026):** `minio/minio` đã bị gỡ khỏi Docker Hub (404) và repo upstream `minio/minio` đã archive — không còn image cộng đồng. Dùng `bitnamilegacy/minio:2025.7.23-debian-12-r5` (bản MinIO đóng băng 08/2025, chỉ cho dev, bind `127.0.0.1`) — **CTO cho phép tạm thời cho local development (17/11/2026)**, không phải giải pháp production; phương án thay thế còn bảo trì (RustFS) ở [thiết kế mục 13](../design/module-3-documents.md#13-object-storage-s3-compatible-thay-minio). Redis `redis:7.4-alpine` (7.4.10), Qdrant `qdrant/qdrant:v1.20.2` — TL đã chạy thử đạt cả ba (báo cáo ngày 16/11 vòng 5).
 - Máy dev có container/volume của dự án khác (ví dụ container `redis` đã dừng): **không** đụng tới; dùng tên project compose `cat-gpt` để không trùng tên.
 - `apps/api/.env.example`: thêm khối biến hạ tầng theo [thiết kế Module 3 mục 8](../design/module-3-documents.md#8-cấu-hình) (`REDIS_*`, `BULLMQ_PREFIX`, `MINIO_*`, `QDRANT_*`) — giá trị minh họa, không credential thật. SE cập nhật `apps/api/.env` của mình cùng danh sách.
 - `scripts/check-env.mjs` (Node chuẩn, không thêm thư viện) + script `pnpm env:check` ở gốc:
@@ -54,7 +54,7 @@ Checklist hai vai: Không áp dụng (không có API/giao diện mới) — ghi 
 ## Quyết định còn mở
 | # | Câu hỏi | Đề xuất mặc định | Chốt |
 |---|---|---|---|
-| Q-INF-1 | Object storage lâu dài khi MinIO không còn image cộng đồng: (a) giữ `bitnamilegacy/minio` cho dev, quyết lại trước khi đóng gói Docker toàn hệ thống; (b) đổi sang S3-compatible còn bảo trì (SeaweedFS…), lệch chữ "MinIO" trong đề cương | (a) cho Wave 0–2 — code gọi S3 API nên đổi máy chủ lưu trữ chỉ đổi `.env`; quyết lại trước task Docker toàn hệ thống | Chờ CTO — **không chặn** SE-010 |
+| Q-INF-1 | Object storage lâu dài khi MinIO không còn image cộng đồng | Giữ `bitnamilegacy/minio` cho dev; chuyển RustFS trước task đóng gói Docker | **Chốt tạm 17/11/2026 (CTO):** `bitnamilegacy/minio` cho local dev, không production; TL đề xuất phương án còn bảo trì ([thiết kế mục 13](../design/module-3-documents.md#13-object-storage-s3-compatible-thay-minio)) |
 
 ## Kết quả review
 Chưa có bàn giao.

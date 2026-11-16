@@ -4,5 +4,6 @@ Một file mỗi ngày (giờ Việt Nam), mới nhất ở trên. Quy tắc và
 
 | Ngày | Báo cáo | Vòng | Trạng thái CTO review | Nội dung chính |
 |---|---|---|---|---|
+| 17/11/2026 (T3) | [2026-11-17](2026-11-17.md) | 1 | Vòng 1: Chờ Review | SE-003 vòng 4 review đạt kỹ thuật (merge chờ khách hàng); TL-007 Done; W1, P1 áp dụng; SE-011 Sẵn sàng; RustFS đề xuất thay MinIO |
 | 16/11/2026 (T2) | [2026-11-16](2026-11-16.md) | 1–5 | Vòng 1–5: Chờ Review | SE-003 review vòng 2–3; merge sớm PR #3, PR #4 (SE-002, SE-007 Done); bộ nguồn đồ án vòng 4; CTO duyệt lộ trình M3–4, thiết kế Module 3, môi trường dev |
 | 15/11/2026 (CN) | [2026-11-15](2026-11-15.md) | 1–10 | Vòng 1, 4, 8: đã kết luận · Vòng 3: khách hàng xác nhận SE-007 · Vòng 2, 3, 5–7, 9, 10: Chờ Review | Chat lên `develop`; TL review SE-002 đạt (merge sau demo); thứ tự task sau demo; bắt đầu báo cáo ngày và prompt onboarding; bắt đầu bộ nguồn đồ án (TL-004, SE-008) |

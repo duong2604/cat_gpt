@@ -1,8 +1,8 @@
 # SE-011 — Lát TXT, backend: tải lên → xử lý bất đồng bộ → READY → danh sách / tải xuống / xóa
 
-Trạng thái: Nháp
+Trạng thái: Sẵn sàng
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 3 ngày làm việc
-Phụ thuộc: [TL-007](TL-007-module-3-design.md) được duyệt (chặn); [SE-010](SE-010-dev-infra-ci.md) đã merge (chặn); Q4 (thư viện chia đoạn) — không chặn
+Phụ thuộc: [TL-007](TL-007-module-3-design.md) — Done 17/11/2026; [SE-010](SE-010-dev-infra-ci.md) đã merge (**chặn** — nhận task sau khi SE-010 merge)
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
 Ngày thực tế: bắt đầu — · bàn giao review — · hoàn tất —
 Chốt: 16/11/2026 — CTO duyệt Wave 0–2: SE-011 triển khai backend lát TXT bằng service thật; chỉ chủ sở hữu truy cập; OpenAI chỉ dùng tài liệu thử công khai
@@ -19,7 +19,8 @@ Một tệp TXT tải lên được lưu thật ở MinIO, xử lý bất đồn
 - Module `apps/api/src/modules/documents/` theo [thiết kế mục 3](../design/module-3-documents.md#3-kiến-trúc-và-thành-phần); chỉ bộ bóc tách TXT.
 - `packages/shared`: `DocumentStatus`, mã lỗi mục 7, `DocumentDto`.
 - Biến môi trường mục 8 trong `env.validation.ts`, `app-config.service.ts`, `.env.example` (đồng bộ `.env`; `pnpm env:check` đạt).
-- Dependency mới (đã duyệt hạ tầng 16/11): `bullmq`, `@nestjs/bullmq`, `minio`, `@qdrant/js-client-rest`; `@langchain/textsplitters` chỉ khi Q4 chốt dùng. Thêm gói khác → hỏi TL trước.
+- Dependency mới (đã duyệt): `bullmq` ^6, `@nestjs/bullmq` ^12, `minio`, `@qdrant/js-client-rest`, `@langchain/textsplitters` (Q4 — CTO 17/11/2026: dùng `RecursiveCharacterTextSplitter`, không tự viết). Thêm gói khác → hỏi TL trước.
+- Job ID: `process-<documentId>`, `delete-<documentId>` — **không dùng `:`** (bullmq 6 ném lỗi), không dùng số ([thiết kế mục 4.4](../design/module-3-documents.md#44-hàng-đợi-bullmq)).
 - Tệp thử công khai trong `apps/api/test/fixtures/` (ghi nguồn).
 - Tài liệu: cập nhật trạng thái trong `module-3-documents.md`; [access-control](../design/access-control.md) thêm dòng ma trận cho tài liệu.
 
@@ -32,7 +33,7 @@ Một tệp TXT tải lên được lưu thật ở MinIO, xử lý bất đồn
 - CTO 16/11/2026 mục 4: kiểm thử bằng service thật, không mock/fake chỉ để đánh dấu xong.
 
 ## Checklist nghiệm thu
-Kiểm bằng Redis/MinIO/Qdrant thật (Docker local), MongoDB Atlas dev, OpenAI thật với tệp thử công khai. Tài khoản: nhân viên A, nhân viên B (cùng vai), admin.
+Kiểm bằng Redis/MinIO/Qdrant thật (Docker local), MongoDB Atlas dev, OpenAI thật với tệp thử công khai. **Không ghi "idempotent" hay "dọn sạch" khi chưa có bảng số liệu thật** (CTO 17/11/2026). Tài khoản: nhân viên A, nhân viên B (cùng vai), admin.
 
 | # | Tiêu chí | Nguồn | Cách kiểm tra |
 |---|---|---|---|
@@ -40,7 +41,9 @@ Kiểm bằng Redis/MinIO/Qdrant thật (Docker local), MongoDB Atlas dev, OpenA
 | AC2 | T2, T10: sai đuôi / sai chữ ký / không UTF-8 / quá cỡ → `400` đúng mã, không còn object/bản ghi; tệp chỉ khoảng trắng → `FAILED DOCUMENT_NO_TEXT`, không thử lại | Thiết kế mục 5–7 | `curl` + kiểm MinIO/Mongo |
 | AC3 | T3, T4: Qdrant tắt rồi bật trước lần thử cuối → `READY`; tắt suốt → `FAILED DOCUMENT_PROCESSING_FAILED` sau đúng `DOCUMENT_JOB_ATTEMPTS` lần | Mục 6.3 | `docker compose stop qdrant` / `start` + log |
 | AC4 | T5: chạy lại job `process` cho tài liệu `READY` → số point không đổi | Mục 6.3 bước 4 | Đếm point trước/sau |
-| AC5 | T6: xóa khi đang `PROCESSING` → cuối cùng 0 point, 0 object, 0 bản ghi; không có `READY` | Mục 6.4 | Tệp lớn + kiểm 3 nơi |
+| AC5 | T6, T11: xóa khi worker đang xử lý — (a) đang embedding, (b) ngay sau `PROCESSING`; mỗi giai đoạn ≥ 3 lần → mọi lần 0 point, 0 object, 0 bản ghi, không có `READY` | Mục 6.4, 10 | Tệp lớn + log worker + đếm 3 nơi (bảng số liệu từng lần) |
+| AC5b | T12: kill tiến trình API khi job `PROCESSING`, khởi động lại → `READY`, số point = `chunkCount` | Mục 6.3 | Log BullMQ + đếm point |
+| AC5c | T13: MinIO tắt khi xóa → tài liệu `404` ngay; bật lại trước khi hết lượt → dọn xong 3 nơi | Mục 6.4 | `docker compose stop/start minio` + đếm 3 nơi |
 | AC6 | T9: Redis tắt → upload `503 DOCUMENT_QUEUE_UNAVAILABLE`, không còn object/bản ghi | Mục 6.2 | `docker compose stop redis` |
 | AC7 | T7: B và admin gọi detail/download/delete tài liệu của A → `404 DOCUMENT_NOT_FOUND`; chưa đăng nhập `401`; danh sách của B không thấy tài liệu của A | M3-2, CS-1 | `curl` 3 cookie jar |
 | AC8 | T8: tải xuống — SHA-256 trùng tệp gốc; `Cache-Control: private, no-store`; tên tiếng Việt đúng | FR-M3-05 | `curl -OJ` + `sha256sum` |
@@ -59,7 +62,7 @@ Kiểm bằng Redis/MinIO/Qdrant thật (Docker local), MongoDB Atlas dev, OpenA
 ## Quyết định còn mở
 | # | Câu hỏi | Đề xuất mặc định | Chốt |
 |---|---|---|---|
-| Q4 | Thư viện chia đoạn | `@langchain/textsplitters`; nếu chưa chốt khi tới bước này: tự viết trong `chunk-text.ts` | Chờ CTO/khách hàng |
+| Q4 | Thư viện chia đoạn | `@langchain/textsplitters` | **Chốt 17/11/2026 (CTO):** `RecursiveCharacterTextSplitter` |
 
 ## Kết quả review
 Chưa có bàn giao.
