@@ -10,6 +10,9 @@ import { ACCESS_TOKEN_COOKIE, API_PREFIX } from './common/constants.js';
 import { appValidationPipe } from './common/pipes/app-validation.pipe.js';
 import { AppConfigService } from './config/app-config.service.js';
 
+// SE-010 AC6: commit thử để xác nhận CI đỏ khi typecheck lỗi — sẽ revert ngay sau khi xác nhận.
+const se010Ac6TypecheckProbe: number = 'not-a-number';
+
 // Node trên Windows đôi khi đọc DNS hệ thống thành 127.0.0.1 → SRV lookup của mongodb+srv lỗi ECONNREFUSED.
 if (dns.getServers().every((s) => s.startsWith('127.') || s === '::1')) {
   dns.setServers(['8.8.8.8', '1.1.1.1']);
