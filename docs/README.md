@@ -25,6 +25,7 @@ Hướng dẫn cài đặt và chạy local nằm ở [README.md](../README.md) 
 | [workflow.md](project/workflow.md) | **Nguồn quy trình**: [vai trò](project/workflow.md#1-vai-trò), [luồng & merge](project/workflow.md#2-luồng), [phân công và nhận task](project/workflow.md#31-phân-công-và-nhận-task), [trạng thái](project/workflow.md#4-trạng-thái-và-quyền-chuyển), [mẫu task](project/workflow.md#5-mẫu-task), [báo cáo & checklist](project/workflow.md#6-báo-cáo-và-checklist), [bàn giao lại](project/workflow.md#8-bàn-giao-lại), [nghiệm thu kỹ thuật](project/workflow.md#9-nghiệm-thu-kỹ-thuật-tl), [checklist hai vai](project/workflow.md#91-trách-nhiệm-hai-vai-về-phân-quyền-giao-diện-và-phát-hành), [điều kiện chặn merge](project/workflow.md#92-điều-kiện-chặn-merge), [phản hồi UI](project/workflow.md#10-phản-hồi-ui), [theo dõi tiến độ](project/workflow.md#11-theo-dõi-tiến-độ) |
 | [preview-progress-review.md](project/preview-progress-review.md) | Audit tiến độ so với báo cáo 27/10/2026: đối chiếu từng module trên `develop` và nhánh preview, checklist trải nghiệm, [checklist kiểm chứng theo vòng](project/preview-progress-review.md#5-checklist-kiểm-chứng-của-tl) |
 | [onboarding/](project/onboarding/team-leader.md) | Prompt mở phiên: [team-leader.md](project/onboarding/team-leader.md), [senior-dev.md](project/onboarding/senior-dev.md) |
+| [engineering-guide.md](project/engineering-guide.md) | Hướng dẫn kỹ thuật ngắn: Simplicity First, Backend, Frontend ([TL-010](tasks/TL-010-engineering-guide-skills-pilot.md), thử nghiệm) |
 | [overview-and-decisions.md](project/overview-and-decisions.md) | Thông tin đề tài, nguyên tắc làm việc, quyết định kiến trúc D-01…D-11, quy ước Git, sự cố môi trường |
 
 ## Task — `tasks/`
@@ -44,6 +45,7 @@ Mục lục: [tasks/README.md](tasks/README.md). Task demo Chat: [TL-001](tasks/
 |---|---|
 | [module-1-auth.md](design/module-1-auth.md) | Module 1: yêu cầu đã chốt, token & phiên, dữ liệu, API, màn hình, kiểm thử |
 | [module-2-chat.md](design/module-2-chat.md) | Module 2: phạm vi, câu hỏi chốt, thiết kế BE/FE, giao thức SSE, kế hoạch, checklist |
+| [module-3-documents.md](design/module-3-documents.md) | Module 3: tài liệu — FS/BD, vòng đời, thử lại, xóa, cấu hình, kịch bản kiểm thử ([TL-007](tasks/TL-007-module-3-design.md), chờ duyệt) |
 | [access-control.md](design/access-control.md) | Ma trận phân quyền vai trò → màn hình → thao tác → dữ liệu → khi thiếu quyền; khoảng trống và chính sách CS-1…CS-6 (đã chốt 15/11) |
 | [ui-release-standards.md](design/ui-release-standards.md) | Chuẩn giao diện (font tiếng Việt, theme, spacing, component, thông báo), chế độ phát hành `demo`/`staff`, tiêu chí chuẩn bị cho 500 nhân sự (đã duyệt 15/11) |
 

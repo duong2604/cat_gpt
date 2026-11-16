@@ -1,5 +1,7 @@
 # Kế hoạch demo Chat
 
+> **16/11/2026:** CTO duyệt lộ trình Module 3–4 (Wave 0–2) — xem [mục 8](#8-lộ-trình-module-34-cto-duyệt-16112026). Mục 1–7 giữ nguyên cho demo Chat 20/11.
+
 Trạng thái: Đã chốt phạm vi, ngày demo **20/11/2026** và nơi chạy demo (khách hàng, 15/11/2026) · Chat đã lên `develop` @ `fbffd5b` (15/11) · Còn mở: giờ demo (D1)
 Người lập: TL · Lập: 15/11/2026 · Cơ sở: `origin/develop` @ `6f9d3e4`, `origin/preview/module-2-4-demo` @ `b2a4b22`
 Vai trò: **khách hàng và CTO chốt phạm vi và deadline**; TL ghi lại, giao task và điều phối ([workflow mục 1](workflow.md#1-vai-trò)). Tiến độ hằng ngày: [báo cáo tiến độ demo](../reports/demo-progress.md).
@@ -100,3 +102,29 @@ Khách hàng (15/11/2026): duyệt TL-001 và Q3; demo đầu tiên dùng phản
 - [ ] Giờ demo — chờ chốt
 
 **Trạng thái và bước tiếp theo** — Đã chốt phạm vi và mốc dự kiến; chờ chốt D1 (giờ) và D3.
+
+## 8. Lộ trình Module 3–4 (CTO duyệt 16/11/2026)
+
+Nguồn: CTO directive (audit), CTO vòng 2 và CTO duyệt Wave 0–2 ngày 16/11/2026 ([báo cáo ngày 16/11 vòng 5](../reports/daily/2026-11-16.md#vòng-5--1655)). Không đặt hạn cứng mới: task mới ghi "Không đặt — theo phụ thuộc"; **giữ nguyên** mốc demo 20/11 và các hạn đã chốt (SE-003 25–26/11, TL-002 19–20/11, TL-004/TL-005 25/11).
+
+**Quyết định đã duyệt:** Module 1–4 là cam kết, Module 3–4 là đường găng, Module 5 tạm hoãn · một Senior Dev thực thi trước, mở hai khi máy đủ tài nguyên · Redis/BullMQ, MinIO, Qdrant chạy Docker local (một bộ dùng chung), MongoDB Atlas dev · lát dọc TXT trước, PDF/DOCX sau · chỉ chủ sở hữu truy cập tài liệu · OpenAI chỉ nhận tài liệu thử công khai, không nhạy cảm · CI tối thiểu · Simplicity First ([engineering-guide](engineering-guide.md)).
+
+### 8.1. Đường găng
+
+```
+TL-007 (thiết kế M3) → SE-010 (Docker + CI) → SE-011 (backend TXT) → SE-012 (giao diện TXT)
+  → TL nghiệm thu lát TXT → SE-013 (PDF/DOCX) → TL-008 (thiết kế M4) → RAG backend → RAG giao diện
+  → đánh giá RAG tiếng Việt → Docker toàn hệ thống
+```
+
+### 8.2. Wave 0–2
+
+| Wave | Điều kiện mở | Phương án 1 Senior Dev (đang áp dụng) | TL |
+|---|---|---|---|
+| 0 | CTO duyệt 16/11 | [SE-003](../tasks/SE-003-release-mode-navigation.md) vòng 4 (ghép `develop`) → [SE-010](../tasks/SE-010-dev-infra-ci.md) | [TL-006](../tasks/TL-006-baseline-roadmap.md), [TL-007](../tasks/TL-007-module-3-design.md), [TL-010](../tasks/TL-010-engineering-guide-skills-pilot.md); review PR #6 |
+| 1 | TL-007 duyệt; SE-010 merge | [SE-011](../tasks/SE-011-documents-txt-backend.md) | Review; viết TL-008 |
+| 2 | SE-011 merge, TL xác minh trên `develop` | [SE-012](../tasks/SE-012-documents-txt-frontend.md) → TL nghiệm thu lát TXT → [SE-013](../tasks/SE-013-documents-pdf-docx.md) | TL-008 gửi duyệt; phiếu đo pilot |
+
+SE-003 không chặn Module 3: nếu TL-007 đã duyệt mà SE-003 còn mở (thêm vòng `Cần sửa`), Senior Dev nhận SE-010/SE-011 trước rồi quay lại SE-003 trong hạn 25/11. SE-005, SE-006, SE-004 làm sau lát TXT (phương án 1 SE) hoặc ở phiên thứ hai khi mở.
+
+**Hai Senior Dev (chưa mở):** chỉ khi máy đủ RAM (đo 16/11: 15,8 GB, trống ~2 GB khi đang làm việc). Một bộ Docker dùng chung; mỗi lúc một bộ app (API + web) chạy; phiên thứ hai làm phần không cần chạy app (code + unit test) và hẹn giờ chạy kiểm tra; tách dữ liệu bằng `.env` (DB, bucket, collection, `BULLMQ_PREFIX`).

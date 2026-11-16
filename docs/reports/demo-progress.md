@@ -2,6 +2,19 @@
 
 Theo mốc của [plan.md](../project/plan.md#2-mốc). Chi tiết từng ngày: [báo cáo ngày](daily/README.md). TL cập nhật cuối mỗi ngày làm việc và ngay khi phát hiện nguy cơ trễ mốc; mục mới nhất ở trên, giữ các mục cũ ([workflow mục 11](../project/workflow.md#11-theo-dõi-tiến-độ)).
 
+## Cập nhật 16/11/2026 (lộ trình Module 3–4, Wave 0–2)
+
+Chi tiết: [16/11 vòng 5](daily/2026-11-16.md#vòng-5--1655). Lộ trình: [plan mục 8](../project/plan.md#8-lộ-trình-module-34-cto-duyệt-16112026).
+
+| Mốc / việc | Tình trạng |
+|---|---|
+| M4 Demo 20/11 | Đúng kế hoạch — `34b465d` không đổi |
+| Luồng chính đầu–cuối đã xác minh trên `develop` | 2 (Module 1; Chat phản hồi mẫu). OpenAI thật trên `develop`: chưa xác minh |
+| Module 3 — thiết kế (TL-007) | Chờ Review — đường găng #1 |
+| Module 3 — SE-010 hạ tầng + CI | Sẵn sàng (sau SE-003 vòng 4) |
+| Môi trường dev | Đạt (Redis, MinIO legacy, Qdrant, Atlas); chờ chốt Q-INF-1 |
+| Việc chặn chờ quyết định | TL-007, Q4, Q-INF-1, W1, P1, khóa OpenAI cho TL |
+
 ## Cập nhật 16/11/2026 chiều (bộ nguồn đồ án vòng 4)
 
 Chi tiết: [16/11 vòng 4](daily/2026-11-16.md#vòng-4--1605).
