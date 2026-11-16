@@ -22,6 +22,9 @@ export interface AppFeaturesDto {
   chatEnabled: boolean;
 }
 
+/** Thông tin người dùng trả về cho màn quản trị. Không có avatarUrl (CS-4: ảnh chỉ chính chủ xem). */
+export type AdminUserDto = Omit<UserDto, 'avatarUrl'>;
+
 export interface SessionDto {
   id: string;
   userAgent: string | null;

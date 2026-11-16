@@ -4,9 +4,14 @@ export interface LlmMessage {
   content: string;
 }
 
+/** Lý do provider kết thúc bình thường (không tính Dừng / lỗi). */
+export type LlmFinishReason = 'completed' | 'max_output_tokens';
+
 export interface LlmStreamOptions {
   /** Bị hủy khi người dùng bấm Dừng hoặc đóng kết nối. */
   signal: AbortSignal;
+  /** Provider gọi khi kết thúc bình thường, kèm lý do. */
+  onFinish?: (reason: LlmFinishReason) => void;
 }
 
 /**

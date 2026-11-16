@@ -1,7 +1,7 @@
 # 02 — Yêu cầu và thiết kế hệ thống
 
-Cơ sở: `origin/develop` @ `6ed0fbc` (code = `fbffd5b`) · Người lập: TL · Trạng thái: **Chờ Review (vòng 2, 15/11/2026)**; bổ sung sau SE-008 (19/11) và sau tích hợp (25/11)
-Tài liệu này tóm tắt và dẫn về Function Spec / Basic Design đã có, không thay thế chúng. Mỗi mục ghi rõ **[Đã kiểm chứng]** (có code tại SHA cơ sở và có bằng chứng kiểm thử), **[PR]** (đã kiểm thử trên PR, chưa tích hợp) hoặc **[Dự kiến]** (thiết kế/đề cương, chưa có code).
+Cơ sở: `origin/develop` @ `6ed0fbc` (code = `fbffd5b`) · Người lập: TL · Trạng thái: **Chờ Review (vòng 4, 16/11/2026)** — PR #3 (`1674425`), PR #4 (`d6832e0`) đã tích hợp; code ứng dụng `d6832e0`
+Tài liệu này tóm tắt và dẫn về Function Spec / Basic Design đã có, không thay thế chúng. Mỗi mục ghi rõ **[Đã kiểm chứng]** (có code tại SHA cơ sở và có bằng chứng kiểm thử), **[PR]** (đã kiểm thử trên PR, chưa tích hợp — vòng 4: không còn mục nào) hoặc **[Dự kiến]** (thiết kế/đề cương, chưa có code).
 
 ## 1. Bài toán
 
@@ -18,7 +18,7 @@ Phạm vi giai đoạn hiện thực: Module 1 (tài khoản) và Module 2 (hộ
 | FR-01 | Đăng nhập bằng email + mật khẩu; không có tự đăng ký | Khách | [Đã kiểm chứng] | [module-1 §1 Q7–Q8](../design/module-1-auth.md#1-yêu-cầu-đã-chốt-với-sinh-viên) |
 | FR-02 | Đăng xuất; tự gia hạn phiên ngầm khi còn hoạt động | NV, QTV | [Đã kiểm chứng] | [module-1 §2.1](../design/module-1-auth.md#21-token-so-sánh-và-lựa-chọn) |
 | FR-03 | Xem/sửa hồ sơ (họ tên, SĐT, phòng ban), tải/xóa ảnh đại diện | NV, QTV | [Đã kiểm chứng] | module-1 §1 Q12, §5 |
-| FR-04 | Ảnh đại diện chỉ chính chủ xem được | NV, QTV | [PR] PR #3 | [SE-002](../tasks/SE-002-avatar-requires-login.md); CS-4 |
+| FR-04 | Ảnh đại diện chỉ chính chủ xem được | NV, QTV | [Đã kiểm chứng] PR #3 → `1674425` | [SE-002](../tasks/SE-002-avatar-requires-login.md); CS-4 |
 | FR-05 | Đổi mật khẩu (cần mật khẩu hiện tại); thu hồi các phiên khác | NV, QTV | [Đã kiểm chứng] | module-1 §2.4 |
 | FR-06 | Xem phiên đăng nhập (thiết bị, IP, lần hoạt động cuối); đăng xuất từng thiết bị / tất cả thiết bị khác | NV, QTV | [Đã kiểm chứng] | module-1 §4–5 |
 | FR-07 | Quản trị: danh sách tài khoản (tìm, lọc vai trò/trạng thái, phân trang); tạo; sửa; đổi vai trò | QTV | [Đã kiểm chứng] | module-1 §4–5 |
@@ -28,7 +28,7 @@ Phạm vi giai đoạn hiện thực: Module 1 (tài khoản) và Module 2 (hộ
 | FR-11 | Dừng câu trả lời đang sinh; phần đã sinh được lưu | NV, QTV | [Đã kiểm chứng] | module-2 §2.2, §4.4 |
 | FR-12 | Tạo lại câu trả lời cuối; sao chép câu trả lời | NV, QTV | [Đã kiểm chứng] | module-2 §2.2 |
 | FR-13 | Danh sách hội thoại (nhóm theo thời gian, tìm theo tiêu đề), đổi tên, xóa; mở lại hội thoại cũ thấy đủ lịch sử | NV, QTV | [Đã kiểm chứng] | module-2 §2.1–2.2 |
-| FR-14 | Trả lời bằng LLM thật (OpenAI), giới hạn độ dài 1.000 token, nhãn "Câu trả lời bị cắt…" khi chạm giới hạn | NV, QTV | [PR] PR #4 | SE-007 @ `e1fda76` |
+| FR-14 | Trả lời bằng LLM thật (OpenAI), giới hạn độ dài 1.000 token, nhãn "Câu trả lời bị cắt…" khi chạm giới hạn | NV, QTV | [Đã kiểm chứng] PR #4 → `d6832e0` | [SE-007](../tasks/SE-007-openai-provider.md) |
 | FR-15 | Quản lý tài liệu, pipeline embedding | NV | [Dự kiến] | Đề cương Module 3 |
 | FR-16 | Hỏi–đáp, tóm tắt tài liệu có trích dẫn (RAG) | NV | [Dự kiến] | Đề cương Module 4 |
 
@@ -44,8 +44,8 @@ NV = nhân viên (`USER`), QTV = quản trị viên (`ADMIN`).
 | NFR-04 | Cách ly dữ liệu | Mọi truy vấn Chat lọc theo `userId`; hội thoại người khác trả `404` (không lộ tồn tại); quyền quản trị không mở quyền đọc nội dung | [Đã kiểm chứng] | [access-control §1](../design/access-control.md#1-nguyên-tắc-đang-áp-dụng-đã-xác-minh-trong-code) |
 | NFR-05 | Phản hồi tức thời | SSE, heartbeat 15 giây; chữ hiện dần ngay khi có | [Đã kiểm chứng] | module-2 §4.4 |
 | NFR-06 | Đa ngôn ngữ, giao diện sáng/tối, responsive | next-intl (vi/en, cookie), next-themes, bố cục mobile | [Đã kiểm chứng] | D-08, D-09; module-1 §5 |
-| NFR-07 | Dễ thay nhà cung cấp AI / lưu trữ | Lớp trừu tượng `LlmProvider`, `StorageService` (đầu chờ) | [Đã kiểm chứng] (mock, local) · [PR] OpenAI | M1-07; module-2 §4.5 |
-| NFR-08 | Khóa API AI không lộ | Key chỉ ở `apps/api/.env` (không commit); log chỉ ghi số token, không ghi nội dung | [PR] PR #4 | SE-007 AC |
+| NFR-07 | Dễ thay nhà cung cấp AI / lưu trữ | Lớp trừu tượng `LlmProvider`, `StorageService` (đầu chờ) | [Đã kiểm chứng] (mock, OpenAI, local) | M1-07; module-2 §4.5 |
+| NFR-08 | Khóa API AI không lộ | Key chỉ ở `apps/api/.env` (không commit); log chỉ ghi số token, không ghi nội dung | [Đã kiểm chứng] PR #4 → `d6832e0` | SE-007 AC |
 | NFR-09 | Sẵn sàng cho 500 nhân sự (R-1…R-10) | Tiêu chí đã chốt; **chưa đo** | [Dự kiến] | [ui-release-standards](../design/ui-release-standards.md); SE-005 |
 | NFR-10 | Triển khai on-premise bằng Docker | Chưa đóng gói | [Dự kiến] | Đề cương; D-04 |
 
@@ -57,7 +57,7 @@ Hai vai trò `ADMIN` / `USER` (module-1 Q10). Ma trận đầy đủ, đã kiể
 |---|---|---|---|---|
 | Đăng nhập | ✔ | — | — | — |
 | Hồ sơ, đổi mật khẩu, phiên của mình | ✘ | ✔ | ✔ | Chưa đăng nhập → chuyển `/login`; API `401` |
-| Ảnh đại diện | ✘ | Chỉ ảnh của mình [PR #3] | Chỉ ảnh của mình [PR #3] | `401` / `404` |
+| Ảnh đại diện | ✘ | Chỉ ảnh của mình [Đã tích hợp — PR #3] | Chỉ ảnh của mình [Đã tích hợp — PR #3] | `401` / `404` |
 | Trò chuyện (hội thoại của mình) | ✘ | ✔ | ✔ | Hội thoại người khác → `404 CONVERSATION_NOT_FOUND` (cả admin) |
 | Quản trị tài khoản | ✘ | ✘ | ✔ | UI "Không có quyền truy cập"; API `403 FORBIDDEN` |
 | Tự khóa / tự hạ quyền mình; hạ admin cuối cùng | — | — | ✘ | `400 USER_CANNOT_MODIFY_SELF` / `USER_LAST_ADMIN` |
@@ -77,11 +77,11 @@ flowchart LR
     G["Guard toàn cục:<br/>JwtAuthGuard, Throttler"]
     M1["auth · sessions · me · admin-users · storage"]
     M2["chat (REST + SSE)"]
-    L["LlmProvider<br/>Mock (mặc định) | OpenAI [PR #4]"]
+    L["LlmProvider<br/>Mock (mặc định) | OpenAI"]
   end
   DB[("MongoDB<br/>users · sessions<br/>conversations · messages")]
   FS[("uploads/ (ảnh đại diện)<br/>LocalStorageProvider")]
-  OAI["OpenAI Responses API<br/>[PR #4]"]
+  OAI["OpenAI Responses API"]
   SH["packages/shared<br/>enum · mã lỗi · kiểu"]
 
   B -- "HTML/JS, cookie httpOnly" --> UI
@@ -98,7 +98,7 @@ flowchart LR
 Điểm thiết kế cần giải thích trong báo cáo:
 - **Cùng origin qua rewrites (D-11):** trình duyệt chỉ nói chuyện với cổng web; Next.js chuyển `/api/*` sang NestJS. Nhờ vậy cookie httpOnly hoạt động mà không cần CORS. Khi triển khai, Nginx đảm nhiệm vai trò này [Dự kiến].
 - **Gói dùng chung `packages/shared`:** enum (`UserRole`, `MessageStatus`…), mã lỗi và kiểu dữ liệu dùng chung cho FE/BE; API chỉ trả **mã lỗi**, FE tự dịch theo ngôn ngữ (D-08).
-- **Đầu chờ (provider):** nghiệp vụ gọi lớp trừu tượng (`LlmProvider`, `StorageService`); đổi nhà cung cấp chỉ thay provider qua cấu hình (`LLM_PROVIDER=mock|openai` trên PR #4).
+- **Đầu chờ (provider):** nghiệp vụ gọi lớp trừu tượng (`LlmProvider`, `StorageService`); đổi nhà cung cấp chỉ thay provider qua cấu hình (`LLM_PROVIDER=mock|openai`, tích hợp PR #4).
 - **Monorepo pnpm + Turborepo (D-01):** một lệnh `pnpm dev` chạy cả hai ứng dụng.
 
 ## 5. Thiết kế dữ liệu (MongoDB)
@@ -144,7 +144,7 @@ erDiagram
     ObjectId userId
     enum role "user | assistant"
     string content
-    enum status "COMPLETED | STOPPED | ERROR (+ TRUNCATED trên PR #4)"
+    enum status "COMPLETED | STOPPED | ERROR | TRUNCATED"
     string model
   }
 ```
@@ -168,7 +168,7 @@ Prefix `/api/v1`; tài liệu tương tác bằng Swagger tại `/api/v1/docs`. 
 | Cá nhân | `GET /me` · `PATCH /me` · `POST /me/avatar` · `DELETE /me/avatar` · `PATCH /me/password` | Không sửa được `role`, `email` (`400`) | `modules/me/me.controller.ts` |
 | Phiên | `GET /me/sessions` · `DELETE /me/sessions/:id` · `DELETE /me/sessions` | Phiên người khác → `404 SESSION_NOT_FOUND` | `modules/me/me.controller.ts` |
 | Quản trị | `GET /admin/users` · `POST /admin/users` · `GET /admin/users/:id` · `PATCH /admin/users/:id` · `PATCH /admin/users/:id/status` · `POST /admin/users/:id/reset-password` | `@Roles(ADMIN)`; USER → `403` | `modules/admin-users/admin-users.controller.ts` |
-| Ảnh đại diện | `GET /files/avatars/:file` | `develop`: phục vụ tĩnh, không cần đăng nhập (KT-1). [PR #3]: yêu cầu đăng nhập, chỉ chính chủ | `main.ts` (`useStaticAssets`) |
+| Ảnh đại diện | `GET /files/avatars/:file` | Yêu cầu đăng nhập, chỉ chính chủ (PR #3 → `1674425`); trước đó phục vụ tĩnh không cần đăng nhập (KT-1, đã đóng) | `files.controller.ts` |
 | Hội thoại | `GET /conversations?q=&cursor=&limit=` · `GET /conversations/:id` · `PATCH /conversations/:id` · `DELETE /conversations/:id` · `GET /conversations/:id/messages` | Lọc theo `userId` | `modules/chat/conversations.controller.ts` |
 | Chat (SSE) | `POST /chat/stream` · `POST /conversations/:id/regenerate` | `text/event-stream`; 20 lần/phút/người | `modules/chat/chat.controller.ts` |
 | Chat | `POST /conversations/:id/stop` | `204`; dừng câu trả lời đang sinh | `modules/chat/chat.controller.ts` |
@@ -230,7 +230,7 @@ sequenceDiagram
 
 Người dùng bấm **Dừng** → web gọi `POST /conversations/:id/stop`; nếu chưa có id hội thoại hoặc lời gọi lỗi thì hủy request stream bằng `AbortController` (server nhận kết nối đóng) → API hủy `signal` của lượt đang chạy → provider ngừng sinh → phần đã sinh được lưu với trạng thái `STOPPED`, hiện nhãn "Đã dừng" cả sau khi mở lại. Nguồn: [module-2 §4.4](../design/module-2-chat.md#44-giao-thức-sse) bước 6; `apps/api/src/modules/chat/chat.controller.ts` (`stop`), `apps/web/src/features/chat/chat-stream-provider.tsx` (`stop`); kiểm thử ở SE-001.
 
-### 7.4. Ba cách kết thúc khi dùng OpenAI [PR #4]
+### 7.4. Ba cách kết thúc khi dùng OpenAI
 
 | Tình huống | Tín hiệu từ provider | Trạng thái lưu | Giao diện |
 |---|---|---|---|
@@ -238,7 +238,7 @@ Người dùng bấm **Dừng** → web gọi `POST /conversations/:id/stop`; n�
 | Chạm giới hạn 1.000 token | `response.incomplete` (`max_output_tokens`) | `TRUNCATED`, giữ phần đã sinh | "Câu trả lời bị cắt do đạt giới hạn độ dài" |
 | Người dùng bấm Dừng | Request tới OpenAI bị hủy (kết nối đóng) | `STOPPED` | "Đã dừng" |
 
-Nguồn: SE-007 @ `e1fda76`; `docs/design/module-2-chat.md` §4.5 trên PR #4. Chỉ trình bày là đã tích hợp sau khi TL xác minh trên `develop` (dự kiến 24/11).
+Nguồn: [SE-007](../tasks/SE-007-openai-provider.md); [module-2 §4.5](../design/module-2-chat.md). Đã tích hợp (merge `d6832e0`, 16/11/2026), TL xác minh ba kết thúc với mock trên `develop` — [báo cáo ngày 16/11 vòng 3](../reports/daily/2026-11-16.md#vòng-3--0058).
 
 ## 8. Thiết kế dự kiến Module 3–4 [Dự kiến]
 
@@ -254,12 +254,12 @@ Quy định Khoa: hình thiết kế phải **tự vẽ bằng phần mềm thi�
 
 | Mã | Sơ đồ | Chương | File nguồn hiện có | Trạng thái | Việc cần làm |
 |---|---|---|---|---|---|
-| D1 | Kiến trúc tổng thể Web – API – MongoDB – AI | 2.3 | Mermaid tại [mục 4](#4-kiến-trúc-tổng-thể) | Có nội dung, đã đối chiếu code @ `6ed0fbc` | Xuất hoặc vẽ lại; sau 24/11 bỏ nhãn [PR #4] nếu đã tích hợp |
-| D2 | ERD 4 collection | 2.4 | Mermaid tại [mục 5](#5-thiết-kế-dữ-liệu-mongodb) | Có nội dung, theo schema trong code | Xuất hoặc vẽ lại; trạng thái `TRUNCATED` sau khi tích hợp PR #4 |
+| D1 | Kiến trúc tổng thể Web – API – MongoDB – AI | 2.3 | Mermaid tại [mục 4](#4-kiến-trúc-tổng-thể) | Có nội dung, đã đối chiếu code @ `6ed0fbc` | Xuất hoặc vẽ lại (nhãn [PR #4] đã bỏ — đã tích hợp) |
+| D2 | ERD 4 collection | 2.4 | Mermaid tại [mục 5](#5-thiết-kế-dữ-liệu-mongodb) | Có nội dung, theo schema trong code | Xuất hoặc vẽ lại; đã có `TRUNCATED` |
 | D3 | Tuần tự đăng nhập / gia hạn phiên | 2.6 | Mermaid tại [mục 7.1](#71-đăng-nhập-gọi-api-và-gia-hạn-phiên-đã-kiểm-chứng) | Có nội dung | Xuất hoặc vẽ lại |
 | D4 | Tuần tự gửi tin nhắn + streaming | 2.6 | Mermaid tại [mục 7.2](#72-gửi-tin-nhắn-và-nhận-câu-trả-lời-streaming-đã-kiểm-chứng) | Có nội dung | Xuất hoặc vẽ lại |
 | D5 | Dừng giữa chừng | 2.6 | Văn bản tại [mục 7.3](#73-dừng-giữa-chừng-đã-kiểm-chứng) | Chưa có sơ đồ | Vẽ mới (tuần tự hoặc hoạt động) |
-| D6 | Trạng thái tin nhắn trợ lý (`COMPLETED` / `STOPPED` / `ERROR` / `TRUNCATED`) | 2.6 / 3.3 | Bảng tại [mục 7.4](#74-ba-cách-kết-thúc-khi-dùng-openai-pr-4) | Chưa có sơ đồ | Vẽ mới sau khi PR #4 tích hợp |
+| D6 | Trạng thái tin nhắn trợ lý (`COMPLETED` / `STOPPED` / `ERROR` / `TRUNCATED`) | 2.6 / 3.3 | Bảng tại [mục 7.4](#74-ba-cách-kết-thúc-khi-dùng-openai) | Chưa có sơ đồ | Vẽ mới (PR #4 đã tích hợp) |
 | D7 | Use case tổng quát (Khách, Nhân viên, Quản trị viên) | 2.2 | Chưa có — dữ liệu ở [mục 2.1](#21-yêu-cầu-chức-năng), [mục 3](#3-tác-nhân-và-phân-quyền) | **Thiếu** | Vẽ mới (quy định Khoa lấy "sơ đồ use case tổng quát" làm ví dụ) |
 | D8 | Use case phân rã Module 1, Module 2 | 2.2 | Chưa có — FR-01…FR-14 | **Thiếu** | Vẽ mới |
 | D9 | Cấu trúc module backend / frontend | 3.1 | Bảng tại [context.md mục 4](../project/context.md#4-bản-đồ-mã-nguồn) | Chưa có sơ đồ | Vẽ mới (SE-008 mô tả, TL/sinh viên vẽ) |

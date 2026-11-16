@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { EnvironmentVariables, NodeEnv, ReleaseMode } from './env.validation.js';
+import { DEFAULT_LLM_MODEL, EnvironmentVariables, NodeEnv, ReleaseMode } from './env.validation.js';
 
 /**
  * Lớp bọc ConfigService để truy cập cấu hình có kiểu rõ ràng,
@@ -58,9 +58,14 @@ export class AppConfigService {
   }
 
   get llm() {
+    const provider = this.get('LLM_PROVIDER');
     return {
-      model: this.get('LLM_MODEL'),
+      provider,
+      model: this.get('LLM_MODEL') ?? DEFAULT_LLM_MODEL[provider],
       systemPrompt: this.get('LLM_SYSTEM_PROMPT'),
+      openAiApiKey: this.get('OPENAI_API_KEY') ?? '',
+      maxOutputTokens: this.get('LLM_MAX_OUTPUT_TOKENS'),
+      historyTokenBudget: this.get('LLM_HISTORY_TOKEN_BUDGET'),
     };
   }
 
