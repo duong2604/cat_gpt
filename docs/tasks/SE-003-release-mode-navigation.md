@@ -4,7 +4,7 @@ Trạng thái: Chờ Review
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 1,5 ngày làm việc (thêm ẩn Chat ở `staff`, 15/11/2026)
 Phụ thuộc: làm sau [SE-002](SE-002-avatar-requires-login.md) (thứ tự ưu tiên, không phụ thuộc code). **Merge sau buổi demo 20/11/2026**
 Hạn bàn giao review: **25/11/2026** · Hạn hoàn tất: **26/11/2026** (khung tích hợp 23–26/11, khách hàng chốt 15/11/2026)
-Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review 16/11/2026 (vòng 3) · hoàn tất —
+Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review 16/11/2026 (vòng 4) · hoàn tất —
 Chốt: 15/11/2026 — khách hàng chốt CS-6: bản nhân viên ẩn Chat khi còn phản hồi mẫu và ẩn tính năng chưa sẵn sàng; Swagger kiểm soát theo môi trường; bản demo local giữ Chat mẫu
 SHA cơ sở: `origin/develop` @ `598b81d`
 PR: [#6](https://github.com/duong2604/cat_gpt/pull/6)
@@ -136,6 +136,21 @@ Chép từ [báo cáo ngày 16/11/2026, vòng 1](../reports/daily/2026-11-16.md#
 - [ ] Mục 3 (ghép `develop` có PR #4, `isMock=false` cho `OpenAiLlmProvider`, thử `staff`+`openai`) — **chưa làm, chờ TL báo PR #4 đã vào `develop`**
 **Kiểm tra đã chạy** — `pnpm typecheck`, `pnpm lint`, `pnpm build` (cả ba đạt); trình duyệt thật (Claude in Chrome) cho 3 lối vào × 2 chế độ và kịch bản lỗi `/me/features`; chỉ chạy một bộ API (cổng 4001) + web (cổng 3000) tại một thời điểm, tắt ngay sau khi kiểm từng chế độ (máy thiếu bộ nhớ theo lưu ý của TL)
 **Dọn nhánh trước khi nhận task này** (mục 2.1) — không đổi so với vòng 1–2 (đang sửa tiếp trên `feature/release-mode`, không nhận task mới)
+**Trạng thái** — Chờ Review
+
+### Checklist vòng 4
+**Task** — SE-003 · PR [#6](https://github.com/duong2604/cat_gpt/pull/6) · SHA đầu PR `7729e14` · vòng 4
+**Kết quả** — Làm mục 1 vòng 1 còn lại (ghép PR #4/SE-007 đã vào `develop`):
+1. `git merge origin/develop` vào `feature/release-mode` (`d0bcff7`). 5 file xung đột, không chồng logic — ghép giữ cả hai phía: `app-config.service.ts` (import `ReleaseMode` + `DEFAULT_LLM_MODEL`), `env.validation.ts` (enum `ReleaseMode` + `LlmProviderName` cạnh nhau), `access-control.md` (KT-1 theo bản SE-002 "Đã sửa", KT-2 theo bản SE-003 "Đã sửa"), `docs/tasks/README.md` (dòng SE-002 theo `develop` = Done, dòng SE-003 giữ bản `feature/release-mode` = Chờ Review), `packages/shared/src/types.ts` (giữ cả `AppFeaturesDto` và `AdminUserDto`, không liên quan nhau).
+2. `OpenAiLlmProvider` chưa khai báo `isMock` (lớp trừu tượng `LlmProvider` yêu cầu, thêm ở SE-003 trước khi `OpenAiLlmProvider` có trên `develop`) → thêm `readonly isMock = false` (`7729e14`); không đổi gì khác trong file.
+**Checklist**
+- [x] Mục 1 vòng 1 (ghép `develop`, `isMock` cho `OpenAiLlmProvider`, thử `staff`+`mock` và `staff`+`openai`) — đạt:
+  - `staff` + `mock` (`.env` tạm `RELEASE_MODE=staff`, `LLM_PROVIDER=mock`; API cổng 4000, web cổng 3000): `GET /me/features` → `{"chatEnabled":false}`; `GET /conversations` → `404`; `POST /chat/stream` → `404` (curl, phiên admin); trình duyệt thật (Claude in Chrome, phiên admin có sẵn): sidebar chỉ còn "Administration › Users", không còn "Chat"; mở `/chat` → "Page not found"; bấm "Back to home" → `/profile` — không hồi quy so với vòng 2–3
+  - `staff` + `openai` (đổi `LLM_PROVIDER=openai`, khởi động lại API; `OPENAI_API_KEY` thật có sẵn trong `.env` máy chủ): `GET /me/features` → `{"chatEnabled":true}`; `GET /conversations` → `200`; `POST /chat/stream` → `200`, stream thật từ OpenAI (`data: {"type":"delta",...}` nhiều đoạn) — đã xóa hội thoại thử ngay sau khi xem log; trình duyệt thật: sidebar có mục "Chat" (mục "Administration › Users" vẫn còn, không có "Documents" — đúng `staff`), mở `/chat` vào được màn chat bình thường
+  - Không chạy `staff`+`mock` và `staff`+`openai` cùng lúc (một bộ API+web tại một thời điểm, tắt ngay sau khi kiểm từng tổ hợp — máy thiếu bộ nhớ theo lưu ý TL)
+- [x] AC1–AC6 không hồi quy sau khi ghép — `pnpm build`, `pnpm typecheck`, `pnpm lint` đạt (4/4, 3/3, 3/3); `pnpm --filter @cat-gpt/api test` 12/12 đạt; chỉ đổi file trong phạm vi ghép (5 file xung đột ở trên) + `openai-llm.provider.ts` (`isMock`)
+**Kiểm tra đã chạy** — `pnpm install --frozen-lockfile`; `pnpm build`/`typecheck`/`lint` (gốc, cả workspace); `pnpm --filter @cat-gpt/api test`; curl cho `/me/features`, `/conversations`, `/chat/stream` ở cả hai tổ hợp `staff`+`mock`/`staff`+`openai`; trình duyệt thật (Claude in Chrome) cho sidebar, `/chat`, nút "Back to home" ở cả hai tổ hợp
+**Dọn nhánh trước khi nhận task này** (mục 2.1) — `develop` local chưa cập nhật (đang làm tiếp SE-003 trên `feature/release-mode`, không nhận task mới); `.env` thử (`RELEASE_MODE`, `LLM_PROVIDER`) đã khôi phục nguyên trạng sau khi kiểm; không tạo tài khoản thử mới (dùng phiên admin có sẵn từ trình duyệt)
 **Trạng thái** — Chờ Review
 
 ## Phản hồi UI
