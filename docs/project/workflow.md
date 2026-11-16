@@ -68,11 +68,11 @@ Quy ước tài liệu đi kèm:
 
 ### 3.1. Phân công và nhận task
 
-- **TL giao task:** ghi trong file task và mục lục: người phụ trách (`TL` / `Senior Dev`), ưu tiên (`P1` cao nhất → `P3`), ước lượng (ngày làm việc), phụ thuộc, hạn bàn giao review, hạn hoàn tất. Hạn do khách hàng và CTO chốt; chưa chốt thì ghi `Chờ chốt`.
+- **TL giao task:** ghi trong file task và mục lục: người phụ trách (`TL` / `Senior Dev`), ưu tiên (`P0` cao nhất — lỗi nghiêm trọng, chặn demo hoặc bảo mật — → `P3`), ước lượng (ngày làm việc), phụ thuộc, hạn bàn giao review, hạn hoàn tất. Hạn do khách hàng và CTO chốt; chưa chốt thì ghi `Chờ chốt`. Task thuộc lộ trình theo phụ thuộc (CTO 16/11/2026) ghi `Không đặt — theo phụ thuộc`; hạn đã chốt trước đó giữ nguyên. Khi có hai phiên Senior Dev, ghi rõ `Senior Dev (phiên A)` / `(phiên B)`.
 - **Senior Dev nhận task khi bắt đầu phiên:**
   1. `git fetch origin develop`, ghi SHA. Task trước của mình đã `Done` → dọn bản local theo [mục 2.1](#21-dọn-nhánh-và-worktree-sau-merge) trước khi nhận task mới.
-  2. Mở [docs/tasks/README.md](../tasks/README.md). Có task giao cho Senior Dev đang `Cần sửa` hoặc `Đang làm` → tiếp tục task đó (`Cần sửa` trước).
-  3. Nếu không, lấy task `Sẵn sàng` giao cho Senior Dev có ưu tiên cao nhất (cùng ưu tiên: hạn bàn giao review sớm hơn, rồi ID nhỏ hơn).
+  2. Mở [docs/tasks/README.md](../tasks/README.md). Chọn theo **ưu tiên trước** (`P0` → `P3`); trong cùng mức ưu tiên: `Cần sửa` → `Đang làm` → `Sẵn sàng`.
+  3. Cùng mức ưu tiên và cùng trạng thái: theo dòng "Thứ tự nhận task" ở mục lục (nếu có), rồi hạn bàn giao review sớm hơn, rồi ID nhỏ hơn. Không nhận task có phụ thuộc chặn chưa xong.
   4. Chuyển `Đang làm` ở cả file task và mục lục, ghi ngày bắt đầu.
   5. Không có task phù hợp → báo TL; không tự tạo task, không nhận task `Nháp`.
 
@@ -108,7 +108,7 @@ Review đạt nhưng merge bị chặn thì task giữ `Chờ Review`. `Done` ng
 Trạng thái: Nháp
 Người phụ trách: <TL | Senior Dev> · Ưu tiên: <P1 | P2 | P3> · Ước lượng: <n ngày làm việc>
 Phụ thuộc: <task ID / quyết định, hoặc Không>
-Hạn bàn giao review: <ngày | Chờ chốt> · Hạn hoàn tất: <ngày | Chờ chốt>
+Hạn bàn giao review: <ngày | Chờ chốt | Không đặt — theo phụ thuộc> · Hạn hoàn tất: <ngày | Chờ chốt | Không đặt — theo phụ thuộc>
 Ngày thực tế: bắt đầu <…> · bàn giao review <…> · hoàn tất <…>
 Chốt: <ngày, do khách hàng ghi>
 SHA cơ sở: `origin/develop` @ `<sha>`
@@ -167,6 +167,7 @@ TL hoàn thành nhiệm vụ: gửi báo cáo ngắn (6.2 cho CTO, 6.3 cho khác
 - [x] AC1 <tiêu chí> — <kết quả thực tế> — <bằng chứng: lệnh + đầu ra, ảnh, file:dòng>
 - [ ] AC2 <tiêu chí> — <chưa đạt / chưa kiểm tra: lý do>
 **Kiểm tra đã chạy** — <lệnh và kết quả>
+**Simplicity First** ([engineering-guide](engineering-guide.md#1-simplicity-first-mọi-task)) — (1) đã đổi gì, vì sao; (2) vì sao là cách đơn giản nhất đủ dùng; (3) abstraction/dependency mới + lý do (hoặc "Không có"); (4) test đã chạy + kết quả; (5) giới hạn còn lại, rủi ro
 **Dọn nhánh trước khi nhận task này** (mục 2.1) — `develop` local @ `<sha>`; đã dọn: <nhánh/worktree>; còn giữ: <nhánh — lý do> (task đầu tiên hoặc không có gì để dọn: ghi "Không có")
 **Trạng thái** — Chờ Review
 ```
@@ -246,6 +247,7 @@ Chuẩn áp dụng: [ma trận phân quyền](../design/access-control.md) và [
 | Giao diện | Theo chuẩn mục 1 của tài liệu giao diện; tự kiểm tra trạng thái trống/tải/lỗi/thành công, desktop + mobile 375px, sáng + tối, vi + en | Kiểm tra lại trên UI; ghi phản hồi theo mục 10 |
 | Chế độ phát hành | Tính năng chưa sẵn sàng phải ẩn được ở chế độ `staff`; không đổi hành vi chế độ `demo` đã chốt | Đối chiếu bảng tính năng theo chế độ trước khi merge |
 | Dữ liệu thử | Tạo tài khoản/dữ liệu thử có tên nhận diện được; xóa hoặc khóa sau kiểm tra, ghi lại trong checklist | Như Senior Dev |
+| Môi trường dev (CTO 16/11/2026) | `.env` và `.env.example` của từng app luôn cùng danh sách biến (`pnpm env:check`); `.env.example` chỉ giá trị minh họa, credential thật chỉ ở `.env` (không commit, không in ra log); Docker local một bộ dùng chung, không `down -v`/`prune`, không đụng container/volume dự án khác, không mở dịch vụ ra Internet; mỗi lúc một bộ app chạy trên máy; hai phiên Senior Dev tách dữ liệu bằng `.env` (DB, bucket, collection, `BULLMQ_PREFIX`) | Như Senior Dev |
 
 **Checklist hai vai** — thêm vào checklist bàn giao (Senior Dev, mẫu 6.1) và review (TL, mẫu 6.2) của mọi task có API hoặc giao diện; mục không áp dụng ghi "Không áp dụng — lý do":
 - [ ] Quyền: ca được phép — <lệnh/ảnh>; ca bị từ chối (chưa đăng nhập `401`, sai vai `403`, dữ liệu người khác `404`) — <lệnh/ảnh>
@@ -277,9 +279,9 @@ Phát hiện lỗi chặn demo hoặc lỗi phân quyền ở bất kỳ đâu: 
 
 ## 11. Theo dõi tiến độ
 
-- **Hai hạn riêng:** *hạn bàn giao review* (task sang `Chờ Review`) và *hạn hoàn tất* (task `Done`). Khách hàng và CTO chốt hạn trong [plan.md](plan.md); chưa chốt ghi `Chờ chốt`.
+- **Hai hạn riêng:** *hạn bàn giao review* (task sang `Chờ Review`) và *hạn hoàn tất* (task `Done`). Khách hàng và CTO chốt hạn trong [plan.md](plan.md); chưa chốt ghi `Chờ chốt`. Task lộ trình theo phụ thuộc ghi `Không đặt — theo phụ thuộc`.
 - **Cột Tiến độ** trong [docs/tasks/README.md](../tasks/README.md):
-  - Task đang mở — so ngày dự kiến với hạn gần nhất chưa qua: `Đúng kế hoạch` (dự kiến ≤ hạn); `Có nguy cơ trễ` (dự kiến > hạn, hoặc phụ thuộc chặn chưa xong khi còn ≤ 1 ngày làm việc); `Quá hạn` (đã qua hạn mà chưa đạt mốc). Hạn `Chờ chốt` → `Chưa đánh giá (chờ chốt hạn)`.
+  - Task đang mở — so ngày dự kiến với hạn gần nhất chưa qua: `Đúng kế hoạch` (dự kiến ≤ hạn); `Có nguy cơ trễ` (dự kiến > hạn, hoặc phụ thuộc chặn chưa xong khi còn ≤ 1 ngày làm việc); `Quá hạn` (đã qua hạn mà chưa đạt mốc). Hạn `Chờ chốt` → `Chưa đánh giá (chờ chốt hạn)`. Hạn `Không đặt — theo phụ thuộc` → ghi "Đường găng #k · ước lượng n · đã dùng m" và đánh giá `Đúng ước lượng` / `Vượt ước lượng`.
   - Task đã xong — ghi ngày thực tế và kết luận so với hạn hoàn tất: `Sớm`, `Đúng hạn` hoặc `Trễ`.
   - Senior Dev đã bàn giao nhưng task chưa `Done` → ghi rõ "Senior Dev đã bàn giao <ngày>; chờ TL review" hoặc "… chờ tích hợp", để biết ai giữ bước tiếp theo.
 - **Báo cáo tổng hợp theo mốc** ở [docs/reports/demo-progress.md](../reports/demo-progress.md): tình trạng từng mốc của plan, mục mới ở đầu, giữ mục cũ; mỗi mục dẫn tới báo cáo ngày liên quan. Chi tiết hằng ngày nằm ở báo cáo ngày (mục 11.1).

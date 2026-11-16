@@ -1,6 +1,6 @@
 # Module 3 — Quản lý tài liệu và đường ống xử lý bất đồng bộ
 
-> Trạng thái: **Chờ Review** — bản thiết kế [TL-007](../tasks/TL-007-module-3-design.md) (16/11/2026), cơ sở `origin/develop` @ `eb1ce4d` (code `d6832e0`). Chưa có code trên `develop`.
+> Trạng thái: **CTO duyệt hướng thiết kế** (17/11/2026, kèm điều chỉnh — vòng 2 ở [TL-007](../tasks/TL-007-module-3-design.md#checklist-vòng-2)); bản đầu 16/11/2026, cơ sở `origin/develop` @ `eb1ce4d` (code `d6832e0`). Chưa có code trên `develop`.
 > Phạm vi theo đề cương: tải lên/tải xuống, xem thông tin (metadata), tìm kiếm, xóa và theo dõi trạng thái xử lý; đường ống bất đồng bộ bóc tách văn bản → chia đoạn → sinh vector → lưu vào cơ sở dữ liệu vector. Định dạng: TXT, PDF dạng text, DOCX; không OCR ([đề cương](../thesis/sources/de-cuong-datn.md)).
 > Quyết định CTO 16/11/2026: lát dọc đầu tiên chỉ TXT ([SE-011](../tasks/SE-011-documents-txt-backend.md), [SE-012](../tasks/SE-012-documents-txt-frontend.md)), sau đó PDF/DOCX ([SE-013](../tasks/SE-013-documents-pdf-docx.md)); chỉ chủ sở hữu truy cập tài liệu; OpenAI chỉ nhận tài liệu thử công khai, không nhạy cảm.
 
@@ -13,8 +13,8 @@
 | M3-3 | Embedding cho lát đầu: OpenAI `text-embedding-3-small` qua SDK `openai` đã có; **chỉ tài liệu thử công khai, không nhạy cảm** cho tới khi có quyết định về dữ liệu nội bộ | CTO 16/11/2026 |
 | M3-4 | Thứ tự: TXT đầu–cuối trước, PDF/DOCX sau khi TL nghiệm thu lát TXT | CTO 16/11/2026 |
 | M3-5 | Ảnh đại diện **giữ** `LocalStorageProvider` hiện có; tài liệu dùng MinIO qua một service riêng của module tài liệu. Không đổi `StorageService` toàn cục, không thêm `STORAGE_DRIVER` (chỉ một nơi dùng MinIO — YAGNI) | TL, Simplicity First |
-| M3-7 | Máy chủ MinIO dev: `bitnamilegacy/minio:2025.7.23-debian-12-r5` (image chính thức đã gỡ khỏi Docker Hub, repo upstream archive — TL kiểm 16/11/2026). Code chỉ dùng S3 API (bucket/object) để có thể đổi máy chủ S3-compatible bằng `.env` | TL, chờ CTO chốt lâu dài (Q-INF-1 ở [SE-010](../tasks/SE-010-dev-infra-ci.md#quyết-định-còn-mở)) |
-| M3-6 | Thư viện chia đoạn (LangChain `@langchain/textsplitters` hay tự viết) | **Chờ** — xem [mục 9](#9-quyết-định-còn-mở) Q4 |
+| M3-6 | Chia đoạn bằng `@langchain/textsplitters` (`RecursiveCharacterTextSplitter`); không tự viết bộ chia đoạn; không dùng chain/agent của LangChain | CTO 17/11/2026 (Q4) |
+| M3-7 | Object storage dev **tạm thời**: `bitnamilegacy/minio:2025.7.23-debian-12-r5` (image chính thức đã gỡ khỏi Docker Hub, repo upstream archive), chỉ local, bucket riêng tư, không mở ra Internet. **Không** phải giải pháp production. Code chỉ dùng S3 API (bucket/object) để đổi máy chủ S3-compatible chỉ bằng `.env`. Ứng viên thay thế còn bảo trì: [mục 13](#13-object-storage-s3-compatible-thay-minio) | CTO 17/11/2026 (Q-INF-1) |
 
 ## 2. Chức năng (Function Spec)
 
@@ -87,7 +87,9 @@ Index: `{ userId: 1, deletedAt: 1, createdAt: -1 }` cho danh sách.
 
 ### 4.4. Hàng đợi BullMQ
 
-- Một queue `documents` với hai loại job: `process` (`jobId = process:<documentId>`) và `delete` (`jobId = delete:<documentId>`). `jobId` cố định để BullMQ bỏ job trùng.
+- Một queue `documents` với hai loại job: `process` (`jobId = process-<documentId>`) và `delete` (`jobId = delete-<documentId>`). **Không dùng dấu `:`**: bullmq 6.7.6 (`dist/cjs/classes/job.js`) ném `Custom Id cannot contain :` khi jobId có `:` mà không tách đúng 3 phần, và `Custom Id cannot be integers` khi jobId là số — TL kiểm mã nguồn 17/11/2026.
+- `jobId` cố định để `add` lần hai **bị bỏ qua** khi job cùng id còn trong Redis (chờ, đang chạy, hoặc đã xong mà chưa bị xóa). Đặt `removeOnComplete: true` và `removeOnFail: { age: 7 ngày }` cho job `process`/`delete` để Redis không phình; tài liệu `FAILED` không được đưa lại vào hàng đợi (người dùng xóa và tải lại).
+- Phiên bản: `bullmq` ^6 và `@nestjs/bullmq` ^12 (peer dependency hỗ trợ bullmq 3–6, NestJS 10–12).
 - `process`: `attempts = DOCUMENT_JOB_ATTEMPTS` (mặc định 3), backoff mũ 5 s. `delete`: `attempts = 5`.
 - Tách dữ liệu giữa các phiên dev bằng `BULLMQ_PREFIX` (mặc định `cat-gpt`).
 
@@ -149,18 +151,18 @@ Mọi chuyển trạng thái là **update có điều kiện** trên `{ _id, del
 1. Chuyển `PROCESSING` (update có điều kiện; không khớp → kết thúc job).
 2. Đọc object từ MinIO → bóc tách văn bản → chia đoạn. Không có chữ (sau khi bỏ khoảng trắng) → `DOCUMENT_NO_TEXT`; số đoạn vượt `DOCUMENT_MAX_CHUNKS` → `DOCUMENT_TOO_MANY_CHUNKS`. Hai lỗi này là **vĩnh viễn** (`UnrecoverableError`) → `FAILED` ngay, không thử lại.
 3. Embedding theo lô. Thiếu `OPENAI_API_KEY` → vĩnh viễn, `DOCUMENT_EMBEDDING_UNAVAILABLE`. Lỗi mạng/429/5xx → **tạm thời**, ném lỗi để BullMQ thử lại.
-4. **Xóa mọi point của `documentId` rồi upsert** point mới → chạy lại bao nhiêu lần cũng không trùng, không sót đoạn cũ.
+4. **Xóa mọi point của `documentId` rồi upsert** point mới — để chạy lại không sinh trùng hay sót đoạn cũ. *Đây là mục tiêu thiết kế; chỉ được ghi là đạt khi T5, T12 chạy bằng service thật cho kết quả đúng.*
 5. Đọc lại bản ghi: nếu đã có `deletedAt` → xóa point của `documentId`, kết thúc (không đặt `READY`).
 6. Chuyển `READY` + `chunkCount` (update có điều kiện).
 7. Lần thử cuối vẫn lỗi tạm thời → `FAILED` + `DOCUMENT_PROCESSING_FAILED` (handler `failed` của worker, chỉ khi `attemptsMade >= attempts`).
 
-API tắt giữa chừng: BullMQ tự đưa job "stalled" trở lại hàng đợi; bước 1 nhận lại từ `PROCESSING`, bước 4 bảo đảm idempotent. Không viết thêm cơ chế khôi phục.
+API tắt giữa chừng: BullMQ tự đưa job "stalled" trở lại hàng đợi; bước 1 nhận lại từ `PROCESSING`, bước 4 xóa rồi ghi lại point. Không viết thêm cơ chế khôi phục. Kiểm bằng T12.
 
 ### 6.4. Xóa (kể cả khi job đang chạy)
 
 1. `DELETE` đặt `deletedAt` (update có điều kiện theo `userId`; không khớp → `404`), đưa job `delete` vào hàng đợi, trả `204`. Từ lúc này mọi API coi như không còn tài liệu.
 2. Job `delete` (idempotent, mỗi bước bỏ qua "không tồn tại"): xóa point Qdrant theo `documentId` → xóa object MinIO → xóa bản ghi Mongo.
-3. Job `process` đang chạy song song sẽ dừng ở bước 1/5/6 vì `deletedAt`; nếu nó upsert sau khi job `delete` đã dọn Qdrant, bước 5 của chính nó xóa lại point. Kết quả cuối luôn: 0 point, 0 object, 0 bản ghi.
+3. Job `process` đang chạy song song sẽ dừng ở bước 1/5/6 vì `deletedAt`; nếu nó upsert sau khi job `delete` đã dọn Qdrant, bước 5 của chính nó xóa lại point. **Kết quả kỳ vọng:** 0 point, 0 object, 0 bản ghi — chỉ ghi là đạt khi T6, T11, T13 chạy bằng service thật cho đúng kết quả; khoảng hở còn biết trước: worker bị dừng đột ngột giữa bước 4 và 5 của một tài liệu đã xóa → point mồ côi tới khi job được chạy lại (stalled) — T12 kiểm.
 4. Đưa job `delete` vào hàng đợi lỗi → vẫn trả `204` (tài liệu đã ẩn); ghi log cảnh báo kèm `documentId`. Bản ghi còn `deletedAt` là dấu vết để dọn tay. *(ponytail: chưa có job quét dọn định kỳ; thêm khi thấy bản ghi `deletedAt` tồn đọng.)*
 
 ## 7. Mã lỗi
@@ -203,7 +205,8 @@ Tất cả có giá trị mặc định trong `env.validation.ts` trừ `MINIO_A
 
 | # | Câu hỏi | Đề xuất TL | Chốt |
 |---|---|---|---|
-| Q4 | Đề cương ghi "Thư viện hỗ trợ RAG: LangChain hoặc LlamaIndex" (mục công nghệ). Dùng `@langchain/textsplitters` cho bước chia đoạn, hay tự viết (~40 dòng) và ghi lý do lệch trong báo cáo? | Dùng `@langchain/textsplitters` (`RecursiveCharacterTextSplitter`) — đáp ứng đề cương, ít code tự viết; không dùng chain/agent | Chờ CTO/khách hàng — **không chặn** SE-010; chặn bước chia đoạn của SE-011 (mặc định nếu chưa chốt khi SE tới bước đó: tự viết, đổi sau chỉ sửa `chunk-text.ts`) |
+| Q4 | Thư viện chia đoạn (đề cương: "LangChain hoặc LlamaIndex") | `@langchain/textsplitters` | **Chốt 17/11/2026 (CTO):** `@langchain/textsplitters` + `RecursiveCharacterTextSplitter`; không tự viết nếu thư viện đáp ứng |
+| Q-INF-1 | Object storage lâu dài | Xem [mục 13](#13-object-storage-s3-compatible-thay-minio) | **Chốt tạm 17/11/2026 (CTO):** `bitnamilegacy/minio` cho local dev; TL đề xuất phương án còn bảo trì |
 | Q-M3-1 | Giới hạn mặc định 20 MB / 500 đoạn mỗi tài liệu | Đồng ý; đổi qua `.env` | Chờ — không chặn |
 
 ## 10. Kiểm thử bắt buộc (dùng service thật)
@@ -222,6 +225,11 @@ Chạy với Redis, MinIO, Qdrant thật (Docker local) và MongoDB Atlas dev; O
 | T8 | Tải xuống | SHA-256 trùng tệp gốc; header `private, no-store`; tên tiếng Việt đúng |
 | T9 | Dừng Redis rồi upload | `503 DOCUMENT_QUEUE_UNAVAILABLE`; không còn object, bản ghi |
 | T10 | Tệp chỉ có khoảng trắng | `FAILED DOCUMENT_NO_TEXT`, không thử lại |
+| T11 | Xóa khi worker **đang xử lý** ở từng giai đoạn: (a) đang embedding (tệp lớn, nhiều lô), (b) ngay sau khi trạng thái thành `PROCESSING`; mỗi giai đoạn chạy ≥ 3 lần, ghi thời điểm xóa so với log worker | Mọi lần: cuối cùng 0 point, 0 object, 0 bản ghi; không lần nào có `READY` |
+| T12 | Dừng đột ngột tiến trình API (kill) khi job đang `PROCESSING`, khởi động lại | Job "stalled" được chạy lại → `READY`; số point = `chunkCount` (không trùng) |
+| T13 | Dừng MinIO rồi xóa tài liệu; bật lại MinIO trước khi job `delete` hết lượt | Tài liệu ẩn ngay (`404`); job `delete` thử lại rồi dọn xong 3 nơi. Dừng MinIO suốt mọi lượt → bản ghi còn `deletedAt` + log cảnh báo (đúng thiết kế 6.4 bước 4) |
+
+Kết quả T5, T6, T11–T13 phải ghi số liệu thật (số point, object, bản ghi trước/sau, lệnh dùng). Không ghi "idempotent" hay "dọn sạch" khi chưa có số liệu này.
 
 Unit test (vitest) chỉ cho phần logic thuần: kiểm định dạng, chia đoạn, quyết định vĩnh viễn/tạm thời. Không mock MinIO/Qdrant/Redis chỉ để có test; mock chỉ khi cần tái hiện lỗi khó (ghi rõ lý do).
 
@@ -236,3 +244,20 @@ Unit test (vitest) chỉ cho phần logic thuần: kiểm định dạng, chia �
 
 ### Checklist vòng 1
 Xem [TL-007](../tasks/TL-007-module-3-design.md#checklist-vòng-1).
+
+### Checklist vòng 2
+Xem [TL-007](../tasks/TL-007-module-3-design.md#checklist-vòng-2).
+
+## 13. Object storage S3-compatible thay MinIO
+
+Bối cảnh (TL kiểm 16–17/11/2026): Docker Hub `minio/minio` trả 404; repo `minio/minio` đã archive; `quay.io/minio/minio` từ chối tải; `bitnami/minio` không còn — chỉ còn `bitnamilegacy/minio` đóng băng 08/2025 (không có bản vá).
+
+| Ứng viên | Giấy phép | Tình trạng (17/11/2026) | Image | Kiểm thử của TL | Đánh giá |
+|---|---|---|---|---|---|
+| **RustFS** | Apache-2.0 | Bản 1.0.6 (15/11/2026), cập nhật liên tục | `rustfs/rustfs:1.0.6` | Chạy local: `mc` (client MinIO) tạo bucket, upload/download tệp TXT tiếng Việt, SHA-256 trùng, bucket mặc định `private`, xóa sạch; RAM ~35 MiB | **Đề xuất** — thay trực tiếp MinIO (cùng S3 API, cùng công cụ `mc`), một container |
+| SeaweedFS | Apache-2.0 | Bản 4.54 (16/11/2026), rất trưởng thành | `chrislusf/seaweedfs` | Chưa chạy | Dự phòng — mạnh nhưng cấu hình S3 (identities, master/volume/filer) phức tạp hơn nhu cầu |
+| VersityGW | Apache-2.0 | v1.11.0 (06/11/2026) | `versity/versitygw` | Chưa chạy | Không chọn — là cổng S3 phía trước hệ thống tệp, ít phổ biến |
+| Garage | **AGPL-3.0** | Cập nhật liên tục | `dxflrs/garage` (tag theo commit) | Chưa chạy | Không chọn — giấy phép AGPL |
+| Ceph RGW | LGPL (chủ yếu) | Trưởng thành | — | — | Không chọn — quá nặng cho on-premise nhỏ |
+
+**Đề xuất TL:** giữ `bitnamilegacy/minio` cho Wave 1–2 như CTO duyệt; trước task đóng gói Docker toàn hệ thống, chuyển sang **RustFS** (chỉ đổi image trong compose và biến `MINIO_*` → giữ tên hoặc đổi thành `S3_*` cùng lúc ở `.env`/`.env.example`), chạy lại T1, T6, T8 với RustFS. Báo cáo đồ án ghi "object storage tương thích S3 (MinIO trong đề cương; RustFS khi triển khai do MinIO ngừng phát hành bản cộng đồng)" — cần CTO/GVHD đồng ý cách ghi.

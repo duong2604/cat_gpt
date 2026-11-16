@@ -2,6 +2,18 @@
 
 Theo mốc của [plan.md](../project/plan.md#2-mốc). Chi tiết từng ngày: [báo cáo ngày](daily/README.md). TL cập nhật cuối mỗi ngày làm việc và ngay khi phát hiện nguy cơ trễ mốc; mục mới nhất ở trên, giữ các mục cũ ([workflow mục 11](../project/workflow.md#11-theo-dõi-tiến-độ)).
 
+## Cập nhật 17/11/2026 (Wave 1 chuẩn bị)
+
+Chi tiết: [17/11 vòng 1](daily/2026-11-17.md#vòng-1--0020).
+
+| Mốc / việc | Tình trạng |
+|---|---|
+| M4 Demo 20/11 | Đúng kế hoạch — `34b465d` không đổi |
+| Luồng chính đầu–cuối đã xác minh | 2 trên `develop` (Module 1; Chat phản hồi mẫu) + Chat OpenAI thật (TL kiểm trên đầu PR #6) |
+| SE-003 (PR #6) | Review vòng 4 **đạt kỹ thuật**; merge chờ khách hàng cho phép trước 20/11 |
+| Module 3 | TL-007 Done; SE-010 Sẵn sàng → SE-011 Sẵn sàng (sau SE-010) |
+| Object storage | MinIO legacy tạm cho dev; đề xuất RustFS (đã chạy thử) |
+
 ## Cập nhật 16/11/2026 (lộ trình Module 3–4, Wave 0–2)
 
 Chi tiết: [16/11 vòng 5](daily/2026-11-16.md#vòng-5--1655). Lộ trình: [plan mục 8](../project/plan.md#8-lộ-trình-module-34-cto-duyệt-16112026).

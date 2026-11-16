@@ -1,6 +1,6 @@
 # TL-006 — Mốc so sánh, đối chiếu tài liệu, lộ trình Module 3–4 và đề xuất sửa workflow
 
-Trạng thái: Đang làm — vòng 1 bàn giao 16/11/2026; còn AC4 (OpenAI thật trên `develop`)
+Trạng thái: Đang làm — vòng 2 (17/11/2026): W1 đã áp dụng; AC4 đạt trên đầu PR #6, ghi lại trên `develop` sau khi PR #6 merge
 Người phụ trách: TL · Ưu tiên: P1 · Ước lượng: 1 ngày làm việc
 Phụ thuộc: Không (AC4 cần `OPENAI_API_KEY` trong `apps/api/.env` của TL)
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
@@ -28,7 +28,7 @@ Tài liệu trên `develop` phản ánh đúng trạng thái thật và lộ tr�
 | 5 | `llm.provider.ts` chú thích "chưa có LLM thật" | Code — để Senior Dev sửa khi chạm file (không tạo task riêng) |
 | 6 | `apps/api/.env` của TL thiếu 6 biến `LLM_*`/`OPENAI_API_KEY`; thư mục Senior Dev thiếu `LLM_HISTORY_TOKEN_BUDGET`, `LLM_SYSTEM_PROMPT` | TL đã bổ sung `.env` của TL (giá trị mẫu, không in giá trị); thư mục Senior Dev → báo Senior Dev tự đồng bộ; SE-010 thêm `pnpm env:check` |
 
-## Đề xuất sửa workflow (chờ CTO duyệt — chưa sửa `workflow.md`)
+## Đề xuất sửa workflow (CTO duyệt 17/11/2026 — đã áp dụng vào `workflow.md`)
 1. **Mục 3.1 — thứ tự nhận task:** thêm mức `P0`; chọn theo **ưu tiên trước**, trong cùng mức thì `Cần sửa` → `Đang làm` → `Sẵn sàng`; cùng mức và cùng trạng thái: theo "Thứ tự nhận task" ở mục lục, rồi ID nhỏ hơn. (Hiện tại `Cần sửa` P2 chen trước `Sẵn sàng` P0; và task có hạn "dự kiến" chen trước task đường găng không đặt hạn.)
 2. **Mục 3.1, 5, 11 — hạn:** task mới được ghi "Không đặt — theo phụ thuộc"; cột Tiến độ ghi "vị trí trên đường găng · ước lượng · đã dùng"; đánh giá `Đúng ước lượng` / `Vượt ước lượng`. Hạn đã chốt giữ nguyên.
 3. **Mục 6.1 — mẫu bàn giao:** thêm 5 dòng Simplicity First ([engineering-guide mục 1](../project/engineering-guide.md#1-simplicity-first-mọi-task)).
@@ -50,7 +50,7 @@ Tài liệu trên `develop` phản ánh đúng trạng thái thật và lộ tr�
 ## Quyết định còn mở
 | # | Câu hỏi | Đề xuất mặc định | Chốt |
 |---|---|---|---|
-| W1 | Áp dụng 5 đề xuất sửa workflow ở trên | Đồng ý cả 5 | Chờ CTO |
+| W1 | Áp dụng 5 đề xuất sửa workflow ở trên | Đồng ý cả 5 | **Duyệt 17/11/2026 (CTO)** |
 
 ## Kết quả review
 Vòng 1 bàn giao 16/11/2026 — chờ CTO. AC4 chưa chạy.
@@ -67,6 +67,17 @@ Vòng 1 bàn giao 16/11/2026 — chờ CTO. AC4 chưa chạy.
 - [ ] AC5 — chờ CTO
 
 **Trạng thái và bước tiếp theo** — Chờ CTO duyệt W1; TL chạy AC4 khi có khóa.
+
+
+### Checklist vòng 2
+**Task hoặc yêu cầu** — TL-006 · cơ sở `c111fd2` · vòng 2
+**Kết luận** — W1 áp dụng vào `workflow.md`; AC4 đạt trên đầu PR #6 (`6c941b8` = code `develop` + SE-003, phần OpenAI không đổi).
+**Checklist**
+- [x] AC5 (W1) — CTO duyệt 17/11/2026; [workflow](../project/workflow.md) mục 3.1 (P0, ưu tiên trước rồi trạng thái, "Thứ tự nhận task", phiên A/B, "Không đặt — theo phụ thuộc"), mục 5 (dòng hạn), mục 6.1 (5 dòng Simplicity First), mục 9.1 (môi trường dev), mục 11 (đánh giá theo ước lượng)
+- [x] AC4 — Đạt trên PR #6 @ `6c941b8` (API bản build cổng 4200, `RELEASE_MODE=staff`, `LLM_PROVIDER=openai`, MongoDB Atlas dev, câu hỏi không nhạy cảm): câu ngắn `COMPLETED` (34 ký tự; usage 77/17, `end=completed`); bài dài `TRUNCATED` (3.662 ký tự; usage 86/1000, `end=max_output_tokens`); Dừng sau 5 đoạn `STOPPED` (65 ký tự đã lưu), **không có dòng usage**; mở lại hội thoại giữ đúng 3 trạng thái, model `gpt-5.4-mini`; log không chứa nội dung câu hỏi hay khóa (`grep` 0 dòng); hội thoại thử đã xóa — **Nguồn: TL chạy 17/11/2026**. Ghi lại một dòng xác nhận trên `develop` khi PR #6 merge
+- [x] Khóa OpenAI dev đặt trong `apps/api/.env` của thư mục TL (CTO cho phép 17/11/2026); không commit, không in
+
+**Trạng thái và bước tiếp theo** — Đang làm: xác nhận AC4 trên `develop` sau khi PR #6 merge, rồi Chờ Review.
 
 ## Phản hồi UI
 Không áp dụng.

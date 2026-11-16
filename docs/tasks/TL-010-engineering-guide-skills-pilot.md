@@ -15,7 +15,7 @@ Một hướng dẫn ngắn giúp code mới đơn giản, đúng phạm vi; ch�
 ## Output
 - [docs/project/engineering-guide.md](../project/engineering-guide.md) (1 file, 3 phần).
 - Đánh giá skill bên ngoài (dưới đây) và phiếu đo cho SE-011, SE-012.
-- Prompt Senior Dev: thêm một dòng dẫn tới hướng dẫn — **đề xuất**, áp dụng khi CTO duyệt (không tự sửa prompt).
+- Prompt Senior Dev: thêm một dòng dẫn tới hướng dẫn — CTO duyệt 17/11/2026, đã áp dụng.
 
 ## Phạm vi
 - Làm: như Output.
@@ -67,7 +67,7 @@ Một hướng dẫn ngắn giúp code mới đơn giản, đúng phạm vi; ch�
 ## Quyết định còn mở
 | # | Câu hỏi | Đề xuất mặc định | Chốt |
 |---|---|---|---|
-| P1 | Thêm một dòng vào prompt Senior Dev: "Đọc docs/project/engineering-guide.md trước khi code" | Đồng ý | Chờ CTO |
+| P1 | Thêm một dòng vào prompt Senior Dev: "Đọc docs/project/engineering-guide.md trước khi code" | Đồng ý | **Duyệt 17/11/2026 (CTO)** — đã thêm vào [prompt Senior Dev](../project/onboarding/senior-dev.md) bước 4 |
 
 ## Kết quả review
 Vòng 1 (16/11/2026): hướng dẫn + đánh giá skill — chờ CTO. Vòng 2: kết quả đo sau SE-011, SE-012.
