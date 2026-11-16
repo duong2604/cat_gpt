@@ -1,6 +1,6 @@
 # CAT GPT — Context dự án
 
-> Đối chiếu với `origin/develop` @ `d6832e0` (16/11/2026, sau merge PR #3 và PR #4). Khi `develop` thay đổi, cập nhật mục 3 và ghi lại SHA.
+> Đối chiếu với `origin/develop` @ `783a8a3` (17/11/2026, sau merge PR #3, PR #4, PR #6). Khi `develop` thay đổi, cập nhật mục 3 và ghi lại SHA.
 > Hướng dẫn cài đặt và chạy local: [README.md](../../README.md#chạy-dự-án).
 
 ## 1. Mục tiêu đồ án
@@ -30,6 +30,8 @@ Cột **Code trên `develop`** là kết quả kiểm tra trực tiếp mã ngu�
 | 3 | ⏳ Chưa có. `/documents` chỉ là trang `ComingSoon`; storage mới có `LocalStorageProvider` | "Chưa bắt đầu (đã có trang giữ chỗ)" | — |
 | 4 | Chưa có | "Chưa bắt đầu" | — |
 | 5 | Chưa có | "Ngoài phạm vi cam kết" | — |
+
+**Chế độ phát hành** (PR #6 / [SE-003](../tasks/SE-003-release-mode-navigation.md), merge `783a8a3` 17/11/2026): API `RELEASE_MODE=demo|staff` + web `NEXT_PUBLIC_RELEASE_MODE`. `staff` ẩn Tài liệu; ẩn Chat khi LLM còn là mẫu (`GET /me/features` → `chatEnabled`, `ChatHiddenGuard` trả `404`); Swagger mặc định tắt ở `staff`. Bản demo 20/11 chạy `34b465d`, không theo `develop`.
 
 **Ngoài `develop`:** nhánh `origin/preview/module-2-4-demo` còn giao diện demo Module 3–4 với dữ liệu giả và tài liệu `docs/ket-qua-tam-thoi.md` — giữ ở preview theo quyết định khách hàng 15/11/2026, không tính vào trạng thái ở trên. Phần Module 2 của nhánh này đã lên `develop` qua SE-001.
 

@@ -1,6 +1,6 @@
 # TL-006 — Mốc so sánh, đối chiếu tài liệu, lộ trình Module 3–4 và đề xuất sửa workflow
 
-Trạng thái: Đang làm — vòng 2 (17/11/2026): W1 đã áp dụng; AC4 đạt trên đầu PR #6, ghi lại trên `develop` sau khi PR #6 merge
+Trạng thái: Chờ Review — vòng 2 (17/11/2026): W1 đã áp dụng; AC4 đạt; chờ CTO xác nhận
 Người phụ trách: TL · Ưu tiên: P1 · Ước lượng: 1 ngày làm việc
 Phụ thuộc: Không (AC4 cần `OPENAI_API_KEY` trong `apps/api/.env` của TL)
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
@@ -77,7 +77,9 @@ Vòng 1 bàn giao 16/11/2026 — chờ CTO. AC4 chưa chạy.
 - [x] AC4 — Đạt trên PR #6 @ `6c941b8` (API bản build cổng 4200, `RELEASE_MODE=staff`, `LLM_PROVIDER=openai`, MongoDB Atlas dev, câu hỏi không nhạy cảm): câu ngắn `COMPLETED` (34 ký tự; usage 77/17, `end=completed`); bài dài `TRUNCATED` (3.662 ký tự; usage 86/1000, `end=max_output_tokens`); Dừng sau 5 đoạn `STOPPED` (65 ký tự đã lưu), **không có dòng usage**; mở lại hội thoại giữ đúng 3 trạng thái, model `gpt-5.4-mini`; log không chứa nội dung câu hỏi hay khóa (`grep` 0 dòng); hội thoại thử đã xóa — **Nguồn: TL chạy 17/11/2026**. Ghi lại một dòng xác nhận trên `develop` khi PR #6 merge
 - [x] Khóa OpenAI dev đặt trong `apps/api/.env` của thư mục TL (CTO cho phép 17/11/2026); không commit, không in
 
-**Trạng thái và bước tiếp theo** — Đang làm: xác nhận AC4 trên `develop` sau khi PR #6 merge, rồi Chờ Review.
+- [x] AC4 trên `develop`: PR #6 merge `783a8a3`; `git diff 6c941b8 783a8a3 -- apps packages` rỗng → code đã kiểm trùng `develop` — PASS
+
+**Trạng thái và bước tiếp theo** — Chờ Review (CTO xác nhận TL-006).
 
 ## Phản hồi UI
 Không áp dụng.
