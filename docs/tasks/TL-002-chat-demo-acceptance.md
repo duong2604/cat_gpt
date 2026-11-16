@@ -53,5 +53,26 @@ D3 ở [plan](../project/plan.md#5-quyết-định-còn-mở) (khách hàng th�
 **Kiểm tra đã chạy** — như SE-001 "Review vòng 1".
 **Trạng thái** — Chờ Review (khách hàng thử).
 
+### Tin trước buổi demo (TL soạn 17/11/2026 — gửi khách hàng trước 19/11)
+Theo [plan mục 4](../project/plan.md#4-rủi-ro) (rủi ro "thiết bị demo khác máy kiểm thử"). Mẫu 6.3.
+
+**Demo Chat 20/11/2026** — bản cố định `34b465d` (code Chat `fbffd5b`, TL kiểm 17/11: `git diff fbffd5b 34b465d -- apps packages pnpm-lock.yaml` rỗng) · Hồ sơ: [TL-002](TL-002-chat-demo-acceptance.md)
+
+**Lưu ý quan trọng** — `develop` hiện đã đi xa hơn bản demo (chế độ phát hành, OpenAI, hạ tầng Module 3 bắt buộc thêm biến MinIO trong `.env`). **Máy trình chiếu phải chạy đúng `34b465d`, không `git pull` lên `develop`** — nếu lỡ cập nhật, API có thể không khởi động vì thiếu biến cấu hình mới.
+
+**Chuẩn bị trên máy trình chiếu (một lần, trước 20/11)**
+- [ ] Mở thư mục dự án → `git fetch origin` → `git checkout 34b465d` → `git rev-parse --short HEAD` **phải ra `34b465d`**
+- [ ] `pnpm install --frozen-lockfile` → `pnpm dev` → mở http://localhost:3000 → thấy trang đăng nhập
+- [ ] Đăng nhập tài khoản dùng cho buổi demo → vào thẳng Trò chuyện
+
+**Thử trên giao diện (5 phút, ngay trước buổi demo)**
+- [ ] Trò chuyện → gửi một câu hỏi → câu trả lời **mẫu** hiện dần từng phần (nội dung không liên quan câu hỏi — đúng như đã chốt D2)
+- [ ] Gửi câu hỏi khác → bấm **Dừng** giữa chừng → câu trả lời dừng, có nhãn "Đã dừng"
+- [ ] Bấm **Tạo lại** → câu trả lời mới hiện dần
+- [ ] Tải lại trang (F5) → mở lại hội thoại vừa rồi ở thanh bên → thấy đủ lịch sử
+- [ ] Đổi ngôn ngữ / giao diện tối (góc phải) → giao diện đổi đúng
+
+**Cần anh/chị chốt** — giờ demo (D1).
+
 ## Phản hồi UI
 Chưa có.
