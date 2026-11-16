@@ -47,6 +47,7 @@ export function fitHistory(messages: LlmMessage[], budget: number): LlmMessage[]
  */
 export class OpenAiLlmProvider extends LlmProvider {
   readonly model: string;
+  readonly isMock = false;
   private readonly logger = new Logger(OpenAiLlmProvider.name);
 
   constructor(

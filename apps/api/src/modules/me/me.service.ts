@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { AVATAR_MAX_SIZE_BYTES, ErrorCode, type UserDto } from '@cat-gpt/shared';
+import { AVATAR_MAX_SIZE_BYTES, ErrorCode, type AppFeaturesDto, type UserDto } from '@cat-gpt/shared';
 import { AppException } from '../../common/exceptions/app.exception.js';
 import type { AuthUser } from '../../common/types/auth-user.js';
 import { verifyPassword } from '../../common/utils/password-hash.js';
+import { AppConfigService } from '../../config/app-config.service.js';
+import { isChatHidden } from '../chat/chat-hidden.guard.js';
+import { LlmProvider } from '../llm/llm.provider.js';
 import { SessionsService } from '../sessions/sessions.service.js';
 import { detectImageType } from '../storage/image-signature.js';
 import { StorageService } from '../storage/storage.service.js';
@@ -18,10 +21,17 @@ export class MeService {
     private readonly sessions: SessionsService,
     private readonly storage: StorageService,
     private readonly presenter: UserPresenter,
+    private readonly config: AppConfigService,
+    private readonly llm: LlmProvider,
   ) {}
 
   async getProfile(userId: string): Promise<UserDto> {
     return this.presenter.toDto(await this.users.getByIdOrThrow(userId));
+  }
+
+  /** Nguồn duy nhất cho việc ẩn/hiện Chat phía web — tránh lệch với 404 của ChatHiddenGuard. */
+  getFeatures(): AppFeaturesDto {
+    return { chatEnabled: !isChatHidden(this.config, this.llm) };
   }
 
   async updateProfile(userId: string, dto: UpdateProfileDto): Promise<UserDto> {

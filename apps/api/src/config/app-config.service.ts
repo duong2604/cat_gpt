@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { DEFAULT_LLM_MODEL, EnvironmentVariables, NodeEnv } from './env.validation.js';
+import { DEFAULT_LLM_MODEL, EnvironmentVariables, NodeEnv, ReleaseMode } from './env.validation.js';
 
 /**
  * Lớp bọc ConfigService để truy cập cấu hình có kiểu rõ ràng,
@@ -44,8 +44,13 @@ export class AppConfigService {
     return this.get('TRUST_PROXY');
   }
 
+  get releaseMode(): ReleaseMode {
+    return this.get('RELEASE_MODE');
+  }
+
   get swaggerEnabled(): boolean {
-    return this.get('SWAGGER_ENABLED');
+    const explicit = this.get('SWAGGER_ENABLED');
+    return explicit ?? this.releaseMode === ReleaseMode.Demo;
   }
 
   get uploadDir(): string {

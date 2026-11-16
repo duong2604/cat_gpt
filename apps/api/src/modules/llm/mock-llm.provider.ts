@@ -19,6 +19,7 @@ const randomInt = (min: number, max: number) => min + Math.floor(Math.random() *
 @Injectable()
 export class MockLlmProvider extends LlmProvider {
   readonly model: string;
+  readonly isMock = true;
 
   constructor(config: AppConfigService) {
     super();

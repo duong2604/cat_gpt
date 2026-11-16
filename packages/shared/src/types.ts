@@ -16,6 +16,12 @@ export interface UserDto {
   updatedAt: string;
 }
 
+/** Tính năng bật/tắt theo cấu hình máy chủ hiện tại (không suy ra từ môi trường phía client). */
+export interface AppFeaturesDto {
+  /** `false` ở bản `staff` khi LLM còn là bản mẫu (CS-6). */
+  chatEnabled: boolean;
+}
+
 /** Thông tin người dùng trả về cho màn quản trị. Không có avatarUrl (CS-4: ảnh chỉ chính chủ xem). */
 export type AdminUserDto = Omit<UserDto, 'avatarUrl'>;
 

@@ -8,6 +8,7 @@ import {
   Param,
   Patch,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiCookieAuth,
@@ -19,6 +20,7 @@ import {
 import type { ConversationDto, CursorPage, MessageDto } from '@cat-gpt/shared';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import type { AuthUser } from '../../common/types/auth-user.js';
+import { ChatHiddenGuard } from './chat-hidden.guard.js';
 import { toConversationDto, toMessageDto } from './chat.presenter.js';
 import { ChatService } from './chat.service.js';
 import { ConversationsService } from './conversations.service.js';
@@ -31,6 +33,7 @@ import {
 
 @ApiTags('Chat - Conversations')
 @ApiCookieAuth()
+@UseGuards(ChatHiddenGuard)
 @Controller('conversations')
 export class ConversationsController {
   constructor(

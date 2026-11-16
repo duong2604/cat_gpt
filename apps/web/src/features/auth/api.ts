@@ -1,4 +1,4 @@
-import type { UserDto } from "@cat-gpt/shared";
+import type { AppFeaturesDto, UserDto } from "@cat-gpt/shared";
 import { api } from "@/lib/api/client";
 
 export interface LoginPayload {
@@ -10,4 +10,5 @@ export const authApi = {
   login: (payload: LoginPayload) => api.post<UserDto>("/auth/login", payload).then((r) => r.data),
   logout: () => api.post<void>("/auth/logout").then(() => undefined),
   me: () => api.get<UserDto>("/me").then((r) => r.data),
+  features: () => api.get<AppFeaturesDto>("/me/features").then((r) => r.data),
 };

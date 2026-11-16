@@ -34,13 +34,13 @@ Ghi chú: biểu tượng "N" góc phải dưới là công cụ của Next ở 
 
 Hai chế độ, chọn bằng biến môi trường khi chạy (đề xuất `RELEASE_MODE=demo|staff`, mặc định `demo` để không đổi bản demo đã chốt):
 
-| Tính năng | `demo` (bản 20/11) | `staff` (thử nội bộ) | Căn cứ |
-|---|---|---|---|
-| Đăng nhập, Hồ sơ, Phiên đăng nhập | Hiện | Hiện | Đã hoàn thành |
-| Quản trị người dùng | Chỉ `ADMIN`; không hiện SĐT, ảnh (CS-4) | Như `demo` | access-control mục 4 |
-| Chat | Hiện, câu trả lời mẫu | **Ẩn** khi còn phản hồi mẫu: không có trên thanh bên, `/chat` → 404, API `chat/*` và `conversations/*` → 404 | [CS-6](access-control.md#4-chính-sách-đã-chốt) — đã chốt |
-| Tài liệu (giữ chỗ "Đang phát triển") | Hiện như hiện tại | **Ẩn** khỏi thanh bên; mở trực tiếp → trang 404 | Chưa sẵn sàng |
-| Swagger `/api/v1/docs` | Theo `SWAGGER_ENABLED` (bật ở máy dev/demo) | Theo `SWAGGER_ENABLED` của môi trường, **mặc định tắt** | CS-6, KT-2 |
+| Tính năng | `demo` (bản 20/11) | `staff` (thử nội bộ) | Căn cứ | Hiện trạng |
+|---|---|---|---|---|
+| Đăng nhập, Hồ sơ, Phiên đăng nhập | Hiện | Hiện | Đã hoàn thành | Đã cài — SE-003 (không đổi) |
+| Quản trị người dùng | Chỉ `ADMIN`; không hiện SĐT, ảnh (CS-4) | Như `demo` | access-control mục 4 | Đã cài — SE-003 (kiểm chứng không đổi ở cả hai chế độ) |
+| Chat | Hiện, câu trả lời mẫu | **Ẩn** khi còn phản hồi mẫu: không có trên thanh bên, `/chat` → 404, API `chat/*` và `conversations/*` → 404 | [CS-6](access-control.md#4-chính-sách-đã-chốt) — đã chốt | Đã cài — SE-003. Lưu ý: trang `/chat`, `/chat/<id>` hiển thị đúng nội dung "Không tìm thấy trang" nhưng mã HTTP của trang vẫn `200` (kiến trúc RSC của app: `Providers` là Client Component bọc quanh toàn bộ children nên response bắt đầu stream trước khi `notFound()` chạy — đặc điểm có sẵn của toàn app, không riêng SE-003). API `chat/*`, `conversations/*` trả đúng `404` |
+| Tài liệu (giữ chỗ "Đang phát triển") | Hiện như hiện tại | **Ẩn** khỏi thanh bên; mở trực tiếp → trang 404 | Chưa sẵn sàng | Đã cài — SE-003 (cùng lưu ý mã HTTP `200` như Chat) |
+| Swagger `/api/v1/docs` | Theo `SWAGGER_ENABLED` (bật ở máy dev/demo) | Theo `SWAGGER_ENABLED` của môi trường, **mặc định tắt** | CS-6, KT-2 | Đã cài — SE-003, đã thử cả 4 tổ hợp (demo/staff × đặt/không đặt `SWAGGER_ENABLED`) |
 
 ## 4. Tiêu chí chuẩn bị cho 500 nhân sự
 
@@ -50,8 +50,8 @@ Cột **Trước thử nội bộ**: **Bắt buộc** = chưa đạt thì không
 
 | # | Tiêu chí | Ngưỡng / cách kiểm tra | Trước thử nội bộ | Hiện trạng |
 |---|---|---|---|---|
-| R-1 | Phân quyền | Mọi dòng XM ở [access-control](access-control.md#2-ma-trận-vai-trò--màn-hình--thao-tác--dữ-liệu--khi-thiếu-quyền) chạy lại đạt; KT-1, KT-2 đã sửa; hành vi đúng CS-1…CS-4 | **Bắt buộc** | CS đã chốt 15/11; còn SE-002, SE-003, SE-006 |
-| R-2 | Chế độ `staff` | Tính năng chưa sẵn sàng bị ẩn theo mục 3 | **Bắt buộc** | SE-003 |
+| R-1 | Phân quyền | Mọi dòng XM ở [access-control](access-control.md#2-ma-trận-vai-trò--màn-hình--thao-tác--dữ-liệu--khi-thiếu-quyền) chạy lại đạt; KT-1, KT-2 đã sửa; hành vi đúng CS-1…CS-4 | **Bắt buộc** | CS đã chốt 15/11; KT-2 đã sửa (SE-003); còn SE-002 (KT-1), SE-006 |
+| R-2 | Chế độ `staff` | Tính năng chưa sẵn sàng bị ẩn theo mục 3 | **Bắt buộc** | Đã sửa — SE-003 (xem lưu ý mã HTTP ở mục 3) |
 | R-3 | Đăng nhập và thao tác đồng loạt từ một IP | Kịch bản [SE-005](../tasks/SE-005-login-limit-shared-ip.md#kịch-bản-kiểm-chứng): 200 tài khoản hợp lệ đăng nhập trong 5 phút rồi thao tác 5 phút, cùng một IP, 20 luồng song song: **0% `429`**, `5xx` < 1%, đăng nhập p95 ≤ 1 s. Chống dò mật khẩu vẫn chạy: một email sai 5 lần → lần 6 `429`, email khác cùng IP không bị ảnh hưởng | **Bắt buộc** | Chưa đạt — 5 lần/phút/IP cho đăng nhập, 120 request/phút/IP cho mọi API (KT-3) → SE-005 |
 | R-4 | Chat streaming đồng thời | Kịch bản tải: 100 người, mỗi người gửi 1 tin/30 giây trong 10 phút. Đạt khi: không lỗi 5xx do máy chủ, sự kiện `delta` đầu tiên p95 ≤ 2 s (đo riêng phần LLM), API thường p95 ≤ 300 ms. Giới hạn 20 tin/phút/người và nút Dừng đúng khi chạy **nhiều instance** (lưu chung, ví dụ Redis) | **Bắt buộc** (kịch bản và ngưỡng); nhiều instance: Sau nếu chạy 1 instance chịu được tải | Chưa đo; giới hạn và stream trong bộ nhớ một tiến trình (KT-4) |
 | R-5 | Tỷ lệ lỗi | 5xx < 1% số request trong kịch bản R-4; lỗi LLM hiển thị nhãn lỗi và tạo lại được (đã có) | **Bắt buộc** | Phần giao diện đạt (SE-001 AC8) |

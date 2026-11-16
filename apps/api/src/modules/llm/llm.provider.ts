@@ -22,6 +22,8 @@ export interface LlmStreamOptions {
  */
 export abstract class LlmProvider {
   abstract readonly model: string;
+  /** `true` khi còn là bản mẫu (chưa gắn LLM thật) — dùng để ẩn Chat ở bản `staff` (CS-6). */
+  abstract readonly isMock: boolean;
 
   /** Trả về từng đoạn văn bản của câu trả lời; phải dừng sớm khi `signal` bị hủy. */
   abstract stream(messages: LlmMessage[], options: LlmStreamOptions): AsyncIterable<string>;

@@ -11,6 +11,7 @@ export interface AdminUsersFilter {
 /** Tập trung query key của TanStack Query để invalidate nhất quán. */
 export const queryKeys = {
   me: ["me"] as const,
+  myFeatures: ["me", "features"] as const,
   mySessions: ["me", "sessions"] as const,
   chat: {
     conversations: ["chat", "conversations"] as const,

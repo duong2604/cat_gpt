@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { FileTextIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+import { notFound } from "next/navigation";
 import { ComingSoon } from "@/components/coming-soon";
+import { isStaffMode } from "@/lib/release-mode";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("nav");
@@ -10,6 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 /** TODO(module-3): quản lý tài liệu + pipeline xử lý. */
 export default async function DocumentsPage() {
+  if (isStaffMode) notFound();
   const t = await getTranslations();
   return (
     <ComingSoon

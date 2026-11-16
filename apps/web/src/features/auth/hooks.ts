@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { UserDto } from "@cat-gpt/shared";
+import type { AppFeaturesDto, UserDto } from "@cat-gpt/shared";
 import { queryKeys } from "@/lib/api/query-keys";
 import { routes } from "@/lib/routes";
 import { authApi, type LoginPayload } from "./api";
@@ -16,6 +16,17 @@ export function useMe() {
 export function useCurrentUser(): UserDto {
   const { data } = useMe();
   if (!data) throw new Error("useCurrentUser() phải được dùng bên trong AppShell");
+  return data;
+}
+
+export function useFeatures() {
+  return useQuery({ queryKey: queryKeys.myFeatures, queryFn: authApi.features, staleTime: 60_000 });
+}
+
+/** Tính năng hiện tại — chỉ dùng bên trong AppShell (đã đảm bảo dữ liệu có sẵn). */
+export function useCurrentFeatures(): AppFeaturesDto {
+  const { data } = useFeatures();
+  if (!data) throw new Error("useCurrentFeatures() phải được dùng bên trong AppShell");
   return data;
 }
 

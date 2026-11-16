@@ -21,11 +21,12 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import type { SessionDto, UserDto } from '@cat-gpt/shared';
+import type { AppFeaturesDto, SessionDto, UserDto } from '@cat-gpt/shared';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import type { AuthUser } from '../../common/types/auth-user.js';
 import { SessionsService } from '../sessions/sessions.service.js';
 import { SessionResponse, UserResponse } from '../users/dto/user.response.js';
+import { AppFeaturesResponse } from './dto/app-features.response.js';
 import { ChangePasswordDto } from './dto/change-password.dto.js';
 import { UpdateProfileDto } from './dto/update-profile.dto.js';
 import { MeService } from './me.service.js';
@@ -88,6 +89,13 @@ export class MeController {
   @ApiNoContentResponse()
   changePassword(@CurrentUser() user: AuthUser, @Body() dto: ChangePasswordDto): Promise<void> {
     return this.me.changePassword(user, dto);
+  }
+
+  @Get('features')
+  @ApiOperation({ summary: 'Tính năng bật/tắt theo cấu hình máy chủ hiện tại' })
+  @ApiOkResponse({ type: AppFeaturesResponse })
+  getFeatures(): AppFeaturesDto {
+    return this.me.getFeatures();
   }
 
   @Get('sessions')

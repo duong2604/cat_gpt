@@ -19,6 +19,11 @@ export enum NodeEnv {
   Test = 'test',
 }
 
+export enum ReleaseMode {
+  Demo = 'demo',
+  Staff = 'staff',
+}
+
 export enum LlmProviderName {
   Mock = 'mock',
   OpenAi = 'openai',
@@ -29,6 +34,7 @@ export const DEFAULT_LLM_MODEL: Record<LlmProviderName, string> = {
   [LlmProviderName.Mock]: 'mock-1',
   [LlmProviderName.OpenAi]: 'gpt-5.4-mini',
 };
+
 
 const toBoolean = ({ value }: { value: unknown }) =>
   value === true || value === 'true' || value === '1';
@@ -78,9 +84,15 @@ export class EnvironmentVariables {
   @IsString()
   TRUST_PROXY = 'loopback';
 
+  /** Không đặt → mặc định theo RELEASE_MODE (bật ở `demo`, tắt ở `staff`). */
+  @IsOptional()
   @Transform(toBoolean)
   @IsBoolean()
-  SWAGGER_ENABLED = true;
+  SWAGGER_ENABLED?: boolean;
+
+  /** `demo` (bản 20/11, mặc định) hoặc `staff` (thử nội bộ, ẩn Chat và tài liệu chưa sẵn sàng). */
+  @IsEnum(ReleaseMode)
+  RELEASE_MODE: ReleaseMode = ReleaseMode.Demo;
 
   @IsString()
   UPLOAD_DIR = 'uploads';
