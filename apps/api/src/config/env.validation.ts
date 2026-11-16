@@ -35,7 +35,6 @@ export const DEFAULT_LLM_MODEL: Record<LlmProviderName, string> = {
   [LlmProviderName.OpenAi]: 'gpt-5.4-mini',
 };
 
-
 const toBoolean = ({ value }: { value: unknown }) =>
   value === true || value === 'true' || value === '1';
 
@@ -139,6 +138,52 @@ export class EnvironmentVariables {
   @IsNotEmpty()
   LLM_SYSTEM_PROMPT =
     'Bạn là CAT GPT, trợ lý AI nội bộ của công ty. Trả lời bằng tiếng Việt (trừ khi người dùng dùng ngôn ngữ khác), ngắn gọn, chính xác, trình bày bằng markdown khi phù hợp.';
+
+  // ===== Hạ tầng dev (SE-010: docker-compose.yml — Redis, MinIO, Qdrant) =====
+  @IsString()
+  REDIS_HOST = 'localhost';
+
+  @Transform(({ value }) => Number(value))
+  @IsInt()
+  @Min(1)
+  @Max(65535)
+  REDIS_PORT = 6379;
+
+  /** Tách dữ liệu hàng đợi BullMQ giữa các phiên dev. */
+  @IsString()
+  BULLMQ_PREFIX = 'cat-gpt';
+
+  @IsString()
+  MINIO_ENDPOINT = 'localhost';
+
+  @Transform(({ value }) => Number(value))
+  @IsInt()
+  @Min(1)
+  @Max(65535)
+  MINIO_PORT = 9000;
+
+  @Transform(toBoolean)
+  @IsBoolean()
+  MINIO_USE_SSL = false;
+
+  /** Bắt buộc — giá trị thật chỉ trong `.env` và `docker-compose.yml`, không commit. */
+  @IsString()
+  @IsNotEmpty()
+  MINIO_ACCESS_KEY: string;
+
+  @IsString()
+  @IsNotEmpty()
+  MINIO_SECRET_KEY: string;
+
+  /** Riêng tư — API không bật chính sách public khi tạo bucket (SE-011). */
+  @IsString()
+  MINIO_BUCKET = 'cat-gpt-dev';
+
+  @IsString()
+  QDRANT_URL = 'http://localhost:6333';
+
+  @IsString()
+  QDRANT_COLLECTION = 'document_chunks';
 }
 
 export function validateEnv(config: Record<string, unknown>): EnvironmentVariables {

@@ -119,6 +119,8 @@ describe('validateEnv — LLM', () => {
     JWT_REFRESH_SECRET: 'b'.repeat(32),
     ADMIN_EMAIL: 'admin@catgpt.local',
     ADMIN_PASSWORD: 'Admin@123',
+    MINIO_ACCESS_KEY: 'test_access_key',
+    MINIO_SECRET_KEY: 'test_secret_key',
   };
   it('mặc định mock, không cần key', () => {
     expect(validateEnv(base).LLM_PROVIDER).toBe(LlmProviderName.Mock);
