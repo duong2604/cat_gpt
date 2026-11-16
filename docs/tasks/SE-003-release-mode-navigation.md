@@ -1,10 +1,10 @@
 # SE-003 — Chế độ phát hành `demo` / `staff` và menu theo vai trò
 
-Trạng thái: Chờ Review
+Trạng thái: Done
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 1,5 ngày làm việc (thêm ẩn Chat ở `staff`, 15/11/2026)
-Phụ thuộc: làm sau [SE-002](SE-002-avatar-requires-login.md) (thứ tự ưu tiên, không phụ thuộc code). **Merge sau buổi demo 20/11/2026**
+Phụ thuộc: làm sau [SE-002](SE-002-avatar-requires-login.md) (thứ tự ưu tiên, không phụ thuộc code). ~~Merge sau buổi demo 20/11/2026~~ — CTO cho phép merge sớm 17/11/2026 (bản demo cố định `34b465d` không đổi)
 Hạn bàn giao review: **25/11/2026** · Hạn hoàn tất: **26/11/2026** (khung tích hợp 23–26/11, khách hàng chốt 15/11/2026)
-Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review 16/11/2026 (vòng 4) · hoàn tất —
+Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review 16/11/2026 (vòng 4) · hoàn tất 17/11/2026
 Chốt: 15/11/2026 — khách hàng chốt CS-6: bản nhân viên ẩn Chat khi còn phản hồi mẫu và ẩn tính năng chưa sẵn sàng; Swagger kiểm soát theo môi trường; bản demo local giữ Chat mẫu
 SHA cơ sở: `origin/develop` @ `598b81d`
 PR: [#6](https://github.com/duong2604/cat_gpt/pull/6)
@@ -57,7 +57,11 @@ Kiểm tra bằng **cả hai vai** — nhân viên (tài khoản thử riêng c�
 Không có. CS-6 đã chốt 15/11/2026.
 
 ## Kết quả review
-Chưa có bàn giao.
+- **Done 17/11/2026** — PR [#6](https://github.com/duong2604/cat_gpt/pull/6), SHA đầu PR đã review `6c941b8`, merge `783a8a3` vào `develop` (`gh pr merge 6 --merge --match-head-commit 6c941b8…`); CTO cho phép merge trước 20/11 (17/11/2026).
+- Xác minh trên `develop` @ `783a8a3`: code trùng hoàn toàn SHA đã review (`git diff 6c941b8 783a8a3 -- apps packages pnpm-lock.yaml package.json` rỗng); typecheck 4/4, lint 3/3, build 3/3, api test 12/12 — **Nguồn: TL chạy 17/11/2026**.
+- Kết luận từng AC: xem [Review vòng 4 (TL)](#review-vòng-4-tl). Màn 375 px: **dựa trên bằng chứng SE (ảnh vòng 2), TL chưa tự xác minh trực tiếp** (công cụ trình duyệt không thu được cửa sổ về 375 px).
+- CI: repo chưa có CI tại thời điểm merge (thêm ở [SE-010](SE-010-dev-infra-ci.md)); không có branch protection trên `develop`.
+- Dọn nhánh: remote `feature/release-mode` đã xóa (TL); nhánh local nằm ở worktree Senior Dev → Senior Dev dọn theo [workflow 2.1](../project/workflow.md#21-dọn-nhánh-và-worktree-sau-merge) trước khi nhận SE-010.
 
 ## Lịch sử review
 ### Checklist vòng 1
@@ -152,6 +156,16 @@ Chép từ [báo cáo ngày 16/11/2026, vòng 1](../reports/daily/2026-11-16.md#
 **Kiểm tra đã chạy** — `pnpm install --frozen-lockfile`; `pnpm build`/`typecheck`/`lint` (gốc, cả workspace); `pnpm --filter @cat-gpt/api test`; curl cho `/me/features`, `/conversations`, `/chat/stream` ở cả hai tổ hợp `staff`+`mock`/`staff`+`openai`; trình duyệt thật (Claude in Chrome) cho sidebar, `/chat`, nút "Back to home" ở cả hai tổ hợp
 **Dọn nhánh trước khi nhận task này** (mục 2.1) — `develop` local chưa cập nhật (đang làm tiếp SE-003 trên `feature/release-mode`, không nhận task mới); `.env` thử (`RELEASE_MODE`, `LLM_PROVIDER`) đã khôi phục nguyên trạng sau khi kiểm; không tạo tài khoản thử mới (dùng phiên admin có sẵn từ trình duyệt)
 **Trạng thái** — Chờ Review
+
+#### Review vòng 4 (TL)
+TL (17/11/2026) — PR #6 @ `6c941b8` (= SHA đã review; `MERGEABLE`/`CLEAN`; nhắm `develop`). Chi tiết: [báo cáo ngày 17/11 vòng 1](../reports/daily/2026-11-17.md#vòng-1--0020). Ghi lại bởi TL sau merge — Senior Dev **không** cần commit thêm vào PR (CTO 17/11/2026).
+- [x] Giải xung đột (`git show --cc d0bcff7`) giữ cả hai phía, không đổi logic; `7729e14` chỉ thêm `readonly isMock = false` — PASS — TL đọc diff
+- [x] typecheck 4/4, lint 3/3, build 3/3, api test 12/12 trên `6c941b8` — PASS — TL chạy
+- [x] AC1–AC4 (API, bản build cổng 4200, Atlas dev; admin + USER thử): `staff`+`mock` → `chatEnabled:false`, `/conversations` `404`, `/chat/stream` `404`, chưa đăng nhập `401`, Swagger mặc định `404`; `staff`+`openai` → `chatEnabled:true`, stream thật; `demo`+`mock` → Chat mẫu, Swagger `200` — PASS — TL chạy
+- [x] Giao diện desktop (Chrome, web dev 3200): `staff` → thanh bên chỉ Quản trị › Users; `/`, `/login` → `/profile`; `/chat`, `/documents` → "Page not found"; "Back to home" → `/profile`; `demo` → `/` → `/chat`, đủ Chat / Tài liệu (Coming soon) / Users — PASS — TL kiểm tra
+- [ ] AC5 màn 375 px / tối / en — **NOT VERIFIED bởi TL** (không thu được cửa sổ); chấp nhận theo ảnh bàn giao vòng 2 của Senior Dev + TL đọc code (thanh bên mobile dùng cùng danh sách mục đã lọc, vòng 4 không đổi tệp giao diện) — CTO chấp thuận ghi nhận 17/11/2026
+- [x] Dữ liệu thử: `tl1117.user@catgpt.local` đã khóa; hội thoại thử đã xóa — PASS
+- [x] Ghi chú: phiếu bàn giao vòng 4 ghi SHA đầu PR `7729e14`; đầu thật `6c941b8` (thêm commit tài liệu) — không ảnh hưởng code
 
 ## Phản hồi UI
 Chưa có.
