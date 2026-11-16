@@ -1,12 +1,12 @@
 # SE-010 — Hạ tầng dev (Docker: Redis, MinIO, Qdrant), kiểm tra `.env` và CI tối thiểu
 
-Trạng thái: Sẵn sàng
+Trạng thái: Đang làm
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 1 ngày làm việc
 Phụ thuộc: Không chặn bởi SE-003 (chỉ thêm khối mới vào `.env.example`; xem "Rủi ro xung đột"). Docker Desktop do khách hàng mở
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
-Ngày thực tế: bắt đầu — · bàn giao review — · hoàn tất —
+Ngày thực tế: bắt đầu 17/11/2026 · bàn giao review — · hoàn tất —
 Chốt: 16/11/2026 — CTO duyệt Wave 0–2: SE-010 triển khai hạ tầng Docker và CI; quy định `.env`/`.env.example`; Docker local một bộ dùng chung
-SHA cơ sở: `origin/develop` @ SHA khi nhận task
+SHA cơ sở: `origin/develop` @ `783a8a3`
 PR: <link, Senior Dev ghi khi bàn giao>
 
 ## Mục tiêu
