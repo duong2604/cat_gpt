@@ -45,6 +45,7 @@ Mục lục: [tasks/README.md](tasks/README.md). Task demo Chat: [TL-001](tasks/
 |---|---|
 | [module-1-auth.md](design/module-1-auth.md) | Module 1: yêu cầu đã chốt, token & phiên, dữ liệu, API, màn hình, kiểm thử |
 | [module-2-chat.md](design/module-2-chat.md) | Module 2: phạm vi, câu hỏi chốt, thiết kế BE/FE, giao thức SSE, kế hoạch, checklist |
+| [module-4-rag.md](design/module-4-rag.md) | Module 4: hỏi đáp tài liệu có trích dẫn, tóm tắt — FS/BD, truy hồi theo quyền, thiếu căn cứ, xác minh trích dẫn ([TL-008](tasks/TL-008-module-4-design.md), chờ duyệt) |
 | [module-3-documents.md](design/module-3-documents.md) | Module 3: tài liệu — FS/BD, vòng đời, thử lại, xóa, cấu hình, kịch bản kiểm thử ([TL-007](tasks/TL-007-module-3-design.md), chờ duyệt) |
 | [access-control.md](design/access-control.md) | Ma trận phân quyền vai trò → màn hình → thao tác → dữ liệu → khi thiếu quyền; khoảng trống và chính sách CS-1…CS-6 (đã chốt 15/11) |
 | [ui-release-standards.md](design/ui-release-standards.md) | Chuẩn giao diện (font tiếng Việt, theme, spacing, component, thông báo), chế độ phát hành `demo`/`staff`, tiêu chí chuẩn bị cho 500 nhân sự (đã duyệt 15/11) |
