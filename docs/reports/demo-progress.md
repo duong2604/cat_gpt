@@ -2,6 +2,17 @@
 
 Theo mốc của [plan.md](../project/plan.md#2-mốc). Chi tiết từng ngày: [báo cáo ngày](daily/README.md). TL cập nhật cuối mỗi ngày làm việc và ngay khi phát hiện nguy cơ trễ mốc; mục mới nhất ở trên, giữ các mục cũ ([workflow mục 11](../project/workflow.md#11-theo-dõi-tiến-độ)).
 
+## Cập nhật 17/11/2026 đêm (SE-003 merged, Module 4 thiết kế)
+
+Chi tiết: [17/11 vòng 2](daily/2026-11-17.md#vòng-2--0045).
+
+| Mốc / việc | Tình trạng |
+|---|---|
+| M4 Demo 20/11 | Đúng kế hoạch — `34b465d` (code `fbffd5b`) không đổi |
+| Luồng chính đã xác minh trên `develop` | Module 1; Chat phản hồi mẫu; Chat OpenAI thật (code `783a8a3`); chế độ `demo`/`staff` |
+| Module 3 | SE-010 đang làm (Senior Dev); SE-011 Sẵn sàng |
+| Module 4 | TL-008 thiết kế chờ duyệt; SE-014…SE-017 Nháp |
+
 ## Cập nhật 17/11/2026 (Wave 1 chuẩn bị)
 
 Chi tiết: [17/11 vòng 1](daily/2026-11-17.md#vòng-1--0020).

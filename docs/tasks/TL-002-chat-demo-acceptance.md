@@ -38,6 +38,7 @@ D3 ở [plan](../project/plan.md#5-quyết-định-còn-mở) (khách hàng th�
 
 ## Kết quả review
 Đã gửi khách hàng link bản chạy và checklist UI ngày 15/11/2026 (D3 chưa chốt → dùng mặc định: chạy `develop` trên máy, mở http://localhost:3000). Chờ khách hàng thử; phản hồi ghi ở mục "Phản hồi UI". Khách hàng chốt 15/11/2026: D3 = chạy sẵn trên máy trình chiếu, mở qua localhost; **giữ `Chờ Review` đến khi khách hàng thử UI**, chỉ chuyển `Done` sau khi khách hàng xác nhận. Trước buổi demo TL gửi SHA bản chạy + checklist ngắn ([plan mục 4](../project/plan.md#4-rủi-ro)).
+- **Rà soát TL 17/11/2026** ([báo cáo](../reports/daily/2026-11-17.md#vòng-2--0045)): AC1–AC3 — PASS (SE-001 review vòng 2, merge `fbffd5b`, chạy lại trên `develop` 15/11). Bản trình chiếu `34b465d`: code trùng `fbffd5b` (`git diff fbffd5b 34b465d -- apps packages pnpm-lock.yaml` rỗng) — PASS. AC4 (khách hàng nhận link + checklist) — PASS 15/11. **Còn:** khách hàng thử UI trên máy trình chiếu — BLOCKED (chờ khách hàng); giờ demo (D1) chưa chốt. TL gửi lại SHA `34b465d` + checklist ngắn trước 19/11 (hạn đã chốt). Giữ `Chờ Review`.
 
 ## Lịch sử review
 

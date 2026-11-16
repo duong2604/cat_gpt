@@ -48,6 +48,7 @@ NV = nhân viên (`USER`), QTV = quản trị viên (`ADMIN`).
 | NFR-08 | Khóa API AI không lộ | Key chỉ ở `apps/api/.env` (không commit); log chỉ ghi số token, không ghi nội dung | [Đã kiểm chứng] PR #4 → `d6832e0` | SE-007 AC |
 | NFR-09 | Sẵn sàng cho 500 nhân sự (R-1…R-10) | Tiêu chí đã chốt; **chưa đo** | [Dự kiến] | [ui-release-standards](../design/ui-release-standards.md); SE-005 |
 | NFR-10 | Triển khai on-premise bằng Docker | Chưa đóng gói | [Dự kiến] | Đề cương; D-04 |
+| NFR-11 | Phát hành theo giai đoạn (bản demo / bản nhân viên) | `RELEASE_MODE=demo\|staff` (API) + `NEXT_PUBLIC_RELEASE_MODE` (web): `staff` ẩn Tài liệu, ẩn Chat khi LLM còn là bản mẫu (`GET /me/features` → `chatEnabled`; API Chat trả `404`), Swagger mặc định tắt | [Đã kiểm chứng] PR #6 → `783a8a3` | [SE-003](../tasks/SE-003-release-mode-navigation.md); CS-6 |
 
 ## 3. Tác nhân và phân quyền
 
@@ -62,7 +63,7 @@ Hai vai trò `ADMIN` / `USER` (module-1 Q10). Ma trận đầy đủ, đã kiể
 | Quản trị tài khoản | ✘ | ✘ | ✔ | UI "Không có quyền truy cập"; API `403 FORBIDDEN` |
 | Tự khóa / tự hạ quyền mình; hạ admin cuối cùng | — | — | ✘ | `400 USER_CANNOT_MODIFY_SELF` / `USER_LAST_ADMIN` |
 
-Chính sách đã chốt nhưng chưa hiện thực (CS-2 chặn admin đặt lại mật khẩu admin khác, CS-3 đổi email thu hồi phiên, CS-4 bỏ SĐT khỏi màn quản trị, CS-6 chế độ phát hành `staff`) thuộc SE-003, SE-006 — [Dự kiến] ([access-control mục 4](../design/access-control.md#4-chính-sách-đã-chốt)).
+CS-6 (chế độ phát hành `staff`) **đã hiện thực** — SE-003, merge `783a8a3` (17/11/2026). Chính sách đã chốt nhưng chưa hiện thực (CS-2 chặn admin đặt lại mật khẩu admin khác, CS-3 đổi email thu hồi phiên, CS-4 bỏ SĐT khỏi màn quản trị) thuộc SE-006 — [Dự kiến] ([access-control mục 4](../design/access-control.md#4-chính-sách-đã-chốt)).
 
 ## 4. Kiến trúc tổng thể
 
@@ -242,7 +243,7 @@ Nguồn: [SE-007](../tasks/SE-007-openai-provider.md); [module-2 §4.5](../desig
 
 ## 8. Thiết kế dự kiến Module 3–4 [Dự kiến]
 
-Chưa có Function Spec / Basic Design trong repo, chưa có code phía máy chủ. Báo cáo chỉ được trình bày ở mức **hướng thiết kế theo đề cương**:
+Đã có Function Spec / Basic Design: [Module 3](../design/module-3-documents.md) (CTO duyệt 17/11/2026) và [Module 4](../design/module-4-rag.md) (chờ duyệt); **chưa có code** phía máy chủ (Module 3 bắt đầu bằng SE-010/SE-011). Cho tới khi có code + kiểm thử, báo cáo trình bày ở mức **thiết kế**, dẫn hai tài liệu trên:
 - Module 3: tải tệp lên (PDF text, DOCX, TXT) → lưu MinIO → hàng đợi Redis/BullMQ → bóc tách văn bản → chia đoạn → sinh embedding đa ngữ → lưu Qdrant; theo dõi trạng thái xử lý.
 - Module 4: truy hồi đoạn liên quan theo câu hỏi → LLM sinh câu trả lời kèm trích dẫn nguồn; tóm tắt tài liệu; dùng lại khung Chat (cùng `LlmProvider`, cùng SSE — [module-2 §1](../design/module-2-chat.md#1-bối-cảnh)).
 - Mô tả trong báo cáo: **thiết kế và giao diện minh họa** (CTO chốt 15/11/2026, T3).
