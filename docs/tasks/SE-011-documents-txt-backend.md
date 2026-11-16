@@ -25,7 +25,7 @@ Một tệp TXT tải lên được lưu thật ở MinIO, xử lý bất đồn
 - Tài liệu: cập nhật trạng thái trong `module-3-documents.md`; [access-control](../design/access-control.md) thêm dòng ma trận cho tài liệu.
 
 ## Phạm vi
-- Làm: API mục 5; vòng đời mục 6; mã lỗi mục 7; tìm theo tên, lọc trạng thái.
+- Làm: API mục 5; vòng đời mục 6; mã lỗi mục 7; tìm theo tên, lọc trạng thái. Ở chế độ `staff` (Tài liệu đang ẩn — CS-6), API `/documents` trả `404` như `ChatHiddenGuard` của SE-003 (bổ sung 17/11/2026 để khớp [module-4-rag.md mục 10](../design/module-4-rag.md#10-chế-độ-phát-hành)).
 - Không làm: PDF/DOCX (SE-013); giao diện (SE-012); truy hồi/RAG; chuyển ảnh đại diện sang MinIO; job quét dọn định kỳ.
 
 ## Nguồn yêu cầu

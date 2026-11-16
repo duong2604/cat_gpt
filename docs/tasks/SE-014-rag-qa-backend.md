@@ -13,7 +13,7 @@ PR: <link>
 Người dùng chọn tài liệu `READY` của mình, hỏi bằng tiếng Việt và nhận câu trả lời dựa trên nội dung tài liệu, hiện dần qua SSE, kèm trích dẫn kiểm chứng được; câu hỏi ngoài tài liệu không sinh câu trả lời hay nguồn bịa.
 
 ## Phạm vi (sơ bộ — chốt theo TL-008)
-- Làm: module `rag` (`RagService`: kiểm quyền, truy hồi Qdrant, dựng ngữ cảnh); `ChatService` gọi `RagService` khi hội thoại có `documentIds`; trích dẫn + kiểm `[n]`; cờ `insufficientEvidence`/`ungrounded`; sự kiện SSE `citations`.
+- Làm: module `rag` (`RagService`: kiểm quyền, truy hồi Qdrant, dựng ngữ cảnh); `ChatService` gọi `RagService` khi hội thoại có `documentIds`; trích dẫn + kiểm `[n]`; cờ `insufficientEvidence`/`ungrounded`; trích dẫn trả trong sự kiện `done` có sẵn; guard ẩn ở chế độ `staff` — theo [module-4-rag.md](../design/module-4-rag.md) mục 3–7, 10; kiểm thử R1–R11 (mục 11).
 - Không làm: giao diện (SE-015); tóm tắt (SE-016); ngưỡng điểm cố định (chờ TL-009); chia sẻ tài liệu.
 
 ## Checklist nghiệm thu (sơ bộ)

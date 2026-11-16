@@ -13,7 +13,7 @@ PR: <link>
 Người dùng bấm "Tóm tắt" ở một tài liệu `READY` của mình và nhận bản tóm tắt tiếng Việt dựa trên toàn bộ nội dung; bản tóm tắt được lưu để mở lại không phải sinh lại.
 
 ## Phạm vi (sơ bộ — chốt theo TL-008)
-- Làm: `POST /documents/:id/summary` (map-reduce đơn giản trên các đoạn, giới hạn chi phí theo `DOCUMENT_MAX_CHUNKS`); lưu tóm tắt vào bản ghi tài liệu; nút và hộp thoại Tóm tắt ở trang Tài liệu.
+- Làm: `POST /documents/:id/summary` → job nền `summarize-<id>` trên queue `documents` (map-reduce đơn giản trên các đoạn đọc từ Qdrant); `summaryStatus` + polling; lưu tóm tắt vào bản ghi tài liệu; nút và hộp thoại Tóm tắt ở trang Tài liệu — theo [module-4-rag.md mục 8](../design/module-4-rag.md#8-tóm-tắt-se-016); kiểm thử S1–S2.
 - Không làm: tóm tắt nhiều tài liệu một lúc; chỉnh độ dài tùy ý.
 
 ## Checklist nghiệm thu (sơ bộ)
