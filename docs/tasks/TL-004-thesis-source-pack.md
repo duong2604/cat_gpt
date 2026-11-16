@@ -1,10 +1,10 @@
 # TL-004 — Bộ tài liệu nguồn cho báo cáo đồ án (Markdown)
 
-Trạng thái: Đang làm — vòng 3 **khách hàng duyệt** 15/11/2026 tại `da66569` để dựng Word nháp ([TL-005](TL-005-thesis-word-draft.md)); vòng 4 (sau tích hợp PR #3 → PR #4) 25/11
+Trạng thái: Chờ Review — vòng 4 bàn giao 16/11/2026 (sớm so với 25/11): trạng thái SE-002/SE-007 → đã tích hợp; B13 (chụp lại ảnh) còn mở. Vòng 3 **khách hàng duyệt** 15/11/2026 tại `da66569` để dựng Word nháp ([TL-005](TL-005-thesis-word-draft.md))
 Người phụ trách: TL · Ưu tiên: P1 · Ước lượng: 3,5 ngày làm việc, chia 4 mốc (bảng dưới)
 Phụ thuộc: [SE-008](SE-008-thesis-implementation-evidence.md) (`03-implementation.md` + bảng bằng chứng); cập nhật trạng thái Module 1–2 sau khi tích hợp PR #3 (SE-002) và PR #4 (SE-007)
 Hạn bàn giao review: **19/11/2026** (vòng 2, bộ nguồn trước demo) · cập nhật theo `develop` sau tích hợp: **25/11/2026** (CTO, 15/11/2026) · Hạn hoàn tất: Chờ chốt
-Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review 15/11/2026 (vòng 1, 2, 3) · hoàn tất —
+Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review 15/11/2026 (vòng 1, 2, 3), 16/11/2026 (vòng 4) · hoàn tất —
 Chốt: 15/11/2026 — khách hàng giao: tạo task TL, xây dựng bộ nguồn Markdown trong `docs/thesis/` để AI khác viết báo cáo Word (file Word khách hàng tự tạo sau); chia việc với Senior Dev (SE sở hữu `03-implementation.md` và bảng bằng chứng); thứ tự sau demo PR #3 → PR #4
 SHA cơ sở: `origin/develop` @ `6ed0fbc` (15/11/2026)
 PR: Không — tài liệu TL tích hợp trực tiếp lên `develop` theo đợt được giao; phần SE qua PR của SE-008
@@ -62,7 +62,7 @@ Một bộ Markdown chính xác, truy vết được, đủ để một AI khác
 - SE-008 vòng 1 (PR #5 @ `bbfd59f`): TL review **Cần sửa** 15/11 — [Review SE-008 vòng 1](#review-se-008-vòng-1-tl).
 - SE-008 vòng 2 (`44bfbad`): TL **Đạt**, merge PR #5 → `8732458`, SE-008 `Done` 15/11.
 - Vòng 3 (15/11/2026, sớm so với hạn 19/11): đủ nguồn 4 chương, `04` tổng hợp từ SE-008 — [Checklist vòng 3](#checklist-vòng-3). **Khách hàng duyệt tại `da66569`** để dựng Word nháp — [Review vòng 3](#review-vòng-3) → [TL-005](TL-005-thesis-word-draft.md).
-- Vòng 4 (25/11): cập nhật bộ Markdown theo kết quả xác minh trên `develop` sau tích hợp PR #3 → PR #4; TL-005 cập nhật bản Word từ SHA nguồn mới.
+- Vòng 4 (16/11/2026, sớm so với 25/11 — PR #3/#4 tích hợp sớm theo yêu cầu khách hàng): bộ Markdown cập nhật theo `develop` @ `d6832e0` — [Checklist vòng 4](#checklist-vòng-4). Chờ khách hàng + CTO; B13 còn mở. TL-005 dùng SHA nguồn mới nếu khách hàng đồng ý.
 - (Kế hoạch ban đầu) Vòng 3 (19/11): sau review SE-008 — [kế hoạch](#kế-hoạch-vòng-2) (đánh số lại: review SE-008 thành vòng 3, cập nhật sau tích hợp thành vòng 4).
 
 ## Lịch sử review
@@ -168,6 +168,23 @@ Yêu cầu tiếp: giao SE-008 ngay (bàn giao 18/11, TL review + tổng hợp 1
 Khách hàng (15/11/2026), nguyên văn: "Tôi duyệt bộ nguồn vòng 3 tại `da66569` để dựng bản Word nháp. Ghi kết luận vào vòng 3 của `TL-004` và giữ lịch sử checklist. Tạo task riêng cho AI viết `.docx` từ đúng SHA này, theo bố cục bốn chương và quy định Q1–Q15. Trong task, dẫn trực tiếp tới PDF quy định để người dựng Word đối chiếu khi cần."
 Yêu cầu kèm theo (ghi vào [TL-005](TL-005-thesis-word-draft.md)): bản nháp mô tả đúng trạng thái tại `da66569` (Module 1 và Chat phản hồi mẫu đã tích hợp; ảnh đại diện và OpenAI đã kiểm thử trên PR #3/#4; Module 3–4 là thiết kế và giao diện minh họa; Chương 4 dùng ca kiểm thử có nguồn); nhãn `CẦN BỔ SUNG`; ảnh tạm và ảnh cần thay; chốt B7 theo checklist vòng 3 và quy định Khoa; checklist bàn giao Word; bàn giao `Chờ Review`. Sau tích hợp 23–24/11: cập nhật bộ Markdown (vòng 4), 25/11 cập nhật bản Word, báo bằng checklist vòng mới.
 Checklist vòng 1–3 giữ nguyên ở trên.
+
+### Checklist vòng 4
+**Task hoặc yêu cầu** — TL-004 · bộ nguồn [docs/thesis/README.md](../thesis/README.md) · cơ sở `origin/develop` @ `ceba640` (code `d6832e0`); SHA bàn giao: commit vòng này (ghi trong [báo cáo ngày 16/11 vòng 4](../reports/daily/2026-11-16.md#vòng-4--1605)) · vòng 4
+**Kết luận** — Đổi trạng thái SE-002 (ảnh đại diện) và SE-007 (OpenAI) từ "đã kiểm thử trên PR, chưa tích hợp" sang **đã tích hợp** kèm SHA merge trong README, `01`–`04`; B10, G3, G7 đóng. Ảnh chụp lại (B13) chưa làm.
+**Checklist**
+- [x] PR #3 → `1674425`, PR #4 → `d6832e0` nằm trên `origin/develop` — Đạt — `git merge-base --is-ancestor` cả hai (TL chạy 16/11 16:05)
+- [x] Merge không thêm thay đổi code ngoài PR — Đạt — `git diff d60864a 1674425 -- apps packages` rỗng; `git diff e1fda76 d6832e0 -- apps packages` chỉ gồm 14 file của PR #3
+- [x] Nhận định mới khớp code trên `develop` — Đạt — `llm.module.ts` chọn `mock`/`openai` theo `LLM_PROVIDER`; có `files.controller.ts`, `openai-llm.provider.spec.ts`; `main.ts` không còn `useStaticAssets`; `MessageStatus.TRUNCATED` dùng ở `chat.service.ts:143`
+- [x] Bằng chứng xác minh trên `develop` dẫn về [báo cáo ngày 16/11 vòng 3](../reports/daily/2026-11-16.md#vòng-3--0058) (build/typecheck/lint, api test 12/12, `200`/`401`/`404` ảnh đại diện, ba kết thúc mock) — Đạt — 04 mục 3.3; ca OpenAI thật (TC-M2-09, TC-M2-11) và TC-M1-12 ghi rõ không chạy lại trên `develop`
+- [x] Không còn nhãn `[PR]`/"chưa tích hợp" cho SE-002/SE-007 trong README, `01`–`04` — Đạt — `grep`; giữ nguyên `evidence/test-cases.md` (hồ sơ ca kiểm thử trên đầu PR, đúng lịch sử) và cột SHA chụp ảnh `m1-07`, `m1-08`, `m2-04`, `m2-05` (chụp trên PR)
+- [x] `03` (Senior Dev lập) — TL chỉ đổi nhãn trạng thái và câu "LlmModule chỉ đăng ký Mock", ghi "Cập nhật trạng thái tích hợp: TL" ở đầu file, không đổi nội dung kỹ thuật — Đạt
+- [x] Liên kết nội bộ tới file — Đạt — script: 0 lỗi; anchor mới `#74-ba-cách-kết-thúc-khi-dùng-openai` đã đổi theo heading
+- [x] Không có khóa API/thông tin cá nhân mới — Đạt — `grep -E "sk-[A-Za-z0-9]{10}"` rỗng
+- [ ] B13 chụp lại ảnh ≥ 1280 px trên `develop` — chưa làm: cần chạy web + API (máy thiếu bộ nhớ ở phiên trước); H1-07, H1-08, H2-05 vẫn dùng tạm, H2-04 không dùng
+- [ ] Chế độ `demo`/`staff` — chưa đưa vào bộ nguồn: PR #6 (SE-003) chưa tích hợp
+
+**Trạng thái và bước tiếp theo** — Chờ Review (khách hàng + CTO). Hỏi khách hàng: TL-005 dựng Word từ SHA vòng 4 thay `da66569`? Còn B13 (TL) và bổ sung `demo`/`staff` sau khi PR #6 merge.
 
 ## Phản hồi UI
 Không áp dụng (tài liệu).

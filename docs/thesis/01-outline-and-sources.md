@@ -24,7 +24,7 @@ Thông tin liên lạc trong đề cương (SĐT, email) cố ý không chép v�
 | # | Kết quả dự kiến | Tình trạng 15/11/2026 |
 |---|---|---|
 | K1 | Hệ thống web gồm 4 module (1–4), giao diện trực quan | Module 1–2 đã tích hợp; Module 3–4 chỉ có demo |
-| K2 | Trợ lý hội thoại phản hồi thời gian thực (streaming) | Đã tích hợp (nội dung mẫu); LLM thật đã kiểm thử trên PR #4 |
+| K2 | Trợ lý hội thoại phản hồi thời gian thực (streaming) | Đã tích hợp (mặc định nội dung mẫu; LLM thật OpenAI bật bằng cấu hình — PR #4 → `d6832e0`, 16/11/2026) |
 | K3 | Quản lý tài liệu + pipeline embedding tự động | Chỉ có demo giao diện |
 | K4 | Tóm tắt, hỏi–đáp RAG có trích dẫn, tối ưu tiếng Việt | Chỉ có demo giao diện |
 | K5 | Khung đánh giá: bộ hỏi–đáp tiếng Việt, chỉ số truy hồi, so sánh embedding | Chưa có |
@@ -58,7 +58,7 @@ Thông tin liên lạc trong đề cương (SĐT, email) cố ý không chép v�
 | CSDL | MongoDB | MongoDB Atlas M0 (có thể đổi sang Mongo Docker qua `MONGODB_URI`) | D-03 |
 | Tổ chức mã nguồn | — | Monorepo pnpm + Turborepo: `apps/api`, `apps/web`, `packages/shared` | D-01 |
 | Xác thực & giao tiếp | JWT, REST, SSE | JWT access/refresh trong cookie httpOnly; REST `/api/v1`; SSE cho Chat | [module-1-auth §2](../design/module-1-auth.md#2-quyết-định-kỹ-thuật--lý-do), [module-2-chat §4.4](../design/module-2-chat.md#44-giao-thức-sse) |
-| LLM | Qua API hoặc Ollama | `MockLlmProvider` trên `develop`; OpenAI Responses API trên PR #4 (chưa tích hợp); Ollama chưa làm | README mục 3 |
+| LLM | Qua API hoặc Ollama | `MockLlmProvider` (mặc định) và OpenAI Responses API (PR #4 → `d6832e0`) trên `develop`; Ollama chưa làm | README mục 3 |
 | Redis + BullMQ, MinIO, Qdrant, LangChain/LlamaIndex, embedding đa ngữ | Có | **Chưa dùng** — thuộc Module 3–4. Lưu tệp hiện là `LocalStorageProvider` (đầu chờ MinIO) | D-04, M1-07 |
 | Docker, Docker Compose, Nginx | Có | **Chưa dùng** — chạy local; Next.js rewrites đóng vai trò proxy cùng origin (D-11) | D-04, D-11 |
 
@@ -125,7 +125,7 @@ Chi tiết quyền: [02 mục 3](02-requirements-and-design.md#3-tác-nhân-và-
 | [module-1-auth.md](../design/module-1-auth.md), [module-2-chat.md](../design/module-2-chat.md) | Function Spec + Basic Design Module 1–2 |
 | [access-control.md](../design/access-control.md), [ui-release-standards.md](../design/ui-release-standards.md) | Ma trận quyền đã xác minh; chuẩn UI và tiêu chí phát hành |
 | [preview-progress-review.md](../project/preview-progress-review.md) | Audit so với báo cáo 27/10 |
-| Hồ sơ task [docs/tasks/](../tasks/README.md) | Bằng chứng kiểm thử theo vòng: SE-001, SE-002, SE-007 (PR #4), TL-003 |
+| Hồ sơ task [docs/tasks/](../tasks/README.md) | Bằng chứng kiểm thử theo vòng: SE-001, SE-002, SE-007, TL-003 |
 | PR #1–#4 trên GitHub | Diff, SHA |
 
 ## 7. Tài liệu tham khảo đề xuất

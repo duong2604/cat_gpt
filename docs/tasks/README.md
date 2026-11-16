@@ -2,7 +2,7 @@
 
 Mục lục task theo ID. Quy ước, phân công và cách nhận task: [workflow mục 3](../project/workflow.md#3-nơi-lưu-task), [mục 3.1](../project/workflow.md#31-phân-công-và-nhận-task); cột Tiến độ theo [mục 11](../project/workflow.md#11-theo-dõi-tiến-độ). TL cập nhật bảng mỗi khi tạo task, đổi trạng thái hoặc đổi hạn. Senior Dev cập nhật khi nhận task (`Đang làm`) và khi bàn giao (`Chờ Review`).
 
-Cập nhật: 15/11/2026.
+Cập nhật: 16/11/2026.
 
 **Mở phiên mới:** prompt [Team Leader](../project/onboarding/team-leader.md) · [Senior Dev](../project/onboarding/senior-dev.md) (CTO xác nhận dùng được 15/11/2026). Báo cáo ngày: [daily/](../reports/daily/README.md).
 
@@ -20,7 +20,7 @@ Cập nhật: 15/11/2026.
 | [SE-007](SE-007-openai-provider.md) | Tích hợp OpenAI cho Chat (Responses API, streaming) | Senior Dev | P1 | Chờ chốt | Chờ chốt | Done | Hoàn tất 16/11 — Sớm (merge PR #4 → `develop` @ `d6832e0`; khách hàng cho merge trước demo) |
 | [2026-11-15-reorganize-project-docs](2026-11-15-reorganize-project-docs.md) | Refactor `docs/`, quy trình làm việc và onboarding TL / Senior Dev | TL | P1 | 15/11/2026 | Không đặt hạn | Chờ Review | Đã bàn giao vòng 7 ngày 15/11; chờ khách hàng + CTO duyệt |
 | [2026-11-15-preview-progress-review](../project/preview-progress-review.md) | Audit tiến độ so với báo cáo 27/10/2026 (lịch sử checklist ở mục 5 của báo cáo) | TL | P1 | 15/11/2026 | Không đặt hạn | Chờ Review | Đã bàn giao vòng 2 ngày 15/11; chờ khách hàng + CTO duyệt |
-| [TL-004](TL-004-thesis-source-pack.md) | Bộ tài liệu nguồn cho báo cáo đồ án (`docs/thesis/`, Markdown) | TL | P1 | 19/11/2026 (vòng có SE-008); cập nhật sau tích hợp 25/11/2026 | Chờ chốt | Đang làm | Vòng 3 khách hàng duyệt 15/11 tại `da66569` (dựng Word nháp — TL-005); vòng 4 cập nhật sau tích hợp 25/11 — Sớm |
+| [TL-004](TL-004-thesis-source-pack.md) | Bộ tài liệu nguồn cho báo cáo đồ án (`docs/thesis/`, Markdown) | TL | P1 | 19/11/2026 (vòng có SE-008); cập nhật sau tích hợp 25/11/2026 | Chờ chốt | Chờ Review | Vòng 4 bàn giao 16/11 (sớm so với 25/11): SE-002/SE-007 → đã tích hợp trong bộ nguồn; còn B13 (chụp lại ảnh); chờ khách hàng + CTO |
 | [SE-008](SE-008-thesis-implementation-evidence.md) | Tài liệu đồ án: hiện thực Module 1–2 + bảng bằng chứng kiểm thử | Senior Dev | P1 | 18/11/2026 | 19/11/2026 | Done | Hoàn tất 15/11 — Sớm (vòng 1 Cần sửa, vòng 2 đạt; merge PR #5 → `develop` @ `8732458`) |
 | [TL-005](TL-005-thesis-word-draft.md) | Dựng bản Word nháp báo cáo đồ án từ bộ nguồn `da66569` | TL (phiên AI viết Word) | P1 | Chờ chốt (đề xuất 18/11); cập nhật 25/11/2026 | Chờ chốt | Sẵn sàng | Chưa bắt đầu — Chưa đánh giá (chờ chốt hạn nháp) |
 
