@@ -2,7 +2,7 @@
 
 Trạng thái: Sẵn sàng
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 3 ngày làm việc
-Phụ thuộc: [TL-007](TL-007-module-3-design.md) — Done 17/11/2026; [SE-010](SE-010-dev-infra-ci.md) đã merge (**chặn** — nhận task sau khi SE-010 merge)
+Phụ thuộc: [TL-007](TL-007-module-3-design.md) — Done 17/11/2026; [SE-010](SE-010-dev-infra-ci.md) — Done 17/11/2026 (merge `9f502d1`); **không còn phụ thuộc chặn**
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
 Ngày thực tế: bắt đầu — · bàn giao review — · hoàn tất —
 Chốt: 16/11/2026 — CTO duyệt Wave 0–2: SE-011 triển khai backend lát TXT bằng service thật; chỉ chủ sở hữu truy cập; OpenAI chỉ dùng tài liệu thử công khai
