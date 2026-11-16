@@ -1,10 +1,10 @@
 # SE-010 — Hạ tầng dev (Docker: Redis, MinIO, Qdrant), kiểm tra `.env` và CI tối thiểu
 
-Trạng thái: Chờ Review
+Trạng thái: Done
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 1 ngày làm việc
 Phụ thuộc: Không chặn bởi SE-003 (chỉ thêm khối mới vào `.env.example`; xem "Rủi ro xung đột"). Docker Desktop do khách hàng mở
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
-Ngày thực tế: bắt đầu 17/11/2026 · bàn giao review 17/11/2026 (vòng 1) · hoàn tất —
+Ngày thực tế: bắt đầu 17/11/2026 · bàn giao review 17/11/2026 (vòng 1) · hoàn tất 17/11/2026
 Chốt: 16/11/2026 — CTO duyệt Wave 0–2: SE-010 triển khai hạ tầng Docker và CI; quy định `.env`/`.env.example`; Docker local một bộ dùng chung
 SHA cơ sở: `origin/develop` @ `783a8a3`
 PR: [#11](https://github.com/duong2604/cat_gpt/pull/11)
@@ -57,7 +57,10 @@ Checklist hai vai: Không áp dụng (không có API/giao diện mới) — ghi 
 | Q-INF-1 | Object storage lâu dài khi MinIO không còn image cộng đồng | Giữ `bitnamilegacy/minio` cho dev; chuyển RustFS trước task đóng gói Docker | **Chốt tạm 17/11/2026 (CTO):** `bitnamilegacy/minio` cho local dev, không production; TL đề xuất phương án còn bảo trì ([thiết kế mục 13](../design/module-3-documents.md#13-object-storage-s3-compatible-thay-minio)) |
 
 ## Kết quả review
-Chưa có bàn giao.
+- **Done 17/11/2026** — PR [#11](https://github.com/duong2604/cat_gpt/pull/11), SHA đầu PR đã review `49e8886`, merge `9f502d1` (`gh pr merge 11 --merge --match-head-commit 49e8886…`); CI xanh trên đầu PR ([run](https://github.com/duong2604/cat_gpt/actions/runs/43946533786) cho code, đầu PR `49e8886` chỉ thêm tài liệu, CI cũng xanh) và trên `develop` (push `9f502d1`).
+- Review TL vòng 1 (`7fa3894`): **Cần sửa** — CI đỏ ở typecheck web ([báo cáo 17/11 vòng 3](../reports/daily/2026-11-17.md#vòng-3--0310)); Senior Dev sửa `597599b` (`next typegen && tsc --noEmit`), làm AC6 (`f66d7a7` đỏ → `8587ac6` revert xanh), ghi checklist `49e8886`. Kết luận từng AC: [Review vòng 1–2 (TL)](#review-vòng-12-tl).
+- Xác minh trên `develop` @ `9f502d1` (TL, 17/11 03:13): code trùng SHA đã review (`git diff` rỗng); `pnpm env:check` OK (api, web, `env.validation.ts`); xóa `apps/web/.next` rồi typecheck 4/4; lint 3/3; api test 12/12; build 3/3.
+- Dọn nhánh: remote `feature/dev-infra-ci` đã xóa; nhánh local ở worktree Senior Dev → Senior Dev dọn (workflow 2.1). Còn 1 volume Docker ẩn danh `528240a6…` do Senior Dev tạo khi tìm hiểu image (không dùng; lệnh xóa bị kiểm soát quyền chặn) — TL không tự xóa (CTO cấm xóa volume ngoài quy trình); chờ khách hàng cho phép `docker volume rm 528240a6a20e…`.
 
 ## Lịch sử review
 ### Checklist vòng 1
@@ -92,6 +95,18 @@ Chưa có bàn giao.
 **Kiểm tra đã chạy** — toàn bộ lệnh và kết quả ở checklist AC1–AC8 trên (chạy thật trong phiên, không có bước nào suy đoán); `pnpm install --frozen-lockfile`, `pnpm build`/`typecheck`/`lint` (gốc, cả workspace), `pnpm --filter @cat-gpt/api test`; đã dừng Docker an toàn (`docker compose stop`, không `-v`) sau khi kiểm xong
 **Dọn nhánh trước khi nhận task này** (mục 2.1) — `develop` local → `783a8a3` (= `origin/develop` lúc nhận task); đã dọn: `feature/release-mode` (SE-003, đã merge PR #6 @ `783a8a3`, `git branch -d` thành công); không còn nhánh/worktree nào khác của Senior Dev cần dọn
 **Trạng thái** — Chờ Review
+
+#### Review vòng 1–2 (TL)
+TL (17/11/2026). Vòng 1 @ `7fa3894` ghi ở [báo cáo 17/11 vòng 3](../reports/daily/2026-11-17.md#vòng-3--0310) (Cần sửa: CI đỏ, thiếu AC6, thiếu checklist). Vòng 2 @ `49e8886` — **Đạt**:
+- [x] AC1 — PASS — TL kiểm 3 container `healthy`, image `redis:7.4-alpine`, `bitnamilegacy/minio:2025.7.23-debian-12-r5`, `qdrant/qdrant:v1.20.2`
+- [x] AC2 — PASS — TL tự chạy: Redis `PONG`; MinIO bucket thử, upload/download SHA-256 trùng, đã xóa; Qdrant tạo/xóa collection thử
+- [x] AC3 — PASS — cổng chỉ `127.0.0.1`; bucket `private`
+- [x] AC4 — PASS — TL chạy `pnpm env:check` trên `develop`: phát hiện `.env` của TL thiếu 11 biến hạ tầng (đúng mục đích), sau đồng bộ → OK; không in giá trị
+- [x] AC5 — PASS — CI xanh [run 43946533786](https://github.com/duong2604/cat_gpt/actions/runs/43946533786); nguyên nhân lỗi vòng 1 (kiểu Next.js sinh tự động) TL tái hiện được: không có `.next` → 6 lỗi, `next typegen` → 0
+- [x] AC6 — PASS — `f66d7a7` → [run đỏ 43946368329](https://github.com/duong2604/cat_gpt/actions/runs/43946368329) đúng bước `pnpm typecheck`; `8587ac6` revert → xanh; `git diff 597599b 8587ac6` rỗng
+- [x] AC7 — PASS có ghi chú — chỉ project `cat-gpt`; container dự án khác nguyên trạng (TL kiểm `docker ps -a`); 1 volume ẩn danh sót lại, chờ cho phép xóa
+- [x] AC8 — PASS — TL chạy trên `develop`
+- Ghi nhận, không chặn: `redis:7.4-alpine` trôi bản vá; cảnh báo Node 20 của GitHub Actions; checklist ghi "vòng 1" nhưng gồm cả bản sửa vòng 2 — chấp nhận
 
 ## Phản hồi UI
 Không áp dụng.
