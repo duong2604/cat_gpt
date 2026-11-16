@@ -1,0 +1,63 @@
+name: cat-gpt
+
+# Hạ tầng dev (SE-010): Redis (BullMQ), MinIO (object storage), Qdrant (vector DB).
+# MongoDB vẫn dùng Atlas — không dựng ở đây.
+#
+# Credential thật đọc từ apps/api/.env (không commit). Chạy với giá trị đó:
+#   docker compose --env-file apps/api/.env up -d
+# Không có --env-file thì dùng giá trị minh họa mặc định bên dưới (đủ để dev nhanh).
+#
+# Dừng an toàn: docker compose stop  (hoặc down, KHÔNG thêm -v — xóa mất volume dữ liệu).
+
+services:
+  redis:
+    image: redis:7.4-alpine
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  minio:
+    # minio/minio bị gỡ khỏi Docker Hub, repo upstream đã archive (TL kiểm 16/11/2026).
+    # bitnamilegacy/minio: tạm cho local dev theo quyết định CTO (Q-INF-1) — không dùng production.
+    image: bitnamilegacy/minio:2025.7.23-debian-12-r5
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-example_access_key}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-example_secret_key}
+    ports:
+      - "127.0.0.1:${MINIO_PORT:-9000}:9000"
+      - "127.0.0.1:9001:9001" # console web, chỉ để debug thủ công
+    volumes:
+      - minio-data:/bitnami/minio/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  qdrant:
+    image: qdrant/qdrant:v1.20.2
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6333:6333" # REST
+      - "127.0.0.1:6334:6334" # gRPC
+    volumes:
+      - qdrant-data:/qdrant/storage
+    healthcheck:
+      # Image không có curl/wget — dùng /dev/tcp của bash để kiểm cổng chấp nhận kết nối.
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/6333'"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  redis-data:
+  minio-data:
+  qdrant-data:

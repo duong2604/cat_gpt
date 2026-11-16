@@ -75,7 +75,25 @@ Tạo `JWT_ACCESS_SECRET` ngẫu nhiên:
 node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
 ```
 
-### 3. Cài đặt và chạy
+### 3. Hạ tầng dev (Docker: Redis, MinIO, Qdrant)
+
+Cần cho Module 3 (tài liệu) trở đi; bỏ qua nếu chỉ chạy Chat. MongoDB vẫn dùng Atlas, không dựng ở đây.
+
+```bash
+# Mở Docker Desktop trước. Đọc credential thật từ apps/api/.env (không có thì dùng giá trị minh họa mặc định):
+docker compose --env-file apps/api/.env up -d
+docker compose ps   # cả 3 dịch vụ phải "healthy"
+```
+
+Kiểm `.env` không lệch `.env.example` (cả hai app, và với `env.validation.ts`):
+
+```bash
+pnpm env:check
+```
+
+Dừng an toàn: `docker compose stop` (giữ dữ liệu) hoặc `docker compose down` (xóa container, giữ volume). **Không** thêm `-v` — sẽ xóa mất dữ liệu Redis/MinIO/Qdrant.
+
+### 4. Cài đặt và chạy
 
 ```bash
 pnpm install
