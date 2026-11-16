@@ -35,6 +35,7 @@ Sắp xếp `docs/` theo nội dung, tạo tài liệu onboarding và quy trình
 
 ## Kết quả review
 Chưa có kết luận của khách hàng / CTO. Bàn giao mới nhất: [Checklist vòng 7](#checklist-vòng-7).
+- **Rà soát TL 17/11/2026** ([báo cáo](../reports/daily/2026-11-17.md#vòng-2--0045)): AC2 kiểm lại trên `develop` — PASS (1.001 liên kết, 0 gãy, chuẩn hóa NFC). `workflow.md` đã được cập nhật thêm theo CTO 16–17/11 (W1) và đang được dùng hằng ngày. **Chờ khách hàng + CTO** kết luận vòng 7 để đóng hồ sơ — TL không tự đóng.
 
 ## Lịch sử review
 

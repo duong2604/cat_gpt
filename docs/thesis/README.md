@@ -2,7 +2,7 @@
 
 Điểm vào cho người (hoặc AI) viết báo cáo đồ án tốt nghiệp bằng Word. Bộ này **chỉ là nguồn**: nội dung đã đối chiếu với code, PR và hồ sơ kiểm thử, kèm đường dẫn để kiểm chứng. File Word do sinh viên tạo sau.
 
-Trạng thái bộ nguồn: **Vòng 4 — Chờ Review** (16/11/2026): SE-002 (PR #3) và SE-007 (PR #4) đã tích hợp và TL xác minh trên `develop` @ `d6832e0` — [TL-004 checklist vòng 4](../tasks/TL-004-thesis-source-pack.md#checklist-vòng-4). Vòng 3 — khách hàng duyệt (15/11/2026) tại `develop` @ SHA ghi trong [TL-004 checklist vòng 3](../tasks/TL-004-thesis-source-pack.md#checklist-vòng-3); đủ nguồn cho cả 4 chương (Chương 3 + bằng chứng từ SE-008). Vòng 1 CTO duyệt (`2f003a0`); vòng 2 (`71e1263`) đọc hai file khách hàng chỉ định. Còn chờ: ảnh chụp lại trên `develop` (B13); chế độ `demo`/`staff` khi SE-003 (PR #6) tích hợp. Đề cương: bản khách hàng chỉ định 15/11/2026 (file sửa 30/09/2026) — căn cứ phê duyệt chưa có (B1).
+Trạng thái bộ nguồn: **Vòng 5 — Chờ Review** (17/11/2026): thêm chế độ phát hành `demo`/`staff` (SE-003, PR #6 → `783a8a3`), thiết kế Module 3 (đã duyệt) và Module 4 (chờ duyệt), ảnh Chat OpenAI chụp lại ≥ 1280 px (B13 phần Chat) — [TL-004 checklist vòng 5](../tasks/TL-004-thesis-source-pack.md#checklist-vòng-5). Vòng 4 (16/11/2026): SE-002 (PR #3) và SE-007 (PR #4) đã tích hợp và TL xác minh trên `develop` @ `d6832e0` — [TL-004 checklist vòng 4](../tasks/TL-004-thesis-source-pack.md#checklist-vòng-4). Vòng 3 — khách hàng duyệt (15/11/2026) tại `develop` @ SHA ghi trong [TL-004 checklist vòng 3](../tasks/TL-004-thesis-source-pack.md#checklist-vòng-3); đủ nguồn cho cả 4 chương (Chương 3 + bằng chứng từ SE-008). Vòng 1 CTO duyệt (`2f003a0`); vòng 2 (`71e1263`) đọc hai file khách hàng chỉ định. Còn chờ: ảnh chụp lại trên `develop` (B13); chế độ `demo`/`staff` khi SE-003 (PR #6) tích hợp. Đề cương: bản khách hàng chỉ định 15/11/2026 (file sửa 30/09/2026) — căn cứ phê duyệt chưa có (B1).
 
 ## 1. Phiên bản cơ sở
 
@@ -12,7 +12,7 @@ Trạng thái bộ nguồn: **Vòng 4 — Chờ Review** (16/11/2026): SE-002 (P
 | `origin/develop` | code ứng dụng `d6832e0` (merge PR #4 / SE-007, sau merge PR #3 / SE-002 `1674425`, 16/11/2026); các commit sau đó chỉ đổi tài liệu. Vòng 3 dùng `8732458` (code `fbffd5b`) |
 | Bản demo 20/11/2026 | `34b465d` (code `fbffd5b`), chạy local trên máy trình chiếu — không đổi |
 | Đã tích hợp 16/11/2026 (sớm, theo yêu cầu khách hàng) | PR #3 / SE-002 @ `d60864a` → merge `1674425`; PR #4 / SE-007 @ `e1fda76` → merge `d6832e0` |
-| PR mở | PR #6 / SE-003 (chế độ `demo`/`staff`) — chưa tích hợp, chưa đưa vào bộ nguồn |
+| Đã tích hợp 17/11/2026 | PR #6 / SE-003 (chế độ phát hành `demo`/`staff`) @ `6c941b8` → merge `783a8a3` |
 | Nhánh demo Module 3–4 | `origin/preview/module-2-4-demo` @ `b2a4b22` — giao diện dữ liệu giả, không tính là hiện thực |
 
 Khi `develop` thay đổi, cập nhật bảng này và mục 3 trước khi dùng bộ nguồn.
@@ -94,4 +94,4 @@ Người (hoặc AI) viết Word **để chỗ trống** đúng dạng `[CẦN B
 | B10 | ~~Chương 2–4 — trạng thái SE-002, SE-007~~ | **Xong** 16/11 — đã đổi sang "đã tích hợp" kèm SHA merge (vòng 4) | TL | Xong |
 | B11 | Chương 4 — số liệu tải, unit test Module 1–2 | Chưa có số liệu; không viết số | TL / Senior Dev (SE-005 và task sau) | Chưa có lịch |
 | B12 | Danh mục viết tắt | Lập từ thuật ngữ thực dùng trong báo cáo (Q13) | Người viết Word | Khi viết Word |
-| B13 | Chương 4 — hình | Chụp lại ≥ 1280 px trên `develop` sau tích hợp: ảnh đại diện chính chủ (PR #3), Chat stream OpenAI, nhãn "bị cắt", nhãn "Đã dừng"; mobile 375 px nếu cần. Đến lúc đó H1-07, H1-08, H2-05 dùng tạm, H2-04 không dùng | TL | Chờ máy đủ bộ nhớ chạy web + API; trước 25/11/2026 |
+| B13 | Chương 4 — hình | **Phần Chat xong 17/11/2026** (H2-04, H2-05, H2-06 trên `develop` @ `783a8a3`, 1536 px). Còn: ảnh đại diện chính chủ (H1-07, H1-08 vẫn ảnh tạm PR #3); mobile 375 px nếu báo cáo cần | TL | Trước 25/11/2026 |

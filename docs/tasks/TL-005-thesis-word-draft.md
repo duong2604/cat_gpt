@@ -102,6 +102,7 @@ Xuất ảnh: Mermaid CLI (`@mermaid-js/mermaid-cli`) cần cài gói và trình
 
 ## Kết quả review
 Chưa có.
+- **Rà soát TL 17/11/2026** ([báo cáo](../reports/daily/2026-11-17.md#vòng-2--0045)): chưa bắt đầu — BLOCKED (chờ khách hàng mở phiên AI viết Word; chốt T1, T2; hạn bản nháp còn `Chờ chốt`). Bộ nguồn đã có vòng 4–5 trên `develop` (TL-004) — đề xuất dùng SHA vòng 5 thay `da66569` khi khách hàng đồng ý. Hạn bản cập nhật 25/11/2026 (đã chốt) giữ nguyên.
 
 ## Lịch sử review
 Chưa có. Bàn giao bản nháp: `### Checklist vòng 1` (W1–W12, kèm SHA nguồn `da66569`, đường dẫn `.docx`/PDF, danh sách `CẦN BỔ SUNG`), trạng thái `Chờ Review`. Cập nhật 25/11: `### Checklist vòng 2` với SHA nguồn mới (TL-004 vòng 4), ảnh đã thay.

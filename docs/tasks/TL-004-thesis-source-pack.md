@@ -1,10 +1,10 @@
 # TL-004 — Bộ tài liệu nguồn cho báo cáo đồ án (Markdown)
 
-Trạng thái: Chờ Review — vòng 4 bàn giao 16/11/2026 (sớm so với 25/11): trạng thái SE-002/SE-007 → đã tích hợp; B13 (chụp lại ảnh) còn mở. Vòng 3 **khách hàng duyệt** 15/11/2026 tại `da66569` để dựng Word nháp ([TL-005](TL-005-thesis-word-draft.md))
+Trạng thái: Chờ Review — vòng 5 bàn giao 17/11/2026 (chế độ phát hành, thiết kế Module 3–4, ảnh Chat OpenAI ≥ 1280 px); còn ảnh đại diện (B13 phần còn lại). Vòng 3 **khách hàng duyệt** 15/11/2026 tại `da66569`
 Người phụ trách: TL · Ưu tiên: P1 · Ước lượng: 3,5 ngày làm việc, chia 4 mốc (bảng dưới)
 Phụ thuộc: [SE-008](SE-008-thesis-implementation-evidence.md) (`03-implementation.md` + bảng bằng chứng); cập nhật trạng thái Module 1–2 sau khi tích hợp PR #3 (SE-002) và PR #4 (SE-007)
 Hạn bàn giao review: **19/11/2026** (vòng 2, bộ nguồn trước demo) · cập nhật theo `develop` sau tích hợp: **25/11/2026** (CTO, 15/11/2026) · Hạn hoàn tất: Chờ chốt
-Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review 15/11/2026 (vòng 1, 2, 3), 16/11/2026 (vòng 4) · hoàn tất —
+Ngày thực tế: bắt đầu 15/11/2026 · bàn giao review 15/11/2026 (vòng 1, 2, 3), 16/11/2026 (vòng 4), 17/11/2026 (vòng 5) · hoàn tất —
 Chốt: 15/11/2026 — khách hàng giao: tạo task TL, xây dựng bộ nguồn Markdown trong `docs/thesis/` để AI khác viết báo cáo Word (file Word khách hàng tự tạo sau); chia việc với Senior Dev (SE sở hữu `03-implementation.md` và bảng bằng chứng); thứ tự sau demo PR #3 → PR #4
 SHA cơ sở: `origin/develop` @ `6ed0fbc` (15/11/2026)
 PR: Không — tài liệu TL tích hợp trực tiếp lên `develop` theo đợt được giao; phần SE qua PR của SE-008
@@ -64,6 +64,7 @@ Một bộ Markdown chính xác, truy vết được, đủ để một AI khác
 - Vòng 3 (15/11/2026, sớm so với hạn 19/11): đủ nguồn 4 chương, `04` tổng hợp từ SE-008 — [Checklist vòng 3](#checklist-vòng-3). **Khách hàng duyệt tại `da66569`** để dựng Word nháp — [Review vòng 3](#review-vòng-3) → [TL-005](TL-005-thesis-word-draft.md).
 - Vòng 4 (16/11/2026, sớm so với 25/11 — PR #3/#4 tích hợp sớm theo yêu cầu khách hàng): bộ Markdown cập nhật theo `develop` @ `d6832e0` — [Checklist vòng 4](#checklist-vòng-4). Chờ khách hàng + CTO; B13 còn mở. TL-005 dùng SHA nguồn mới nếu khách hàng đồng ý.
 - (Kế hoạch ban đầu) Vòng 3 (19/11): sau review SE-008 — [kế hoạch](#kế-hoạch-vòng-2) (đánh số lại: review SE-008 thành vòng 3, cập nhật sau tích hợp thành vòng 4).
+- Vòng 5 (17/11/2026): thêm chế độ `demo`/`staff` (PR #6 → `783a8a3`), dẫn thiết kế Module 3–4, chụp lại ảnh Chat OpenAI trên `develop` (B13 phần Chat) — [Checklist vòng 5](#checklist-vòng-5). Chờ khách hàng + CTO.
 
 ## Lịch sử review
 ### Checklist vòng 1
@@ -185,6 +186,19 @@ Checklist vòng 1–3 giữ nguyên ở trên.
 - [ ] Chế độ `demo`/`staff` — chưa đưa vào bộ nguồn: PR #6 (SE-003) chưa tích hợp
 
 **Trạng thái và bước tiếp theo** — Chờ Review (khách hàng + CTO). Hỏi khách hàng: TL-005 dựng Word từ SHA vòng 4 thay `da66569`? Còn B13 (TL) và bổ sung `demo`/`staff` sau khi PR #6 merge.
+
+### Checklist vòng 5
+**Task hoặc yêu cầu** — TL-004 · bộ nguồn [docs/thesis/README.md](../thesis/README.md) · cơ sở `develop` @ `f4e1516` (code `783a8a3`) · vòng 5
+**Kết luận** — Bộ nguồn khớp `develop` sau PR #6; B13 xong phần Chat; còn ảnh đại diện.
+**Checklist**
+- [x] Chế độ phát hành vào bộ nguồn — PASS — [02 NFR-11, mục 3](../thesis/02-requirements-and-design.md#22-yêu-cầu-phi-chức-năng); README mục 1 (PR #6 → `783a8a3`); dựa trên TL review vòng 4 của SE-003 (TL chạy API + giao diện 17/11)
+- [x] Module 3–4: 02 mục 8 dẫn [module-3-documents.md](../design/module-3-documents.md) (đã duyệt) và [module-4-rag.md](../design/module-4-rag.md) (chờ duyệt); vẫn ghi "chưa có code" — PASS (`git ls-tree origin/develop apps/api/src/modules` không có `documents`, `rag`)
+- [x] B13 phần Chat — PASS — TL chụp trên `develop` @ `783a8a3` (API bản build, `LLM_PROVIDER=openai`, giao diện tiếng Việt, câu hỏi chủ đề công khai), 1536 × 695: [m2-04-openai-stream.jpg](../thesis/images/m2-04-openai-stream.jpg), [m2-05-openai-truncated.jpg](../thesis/images/m2-05-openai-truncated.jpg), [m2-06-stopped.jpg](../thesis/images/m2-06-stopped.jpg); trạng thái lưu khớp ảnh (`TRUNCATED` 3.440 ký tự, usage `output_tokens=1000 end=max_output_tokens`; `STOPPED` 3.071 ký tự, không có dòng usage); hội thoại thử đã xóa (`204`)
+- [ ] B13 ảnh đại diện (H1-07, H1-08) — NOT VERIFIED: chưa chụp lại (cần tải ảnh lên tài khoản thử trên trình duyệt); mobile 375 px — BLOCKED: công cụ trình duyệt của TL không thu được cửa sổ
+- [x] Liên kết — PASS — kiểm toàn repo (`docs/**`, `README.md`, `CLAUDE.md`, chuẩn hóa NFC): 1.001 liên kết, 0 gãy
+- [x] Ảnh không chứa khóa API hay tài khoản thật — PASS — chỉ hiện `admin@catgpt.local` (tài khoản seed mặc định đã có trong repo)
+
+**Trạng thái và bước tiếp theo** — Chờ Review (khách hàng + CTO). TL-005: nếu khách hàng mở phiên Word, đề xuất dùng SHA của vòng 5.
 
 ## Phản hồi UI
 Không áp dụng (tài liệu).

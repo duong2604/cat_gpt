@@ -71,6 +71,7 @@ Một hướng dẫn ngắn giúp code mới đơn giản, đúng phạm vi; ch�
 
 ## Kết quả review
 Vòng 1 (16/11/2026): hướng dẫn + đánh giá skill — chờ CTO. Vòng 2: kết quả đo sau SE-011, SE-012.
+- **Rà soát TL 17/11/2026** ([báo cáo](../reports/daily/2026-11-17.md#vòng-2--0045)): AC1, AC2 — PASS; P1 áp dụng; AC3, AC4 — chờ SE-011, SE-012 bàn giao (không chặn).
 
 ## Lịch sử review
 ### Checklist vòng 1
