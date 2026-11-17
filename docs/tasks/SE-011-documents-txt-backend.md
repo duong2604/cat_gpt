@@ -1,7 +1,7 @@
 # SE-011 — Lát TXT, backend: tải lên → xử lý bất đồng bộ → READY → danh sách / tải xuống / xóa
 
 Trạng thái: Sẵn sàng
-Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 3 ngày làm việc
+Người phụ trách: Senior Dev · Ưu tiên: **P0** (CTO 17/11/2026 tối) · Ước lượng: 3 ngày làm việc
 Phụ thuộc: [TL-007](TL-007-module-3-design.md) — Done 17/11/2026; [SE-010](SE-010-dev-infra-ci.md) — Done 17/11/2026 (merge `9f502d1`); **không còn phụ thuộc chặn**
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
 Ngày thực tế: bắt đầu — · bàn giao review — · hoàn tất —
@@ -55,6 +55,18 @@ Kiểm bằng Redis/MinIO/Qdrant thật (Docker local), MongoDB Atlas dev, OpenA
 | AC14 | CI xanh; `pnpm build`, `typecheck`, `lint` đạt | Quy ước repo | Link run |
 
 **Bàn giao bổ sung (Simplicity First):** (1) đã đổi gì, vì sao; (2) vì sao đây là cách đơn giản nhất đủ dùng; (3) abstraction/dependency mới và lý do; (4) test đã chạy + kết quả; (5) giới hạn còn lại, rủi ro.
+
+## Checkpoint nội bộ (CTO 17/11/2026 tối)
+Đây là các checkpoint nội bộ: không thay AC, và mọi AC ở trên vẫn bắt buộc. **Mục tiêu sáng 18/11 là CP1–CP3**, tức happy case chạy trên service thật, có PR để review. **CP4 bắt buộc trước khi merge / Done.** PR có thể mở sau CP3; khi CP4 chưa đạt thì PR vẫn để OPEN.
+
+| CP | Nội dung | Bằng chứng tối thiểu khi báo TL |
+|---|---|---|
+| CP1 Foundation | Module `documents`; DTO/schema/config; tích hợp MinIO, Mongo, BullMQ, Qdrant; `POST /documents` → `201 PENDING` | Commit SHA; `curl` request/response đã che dữ liệu nhạy cảm |
+| CP2 Processing | Worker đọc TXT → kiểm UTF-8 → chia đoạn → OpenAI embedding → upsert Qdrant → `READY` | `documentId`, `chunkCount`, số point Qdrant theo `documentId`, log worker |
+| CP3 Read APIs | List, detail, download | SHA-256 tệp gốc = tệp tải về; đếm 3 nơi: Mongo, MinIO, Qdrant |
+| CP4 Hardening | Delete/cleanup, cô lập chủ sở hữu, retry, idempotency, đồng thời | AC1–AC14 đầy đủ (T1–T13) |
+
+Mỗi checkpoint: commit + push lên nhánh, rồi báo TL SHA. TL review từng checkpoint.
 
 ## Rủi ro xung đột
 `app.module.ts`, `env.validation.ts`, `app-config.service.ts`, `.env.example`, `packages/shared` — cũng bị PR #6 (SE-003) sửa. Chỉ **thêm khối mới**; nếu PR #6 chưa merge khi bàn giao, ghi rõ trong PR.
