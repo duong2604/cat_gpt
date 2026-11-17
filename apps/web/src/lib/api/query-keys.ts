@@ -1,4 +1,4 @@
-import type { UserRole, UserStatus } from "@cat-gpt/shared";
+import type { DocumentStatus, UserRole, UserStatus } from "@cat-gpt/shared";
 
 export interface AdminUsersFilter {
   page: number;
@@ -6,6 +6,13 @@ export interface AdminUsersFilter {
   search?: string;
   role?: UserRole;
   status?: UserStatus;
+}
+
+export interface DocumentsFilter {
+  page: number;
+  pageSize: number;
+  q?: string;
+  status?: DocumentStatus;
 }
 
 /** Tập trung query key của TanStack Query để invalidate nhất quán. */
@@ -22,5 +29,9 @@ export const queryKeys = {
   adminUsers: {
     all: ["admin", "users"] as const,
     list: (filter: AdminUsersFilter) => ["admin", "users", "list", filter] as const,
+  },
+  documents: {
+    all: ["documents"] as const,
+    list: (filter: DocumentsFilter) => ["documents", "list", filter] as const,
   },
 };

@@ -87,7 +87,7 @@
     "SESSION_CANNOT_REVOKE_CURRENT": "Không thể đăng xuất phiên hiện tại tại đây. Hãy dùng nút Đăng xuất.",
     "FILE_REQUIRED": "Vui lòng chọn tệp.",
     "FILE_TOO_LARGE": "Tệp quá lớn.",
-    "FILE_INVALID_TYPE": "Chỉ chấp nhận ảnh JPG, PNG hoặc WEBP.",
+    "FILE_INVALID_TYPE": "Loại tệp không hợp lệ.",
     "NETWORK_ERROR": "Không kết nối được máy chủ. Vui lòng kiểm tra mạng.",
     "CONVERSATION_NOT_FOUND": "Không tìm thấy cuộc hội thoại.",
     "CHAT_STREAM_IN_PROGRESS": "Trợ lý đang trả lời trong hội thoại này. Vui lòng đợi hoặc bấm Dừng.",
@@ -161,8 +161,41 @@
     }
   },
   "documents": {
-    "title": "Quản lý tài liệu",
-    "description": "Module 3 – Tải lên, tìm kiếm và theo dõi trạng thái xử lý tài liệu sẽ được triển khai ở giai đoạn tiếp theo."
+    "title": "Tài liệu",
+    "description": "Tải lên, tìm kiếm và theo dõi trạng thái xử lý tài liệu TXT.",
+    "upload": "Tải lên",
+    "uploading": "Đang tải lên...",
+    "uploadHint": "Chỉ tệp .txt, tối đa 20MB.",
+    "searchPlaceholder": "Tìm theo tên tệp",
+    "allStatuses": "Tất cả trạng thái",
+    "empty": "Chưa có tài liệu nào.",
+    "emptyFiltered": "Không tìm thấy tài liệu phù hợp.",
+    "columns": {
+      "name": "Tên tệp",
+      "status": "Trạng thái",
+      "size": "Kích thước",
+      "createdAt": "Ngày tải lên",
+      "actions": "Thao tác"
+    },
+    "status": {
+      "PENDING": "Đang chờ",
+      "PROCESSING": "Đang xử lý",
+      "READY": "Sẵn sàng",
+      "FAILED": "Lỗi"
+    },
+    "actions": {
+      "open": "Mở thao tác",
+      "download": "Tải xuống",
+      "delete": "Xóa"
+    },
+    "deleteDialog": {
+      "title": "Xóa tài liệu?",
+      "description": "\"{name}\" sẽ bị xóa vĩnh viễn, không thể khôi phục.",
+      "confirm": "Xóa tài liệu"
+    },
+    "uploaded": "Đã tải lên \"{name}\".",
+    "deleted": "Đã xóa \"{name}\".",
+    "errorCodeLabel": "Mã lỗi"
   },
   "profile": {
     "title": "Hồ sơ cá nhân",
