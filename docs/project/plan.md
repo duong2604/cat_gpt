@@ -127,4 +127,34 @@ TL-007 (thiết kế M3) → SE-010 (Docker + CI) → SE-011 (backend TXT) → S
 
 SE-003 không chặn Module 3: nếu TL-007 đã duyệt mà SE-003 còn mở (thêm vòng `Cần sửa`), Senior Dev nhận SE-010/SE-011 trước rồi quay lại SE-003 trong hạn 25/11. SE-005, SE-006, SE-004 làm sau lát TXT (phương án 1 SE) hoặc ở phiên thứ hai khi mở.
 
+### 8.3. Module 4: phụ thuộc, đường găng và thứ tự (CTO chốt 18/11/2026)
+
+Nguồn: CTO 18/11/2026 (chỉ thị chuẩn bị Module 4 + bổ sung điều phối).
+- Ưu tiên trong Module 4: P0 RAG backend happy case · P1 RAG giao diện · P1 tóm tắt · P2 đánh giá.
+- Về kỹ thuật, RAG trên TXT **không phụ thuộc** SE-013 (PDF/DOCX): `page` là trường tùy chọn, không đổi hợp đồng ([TL-008 AC4](../tasks/TL-008-module-4-design.md#checklist-vòng-1)). Tuy vậy **thứ tự nhận việc** giữ Module 3 trước (CTO chốt).
+- Khi Module 3 hoàn thành, TL tự chuyển SE-014 `Sẵn sàng`, giao trực tiếp cho phiên Senior Dev chính thức và xác nhận branch/base SHA. Không liên lạc được phiên SE thì ghi BLOCKED và báo CTO.
+
+```
+SE-011 (merge) ──┬─► [TL-008 AC4 trên develop] ─► SE-014 (RAG backend, P0, 3n) ─┬─► SE-015 (RAG UI, 2n)
+                 │                                                               ├─► SE-016 (tóm tắt, 1,5n)
+                 │                                                               └─► SE-017 (đánh giá, 2n)
+                 ├─► SE-012 (UI Tài liệu, 2n) ─────────────────────────────────────┬─► SE-015
+                 │                                                                 └─► SE-016
+                 └─► TL-009 nhãn chunkIndex ─► TL-009 duyệt ─────────────────────────► SE-017
+SE-012 + TL nghiệm thu lát TXT ─► SE-013 (PDF/DOCX, 1,5n) — độc lập với Module 4
+```
+
+| Loại | Việc |
+|---|---|
+| TL làm ngay | TL-009: chọn tài liệu, viết câu hỏi; review SE-011 CP4; chuẩn bị script kiểm R1–R11 |
+| SE đang bị chặn | SE-014 (chờ SE-011 merge + AC4); SE-015, SE-016 (chờ SE-012 + SE-014); SE-017 (chờ TL-009 + SE-014) |
+| Chuẩn bị song song | Nội dung SE-014…SE-017 (đã xong 18/11); bộ câu hỏi TL-009 |
+| Bắt buộc tuần tự (1 SE) | SE-011 → SE-012 → SE-013 → SE-014 → SE-015 → SE-016 → SE-017 |
+
+**Thứ tự cho một Senior Dev (CTO chốt 18/11):** SE-011 (CP4 còn lại, ~0,5–1n) → SE-012 (2n) → SE-013 (1,5n) → **SE-014** (3n) → SE-015 (2n) → SE-016 (1,5n) → SE-017 (2n).
+- Tổng ≈ 12,5–13 ngày công SE.
+- Happy case RAG backend sau khoảng 7–7,5n kể từ 18/11.
+
+Đây là ước lượng theo ngày công, **không phải cam kết ngày** (chưa trừ vòng review/Cần sửa). SE-015 và SE-016 cùng chỉ cần SE-014 + SE-012; làm SE-015 trước theo ưu tiên P1 (giao diện hỏi tài liệu là chức năng chính).
+
 **Hai Senior Dev (chưa mở):** chỉ khi máy đủ RAM (đo 16/11: 15,8 GB, trống ~2 GB khi đang làm việc). Một bộ Docker dùng chung; mỗi lúc một bộ app (API + web) chạy; phiên thứ hai làm phần không cần chạy app (code + unit test) và hẹn giờ chạy kiểm tra; tách dữ liệu bằng `.env` (DB, bucket, collection, `BULLMQ_PREFIX`).
