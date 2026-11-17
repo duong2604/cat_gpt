@@ -1,12 +1,12 @@
 # SE-013 — Mở rộng định dạng: PDF dạng text và DOCX
 
-Trạng thái: Sẵn sàng — TL chuyển 18/11/2026 (nghiệm thu lát TXT trên `develop` @ `cd386e5`)
+Trạng thái: Đang làm
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 1,5 ngày làm việc
 Phụ thuộc: TL nghiệm thu lát TXT trên `develop` ([SE-011](SE-011-documents-txt-backend.md) + [SE-012](SE-012-documents-txt-frontend.md)) — **đạt 18/11/2026** (`cd386e5`); không còn phụ thuộc chặn
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
-Ngày thực tế: bắt đầu — · bàn giao review — · hoàn tất —
+Ngày thực tế: bắt đầu — 18/11/2026 · bàn giao review — · hoàn tất —
 Chốt: 16/11/2026 — CTO duyệt Wave 0–2: SE-013 mở rộng PDF/DOCX sau khi nghiệm thu TXT
-SHA cơ sở: `origin/develop` @ SHA khi nhận task
+SHA cơ sở: `origin/develop` @ `b4c17be`
 PR: <link, Senior Dev ghi khi bàn giao>
 
 ## Mục tiêu
@@ -41,7 +41,7 @@ Tài liệu PDF dạng text và DOCX đi qua cùng đường ống của lát TX
 ## Quyết định còn mở
 | # | Câu hỏi | Đề xuất mặc định | Chốt |
 |---|---|---|---|
-| — | Thư viện PDF | SE đề xuất khi nhận task, TL duyệt | — |
+| — | Thư viện PDF | SE đề xuất `unpdf@1.9.1` (MIT, ~2,2 MB, không phụ thuộc bắt buộc, khớp Node ≥22 của repo, có sẵn `extractText({ mergePages: false })` cho `page` theo trang) — đã gửi TL duyệt 18/11/2026, chờ phản hồi | — |
 
 ## Kết quả review
 Chưa có bàn giao.
