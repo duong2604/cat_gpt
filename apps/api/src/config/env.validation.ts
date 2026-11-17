@@ -184,6 +184,35 @@ export class EnvironmentVariables {
 
   @IsString()
   QDRANT_COLLECTION = 'document_chunks';
+
+  // ===== Tài liệu (SE-011) =====
+  @IsString()
+  EMBEDDING_MODEL = 'text-embedding-3-small';
+
+  @Transform(({ value }) => Number(value))
+  @IsInt()
+  @Min(1)
+  DOCUMENT_MAX_SIZE_MB = 20;
+
+  @Transform(({ value }) => Number(value))
+  @IsInt()
+  @Min(1)
+  DOCUMENT_MAX_CHUNKS = 500;
+
+  @Transform(({ value }) => Number(value))
+  @IsInt()
+  @Min(1)
+  DOCUMENT_CHUNK_SIZE = 1000;
+
+  @Transform(({ value }) => Number(value))
+  @IsInt()
+  @Min(0)
+  DOCUMENT_CHUNK_OVERLAP = 150;
+
+  @Transform(({ value }) => Number(value))
+  @IsInt()
+  @Min(1)
+  DOCUMENT_JOB_ATTEMPTS = 3;
 }
 
 export function validateEnv(config: Record<string, unknown>): EnvironmentVariables {

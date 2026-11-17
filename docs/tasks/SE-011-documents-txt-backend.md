@@ -1,13 +1,13 @@
 # SE-011 — Lát TXT, backend: tải lên → xử lý bất đồng bộ → READY → danh sách / tải xuống / xóa
 
-Trạng thái: Sẵn sàng
+Trạng thái: Đang làm
 Người phụ trách: Senior Dev · Ưu tiên: **P0** (CTO 17/11/2026 tối) · Ước lượng: 3 ngày làm việc
 Phụ thuộc: [TL-007](TL-007-module-3-design.md) — Done 17/11/2026; [SE-010](SE-010-dev-infra-ci.md) — Done 17/11/2026 (merge `9f502d1`); **không còn phụ thuộc chặn**
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
-Ngày thực tế: bắt đầu — · bàn giao review — · hoàn tất —
+Ngày thực tế: bắt đầu — 17/11/2026 · bàn giao review — · hoàn tất —
 Chốt: 16/11/2026 — CTO duyệt Wave 0–2: SE-011 triển khai backend lát TXT bằng service thật; chỉ chủ sở hữu truy cập; OpenAI chỉ dùng tài liệu thử công khai
-SHA cơ sở: `origin/develop` @ SHA khi nhận task
-PR: <link, Senior Dev ghi khi bàn giao>
+SHA cơ sở: `origin/develop` @ `3401235`
+PR: https://github.com/duong2604/cat_gpt/pull/19
 
 **Thử nghiệm skills:** task pilot số 1 ([TL-010](TL-010-engineering-guide-skills-pilot.md)) — đọc [engineering-guide](../project/engineering-guide.md) trước khi làm.
 
@@ -80,6 +80,49 @@ Mỗi checkpoint: commit + push lên nhánh, rồi báo TL SHA. TL review từng
 Chưa có bàn giao.
 
 ## Lịch sử review
+
+### Checklist vòng 1
+
+**Task** — SE-011 · PR https://github.com/duong2604/cat_gpt/pull/19 · SHA đầu PR `6a4a766` · SHA cuối `a5a82bf` · vòng 1
+**Kết quả** — Module `apps/api/src/modules/documents/` (controller/service/presenter/schema/dto, MinIO/Qdrant/OpenAI embeddings/BullMQ worker); `packages/shared` (`DocumentStatus`, `DocumentDto`, 6 mã lỗi); biến môi trường mục 8; sửa 3 lỗi chặn do TL phát hiện ở vòng review đầu (web i18n thiếu khóa lỗi, tên tệp tiếng Việt bị multer giải mã sai, Qdrant "Not Found" khi collection chưa tồn tại) + 2 lỗi CP4 (Redis treo thay vì 503, upload >25MB trả 413 thay vì 400) + 1 lỗi tự phát hiện (MinIO remove() nuốt mọi lỗi, chặn retry job xóa). **AC1–AC14 đã tự xác minh đạt trên service thật** (chi tiết dưới). Chưa đề nghị merge — chờ TL tự kiểm tra lại độc lập (đặc biệt T6/T11, đã gửi 6 documentId) và ký duyệt.
+
+**Checklist**
+- [x] AC1 T1: upload TXT → `201 PENDING` → `READY`; `chunkCount > 0`; point Qdrant = `chunkCount` — Đạt — Senior Dev: doc `6afc84bfa9f370c78f429534`, READY ~0.6s, chunkCount=3, Qdrant count=3. TL độc lập: `Giới thiệu Việt Nam.txt` (8254B), READY 1.3s, chunkCount=7, Mongo 1/MinIO 1/Qdrant 7, collection size 1536 Cosine, payload keys đúng {chunkIndex,documentId,text,userId}, index trên userId/documentId
+- [x] AC2 T2,T10: sai đuôi/chữ ký/UTF-8/quá cỡ → 400 đúng mã; khoảng trắng → FAILED DOCUMENT_NO_TEXT — Đạt — qua API thật, dùng tệp TL chuẩn bị (`se011-fixtures/`) + tệp tự tạo: `pdf-as-txt.txt`, `latin1.txt`, `nul-byte.txt`, `wrong-ext.md` → 400 FILE_INVALID_TYPE; tệp PDF giả có nội dung nhị phân thật sau header `%PDF-` (không chỉ chữ `%PDF-` dạng ASCII) → 400 FILE_INVALID_TYPE; 26MB → 400 FILE_TOO_LARGE; `whitespace.txt` → 201 PENDING rồi FAILED DOCUMENT_NO_TEXT trong 176ms (không thử lại); `too-many-chunks.txt` (933KB) → 201 PENDING rồi FAILED DOCUMENT_TOO_MANY_CHUNKS trong 807ms (không thử lại, dừng trước khi gọi OpenAI); `bom.txt` → READY, chunkCount=1 (BOM bị bỏ đúng)
+- [x] AC3 T3,T4: Qdrant tắt/bật → READY hoặc FAILED sau đúng số lần — Đạt — T4 (Qdrant tắt suốt, doc `...2cb4`): job `failed`, attemptsMade=3/3, doc FAILED DOCUMENT_PROCESSING_FAILED, Qdrant 0 point cho documentId này (chưa từng ghi được). T3 (Qdrant tắt rồi bật trước lần thử cuối, doc `...2cb6`): tắt tới khi job ở `delayed` attemptsMade=2, bật lại Qdrant, lần thử 3 chạy → READY, chunkCount=3, Qdrant count=3 khớp. Cả hai đã xóa sau kiểm, TL xác minh lại bằng đếm trực tiếp (Mongo 0/MinIO 0/Qdrant 0 cho cả hai)
+- [x] AC4 T5: chạy lại job `process` cho tài liệu `READY` → số point không đổi — Đạt — Senior Dev: re-queue thủ công `process-6afc84bfa9f370c78f429534`, worker bỏ qua (log "bỏ qua: đã bị xóa hoặc đổi trạng thái" — status guard chỉ nhận PENDING/PROCESSING), Qdrant giữ nguyên 3 point. TL độc lập: 2 lần chạy lại → 7→7→7 point
+- [x] AC5 T6,T11: xóa khi đang `PROCESSING` (đang embedding / ngay sau PROCESSING), ≥3 lần mỗi giai đoạn → 0 point/0 object/0 bản ghi, không có READY — Đạt — tệp `large-400chunks.txt` (480KB, TL chuẩn bị), 6 lần chạy (script tự động, đếm trực tiếp 3 nơi, đợi thêm 10s sau khi 404 để bắt upsert muộn):
+  - Giai đoạn (a) đang embedding (xóa ~1.9s sau khi thấy `PROCESSING`, trong lúc đang gọi OpenAI theo lô): 3 lần, doc `...2cc2`/`...2cc5`/`...2cc8` — cả 3 lần: `detail` 404 trong ~2s sau upload, chưa từng thấy `READY`, Mongo=0/MinIO=gone/Qdrant=0
+  - Giai đoạn (b) ngay sau khi chuyển `PROCESSING` (xóa ngay khi có response upload, ~260ms): 3 lần, doc `...2cb9`/`...2cbc`/`...2cbf` — cả 3 lần: `detail` 404 trong ~400ms sau upload, chưa từng thấy `READY`, Mongo=0/MinIO=gone/Qdrant=0
+  - Toàn bộ 6 documentId đã gửi TL để tự đếm lại độc lập
+- [x] AC5b T12: kill API khi `PROCESSING`, khởi động lại → `READY`, point = `chunkCount` — Đạt (TL xác minh độc lập) — tệp 419 đoạn, kill -9 khi đang PROCESSING (0 point lúc kill), khởi động lại → job "stalled" chạy lại → READY, chunkCount=419, 419 point, 419 chunkIndex 0–418 duy nhất, không trùng
+- [x] AC5c T13: MinIO tắt khi xóa → `404` ngay; bật lại trước khi hết lượt → dọn xong 3 nơi — Đạt — 2 kịch bản, đếm trực tiếp 3 nơi (không qua API): (1) MinIO tắt rồi bật giữa chừng (doc `...ba12`): `DELETE` 204 trong 0.167s, GET 404 ngay; lúc tắt job ở trạng thái `delayed` attemptsMade=2/5; sau khi bật lại job hoàn tất; Mongo `countDocuments({_id})`=0, MinIO `statObject`=NotFound, Qdrant=0. (2) MinIO tắt suốt (doc `...ba14`): job `failed` sau 5 lần thử (~80s); Mongo `countDocuments({_id})`=1 còn `deletedAt`, MinIO vẫn không vào được, Qdrant=0 — đúng thiết kế mục 6.4 bước 4. Phát hiện và sửa thêm: `DocumentFilesService.remove()` trước đó nuốt mọi lỗi (kể cả mất kết nối thật), khiến job xóa "thành công" giả khi MinIO lỗi mà không bao giờ thử lại — đã sửa để lỗi thật được ném ra cho BullMQ thử lại. TL xác minh độc lập kịch bản (1) hai lần trên `6a4a766`: `delayed` attemptsMade=2, sau khi bật lại → Mongo 0 / MinIO 0 / Qdrant 0
+- [x] AC6 T9: Redis tắt → upload `503 DOCUMENT_QUEUE_UNAVAILABLE`, không còn object/bản ghi — Đạt — Senior Dev: 503 sau ~3.3s (timeout chủ động, vì ioredis mặc định xếp hàng lệnh trong bộ nhớ thay vì báo lỗi ngay). TL độc lập: 503 sau 3.2s, Mongo 0 bản ghi, MinIO 0 object
+- [x] AC7 T7: B/admin gọi tài liệu của A → `404`; chưa đăng nhập → `401`; danh sách B không có tài liệu A — Đạt — TL xác minh độc lập (B và admin: `404`; chưa đăng nhập: `401`; danh sách B không chứa tài liệu A). Senior Dev tự kiểm thêm bằng 2 tài khoản TL cấp (`tl-se011.a`, `tl-se011.b`, không ghi mật khẩu ra ngoài): A upload, B gọi detail/download/delete → `404 DOCUMENT_NOT_FOUND` cả 3; admin gọi cùng 3 thao tác → `404` (không có ngoại lệ, đúng M3-2/CS-1); không cookie → `401`; danh sách B `total=0`, không chứa tài liệu A; A tự xóa → `204`
+- [x] AC8 T8: tải xuống — SHA-256 khớp, `Cache-Control: private, no-store`, tên tiếng Việt đúng — Đạt — Senior Dev: SHA-256 tệp tải về khớp tuyệt đối tệp gốc, header đúng. TL độc lập: SHA-256 khớp, tên tiếng Việt đúng, tìm không phân biệt hoa/thường (tìm "GIỚI" thấy "Giới thiệu...")
+- [x] AC9 Tìm theo tên không phân biệt hoa/thường; lọc `status`; phân trang — Đạt — tìm không phân biệt hoa/thường (TL xác minh: "GIỚI" tìm thấy "Giới thiệu…"); lọc `status=READY` (Senior Dev); phân trang: tạo 25 tài liệu, `pageSize=10` → trang 1 (10 mục, mới nhất trước), trang 2 (10 mục), trang 3 (5 mục), `meta.total=25`, `totalPages=3`; gộp 3 trang = 25 tên duy nhất, không trùng/sót. Đã xóa cả 25, Qdrant tổng còn 0 point
+- [x] AC10 Unit test kiểm định dạng, chia đoạn, phân loại lỗi vĩnh viễn/tạm thời — Đạt — theo yêu cầu TL: tách `permanentErrorFor(text, chunks, maxChunks, hasKey): ErrorCode | null` (`permanent-error.ts`) khỏi `document-processor.ts`; `handleProcess` gọi hàm này, khác `null` → `failPermanently`. `permanent-error.spec.ts` (4 case: `DOCUMENT_NO_TEXT`, `DOCUMENT_TOO_MANY_CHUNKS`, `DOCUMENT_EMBEDDING_UNAVAILABLE`, `null` nghĩa tạm thời) + `text-extract.spec.ts`, `chunk-text.spec.ts`, `sanitize-filename.spec.ts` = 30 test, không mock. Bằng chứng hành vi qua kiểm thật: `whitespace.txt`/`too-many-chunks.txt` sau khi tách hàm vẫn FAILED đúng mã, không thử lại (T2/T10); `DOCUMENT_PROCESSING_FAILED` vẫn thử đúng 3 lần rồi FAILED (T3/T4/AC6)
+- [x] AC11 Log không có nội dung tài liệu, khóa API — Đạt — Senior Dev tự `grep` log API (bao gồm log của toàn bộ phiên kiểm thử CP2–CP4 ở trên): không có nội dung tệp thử (`grep` nội dung các tệp thử → không khớp), không có `sk-proj-`/khóa OpenAI/`JWT_ACCESS_SECRET`/`MINIO_SECRET`; dòng log duy nhất có chữ "password" là tên route `/me/password`, không phải giá trị. TL xác nhận cùng kết quả ở vòng review CP1 (trên mã trước đó)
+- [x] AC12 `.env` ↔ `.env.example` đồng bộ; không có credential thật trong `.env.example` — Đạt — `pnpm env:check` OK nhiều lần trong suốt quá trình; biến thêm cho tài liệu (`EMBEDDING_MODEL`, `DOCUMENT_*`) đã đồng bộ
+- [x] AC13 Checklist hai vai (mục 9.1), dữ liệu thử đã xóa — Đạt — xem "Checklist hai vai" chi tiết ngay dưới bảng này; mọi tài liệu thử (của Senior Dev và TL) đã xóa, đếm trực tiếp Mongo/MinIO/Qdrant = 0 ở lần kiểm cuối
+- [x] AC14 CI xanh; `pnpm build`, `typecheck`, `lint` đạt — Đạt — `pnpm typecheck && pnpm build && pnpm lint` ở gốc monorepo đạt tại `a5a82bf`; CI GitHub Actions xanh tại `a5a82bf` ([run 44135413052](https://github.com/duong2604/cat_gpt/actions/runs/44135413052), 55s) — SHA cuối cùng của vòng 1
+
+**Checklist hai vai** ([workflow 9.1](../project/workflow.md#91-trách-nhiệm-hai-vai-về-phân-quyền-giao-diện-và-phát-hành))
+- [x] Quyền: ca được phép — upload/list/detail/download/delete tài liệu của chính mình (AC1, AC8); ca bị từ chối — chưa đăng nhập `401` (curl không cookie), cùng vai khác tài khoản `404` (A/B), vai khác `404` (admin, không có ngoại lệ) — AC7
+- [ ] Đường dẫn trực tiếp tới màn hình không có quyền — Không áp dụng — task backend, chưa có UI (giao diện ở [SE-012](SE-012-documents-txt-frontend.md))
+- [ ] Trạng thái trống/tải/lỗi/thành công — Không áp dụng — task backend, chưa có UI
+- [ ] Desktop + mobile 375px, sáng + tối, vi + en — Không áp dụng — task backend, chưa có UI
+- [x] Chế độ `demo`/`staff` hiển thị đúng bảng tính năng — Đạt — `RELEASE_MODE=staff`: `GET`/`POST /documents` → `404` (giống route không tồn tại), Chat vẫn `chatEnabled:true` (đúng CS-6: Tài liệu luôn ẩn ở `staff`, không phụ thuộc mock/thật như Chat)
+- [x] Ma trận quyền/chuẩn giao diện đã cập nhật nếu có thay đổi — Đạt — thêm 3 dòng cho API `/documents` vào [access-control.md](../design/access-control.md) (USER thao tác của mình; USER/ADMIN với tài liệu người khác → `404` không ngoại lệ; `staff` → `404`)
+- [x] Dữ liệu thử đã dọn — Đạt — tài khoản thử: `tl-se011.a@catgpt.local`, `tl-se011.b@catgpt.local` (TL tạo, TL sẽ khóa sau khi SE-011 xong) và admin seed (không phải tài khoản thử, giữ nguyên); tài liệu thử: mọi tài liệu đã xóa qua API, đếm trực tiếp Mongo/MinIO/Qdrant = 0 ở lần kiểm cuối mỗi đợt
+
+**Kiểm tra đã chạy** — `pnpm typecheck && pnpm build && pnpm lint` (gốc monorepo, đạt); `pnpm --filter @cat-gpt/api test` 30/30; `pnpm env:check` OK; CI xanh trên các SHA trước (dẫn lại SHA cuối ở dòng AC14); kiểm thật trên MongoDB Atlas dev, Redis/MinIO/Qdrant Docker local dùng chung với TL, OpenAI thật (tệp thử `apps/api/test/fixtures/se-011-sample.txt` tự soạn, tệp tiếng Việt và `large-400chunks.txt` của TL, 2 tài khoản thử TL cấp)
+
+**Simplicity First** ([engineering-guide](../project/engineering-guide.md#1-simplicity-first-mọi-task)) — (1) Đã làm module `documents` theo đúng khuôn `chat/` (controller/service/schema/dto/presenter), worker BullMQ trong cùng tiến trình API (ponytail đã ghi), dùng lại `AppException`/`ErrorCode`/`PaginationQueryDto`/`FileInterceptor` sẵn có; (2) không thêm interface/abstraction cho MinIO/Qdrant/OpenAI (mỗi dịch vụ một class cụ thể, đúng M3-5 và "một bản cài, không interface"); dùng `@langchain/textsplitters` theo đúng Q4, không tự viết bộ chia đoạn; (3) dependency mới đã duyệt trong task: `bullmq`, `@nestjs/bullmq`, `minio`, `@qdrant/js-client-rest`, `@langchain/textsplitters`; thêm `ioredis` (peer bắt buộc của `bullmq` 6, không có trong danh sách duyệt ban đầu nhưng là phụ thuộc kỹ thuật bắt buộc, không phải lựa chọn thiết kế); (4) test: unit (30, logic thuần, không mock) + kiểm thật từng bước (upload/process/list/detail/download/delete) trên Mongo Atlas/MinIO/Qdrant/Redis/OpenAI thật, kết quả ghi trong checklist; (5) giới hạn còn lại: chưa có job quét dọn định kỳ cho bản ghi `deletedAt` mồ côi khi dọn dẹp thất bại toàn bộ (đã ghi chú `ponytail:` tại chỗ, đúng như thiết kế mục 6.4 chấp nhận); `embedAll` gọi lại OpenAI từ đầu mỗi lần thử lại (không nhớ lô đã nhúng) — chấp nhận được ở quy mô task này, sẽ tốn hơn nếu tệp rất lớn và lỗi ở lô cuối
+
+**Dọn nhánh trước khi nhận task này** (mục 2.1) — `develop` local @ `3401235` lúc nhận task; đã dọn: `feature/dev-infra-ci` (SE-010, đã merge, xóa local); còn giữ: không có nhánh nào khác
+
+**Trạng thái** — Chờ Review (AC1–AC14 tự xác minh đạt; PR giữ **OPEN**, chưa đề nghị merge — chờ TL tự kiểm tra độc lập, đặc biệt T6/T11, rồi ký duyệt)
 
 ## Phản hồi UI
 Không áp dụng (backend). Giao diện ở [SE-012](SE-012-documents-txt-frontend.md).

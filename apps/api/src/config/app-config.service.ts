@@ -76,4 +76,38 @@ export class AppConfigService {
       fullName: this.get('ADMIN_FULL_NAME'),
     };
   }
+
+  get redis() {
+    return { host: this.get('REDIS_HOST'), port: this.get('REDIS_PORT') };
+  }
+
+  get bullmqPrefix(): string {
+    return this.get('BULLMQ_PREFIX');
+  }
+
+  get minio() {
+    return {
+      endPoint: this.get('MINIO_ENDPOINT'),
+      port: this.get('MINIO_PORT'),
+      useSSL: this.get('MINIO_USE_SSL'),
+      accessKey: this.get('MINIO_ACCESS_KEY'),
+      secretKey: this.get('MINIO_SECRET_KEY'),
+      bucket: this.get('MINIO_BUCKET'),
+    };
+  }
+
+  get qdrant() {
+    return { url: this.get('QDRANT_URL'), collection: this.get('QDRANT_COLLECTION') };
+  }
+
+  get documents() {
+    return {
+      embeddingModel: this.get('EMBEDDING_MODEL'),
+      maxSizeBytes: this.get('DOCUMENT_MAX_SIZE_MB') * 1024 * 1024,
+      maxChunks: this.get('DOCUMENT_MAX_CHUNKS'),
+      chunkSize: this.get('DOCUMENT_CHUNK_SIZE'),
+      chunkOverlap: this.get('DOCUMENT_CHUNK_OVERLAP'),
+      jobAttempts: this.get('DOCUMENT_JOB_ATTEMPTS'),
+    };
+  }
 }
