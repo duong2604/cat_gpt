@@ -96,7 +96,21 @@ Vòng 1 bàn giao 17/11/2026. **CTO review vòng 6 (17/11/2026): APPROVED WITH C
 - [x] AC1 — 8 FR (đề cương: tóm tắt, hỏi–đáp kèm trích dẫn, tối ưu tiếng Việt, khung đánh giá) gắn task — [mục 2](../design/module-4-rag.md#2-chức-năng-function-spec)
 - [x] AC2 — thiếu căn cứ: chặn cứng khi 0 đoạn / tài liệu không còn hợp lệ (không gọi LLM); câu từ chối cố định nhận diện bằng so khớp chuỗi; `RAG_MIN_SCORE` tắt mặc định; trích dẫn chỉ lấy từ payload Qdrant, `[n]` ngoài khoảng bị bỏ, không nguồn hợp lệ → `ungrounded` — [mục 6](../design/module-4-rag.md#6-truy-hồi-thiếu-căn-cứ-xác-minh-trích-dẫn)
 - [x] AC3 — kiểm Mongo (`userId`, `READY`, chưa xóa) + lọc Qdrant `userId` + `documentId`; `404` đồng nhất; R4–R6 — [mục 5, 11](../design/module-4-rag.md#11-kiểm-thử-bắt-buộc-service-thật)
-- [ ] AC4 — đối chiếu payload Qdrant **thật** của SE-011: NOT VERIFIED (SE-011 chưa có code) — kiểm khi SE-011 bàn giao; thiết kế dựa trên payload đã chốt ở [Module 3 mục 4.3](../design/module-3-documents.md#43-qdrant)
+- [ ] AC4 — đối chiếu payload Qdrant **thật** của SE-011: **chưa PASS**. Đã khớp trên nhánh SE-011, nhưng chờ SE-011 merge rồi xác nhận lại trên `develop`.
+  - **Bằng chứng nhánh** (TL chạy 18/11/2026 ~00:00 trên `feature/module-3-documents-txt` @ `35946cb`, [PR #19](https://github.com/duong2604/cat_gpt/pull/19), OpenAI thật, tài liệu thử tự soạn):
+    - Collection `document_chunks`: vector 1536 chiều (`text-embedding-3-small`), Cosine; payload index `keyword` trên `userId`, `documentId`.
+    - Point `id` là UUID. Payload có đúng `{chunkIndex: number, documentId: string, text: string, userId: string}`; `userId` = chủ sở hữu (khớp `storageKey`); `chunkIndex` liên tục `0…n-1`, không trùng (419/419 với tệp lớn).
+  - **Đối chiếu Module 4:**
+    - Filter `userId` + `documentId ∈ …`: có index keyword, dùng `match.value` / `match.any` được → mục 6.1 bước 3 khả thi.
+    - `citations[].chunkIndex`, `quote` (cắt từ `text`): có đủ trường.
+    - `documentName` **không** có trong payload — lấy từ Mongo khi `prepare()` (đã có truy vấn kiểm quyền), đúng mục 4.
+    - `page`: TXT không có. SE-013 thêm `page` cho PDF; trường tùy chọn, không đổi hợp đồng.
+    - Tóm tắt `scroll` theo `documentId`, sắp theo `chunkIndex`: khả thi.
+  - **Phát hiện cho SE-014:**
+    - `DocumentsModule` chưa `exports` `EmbeddingService`/`VectorStoreService`/model `DocumentEntity` → SE-014 thêm `exports`.
+    - `VectorStoreService` chưa có `search`/`scroll` → SE-014 thêm `search`, SE-016 thêm `scroll`.
+    - `EmbeddingService.embedAll(texts)` dùng được cho câu hỏi (`embedAll([q])[0]`).
+  - **Sau khi SE-011 merge:** TL chạy lại T1 trên `develop`, chụp payload một point. Lúc đó mới đánh dấu AC4 PASS.
 - [x] AC5 — CTO duyệt kiến trúc có điều kiện 17/11/2026 (review vòng 6); chốt Q-M4-1…5. **Nguồn:** chỉ thị CTO review vòng 6
 
 **Trạng thái và bước tiếp theo** — Chờ Review.
