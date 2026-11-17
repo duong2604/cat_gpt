@@ -1,8 +1,8 @@
 # SE-012 — Lát TXT, giao diện: trang Tài liệu thật
 
-Trạng thái: Nháp
+Trạng thái: Sẵn sàng — TL chuyển 18/11/2026 (SE-011 merge `abc5a55`; SE-003 đã merge `783a8a3`)
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 2 ngày làm việc
-Phụ thuộc: [SE-011](SE-011-documents-txt-backend.md) đã merge (chặn); [SE-003](SE-003-release-mode-navigation.md) nên merge trước (cùng sửa `documents/page.tsx`, `app-sidebar.tsx`)
+Phụ thuộc: [SE-011](SE-011-documents-txt-backend.md) — **Done**, merge `abc5a55`; [SE-003](SE-003-release-mode-navigation.md) — Done, merge `783a8a3`; **không còn phụ thuộc chặn**
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
 Ngày thực tế: bắt đầu — · bàn giao review — · hoàn tất —
 Chốt: 16/11/2026 — CTO duyệt Wave 0–2: SE-012 triển khai frontend lát TXT

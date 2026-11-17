@@ -1,10 +1,10 @@
 # SE-011 — Lát TXT, backend: tải lên → xử lý bất đồng bộ → READY → danh sách / tải xuống / xóa
 
-Trạng thái: Đang làm
+Trạng thái: Done — merge [PR #19](https://github.com/duong2604/cat_gpt/pull/19) → `develop` @ `abc5a55` (18/11/2026)
 Người phụ trách: Senior Dev · Ưu tiên: **P0** (CTO 17/11/2026 tối) · Ước lượng: 3 ngày làm việc
 Phụ thuộc: [TL-007](TL-007-module-3-design.md) — Done 17/11/2026; [SE-010](SE-010-dev-infra-ci.md) — Done 17/11/2026 (merge `9f502d1`); **không còn phụ thuộc chặn**
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
-Ngày thực tế: bắt đầu — 17/11/2026 · bàn giao review — · hoàn tất —
+Ngày thực tế: bắt đầu 17/11/2026 · bàn giao review 18/11/2026 (vòng 1) · hoàn tất 18/11/2026
 Chốt: 16/11/2026 — CTO duyệt Wave 0–2: SE-011 triển khai backend lát TXT bằng service thật; chỉ chủ sở hữu truy cập; OpenAI chỉ dùng tài liệu thử công khai
 SHA cơ sở: `origin/develop` @ `3401235`
 PR: https://github.com/duong2604/cat_gpt/pull/19
@@ -77,7 +77,22 @@ Mỗi checkpoint: commit + push lên nhánh, rồi báo TL SHA. TL review từng
 | Q4 | Thư viện chia đoạn | `@langchain/textsplitters` | **Chốt 17/11/2026 (CTO):** `RecursiveCharacterTextSplitter` |
 
 ## Kết quả review
-Chưa có bàn giao.
+**Done 18/11/2026** — TL merge [PR #19](https://github.com/duong2604/cat_gpt/pull/19) tại đầu PR `d681149` (= SHA TL review cuối) → `develop` @ `abc5a55`; code `develop` trùng `d681149` (`git diff` rỗng ở `apps`, `packages`); CI `develop` [run 44136156545](https://github.com/duong2604/cat_gpt/actions/runs/44136156545). Ước lượng 3n → thực tế < 1 ngày lịch (17/11 22:45 → 18/11 00:20) — Sớm. Chặn ngoài: quyền embedding OpenAI (403, ~23:30–23:45 17/11), CTO cấp.
+
+### Review TL (17–18/11/2026)
+TL kiểm độc lập trên worktree riêng `cat_gpt-review`, API cổng 4300, `BULLMQ_PREFIX=cat-gpt-tlreview` (không đụng job của Senior Dev), đếm trực tiếp Mongo/MinIO/Qdrant bằng script riêng. Tài khoản thử A/B do TL tạo; tệp thử tự soạn, công khai.
+
+| Vòng / SHA | Kết luận | Chi tiết |
+|---|---|---|
+| CP1 `7f7874c` | FAIL | 3 lỗi chặn: typecheck/build web đỏ (thiếu khóa i18n mã lỗi mới); tên tệp tiếng Việt bị multer giải mã latin1; `deleteByDocumentId` ném `Not Found` khi chưa có collection → job xóa không dọn được (và tài liệu đầu tiên trên Qdrant trống không bao giờ `READY`) |
+| CP1 `0c8477a` | PASS | Cả 3 lỗi đã sửa, kiểm lại bằng đếm 3 nơi |
+| CP4 `35946cb` | PASS (phần) | T9 Redis không tới được → `503` sau 3,2 s, 0 bản ghi/0 object; 21 MB, 26 MB → `400 FILE_TOO_LARGE` |
+| CP2/CP3 `35946cb` | PASS | T1 READY 1,3 s, chunkCount 7 = 7 point; SHA-256 tải về khớp; T5 7→7→7; **T12** kill -9 khi PROCESSING → khởi động lại → READY 419 đoạn = 419 point, 419 `chunkIndex` duy nhất |
+| T13 `6a4a766` | PASS | MinIO dừng thật khi xóa → job `delayed` attemptsMade 2 → bật lại → 0/0/0 |
+| Vòng 1 `5253eac` | Cần sửa | AC10 thiếu unit test phân loại lỗi vĩnh viễn/tạm thời (AC đã duyệt); AC14 dẫn CI SHA cũ. T6/T11: đếm lại 6 tài liệu của Senior Dev = 0/0/0; TL tự chạy 2 lần (pha a +1,8 s, pha b +209 ms) = 0/0/0. AC11: grep log TL 0 kết quả |
+| Vòng 1 `d681149` | **Đạt → merge** | `permanentErrorFor` + 4 test; gates TL: env:check, typecheck, lint, build, api test 30/30; CI run 44135724774 xanh; khói: happy READY 7 đoạn + SHA khớp; tệp khoảng trắng `FAILED DOCUMENT_NO_TEXT` attemptsMade 1 (không thử lại); dọn 0/0/0 |
+
+Sau merge: TL chạy lại T1 trên `develop` @ `abc5a55` — READY 7 đoạn, Mongo 1/MinIO 1/Qdrant 7; dọn 0/0/0 ([TL-008 AC4](TL-008-module-4-design.md#checklist-vòng-1)).
 
 ## Lịch sử review
 
@@ -122,7 +137,7 @@ Chưa có bàn giao.
 
 **Dọn nhánh trước khi nhận task này** (mục 2.1) — `develop` local @ `3401235` lúc nhận task; đã dọn: `feature/dev-infra-ci` (SE-010, đã merge, xóa local); còn giữ: không có nhánh nào khác
 
-**Trạng thái** — Chờ Review (AC1–AC14 tự xác minh đạt; PR giữ **OPEN**, chưa đề nghị merge — chờ TL tự kiểm tra độc lập, đặc biệt T6/T11, rồi ký duyệt)
+**Trạng thái** — Chờ Review (AC1–AC14 tự xác minh đạt; PR giữ **OPEN**, chưa đề nghị merge — chờ TL tự kiểm tra độc lập, đặc biệt T6/T11, rồi ký duyệt). → TL review đạt tại `d681149`, merge 18/11/2026 (xem Kết quả review).
 
 ## Phản hồi UI
 Không áp dụng (backend). Giao diện ở [SE-012](SE-012-documents-txt-frontend.md).
