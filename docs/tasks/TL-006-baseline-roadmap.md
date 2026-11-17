@@ -1,10 +1,10 @@
 # TL-006 — Mốc so sánh, đối chiếu tài liệu, lộ trình Module 3–4 và đề xuất sửa workflow
 
-Trạng thái: Chờ Review — vòng 2 (17/11/2026): W1 đã áp dụng; AC4 đạt; chờ CTO xác nhận
+Trạng thái: Done — CTO duyệt 17/11/2026 (review vòng 6)
 Người phụ trách: TL · Ưu tiên: P1 · Ước lượng: 1 ngày làm việc
 Phụ thuộc: Không (AC4 cần `OPENAI_API_KEY` trong `apps/api/.env` của TL)
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
-Ngày thực tế: bắt đầu 16/11/2026 · bàn giao review 16/11/2026 (vòng 1) · hoàn tất —
+Ngày thực tế: bắt đầu 16/11/2026 · bàn giao review 16/11/2026 (vòng 1) · hoàn tất 17/11/2026
 Chốt: 16/11/2026 — CTO duyệt Wave 0–2 (APPROVED WITH CONDITIONS); giữ nguyên hạn đã chốt, task mới "Không đặt — theo phụ thuộc"; chỉ **đề xuất** sửa workflow và mục lục
 SHA cơ sở: `origin/develop` @ `eb1ce4d`
 PR: Không — tài liệu TL
@@ -80,6 +80,9 @@ Vòng 1 bàn giao 16/11/2026 — chờ CTO. AC4 chưa chạy.
 - [x] AC4 trên `develop`: PR #6 merge `783a8a3`; `git diff 6c941b8 783a8a3 -- apps packages` rỗng → code đã kiểm trùng `develop` — PASS
 
 **Trạng thái và bước tiếp theo** — Chờ Review (CTO xác nhận TL-006).
+
+### Kết quả CTO review vòng 6 (17/11/2026)
+**APPROVED** — CTO chấp nhận W1 và kết quả kiểm thử OpenAI thật. AC1–AC5 đều có bằng chứng (vòng 1–2 ở trên). TL đối chiếu lại AC1 lúc 22:30 17/11 ([báo cáo vòng 6](../reports/daily/2026-11-17.md#1-đồng-bộ-trạng-thái-không-giả-định-vòng-5-còn-đúng)): không lệch. → **Done**.
 
 ## Phản hồi UI
 Không áp dụng.

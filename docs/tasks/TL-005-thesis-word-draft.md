@@ -13,10 +13,10 @@ PR: <ghi khi bàn giao>
 Một file `.docx` nháp hoàn chỉnh về cấu trúc và định dạng theo quy định Khoa, nội dung lấy **chỉ** từ bộ nguồn `docs/thesis/` tại `da66569`, mô tả đúng trạng thái tại SHA đó; mục sinh viên chưa cung cấp để nhãn `CẦN BỔ SUNG`.
 
 ## Output
-- `docs/thesis/word/bao-cao-datn-nhap-da66569.docx` (lần 2: `…-<sha nguồn mới>.docx`, giữ file cũ tới khi bản mới được duyệt).
-- `docs/thesis/word/bao-cao-datn-nhap-da66569.pdf` — bản render để kiểm bố cục (xuất từ Microsoft Word có trên máy; không có LibreOffice).
+- `D:\workspace\buggysoft\cat_gpt-thesis-private\bao-cao-datn-nhap-da66569.docx`. File này **ngoài repo** (T2, CTO 17/11/2026: không đưa Word vào repo công khai). Lần 2: `…-<sha nguồn mới>.docx`, giữ file cũ tới khi bản mới được duyệt.
+- `D:\workspace\buggysoft\cat_gpt-thesis-private\bao-cao-datn-nhap-da66569.pdf` — bản render để kiểm bố cục (xuất từ Microsoft Word có trên máy; không có LibreOffice).
 - `docs/thesis/diagrams/` — file nguồn sơ đồ (`.mmd`, đã có D1–D4, D9) + ảnh xuất (`.svg` hoặc `.png`) dùng trong Word; sơ đồ vẽ mới theo mục "Sơ đồ" dưới đây.
-- PR `docs/thesis-word` → `develop`, checklist vòng 1 trong file này. **Không** đưa file Word vào repo nếu có thông tin liên lạc cá nhân.
+- PR `docs/thesis-word` → `develop` chỉ gồm sơ đồ và checklist vòng 1 trong file này (kèm SHA-256 của `.docx`/PDF để đối chiếu). **Không** commit `.docx`/PDF.
 
 ## Nguồn bắt buộc (tại `da66569`)
 | Nguồn | Dùng cho |
@@ -97,8 +97,8 @@ Xuất ảnh: Mermaid CLI (`@mermaid-js/mermaid-cli`) cần cài gói và trình
 ## Quyết định còn mở
 | # | Câu hỏi | Đề xuất mặc định | Chốt |
 |---|---|---|---|
-| T1 | File Mermaid `.mmd` + ảnh xuất có được coi là "file hình vẽ bằng phần mềm thiết kế" (Q12) không? | Có; nếu GVHD yêu cầu công cụ khác thì vẽ lại | Chờ khách hàng/GVHD |
-| T2 | Đặt file Word trong repo công khai (`docs/thesis/word/`)? | Có, vì chỉ chứa thông tin đã có trong repo (tên, MSV, lớp); không có liên lạc cá nhân | Chờ khách hàng |
+| T1 | File Mermaid `.mmd` + ảnh xuất có được coi là "file hình vẽ bằng phần mềm thiết kế" (Q12) không? | Có; nếu GVHD yêu cầu công cụ khác thì vẽ lại | **CTO chốt 17/11/2026:** chấp nhận `.mmd` + ảnh xuất cho bản nháp; GVHD yêu cầu định dạng khác thì điều chỉnh |
+| T2 | Đặt file Word trong repo công khai (`docs/thesis/word/`)? | Có, vì chỉ chứa thông tin đã có trong repo (tên, MSV, lớp); không có liên lạc cá nhân | **CTO 17/11/2026: Không.** Word/PDF để ở thư mục local ngoài repo (`D:\workspace\buggysoft\cat_gpt-thesis-private\`) hoặc nơi lưu trữ riêng tư; kiểm dữ liệu (W12) trước khi chia sẻ |
 
 ## Kết quả review
 Chưa có.
@@ -119,5 +119,5 @@ Bạn dựng bản Word nháp báo cáo đồ án CAT GPT theo docs/tasks/TL-005
 2. Viết .docx (dùng skill docx nếu có; style Word thật cho Heading 1–3, Normal, Caption; mục lục, danh mục hình/bảng là field tự sinh). Chỉ dùng nội dung nguồn; trạng thái module theo bảng trong TL-005; chèn [CẦN BỔ SUNG: B<n> — …] ở mọi chỗ thiếu.
 3. Sơ đồ: dùng file .mmd trong docs/thesis/diagrams/; vẽ thêm D5, D6, D10 bằng Mermaid. Xuất ảnh cần cài công cụ → hỏi người dùng trước; không được thì để khung + ghi chú.
 4. Xuất PDF bằng Microsoft Word, xem từng trang theo W11. Chạy checklist W1–W12.
-5. Bàn giao: PR docs/thesis-word → develop (chỉ docs/thesis/word/**, docs/thesis/diagrams/**, file TL-005, dòng TL-005 mục lục), ghi "### Checklist vòng 1" vào TL-005, trạng thái Chờ Review. Không merge, không sửa file nguồn 01–04.
+5. Lưu .docx và PDF vào D:\workspace\buggysoft\cat_gpt-thesis-private\ (NGOÀI repo, không commit). Bàn giao: PR docs/thesis-word → develop (chỉ docs/thesis/diagrams/**, file TL-005, dòng TL-005 mục lục; ghi SHA-256 của .docx/PDF), ghi "### Checklist vòng 1" vào TL-005, trạng thái Chờ Review. Không merge, không sửa file nguồn 01–04.
 ```

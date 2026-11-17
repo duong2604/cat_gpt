@@ -99,5 +99,10 @@ CS-1…CS-6 ở [access-control mục 4](../design/access-control.md#4-chính-s�
 **Kiểm tra đã chạy** — `git fetch`; `git worktree list`; `git merge-base`, `git diff --quiet`, `git show --stat 977c03d`; `gh pr list --head fix/avatar-requires-login`; `git diff --check`; kiểm tra liên kết.
 **Trạng thái và bước tiếp theo** — Chờ Review; khách hàng xác nhận vòng 3, chốt R1 (quy trình khôi phục) và Q1 (chặn tạm theo IP), duyệt mốc dự kiến.
 
+**CTO review vòng 6 (17/11/2026):**
+- **R1 — đồng ý có điều kiện:** giữ quy trình 3 vai. Mỗi lần khôi phục admin phải có **CTO phê duyệt rõ ràng**, có nhật ký kiểm toán (`ADMIN_RECOVERED`), và không tạo đường vòng vượt kiểm soát quyền. Ghi vào [SE-006](SE-006-account-admin-rules.md) khi phần chờ R1 của SE-006 chuyển `Sẵn sàng`.
+- **Q1 — chưa chốt:** giữ yêu cầu SE-005 kiểm thử nhiều người dùng chung IP, chống dò mật khẩu, đo tỷ lệ `429`. TL đề xuất chính sách sau khi có số liệu.
+- Không đóng TL-003 khi xác nhận vòng 3 và Q1 còn mở.
+
 ## Phản hồi UI
 Chưa có.
