@@ -1,12 +1,12 @@
 # SE-012 — Lát TXT, giao diện: trang Tài liệu thật
 
-Trạng thái: Sẵn sàng — TL chuyển 18/11/2026 (SE-011 merge `abc5a55`; SE-003 đã merge `783a8a3`)
+Trạng thái: Đang làm
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 2 ngày làm việc
 Phụ thuộc: [SE-011](SE-011-documents-txt-backend.md) — **Done**, merge `abc5a55`; [SE-003](SE-003-release-mode-navigation.md) — Done, merge `783a8a3`; **không còn phụ thuộc chặn**
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
-Ngày thực tế: bắt đầu — · bàn giao review — · hoàn tất —
+Ngày thực tế: bắt đầu — 18/11/2026 · bàn giao review — · hoàn tất —
 Chốt: 16/11/2026 — CTO duyệt Wave 0–2: SE-012 triển khai frontend lát TXT
-SHA cơ sở: `origin/develop` @ SHA khi nhận task
+SHA cơ sở: `origin/develop` @ `1ca349e`
 PR: <link, Senior Dev ghi khi bàn giao>
 
 **Thử nghiệm skills:** task pilot số 2 ([TL-010](TL-010-engineering-guide-skills-pilot.md)) — đọc [engineering-guide](../project/engineering-guide.md) và `apps/web/AGENTS.md` trước khi làm.
