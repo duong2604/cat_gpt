@@ -1,5 +1,6 @@
 export * from './chat.js';
 export * from './constants.js';
+export * from './documents.js';
 export * from './enums.js';
 export * from './error-codes.js';
 export * from './types.js';

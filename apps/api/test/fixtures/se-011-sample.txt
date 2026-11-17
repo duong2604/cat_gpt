@@ -1,0 +1,28 @@
+Tài liệu thử nghiệm SE-011 (tự soạn cho mục đích kiểm thử, không nhạy cảm)
+
+Việt Nam là một quốc gia nằm ở khu vực Đông Nam Á, có đường bờ biển dài trải từ Bắc vào Nam.
+Địa hình đất nước rất đa dạng: phía Bắc có nhiều dãy núi cao, vùng đồng bằng sông Hồng trù phú;
+miền Trung có dải đất hẹp với nhiều đồi núi ăn sát ra biển; miền Nam có đồng bằng sông Cửu Long
+rộng lớn, là vựa lúa quan trọng của cả nước. Khí hậu Việt Nam mang tính chất nhiệt đới gió mùa,
+chia làm hai mùa rõ rệt ở miền Nam là mùa mưa và mùa khô, trong khi miền Bắc có bốn mùa xuân hạ
+thu đông tương đối rõ nét.
+
+Về mặt hành chính, Việt Nam được chia thành nhiều tỉnh và thành phố trực thuộc trung ương. Thủ đô
+là Hà Nội, nằm ở miền Bắc, là trung tâm chính trị và văn hóa lâu đời. Thành phố Hồ Chí Minh ở miền
+Nam là trung tâm kinh tế lớn nhất cả nước, đóng góp một phần quan trọng vào tổng sản phẩm quốc nội.
+Ngoài ra, các thành phố như Đà Nẵng, Hải Phòng, Cần Thơ cũng đóng vai trò quan trọng trong phát
+triển kinh tế vùng.
+
+Nền kinh tế Việt Nam trong những năm gần đây có tốc độ tăng trưởng tương đối cao so với khu vực,
+nhờ vào quá trình cải cách và hội nhập quốc tế. Các ngành công nghiệp chế biến, chế tạo, công nghệ
+thông tin và du lịch được xem là những động lực tăng trưởng chính. Nông nghiệp vẫn giữ vai trò nền
+tảng, đặc biệt là sản xuất lúa gạo, thủy sản và cây công nghiệp xuất khẩu như cà phê, hồ tiêu, điều.
+
+Giáo dục và đào tạo cũng được chú trọng phát triển, với hệ thống trường học trải dài từ bậc mầm non
+đến đại học ở khắp các tỉnh thành. Nhiều trường đại học trong nước đã mở rộng hợp tác quốc tế, trao
+đổi sinh viên và nghiên cứu khoa học với các đối tác nước ngoài, góp phần nâng cao chất lượng nguồn
+nhân lực cho đất nước trong giai đoạn hội nhập và chuyển đổi số hiện nay.
+
+Tài liệu này chỉ nhằm mục đích kiểm thử chức năng tải lên, xử lý bất đồng bộ, chia đoạn văn bản,
+sinh vector embedding và lưu trữ trong cơ sở dữ liệu vector của hệ thống CAT GPT, không chứa thông
+tin nhạy cảm hay dữ liệu cá nhân của bất kỳ ai.
