@@ -9,6 +9,7 @@ import { chunkText } from './chunk-text.js';
 import { DocumentFilesService } from './document-files.service.js';
 import type { DeleteJobData, ProcessJobData } from './documents.service.js';
 import { EmbeddingService } from './embedding.service.js';
+import { permanentErrorFor } from './permanent-error.js';
 import { DocumentEntity } from './schemas/document.schema.js';
 import { extractTxt } from './text-extract.js';
 import { VectorStoreService } from './vector-store.service.js';
@@ -70,15 +71,15 @@ export class DocumentProcessor extends WorkerHost {
       this.config.documents.chunkSize,
       this.config.documents.chunkOverlap,
     );
-    if (chunks.length === 0) {
-      return this.failPermanently(_id, ErrorCode.DOCUMENT_NO_TEXT);
-    }
-    if (chunks.length > this.config.documents.maxChunks) {
-      return this.failPermanently(_id, ErrorCode.DOCUMENT_TOO_MANY_CHUNKS);
-    }
 
-    if (!this.config.llm.openAiApiKey) {
-      return this.failPermanently(_id, ErrorCode.DOCUMENT_EMBEDDING_UNAVAILABLE);
+    const permanentError = permanentErrorFor(
+      text,
+      chunks,
+      this.config.documents.maxChunks,
+      Boolean(this.config.llm.openAiApiKey),
+    );
+    if (permanentError) {
+      return this.failPermanently(_id, permanentError);
     }
     // Lỗi mạng/429/5xx ném ra ngoài — BullMQ thử lại (lỗi tạm thời, thiết kế mục 6.3 bước 3).
     const vectors = await this.embeddings.embedAll(chunks);
