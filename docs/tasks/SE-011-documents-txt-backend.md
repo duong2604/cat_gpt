@@ -83,7 +83,7 @@ Chưa có bàn giao.
 
 ### Checklist vòng 1
 
-**Task** — SE-011 · PR https://github.com/duong2604/cat_gpt/pull/19 · SHA đầu PR `6a4a766` · SHA cuối `0d10321` · vòng 1
+**Task** — SE-011 · PR https://github.com/duong2604/cat_gpt/pull/19 · SHA đầu PR `6a4a766` · SHA cuối `a5a82bf` · vòng 1
 **Kết quả** — Module `apps/api/src/modules/documents/` (controller/service/presenter/schema/dto, MinIO/Qdrant/OpenAI embeddings/BullMQ worker); `packages/shared` (`DocumentStatus`, `DocumentDto`, 6 mã lỗi); biến môi trường mục 8; sửa 3 lỗi chặn do TL phát hiện ở vòng review đầu (web i18n thiếu khóa lỗi, tên tệp tiếng Việt bị multer giải mã sai, Qdrant "Not Found" khi collection chưa tồn tại) + 2 lỗi CP4 (Redis treo thay vì 503, upload >25MB trả 413 thay vì 400) + 1 lỗi tự phát hiện (MinIO remove() nuốt mọi lỗi, chặn retry job xóa). **AC1–AC14 đã tự xác minh đạt trên service thật** (chi tiết dưới). Chưa đề nghị merge — chờ TL tự kiểm tra lại độc lập (đặc biệt T6/T11, đã gửi 6 documentId) và ký duyệt.
 
 **Checklist**
@@ -105,7 +105,7 @@ Chưa có bàn giao.
 - [x] AC11 Log không có nội dung tài liệu, khóa API — Đạt — Senior Dev tự `grep` log API (bao gồm log của toàn bộ phiên kiểm thử CP2–CP4 ở trên): không có nội dung tệp thử (`grep` nội dung các tệp thử → không khớp), không có `sk-proj-`/khóa OpenAI/`JWT_ACCESS_SECRET`/`MINIO_SECRET`; dòng log duy nhất có chữ "password" là tên route `/me/password`, không phải giá trị. TL xác nhận cùng kết quả ở vòng review CP1 (trên mã trước đó)
 - [x] AC12 `.env` ↔ `.env.example` đồng bộ; không có credential thật trong `.env.example` — Đạt — `pnpm env:check` OK nhiều lần trong suốt quá trình; biến thêm cho tài liệu (`EMBEDDING_MODEL`, `DOCUMENT_*`) đã đồng bộ
 - [x] AC13 Checklist hai vai (mục 9.1), dữ liệu thử đã xóa — Đạt — xem "Checklist hai vai" chi tiết ngay dưới bảng này; mọi tài liệu thử (của Senior Dev và TL) đã xóa, đếm trực tiếp Mongo/MinIO/Qdrant = 0 ở lần kiểm cuối
-- [x] AC14 CI xanh; `pnpm build`, `typecheck`, `lint` đạt — Đạt — `pnpm typecheck && pnpm build && pnpm lint` ở gốc monorepo đạt (lần cuối sau khi gộp `develop` @ `190b94f`, toàn FULL TURBO); CI GitHub Actions xanh tại `0d10321` ([run 44133543973](https://github.com/duong2604/cat_gpt/actions/runs/44133543973), 44s)
+- [x] AC14 CI xanh; `pnpm build`, `typecheck`, `lint` đạt — Đạt — `pnpm typecheck && pnpm build && pnpm lint` ở gốc monorepo đạt tại `a5a82bf`; CI GitHub Actions xanh tại `a5a82bf` ([run 44135413052](https://github.com/duong2604/cat_gpt/actions/runs/44135413052), 55s) — SHA cuối cùng của vòng 1
 
 **Checklist hai vai** ([workflow 9.1](../project/workflow.md#91-trách-nhiệm-hai-vai-về-phân-quyền-giao-diện-và-phát-hành))
 - [x] Quyền: ca được phép — upload/list/detail/download/delete tài liệu của chính mình (AC1, AC8); ca bị từ chối — chưa đăng nhập `401` (curl không cookie), cùng vai khác tài khoản `404` (A/B), vai khác `404` (admin, không có ngoại lệ) — AC7
