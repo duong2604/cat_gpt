@@ -1,6 +1,6 @@
 # TL-008 — Thiết kế Module 4: truy hồi, hỏi đáp có trích dẫn, tóm tắt
 
-Trạng thái: Chờ Review — CTO duyệt kiến trúc có điều kiện 17/11/2026 (review vòng 6), chốt Q-M4-1…5; còn AC4 (payload Qdrant thật, chờ SE-011)
+Trạng thái: Done — CTO duyệt kiến trúc có điều kiện 17/11/2026 (review vòng 6); điều kiện AC4 đạt trên `develop` @ `abc5a55` (18/11/2026)
 Người phụ trách: TL · Ưu tiên: P1 · Ước lượng: 1 ngày làm việc
 Phụ thuộc: [TL-007](TL-007-module-3-design.md) — Done 17/11/2026. Nên viết song song [SE-011](SE-011-documents-txt-backend.md) để đối chiếu payload Qdrant thật; **chặn** SE-014…SE-016
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
@@ -88,6 +88,8 @@ Không quyết định nào trong 5 điểm chặn SE-011. Lát TXT chỉ tạo 
 ## Kết quả review
 Vòng 1 bàn giao 17/11/2026. **CTO review vòng 6 (17/11/2026): APPROVED WITH CONDITIONS** — chấp thuận kiến trúc để chuẩn bị Module 4; chốt Q-M4-1…5. Điều kiện: AC4 giữ NOT VERIFIED tới khi đối chiếu payload Qdrant thật của SE-011; chưa đóng TL-008. SE-014 → `Sẵn sàng` chỉ khi SE-011 merge **và** AC4 đạt; SE-016 sau SE-012 merge; SE-015 sau SE-014.
 
+**Done 18/11/2026** — AC1–AC5 đạt (AC4 trên `develop` @ `abc5a55` sau khi SE-011 merge). Gate kỹ thuật của SE-014 đã đạt; thứ tự nhận giữ Module 3 trước (CTO 18/11): SE-014 `Sẵn sàng` sau khi SE-012, SE-013 merge.
+
 ## Lịch sử review
 ### Checklist vòng 1
 **Task hoặc yêu cầu** — TL-008 · [module-4-rag.md](../design/module-4-rag.md) · cơ sở `ef2a029` · vòng 1
@@ -96,7 +98,7 @@ Vòng 1 bàn giao 17/11/2026. **CTO review vòng 6 (17/11/2026): APPROVED WITH C
 - [x] AC1 — 8 FR (đề cương: tóm tắt, hỏi–đáp kèm trích dẫn, tối ưu tiếng Việt, khung đánh giá) gắn task — [mục 2](../design/module-4-rag.md#2-chức-năng-function-spec)
 - [x] AC2 — thiếu căn cứ: chặn cứng khi 0 đoạn / tài liệu không còn hợp lệ (không gọi LLM); câu từ chối cố định nhận diện bằng so khớp chuỗi; `RAG_MIN_SCORE` tắt mặc định; trích dẫn chỉ lấy từ payload Qdrant, `[n]` ngoài khoảng bị bỏ, không nguồn hợp lệ → `ungrounded` — [mục 6](../design/module-4-rag.md#6-truy-hồi-thiếu-căn-cứ-xác-minh-trích-dẫn)
 - [x] AC3 — kiểm Mongo (`userId`, `READY`, chưa xóa) + lọc Qdrant `userId` + `documentId`; `404` đồng nhất; R4–R6 — [mục 5, 11](../design/module-4-rag.md#11-kiểm-thử-bắt-buộc-service-thật)
-- [ ] AC4 — đối chiếu payload Qdrant **thật** của SE-011: **chưa PASS**. Đã khớp trên nhánh SE-011, nhưng chờ SE-011 merge rồi xác nhận lại trên `develop`.
+- [x] AC4 — đối chiếu payload Qdrant **thật** của SE-011: **PASS trên `develop` @ `abc5a55`** (18/11/2026 00:20, sau khi SE-011 merge).
   - **Bằng chứng nhánh** (TL chạy 18/11/2026 ~00:00 trên `feature/module-3-documents-txt` @ `35946cb`, [PR #19](https://github.com/duong2604/cat_gpt/pull/19), OpenAI thật, tài liệu thử tự soạn):
     - Collection `document_chunks`: vector 1536 chiều (`text-embedding-3-small`), Cosine; payload index `keyword` trên `userId`, `documentId`.
     - Point `id` là UUID. Payload có đúng `{chunkIndex: number, documentId: string, text: string, userId: string}`; `userId` = chủ sở hữu (khớp `storageKey`); `chunkIndex` liên tục `0…n-1`, không trùng (419/419 với tệp lớn).
@@ -110,7 +112,7 @@ Vòng 1 bàn giao 17/11/2026. **CTO review vòng 6 (17/11/2026): APPROVED WITH C
     - `DocumentsModule` chưa `exports` `EmbeddingService`/`VectorStoreService`/model `DocumentEntity` → SE-014 thêm `exports`.
     - `VectorStoreService` chưa có `search`/`scroll` → SE-014 thêm `search`, SE-016 thêm `scroll`.
     - `EmbeddingService.embedAll(texts)` dùng được cho câu hỏi (`embedAll([q])[0]`).
-  - **Sau khi SE-011 merge:** TL chạy lại T1 trên `develop`, chụp payload một point. Lúc đó mới đánh dấu AC4 PASS.
+  - **Trên `develop` @ `abc5a55`** (TL chạy API build từ `develop`, OpenAI thật): T1 READY 7 đoạn = 7 point. Một point thật: `{"id":"7b7a211b-…","payload":{"userId":"6afc7969…","documentId":"6afc8d52…","chunkIndex":0,"text":"Mục 1. Quy trình xin nghỉ phép mẫu…(921 ký tự)"}}`. Search có filter `userId` (`match.value`) + `documentId` (`match.any`) → `ok`, 3 kết quả — đúng truy vấn mục 6.1 bước 3. Dữ liệu thử đã dọn 0/0/0.
 - [x] AC5 — CTO duyệt kiến trúc có điều kiện 17/11/2026 (review vòng 6); chốt Q-M4-1…5. **Nguồn:** chỉ thị CTO review vòng 6
 
 **Trạng thái và bước tiếp theo** — Chờ Review.
