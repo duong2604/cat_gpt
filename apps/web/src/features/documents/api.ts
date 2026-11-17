@@ -6,6 +6,8 @@ export const documentsApi = {
   list: (filter: DocumentsFilter) =>
     api.get<Paginated<DocumentDto>>("/documents", { params: filter }).then((r) => r.data),
 
+  get: (id: string) => api.get<DocumentDto>(`/documents/${id}`).then((r) => r.data),
+
   upload: (file: File) => {
     const form = new FormData();
     form.append("file", file);

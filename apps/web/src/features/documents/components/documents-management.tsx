@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useFormatter, useNow, useTranslations } from "next-intl";
 import { useState } from "react";
+import { toast } from "sonner";
 import { DEFAULT_PAGE_SIZE, type DocumentDto, DocumentStatus, type ErrorCode } from "@cat-gpt/shared";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
@@ -40,8 +41,7 @@ import {
 } from "@/components/ui/table";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useErrorMessage } from "@/hooks/use-error-message";
-import { documentsApi } from "../api";
-import { useDocuments } from "../hooks";
+import { useDocuments, useDownloadDocument } from "../hooks";
 import { DeleteDocumentDialog } from "./delete-document-dialog";
 import { DocumentStatusBadge } from "./document-status-badge";
 import { UploadDocumentButton } from "./upload-document-button";
@@ -237,6 +237,14 @@ export function DocumentsManagement() {
 
 function DocumentActions({ document, onDelete }: { document: DocumentDto; onDelete: () => void }) {
   const t = useTranslations("documents");
+  const errorMessage = useErrorMessage();
+  const download = useDownloadDocument();
+
+  const onDownload = () => {
+    download.mutate(document, {
+      onError: (error) => toast.error(errorMessage(error)),
+    });
+  };
 
   return (
     <DropdownMenu>
@@ -246,11 +254,12 @@ function DocumentActions({ document, onDelete }: { document: DocumentDto; onDele
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem asChild disabled={document.status !== DocumentStatus.READY}>
-          <a href={documentsApi.downloadUrl(document.id)} download>
-            <DownloadIcon />
-            {t("actions.download")}
-          </a>
+        <DropdownMenuItem
+          disabled={document.status !== DocumentStatus.READY || download.isPending}
+          onSelect={onDownload}
+        >
+          <DownloadIcon />
+          {t("actions.download")}
         </DropdownMenuItem>
         <DropdownMenuItem variant="destructive" onSelect={onDelete}>
           <Trash2Icon />
