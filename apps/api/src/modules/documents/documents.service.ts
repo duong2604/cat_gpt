@@ -25,6 +25,29 @@ export interface DeleteJobData {
 const DELETE_JOB_ATTEMPTS = 5;
 const JOB_BACKOFF_DELAY_MS = 5000;
 const FAILED_JOB_RETENTION_SECONDS = 7 * 24 * 3600;
+/**
+ * ioredis mặc định xếp lệnh vào hàng đợi trong bộ nhớ khi mất kết nối thay vì báo lỗi
+ * ngay (AC6/T9 cần `queue.add` thất bại nhanh khi Redis tắt). Giới hạn thời gian chờ
+ * thay vì đổi cấu hình kết nối dùng chung với Worker (ponytail: timeout đơn giản hơn
+ * và không ảnh hưởng hành vi đọc job của Worker).
+ */
+const QUEUE_ADD_TIMEOUT_MS = 3000;
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(`Hết thời gian chờ sau ${ms}ms`)), ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error: unknown) => {
+        clearTimeout(timer);
+        reject(error as Error);
+      },
+    );
+  });
+}
 
 /** Nghiệp vụ + quyền + vòng đời tài liệu. Mọi truy vấn lọc theo `userId` người gọi (M3-2). */
 @Injectable()
@@ -72,16 +95,19 @@ export class DocumentsService {
     }
 
     try {
-      await this.queue.add(
-        'process',
-        { documentId: _id.toString() } satisfies ProcessJobData,
-        {
-          jobId: `process-${_id.toString()}`,
-          attempts: this.config.documents.jobAttempts,
-          backoff: { type: 'exponential', delay: JOB_BACKOFF_DELAY_MS },
-          removeOnComplete: true,
-          removeOnFail: { age: FAILED_JOB_RETENTION_SECONDS },
-        },
+      await withTimeout(
+        this.queue.add(
+          'process',
+          { documentId: _id.toString() } satisfies ProcessJobData,
+          {
+            jobId: `process-${_id.toString()}`,
+            attempts: this.config.documents.jobAttempts,
+            backoff: { type: 'exponential', delay: JOB_BACKOFF_DELAY_MS },
+            removeOnComplete: true,
+            removeOnFail: { age: FAILED_JOB_RETENTION_SECONDS },
+          },
+        ),
+        QUEUE_ADD_TIMEOUT_MS,
       );
     } catch {
       await this.documentModel.deleteOne({ _id }).exec();
@@ -147,16 +173,19 @@ export class DocumentsService {
     if (result.matchedCount === 0) throw AppException.notFound(ErrorCode.DOCUMENT_NOT_FOUND);
 
     try {
-      await this.queue.add(
-        'delete',
-        { documentId: id } satisfies DeleteJobData,
-        {
-          jobId: `delete-${id}`,
-          attempts: DELETE_JOB_ATTEMPTS,
-          backoff: { type: 'exponential', delay: JOB_BACKOFF_DELAY_MS },
-          removeOnComplete: true,
-          removeOnFail: { age: FAILED_JOB_RETENTION_SECONDS },
-        },
+      await withTimeout(
+        this.queue.add(
+          'delete',
+          { documentId: id } satisfies DeleteJobData,
+          {
+            jobId: `delete-${id}`,
+            attempts: DELETE_JOB_ATTEMPTS,
+            backoff: { type: 'exponential', delay: JOB_BACKOFF_DELAY_MS },
+            removeOnComplete: true,
+            removeOnFail: { age: FAILED_JOB_RETENTION_SECONDS },
+          },
+        ),
+        QUEUE_ADD_TIMEOUT_MS,
       );
     } catch (error) {
       // Tài liệu đã ẩn (deletedAt đã đặt) — vẫn trả 204, chỉ cảnh báo để dọn tay (thiết kế mục 6.4 bước 4).

@@ -86,7 +86,7 @@
     "SESSION_NOT_FOUND": "Phiên đăng nhập không tồn tại hoặc đã kết thúc.",
     "SESSION_CANNOT_REVOKE_CURRENT": "Không thể đăng xuất phiên hiện tại tại đây. Hãy dùng nút Đăng xuất.",
     "FILE_REQUIRED": "Vui lòng chọn tệp.",
-    "FILE_TOO_LARGE": "Tệp quá lớn (tối đa 2MB).",
+    "FILE_TOO_LARGE": "Tệp quá lớn.",
     "FILE_INVALID_TYPE": "Chỉ chấp nhận ảnh JPG, PNG hoặc WEBP.",
     "NETWORK_ERROR": "Không kết nối được máy chủ. Vui lòng kiểm tra mạng.",
     "CONVERSATION_NOT_FOUND": "Không tìm thấy cuộc hội thoại.",

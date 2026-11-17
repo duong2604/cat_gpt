@@ -86,7 +86,7 @@
     "SESSION_NOT_FOUND": "Session not found or already ended.",
     "SESSION_CANNOT_REVOKE_CURRENT": "You cannot end the current session here. Use Log out instead.",
     "FILE_REQUIRED": "Please choose a file.",
-    "FILE_TOO_LARGE": "File is too large (max 2MB).",
+    "FILE_TOO_LARGE": "File is too large.",
     "FILE_INVALID_TYPE": "Only JPG, PNG or WEBP images are allowed.",
     "NETWORK_ERROR": "Cannot reach the server. Please check your connection.",
     "CONVERSATION_NOT_FOUND": "Conversation not found.",

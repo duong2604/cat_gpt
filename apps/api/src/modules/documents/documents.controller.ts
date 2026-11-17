@@ -9,6 +9,7 @@ import {
   Query,
   Res,
   UploadedFile,
+  UseFilters,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -30,6 +31,7 @@ import { DocumentsHiddenGuard } from './documents-hidden.guard.js';
 import { DocumentsService } from './documents.service.js';
 import { DocumentPageResponse, DocumentResponse } from './dto/document.response.js';
 import { ListDocumentsQueryDto } from './dto/list-documents-query.dto.js';
+import { UploadSizeFilter } from './upload-size.filter.js';
 
 /** Giới hạn cứng của multer; kiểm tra thật (DOCUMENT_MAX_SIZE_MB) nằm trong DocumentsService. */
 const UPLOAD_HARD_LIMIT_BYTES = 25 * 1024 * 1024;
@@ -42,6 +44,7 @@ export class DocumentsController {
   constructor(private readonly documents: DocumentsService) {}
 
   @Post()
+  @UseFilters(UploadSizeFilter)
   @UseInterceptors(FileInterceptor('file', { limits: { fileSize: UPLOAD_HARD_LIMIT_BYTES } }))
   @ApiOperation({ summary: 'Tải lên tệp TXT' })
   @ApiConsumes('multipart/form-data')
