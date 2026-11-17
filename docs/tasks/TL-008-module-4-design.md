@@ -42,6 +42,47 @@ Bản FS/BD Module 4 đủ để Senior Dev làm hỏi đáp có trích dẫn v�
 |---|---|---|---|
 | Q-M4-1…5 | Lối vào giao diện; số tài liệu tối đa; tài liệu cố định khi tạo hội thoại; tóm tắt chạy nền; câu hỏi nối tiếp không viết lại — xem [thiết kế mục 12](../design/module-4-rag.md#12-quyết-định-còn-mở) | Theo đề xuất TL | Chờ CTO/khách hàng (chỉ Q-M4-1 ảnh hưởng SE-015) |
 
+### Tóm tắt quyết định cho CTO (17/11/2026, tối)
+Không quyết định nào trong 5 điểm chặn SE-011. Lát TXT chỉ tạo đoạn + vector, còn Module 4 chỉ đọc. Nếu CTO đồng ý, có thể **tạm chốt ngay Q-M4-2…5** theo đề xuất; mỗi điểm vẫn đổi được về sau qua biến môi trường hoặc một task nhỏ. **Q-M4-1** chỉ cần chốt trước SE-015.
+
+**Q-M4-1 — Lối vào giao diện hỏi tài liệu**
+- **Đề xuất mặc định:** Có hai lối vào, cùng mở một hộp thoại chọn tài liệu:
+  - nút "Hỏi tài liệu" ở trang Tài liệu, chọn sẵn tài liệu đó;
+  - tùy chọn "Hỏi theo tài liệu" khi tạo hội thoại mới.
+- **Ưu điểm:** Đúng hai ngữ cảnh người dùng thường gặp, và dùng lại toàn bộ Chat UI (M4-1).
+- **Nhược điểm:** Có hai điểm vào phải kiểm thử. Phương án gọn hơn là chỉ giữ nút ở trang Tài liệu: bớt khoảng 0,3n, nhưng người dùng đang ở Chat sẽ không thấy chức năng.
+- **Ảnh hưởng scope/tiến độ:** Chỉ ảnh hưởng SE-015 (ước lượng 2n). API không đổi.
+- **Tạm chốt không ảnh hưởng SE-011:** Có. Hạn chót chốt là khi SE-015 chuyển `Sẵn sàng` (sau SE-014).
+
+**Q-M4-2 — Số tài liệu tối đa mỗi hội thoại: 5 (`RAG_MAX_DOCUMENTS`)**
+- **Ưu điểm:** Giới hạn kích thước bộ lọc Qdrant và độ dài ngữ cảnh, đủ cho kịch bản demo (1–3 tài liệu). Đổi bằng biến môi trường, không cần sửa code.
+- **Nhược điểm:** Người dùng muốn hỏi trên cả kho tài liệu sẽ không làm được. Đó là phạm vi khác (tìm kiếm toàn kho), chưa có trong đề cương.
+- **Ảnh hưởng:** Không ảnh hưởng tiến độ.
+- **Tạm chốt:** Có.
+
+**Q-M4-3 — Tài liệu cố định khi tạo hội thoại**
+- **Ưu điểm:** Các lượt trong một hội thoại không trộn nguồn, trích dẫn cũ luôn khớp. Không cần API thêm/bớt tài liệu.
+- **Nhược điểm:** Muốn đổi tài liệu phải tạo hội thoại mới.
+- **Ảnh hưởng:** Bỏ đi khoảng 1n so với phương án cho sửa danh sách (thêm API, giao diện, kiểm thử trích dẫn lịch sử).
+- **Tạm chốt:** Có.
+
+**Q-M4-4 — Tóm tắt chạy nền (job + polling)**
+- **Ưu điểm:** Tài liệu dài cần nhiều lượt gọi LLM (gộp nhóm 12.000 ký tự), nên chờ trong một request dễ quá thời gian. Dùng lại BullMQ và cơ chế polling của Module 3. Kết quả được lưu và không sinh lại.
+- **Nhược điểm:** Thêm một trạng thái `summaryStatus`. Người dùng không thấy chữ hiện dần.
+- **Ảnh hưởng:** SE-016 giữ nguyên 1,5n, nhưng phụ thuộc hàng đợi của SE-011. Lý do thêm để SE-011 làm đúng retry/idempotency.
+- **Tạm chốt:** Có.
+
+**Q-M4-5 — Câu hỏi nối tiếp chỉ truy hồi theo câu mới nhất**
+- **Ưu điểm:** Không tốn thêm một lượt LLM mỗi câu hỏi, và dễ giải thích trong đồ án.
+- **Nhược điểm:** Câu hỏi kiểu "còn điều 5 thì sao?" có thể truy hồi kém.
+- **Ảnh hưởng:** Bản đầu không tốn thêm việc. Nếu TL-009/SE-017 cho thấy kém, thêm bước viết lại câu hỏi (khoảng 0,5n).
+- **Tạm chốt:** Có. Sẽ đo lại khi có TL-009.
+
+**Cần CTO trả lời:**
+1. Đồng ý tạm chốt Q-M4-2…5 theo đề xuất? (có/không)
+2. Q-M4-1 chọn hai lối vào hay chỉ trang Tài liệu?
+3. Duyệt TL-008 khi AC4 còn NOT VERIFIED? Nếu duyệt, SE-014 vẫn chỉ chuyển `Sẵn sàng` sau khi SE-011 merge và AC4 đạt.
+
 ## Kết quả review
 Vòng 1 bàn giao 17/11/2026 — chờ CTO/khách hàng duyệt. Khi duyệt: SE-014 (sau SE-011 merge), SE-016 (sau SE-012 merge) → `Sẵn sàng`; SE-015 sau SE-014.
 
