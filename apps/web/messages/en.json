@@ -87,7 +87,7 @@
     "SESSION_CANNOT_REVOKE_CURRENT": "You cannot end the current session here. Use Log out instead.",
     "FILE_REQUIRED": "Please choose a file.",
     "FILE_TOO_LARGE": "File is too large.",
-    "FILE_INVALID_TYPE": "Only JPG, PNG or WEBP images are allowed.",
+    "FILE_INVALID_TYPE": "Invalid file type.",
     "NETWORK_ERROR": "Cannot reach the server. Please check your connection.",
     "CONVERSATION_NOT_FOUND": "Conversation not found.",
     "CHAT_STREAM_IN_PROGRESS": "The assistant is still answering in this conversation. Please wait or press Stop.",
@@ -161,8 +161,41 @@
     }
   },
   "documents": {
-    "title": "Document management",
-    "description": "Module 3 – uploading, searching and tracking document processing will be built in the next phase."
+    "title": "Documents",
+    "description": "Upload, search and track the processing status of TXT documents.",
+    "upload": "Upload",
+    "uploading": "Uploading...",
+    "uploadHint": "TXT files only, up to 20MB.",
+    "searchPlaceholder": "Search by file name",
+    "allStatuses": "All statuses",
+    "empty": "No documents yet.",
+    "emptyFiltered": "No matching documents found.",
+    "columns": {
+      "name": "File name",
+      "status": "Status",
+      "size": "Size",
+      "createdAt": "Uploaded",
+      "actions": "Actions"
+    },
+    "status": {
+      "PENDING": "Pending",
+      "PROCESSING": "Processing",
+      "READY": "Ready",
+      "FAILED": "Failed"
+    },
+    "actions": {
+      "open": "Open actions",
+      "download": "Download",
+      "delete": "Delete"
+    },
+    "deleteDialog": {
+      "title": "Delete this document?",
+      "description": "\"{name}\" will be permanently deleted and cannot be recovered.",
+      "confirm": "Delete document"
+    },
+    "uploaded": "\"{name}\" uploaded.",
+    "deleted": "\"{name}\" deleted.",
+    "errorCodeLabel": "Error code"
   },
   "profile": {
     "title": "Profile",

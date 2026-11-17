@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import { FileTextIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
-import { ComingSoon } from "@/components/coming-soon";
+import { DocumentsManagement } from "@/features/documents/components/documents-management";
 import { isStaffMode } from "@/lib/release-mode";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -10,16 +9,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("documents") };
 }
 
-/** TODO(module-3): quản lý tài liệu + pipeline xử lý. */
+/** Tài liệu chưa sẵn sàng ở bản `staff` (CS-6) — ẩn như route không tồn tại, giống Chat. */
 export default async function DocumentsPage() {
   if (isStaffMode) notFound();
-  const t = await getTranslations();
-  return (
-    <ComingSoon
-      icon={FileTextIcon}
-      title={t("documents.title")}
-      description={t("documents.description")}
-      badge={t("common.comingSoon")}
-    />
-  );
+  return <DocumentsManagement />;
 }

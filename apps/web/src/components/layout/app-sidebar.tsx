@@ -82,7 +82,7 @@ export function AppSidebar() {
     ...(chatEnabled ? [{ key: "chat" as const, href: routes.chat, icon: MessageSquareIcon }] : []),
     ...(isStaffMode
       ? []
-      : [{ key: "documents" as const, href: routes.documents, icon: FileTextIcon, comingSoon: true }]),
+      : [{ key: "documents" as const, href: routes.documents, icon: FileTextIcon }]),
   ];
 
   return (
