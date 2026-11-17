@@ -1,6 +1,6 @@
 # TL-008 — Thiết kế Module 4: truy hồi, hỏi đáp có trích dẫn, tóm tắt
 
-Trạng thái: Chờ Review
+Trạng thái: Chờ Review — CTO duyệt kiến trúc có điều kiện 17/11/2026 (review vòng 6), chốt Q-M4-1…5; còn AC4 (payload Qdrant thật, chờ SE-011)
 Người phụ trách: TL · Ưu tiên: P1 · Ước lượng: 1 ngày làm việc
 Phụ thuộc: [TL-007](TL-007-module-3-design.md) — Done 17/11/2026. Nên viết song song [SE-011](SE-011-documents-txt-backend.md) để đối chiếu payload Qdrant thật; **chặn** SE-014…SE-016
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
@@ -40,9 +40,11 @@ Bản FS/BD Module 4 đủ để Senior Dev làm hỏi đáp có trích dẫn v�
 ## Quyết định còn mở
 | # | Câu hỏi | Đề xuất mặc định | Chốt |
 |---|---|---|---|
-| Q-M4-1…5 | Lối vào giao diện; số tài liệu tối đa; tài liệu cố định khi tạo hội thoại; tóm tắt chạy nền; câu hỏi nối tiếp không viết lại — xem [thiết kế mục 12](../design/module-4-rag.md#12-quyết-định-còn-mở) | Theo đề xuất TL | Chờ CTO/khách hàng (chỉ Q-M4-1 ảnh hưởng SE-015) |
+| Q-M4-1…5 | Lối vào giao diện; số tài liệu tối đa; tài liệu cố định khi tạo hội thoại; tóm tắt chạy nền; câu hỏi nối tiếp không viết lại — xem [thiết kế mục 12](../design/module-4-rag.md#12-quyết-định-cto-chốt-17112026-review-vòng-6) | Theo đề xuất TL | **CTO chốt 17/11/2026:** Q-M4-1 chỉ lối vào từ trang Tài liệu; Q-M4-2…5 theo đề xuất — [thiết kế mục 12](../design/module-4-rag.md#12-quyết-định-cto-chốt-17112026-review-vòng-6) |
 
 ### Tóm tắt quyết định cho CTO (17/11/2026, tối)
+> **Kết quả:** CTO chốt 17/11/2026 (review vòng 6). Q-M4-1 chọn **một** lối vào (trang Tài liệu); Q-M4-2…5 theo đề xuất. Phần dưới giữ làm hồ sơ.
+
 Không quyết định nào trong 5 điểm chặn SE-011. Lát TXT chỉ tạo đoạn + vector, còn Module 4 chỉ đọc. Nếu CTO đồng ý, có thể **tạm chốt ngay Q-M4-2…5** theo đề xuất; mỗi điểm vẫn đổi được về sau qua biến môi trường hoặc một task nhỏ. **Q-M4-1** chỉ cần chốt trước SE-015.
 
 **Q-M4-1 — Lối vào giao diện hỏi tài liệu**
@@ -84,7 +86,7 @@ Không quyết định nào trong 5 điểm chặn SE-011. Lát TXT chỉ tạo 
 3. Duyệt TL-008 khi AC4 còn NOT VERIFIED? Nếu duyệt, SE-014 vẫn chỉ chuyển `Sẵn sàng` sau khi SE-011 merge và AC4 đạt.
 
 ## Kết quả review
-Vòng 1 bàn giao 17/11/2026 — chờ CTO/khách hàng duyệt. Khi duyệt: SE-014 (sau SE-011 merge), SE-016 (sau SE-012 merge) → `Sẵn sàng`; SE-015 sau SE-014.
+Vòng 1 bàn giao 17/11/2026. **CTO review vòng 6 (17/11/2026): APPROVED WITH CONDITIONS** — chấp thuận kiến trúc để chuẩn bị Module 4; chốt Q-M4-1…5. Điều kiện: AC4 giữ NOT VERIFIED tới khi đối chiếu payload Qdrant thật của SE-011; chưa đóng TL-008. SE-014 → `Sẵn sàng` chỉ khi SE-011 merge **và** AC4 đạt; SE-016 sau SE-012 merge; SE-015 sau SE-014.
 
 ## Lịch sử review
 ### Checklist vòng 1
@@ -95,7 +97,7 @@ Vòng 1 bàn giao 17/11/2026 — chờ CTO/khách hàng duyệt. Khi duyệt: SE
 - [x] AC2 — thiếu căn cứ: chặn cứng khi 0 đoạn / tài liệu không còn hợp lệ (không gọi LLM); câu từ chối cố định nhận diện bằng so khớp chuỗi; `RAG_MIN_SCORE` tắt mặc định; trích dẫn chỉ lấy từ payload Qdrant, `[n]` ngoài khoảng bị bỏ, không nguồn hợp lệ → `ungrounded` — [mục 6](../design/module-4-rag.md#6-truy-hồi-thiếu-căn-cứ-xác-minh-trích-dẫn)
 - [x] AC3 — kiểm Mongo (`userId`, `READY`, chưa xóa) + lọc Qdrant `userId` + `documentId`; `404` đồng nhất; R4–R6 — [mục 5, 11](../design/module-4-rag.md#11-kiểm-thử-bắt-buộc-service-thật)
 - [ ] AC4 — đối chiếu payload Qdrant **thật** của SE-011: NOT VERIFIED (SE-011 chưa có code) — kiểm khi SE-011 bàn giao; thiết kế dựa trên payload đã chốt ở [Module 3 mục 4.3](../design/module-3-documents.md#43-qdrant)
-- [ ] AC5 — chờ CTO/khách hàng
+- [x] AC5 — CTO duyệt kiến trúc có điều kiện 17/11/2026 (review vòng 6); chốt Q-M4-1…5. **Nguồn:** chỉ thị CTO review vòng 6
 
 **Trạng thái và bước tiếp theo** — Chờ Review.
 

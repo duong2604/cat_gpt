@@ -162,15 +162,15 @@ Qdrant/Redis/MinIO thật (Docker local), MongoDB Atlas dev, OpenAI thật; **ch
 
 Unit test (vitest) cho `verifyCitations` và dựng prompt (logic thuần). Không mock Qdrant/OpenAI chỉ để có test.
 
-## 12. Quyết định còn mở
+## 12. Quyết định (CTO chốt 17/11/2026, review vòng 6)
 
 | # | Câu hỏi | Đề xuất TL | Chốt |
 |---|---|---|---|
-| Q-M4-1 | Chỗ bắt đầu hỏi tài liệu trên giao diện | Hai lối vào cùng một hộp thoại chọn tài liệu: nút "Hỏi tài liệu" ở trang Tài liệu (chọn sẵn tài liệu đó) và tùy chọn "Hỏi theo tài liệu" khi tạo hội thoại mới ở Chat | Chờ CTO/khách hàng |
-| Q-M4-2 | Số tài liệu tối đa mỗi hội thoại | 5 (`RAG_MAX_DOCUMENTS`) | Chờ — không chặn |
-| Q-M4-3 | Tài liệu của hội thoại cố định khi tạo (muốn đổi → tạo hội thoại mới) | Đồng ý — tránh trộn nguồn giữa các lượt | Chờ — không chặn |
-| Q-M4-4 | Tóm tắt chạy nền (job + polling) thay vì chờ trong một request | Đồng ý — tài liệu dài cần nhiều lượt gọi LLM | Chờ — không chặn |
-| Q-M4-5 | Câu hỏi nối tiếp chỉ truy hồi theo câu mới nhất (không viết lại câu hỏi) | Đồng ý cho bản đầu; đo bằng TL-009 rồi quyết | Chờ — không chặn |
+| Q-M4-1 | Chỗ bắt đầu hỏi tài liệu trên giao diện | Hai lối vào: nút "Hỏi tài liệu" ở trang Tài liệu và tùy chọn khi tạo hội thoại ở Chat | **Chốt:** bản đầu **chỉ** nút "Hỏi tài liệu" ở trang Tài liệu, chọn sẵn tài liệu đó; **chưa** thêm lựa chọn ở màn tạo hội thoại Chat |
+| Q-M4-2 | Số tài liệu tối đa mỗi hội thoại | 5 (`RAG_MAX_DOCUMENTS`) | **Chốt:** 5 |
+| Q-M4-3 | Tài liệu của hội thoại cố định khi tạo (muốn đổi → tạo hội thoại mới) | Đồng ý — tránh trộn nguồn giữa các lượt | **Chốt** |
+| Q-M4-4 | Tóm tắt chạy nền (job + polling) thay vì chờ trong một request | Đồng ý — tài liệu dài cần nhiều lượt gọi LLM | **Chốt:** job chạy nền |
+| Q-M4-5 | Câu hỏi nối tiếp chỉ truy hồi theo câu mới nhất (không viết lại câu hỏi) | Đồng ý cho bản đầu; đo bằng TL-009 rồi quyết | **Chốt** cho bản đầu; chưa làm query rewriting |
 
 ## 13. Lịch sử review
 

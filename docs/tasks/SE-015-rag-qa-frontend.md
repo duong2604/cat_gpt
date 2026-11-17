@@ -10,11 +10,11 @@ SHA cơ sở: `origin/develop` @ SHA khi nhận task
 PR: <link>
 
 ## Mục tiêu
-Từ trang Tài liệu hoặc Chat, người dùng chọn tài liệu `READY`, hỏi và thấy câu trả lời hiện dần kèm nhãn trích dẫn bấm được để xem đoạn nguồn; thấy rõ khi tài liệu không đủ căn cứ.
+Từ trang Tài liệu (nút "Hỏi tài liệu", chọn sẵn tài liệu đó — Q-M4-1, CTO chốt 17/11/2026), người dùng chọn tài liệu `READY`, hỏi và thấy câu trả lời hiện dần kèm nhãn trích dẫn bấm được để xem đoạn nguồn; thấy rõ khi tài liệu không đủ căn cứ.
 
 ## Phạm vi (sơ bộ — chốt theo TL-008)
-- Làm: chọn tài liệu khi tạo hội thoại; dùng lại khung Chat (SSE, Dừng, Tạo lại); nhãn trích dẫn → xem đoạn nguồn; hiển thị câu từ chối và cảnh báo `ungrounded`; vi/en; desktop + 375 px.
-- Không làm: tóm tắt (SE-016); xem trước toàn văn tài liệu.
+- Làm: nút "Hỏi tài liệu" ở trang Tài liệu → hộp thoại chọn tài liệu (chọn sẵn tài liệu đó, tối đa 5) → tạo hội thoại; dùng lại khung Chat (SSE, Dừng, Tạo lại); nhãn trích dẫn → xem đoạn nguồn; hiển thị câu từ chối và cảnh báo `ungrounded`; vi/en; desktop + 375 px.
+- Không làm: lối vào từ màn tạo hội thoại Chat (Q-M4-1); tóm tắt (SE-016); xem trước toàn văn tài liệu; thêm/bớt tài liệu sau khi tạo hội thoại (Q-M4-3).
 
 ## Checklist nghiệm thu (sơ bộ)
 | # | Tiêu chí | Cách kiểm tra |
