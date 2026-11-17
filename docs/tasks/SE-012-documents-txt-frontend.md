@@ -7,7 +7,7 @@ Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tấ
 Ngày thực tế: bắt đầu — 18/11/2026 · bàn giao review — 18/11/2026 · hoàn tất —
 Chốt: 16/11/2026 — CTO duyệt Wave 0–2: SE-012 triển khai frontend lát TXT
 SHA cơ sở: `origin/develop` @ `1ca349e`
-PR: <link, Senior Dev ghi khi bàn giao>
+PR: https://github.com/duong2604/cat_gpt/pull/22
 
 **Thử nghiệm skills:** task pilot số 2 ([TL-010](TL-010-engineering-guide-skills-pilot.md)) — đọc [engineering-guide](../project/engineering-guide.md) và `apps/web/AGENTS.md` trước khi làm.
 
