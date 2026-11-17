@@ -119,7 +119,7 @@ TL review PR #22 @ `f8441ed`: gate PASS (`env:check`, `typecheck`, `lint`, `buil
 | Nhãn FAILED — English | Đạt | Cùng dòng, chuyển ngôn ngữ sang English → "Failed", "Error code: The file has no extractable text content." Ảnh: `C:\Users\duong\AppData\Local\Temp\claude-chrome-screenshots-wA5IJ7\screenshot-1794952067376-5.jpg` |
 | Dọn dữ liệu thử | Đạt | Xóa `whitespace.txt` qua UI, lấy id từ Network (`DELETE /documents/6afccb712f938a5ec9ad40fc` → 204); đếm trực tiếp: Mongo `countDocuments({_id})`=0, MinIO (liệt kê theo tiền tố `documents/<userId>/`, không dựa vào bản ghi Mongo) = 0 đối tượng khớp id, Qdrant = 0 |
 
-Head mới sau vòng 4: xem commit đính kèm bên dưới (chỉ thay đổi tài liệu, không đổi code).
+Head mới sau vòng 4: `04821ee` (chỉ thay đổi tài liệu, không đổi code).
 
 ## Phản hồi UI
 Chưa có.
