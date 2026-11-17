@@ -69,8 +69,15 @@ export class VectorStoreService {
     });
   }
 
-  /** Idempotent — không lỗi nếu không có point nào theo documentId. */
+  /**
+   * Idempotent — không có point nào, hoặc collection chưa tồn tại (chưa ai xử lý xong
+   * tài liệu nào), đều coi là không có gì để xóa (thiết kế mục 6.4: mỗi bước bỏ qua
+   * "không tồn tại"). Worker cũng gọi hàm này trước upsert mỗi lần xử lý — nếu không
+   * kiểm tồn tại trước, tài liệu đầu tiên trên một Qdrant mới sẽ không bao giờ tới READY.
+   */
   async deleteByDocumentId(documentId: string): Promise<void> {
+    const { exists } = await this.client.collectionExists(this.collection);
+    if (!exists) return;
     await this.client.delete(this.collection, {
       wait: true,
       filter: { must: [{ key: 'documentId', match: { value: documentId } }] },
@@ -78,6 +85,8 @@ export class VectorStoreService {
   }
 
   async countByDocumentId(documentId: string): Promise<number> {
+    const { exists } = await this.client.collectionExists(this.collection);
+    if (!exists) return 0;
     const result = await this.client.count(this.collection, {
       filter: { must: [{ key: 'documentId', match: { value: documentId } }] },
       exact: true,

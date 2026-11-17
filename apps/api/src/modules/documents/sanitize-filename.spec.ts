@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { sanitizeFileName } from './sanitize-filename.js';
+import { fixMulterFilenameEncoding, sanitizeFileName } from './sanitize-filename.js';
 
 describe('sanitizeFileName', () => {
   it('giữ nguyên tên hợp lệ', () => {
@@ -21,5 +21,17 @@ describe('sanitizeFileName', () => {
   it('giới hạn 255 ký tự', () => {
     const longName = `${'a'.repeat(300)}.txt`;
     expect(sanitizeFileName(longName).length).toBe(255);
+  });
+});
+
+describe('fixMulterFilenameEncoding', () => {
+  it('khôi phục tên tiếng Việt bị multer giải mã sai thành latin1', () => {
+    const original = 'Giới thiệu Việt Nam.txt';
+    const mojibake = Buffer.from(original, 'utf8').toString('latin1');
+    expect(fixMulterFilenameEncoding(mojibake)).toBe(original);
+  });
+
+  it('không ảnh hưởng tên thuần ASCII', () => {
+    expect(fixMulterFilenameEncoding('report-2026.txt')).toBe('report-2026.txt');
   });
 });

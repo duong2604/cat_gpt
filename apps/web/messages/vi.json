@@ -91,7 +91,13 @@
     "NETWORK_ERROR": "Không kết nối được máy chủ. Vui lòng kiểm tra mạng.",
     "CONVERSATION_NOT_FOUND": "Không tìm thấy cuộc hội thoại.",
     "CHAT_STREAM_IN_PROGRESS": "Trợ lý đang trả lời trong hội thoại này. Vui lòng đợi hoặc bấm Dừng.",
-    "CHAT_NOTHING_TO_REGENERATE": "Không có câu hỏi nào để tạo lại câu trả lời."
+    "CHAT_NOTHING_TO_REGENERATE": "Không có câu hỏi nào để tạo lại câu trả lời.",
+    "DOCUMENT_NOT_FOUND": "Không tìm thấy tài liệu.",
+    "DOCUMENT_QUEUE_UNAVAILABLE": "Hệ thống xử lý tài liệu đang bận. Vui lòng thử lại sau.",
+    "DOCUMENT_NO_TEXT": "Tệp không có nội dung văn bản để xử lý.",
+    "DOCUMENT_TOO_MANY_CHUNKS": "Tài liệu quá dài để xử lý.",
+    "DOCUMENT_EMBEDDING_UNAVAILABLE": "Chức năng xử lý tài liệu hiện chưa khả dụng.",
+    "DOCUMENT_PROCESSING_FAILED": "Xử lý tài liệu thất bại. Vui lòng xóa và tải lên lại."
   },
   "roles": {
     "ADMIN": "Quản trị viên",

@@ -11,7 +11,7 @@ import { AppConfigService } from '../../config/app-config.service.js';
 import { DocumentFilesService } from './document-files.service.js';
 import { toDocumentDto } from './document.presenter.js';
 import type { ListDocumentsQueryDto } from './dto/list-documents-query.dto.js';
-import { sanitizeFileName } from './sanitize-filename.js';
+import { fixMulterFilenameEncoding, sanitizeFileName } from './sanitize-filename.js';
 import { DocumentEntity } from './schemas/document.schema.js';
 import { isValidTxtSignature } from './text-extract.js';
 
@@ -49,7 +49,7 @@ export class DocumentsService {
 
     const _id = new Types.ObjectId();
     const storageKey = `documents/${userId}/${_id.toString()}`;
-    const name = sanitizeFileName(file.originalname);
+    const name = sanitizeFileName(fixMulterFilenameEncoding(file.originalname));
 
     await this.files.put(storageKey, file.buffer, 'text/plain');
 

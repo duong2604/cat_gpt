@@ -137,6 +137,10 @@ export class DocumentProcessor extends WorkerHost {
         { $set: { status: DocumentStatus.FAILED, errorCode: ErrorCode.DOCUMENT_PROCESSING_FAILED } },
       )
       .exec();
+    // Chỉ số liệu để chẩn đoán — không ghi nội dung tài liệu hay khóa API (thiết kế mục 7).
+    this.logger.warn(
+      `documentId=${documentId} errorCode=${ErrorCode.DOCUMENT_PROCESSING_FAILED} reason=${error.message}`,
+    );
   }
 
   /** Idempotent — mỗi bước bỏ qua "không tồn tại" (thiết kế mục 6.4 bước 2). */
