@@ -15,7 +15,7 @@ PR: <link, Senior Dev ghi khi bàn giao>
 Nhân viên mở Tài liệu, tải lên tệp TXT, thấy trạng thái tự chuyển tới "Sẵn sàng", tìm theo tên, tải xuống và xóa — trên dữ liệu thật của API SE-011.
 
 ## Output
-- PR từ `feature/module-3-documents-txt-web` vào `develop`.
+- PR từ `feature/module-3-documents-txt-ui` vào `develop`.
 - `apps/web/src/features/documents/` (`api.ts`, `hooks.ts`, `components/`) và route `/documents` theo [thiết kế mục 11](../design/module-3-documents.md#11-giao-diện-se-012); dùng lại component preview khi hợp, không dùng `fake-data`.
 - `messages/{vi,en}.json`: nhãn trạng thái, thông báo cho mọi mã lỗi mục 7.
 
