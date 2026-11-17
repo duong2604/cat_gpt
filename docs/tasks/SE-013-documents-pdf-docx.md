@@ -1,8 +1,8 @@
 # SE-013 — Mở rộng định dạng: PDF dạng text và DOCX
 
-Trạng thái: Nháp
+Trạng thái: Sẵn sàng — TL chuyển 18/11/2026 (nghiệm thu lát TXT trên `develop` @ `cd386e5`)
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 1,5 ngày làm việc
-Phụ thuộc: TL nghiệm thu lát TXT trên `develop` ([SE-011](SE-011-documents-txt-backend.md) + [SE-012](SE-012-documents-txt-frontend.md)) (chặn)
+Phụ thuộc: TL nghiệm thu lát TXT trên `develop` ([SE-011](SE-011-documents-txt-backend.md) + [SE-012](SE-012-documents-txt-frontend.md)) — **đạt 18/11/2026** (`cd386e5`); không còn phụ thuộc chặn
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
 Ngày thực tế: bắt đầu — · bàn giao review — · hoàn tất —
 Chốt: 16/11/2026 — CTO duyệt Wave 0–2: SE-013 mở rộng PDF/DOCX sau khi nghiệm thu TXT

@@ -1,10 +1,10 @@
 # SE-012 — Lát TXT, giao diện: trang Tài liệu thật
 
-Trạng thái: Chờ Review
+Trạng thái: Done — merge [PR #22](https://github.com/duong2604/cat_gpt/pull/22) → `develop` @ `cd386e5` (18/11/2026)
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 2 ngày làm việc
 Phụ thuộc: [SE-011](SE-011-documents-txt-backend.md) — **Done**, merge `abc5a55`; [SE-003](SE-003-release-mode-navigation.md) — Done, merge `783a8a3`; **không còn phụ thuộc chặn**
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
-Ngày thực tế: bắt đầu — 18/11/2026 · bàn giao review — 18/11/2026 · hoàn tất —
+Ngày thực tế: bắt đầu 18/11/2026 · bàn giao review 18/11/2026 · hoàn tất 18/11/2026
 Chốt: 16/11/2026 — CTO duyệt Wave 0–2: SE-012 triển khai frontend lát TXT
 SHA cơ sở: `origin/develop` @ `1ca349e`
 PR: https://github.com/duong2604/cat_gpt/pull/22
@@ -46,6 +46,19 @@ Nhân viên mở Tài liệu, tải lên tệp TXT, thấy trạng thái tự ch
 | — | Không có | — | — |
 
 ## Kết quả review
+**Done 18/11/2026 (TL).** Merge [PR #22](https://github.com/duong2604/cat_gpt/pull/22) tại đầu PR `ad6ee97` (= SHA TL review) → `develop` @ `cd386e5`; code `develop` trùng `ad6ee97`. CI PR: [run 44183896287](https://github.com/duong2604/cat_gpt/actions/runs/44183896287). Ước lượng 2n → thực tế < 1 ngày — Sớm.
+
+| Vòng / SHA | Kết luận TL | Chi tiết |
+|---|---|---|
+| CP1 `f437720` | PASS | Gates; logic polling chỉ khi còn `PENDING/PROCESSING`. Yêu cầu: tải xuống qua thẻ `<a>` bỏ qua làm mới phiên; gợi ý avatar mất do đổi câu `FILE_INVALID_TYPE`; xóa 404 phải làm mới danh sách |
+| `0ee68c0` | PASS | Ba điểm trên đã sửa (pre-flight `GET /documents/:id`; gợi ý avatar còn; `onSettled` làm mới khi 404) |
+| Vòng 1 `f8441ed` | Cần sửa (bằng chứng) | Gates + CI xanh; TL kiểm qua proxy web `:3000` trên đầu PR: A tải lên → READY 7 đoạn, SHA-256 khớp, `private, no-store`; danh sách của B (`page=1&pageSize=10`) total 0; B/admin `404` chi tiết/tải/xóa, chưa đăng nhập `401`; dọn 0/0/0. AC2 thiếu bằng chứng quan sát (quá cỡ, nhãn `FAILED`); AC8 thiếu link CI |
+| Vòng 1 `ad6ee97` | **Đạt → merge** | Chỉ sửa tài liệu: ảnh toast "Tệp quá lớn." (API chạy `DOCUMENT_MAX_SIZE_MB=1`), nhãn `FAILED` đã dịch vi/en; link CI. TL đếm toàn kho: Mongo 0 / MinIO 0 / Qdrant 0 |
+
+**Giới hạn của review TL:** chưa đi giao diện khi đăng nhập bằng A/B — quyền đọc mật khẩu tài khoản thử vào phiên TL bị chặn. Cô lập chủ sở hữu được kiểm ở tầng API qua đúng truy vấn của trang (đủ cho AC5); giao diện chỉ hiện dữ liệu server trả về.
+
+**TL nghiệm thu lát TXT trên `develop`** (SE-011 `abc5a55` + SE-012 `cd386e5`): đạt — điều kiện mở SE-013.
+
 **Task:** SE-012 — trang Tài liệu thật (danh sách, tải lên, tìm, lọc, tải xuống, xóa) trên API thật của SE-011, không mock.
 
 **Kết quả:** Đã làm đủ phạm vi mục tiêu; đã tự kiểm toàn bộ AC1–AC8 bằng dịch vụ thật (Mongo/MinIO/Qdrant/Redis thật, không giả lập); đã sửa 3 vấn đề TL phát hiện ở CP1 và 1 lỗi tự tìm thấy khi test CP2 (xem Checklist vòng 2); đã dọn toàn bộ dữ liệu thử, xác nhận bằng đếm trực tiếp 3 nơi (không dùng danh sách API).
