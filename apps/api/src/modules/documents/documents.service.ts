@@ -90,7 +90,7 @@ export class DocumentsService {
         })
       ).toObject();
     } catch (error) {
-      await this.files.remove(storageKey);
+      await this.removeFileBestEffort(storageKey);
       throw error;
     }
 
@@ -111,11 +111,24 @@ export class DocumentsService {
       );
     } catch {
       await this.documentModel.deleteOne({ _id }).exec();
-      await this.files.remove(storageKey);
+      await this.removeFileBestEffort(storageKey);
       throw new AppException(ErrorCode.DOCUMENT_QUEUE_UNAVAILABLE, HttpStatus.SERVICE_UNAVAILABLE);
     }
 
     return toDocumentDto(doc);
+  }
+
+  /**
+   * Dọn object MinIO khi hoàn tác upload (lỗi Mongo hoặc hàng đợi). Không để lỗi dọn dẹp
+   * che mất lỗi gốc đang được trả về — khác với job `delete` của worker, nơi lỗi phải
+   * được ném ra để BullMQ thử lại (xem `DocumentFilesService.remove`).
+   */
+  private async removeFileBestEffort(storageKey: string): Promise<void> {
+    try {
+      await this.files.remove(storageKey);
+    } catch (error) {
+      this.logger.warn(`Không xóa được object MinIO ${storageKey} khi hoàn tác: ${(error as Error).message}`);
+    }
   }
 
   async list(userId: string, query: ListDocumentsQueryDto): Promise<Paginated<DocumentDto>> {

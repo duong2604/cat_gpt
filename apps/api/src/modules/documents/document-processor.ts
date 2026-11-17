@@ -122,11 +122,20 @@ export class DocumentProcessor extends WorkerHost {
    */
   @OnWorkerEvent('failed')
   async onFailed(job: Job, error: Error): Promise<void> {
-    if (job.name !== 'process' || error instanceof UnrecoverableError) return;
+    if (error instanceof UnrecoverableError) return;
     const attempts = job.opts.attempts ?? 1;
     if (job.attemptsMade < attempts) return;
 
-    const { documentId } = job.data as ProcessJobData;
+    const { documentId } = job.data as ProcessJobData | DeleteJobData;
+
+    if (job.name === 'delete') {
+      // Hết lượt thử dọn (vd MinIO không sẵn sàng suốt): bản ghi còn deletedAt là dấu vết
+      // để dọn tay — chưa có job quét dọn định kỳ (thiết kế mục 6.4 bước 4, ghi chú ponytail).
+      this.logger.warn(`documentId=${documentId} job=delete hết lượt thử, reason=${error.message}`);
+      return;
+    }
+    if (job.name !== 'process') return;
+
     await this.documentModel
       .updateOne(
         {

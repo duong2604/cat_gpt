@@ -53,10 +53,14 @@ export class DocumentFilesService implements OnModuleInit {
     return Buffer.concat(chunks);
   }
 
-  /** Idempotent — không ném lỗi nếu object không tồn tại (S3 semantics). */
+  /**
+   * Idempotent với object không tồn tại — S3 `DELETE` không báo lỗi trong trường hợp đó
+   * (xác nhận thực tế: `removeObject` trên key không tồn tại không ném lỗi). Mọi lỗi
+   * thật sự ném ra (mất kết nối MinIO...) được để nguyên cho người gọi — job `delete`
+   * của worker dựa vào lỗi ném ra để BullMQ thử lại (thiết kế mục 6.4, AC5c/T13); nuốt
+   * lỗi ở đây sẽ khiến object mồ côi vĩnh viễn khi MinIO tạm thời không sẵn sàng.
+   */
   async remove(key: string): Promise<void> {
-    await this.client.removeObject(this.bucket, key).catch((error: unknown) => {
-      this.logger.warn(`Không xóa được object MinIO ${key}: ${(error as Error).message}`);
-    });
+    await this.client.removeObject(this.bucket, key);
   }
 }
