@@ -1,7 +1,11 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { ErrorCode, MessageRole, MessageStatus } from '@cat-gpt/shared';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
+import { DocumentStatus, ErrorCode, MessageRole, MessageStatus } from '@cat-gpt/shared';
 import { AppException } from '../../common/exceptions/app.exception.js';
 import { AppConfigService } from '../../config/app-config.service.js';
+import { isDocumentsHidden } from '../documents/documents-hidden.guard.js';
+import { DocumentEntity } from '../documents/schemas/document.schema.js';
 import { type LlmFinishReason, type LlmMessage, LlmProvider } from '../llm/llm.provider.js';
 import { toConversationDto, toMessageDto } from './chat.presenter.js';
 import { ConversationsService } from './conversations.service.js';
@@ -49,6 +53,7 @@ export class ChatService {
     private readonly conversations: ConversationsService,
     private readonly llm: LlmProvider,
     private readonly config: AppConfigService,
+    @InjectModel(DocumentEntity.name) private readonly documents: Model<DocumentEntity>,
   ) {}
 
   async send(userId: string, dto: SendMessageDto, sse: SseStream): Promise<void> {
@@ -56,10 +61,19 @@ export class ChatService {
 
     let conversation: Conversation;
     if (dto.conversationId) {
+      if (dto.documentIds) {
+        throw AppException.badRequest(
+          ErrorCode.VALIDATION_FAILED,
+          'documentIds chỉ dùng khi tạo hội thoại mới',
+        );
+      }
       conversation = await this.conversations.getOwnedOrThrow(userId, dto.conversationId);
       this.assertNotStreaming(conversation);
     } else {
-      conversation = await this.conversations.create(userId, makeTitle(dto.content));
+      const documentIds = dto.documentIds
+        ? await this.validateDocumentSelection(userId, dto.documentIds)
+        : undefined;
+      conversation = await this.conversations.create(userId, makeTitle(dto.content), documentIds);
     }
 
     const userMessage = await this.conversations.createMessage({
@@ -168,6 +182,38 @@ export class ChatService {
       this.inFlight.delete(key);
       sse.end();
     }
+  }
+
+  /**
+   * Kiểm tài liệu khi tạo hội thoại hỏi đáp (thiết kế mục 5): một truy vấn Mongo
+   * `{ _id ∈ ids, userId, deletedAt: null }` — thiếu bất kỳ id nào (không có / đã xóa /
+   * của người khác, không phân biệt) → `404`; có tài liệu chưa `READY` → `400`.
+   * `RagService.prepare()` tự lọc lại lúc trả lời (tài liệu có thể bị xóa sau khi tạo).
+   */
+  private async validateDocumentSelection(userId: string, documentIds: string[]): Promise<Types.ObjectId[]> {
+    // Hỏi tài liệu cần cả Chat bật (ChatHiddenGuard trên route) và Tài liệu hiển thị
+    // (thiết kế mục 10) — ẩn như tài liệu không tồn tại, không phân biệt lý do.
+    if (isDocumentsHidden(this.config)) {
+      throw AppException.notFound(ErrorCode.DOCUMENT_NOT_FOUND);
+    }
+    if (documentIds.length > this.config.rag.maxDocuments) {
+      throw AppException.badRequest(
+        ErrorCode.VALIDATION_FAILED,
+        `Tối đa ${this.config.rag.maxDocuments} tài liệu mỗi hội thoại`,
+      );
+    }
+    const ids = documentIds.map((id) => new Types.ObjectId(id));
+    const found = await this.documents
+      .find({ _id: { $in: ids }, userId: new Types.ObjectId(userId), deletedAt: null })
+      .lean<DocumentEntity[]>()
+      .exec();
+    if (found.length !== ids.length) {
+      throw AppException.notFound(ErrorCode.DOCUMENT_NOT_FOUND);
+    }
+    if (found.some((d) => d.status !== DocumentStatus.READY)) {
+      throw AppException.badRequest(ErrorCode.DOCUMENT_NOT_READY);
+    }
+    return ids;
   }
 
   private assertNotStreaming(conversation: Conversation): void {

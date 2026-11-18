@@ -25,6 +25,18 @@ export interface ConversationDto {
   lastMessageAt: string;
   createdAt: string;
   updatedAt: string;
+  /** Tài liệu gắn với hội thoại hỏi–đáp (Module 4) — cố định khi tạo; không có → Chat thường. */
+  documentIds?: string[];
+}
+
+/** Trích dẫn `[n]` — lấy từ payload Qdrant tại thời điểm trả lời, không do model sinh (thiết kế mục 6.3). */
+export interface CitationDto {
+  n: number;
+  documentId: string;
+  documentName: string;
+  chunkIndex: number;
+  page?: number;
+  quote: string;
 }
 
 export interface MessageDto {
@@ -35,6 +47,10 @@ export interface MessageDto {
   status: MessageStatus;
   model: string | null;
   createdAt: string;
+  /** Chỉ ở tin assistant của hội thoại có `documentIds` (Module 4). */
+  citations?: CitationDto[];
+  insufficientEvidence?: boolean;
+  ungrounded?: boolean;
 }
 
 /** Phân trang bằng cursor (dùng cho danh sách cuộn vô hạn). */

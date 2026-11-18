@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { DocumentsModule } from '../documents/documents.module.js';
 import { LlmModule } from '../llm/llm.module.js';
 import { ChatHiddenGuard } from './chat-hidden.guard.js';
 import { ChatThrottlerGuard } from './chat-throttler.guard.js';
@@ -17,6 +18,7 @@ import { Message, MessageSchema } from './schemas/message.schema.js';
       { name: Message.name, schema: MessageSchema },
     ]),
     LlmModule,
+    DocumentsModule,
   ],
   controllers: [ConversationsController, ChatController],
   providers: [ConversationsService, ChatService, ChatThrottlerGuard, ChatHiddenGuard],

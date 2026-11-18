@@ -16,6 +16,10 @@ export class Conversation {
   @Prop({ type: Date, required: true })
   lastMessageAt: Date;
 
+  /** Tài liệu hỏi–đáp (Module 4) — cố định khi tạo; không có → Chat thường (thiết kế mục 4). */
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'DocumentEntity' }], default: undefined })
+  documentIds?: Types.ObjectId[];
+
   createdAt: Date;
   updatedAt: Date;
 }

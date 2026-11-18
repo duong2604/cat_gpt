@@ -84,11 +84,12 @@ export class ConversationsService {
     return conversation;
   }
 
-  async create(userId: string, title: string): Promise<Conversation> {
+  async create(userId: string, title: string, documentIds?: Types.ObjectId[]): Promise<Conversation> {
     const doc = await this.conversationModel.create({
       userId: new Types.ObjectId(userId),
       title,
       lastMessageAt: new Date(),
+      ...(documentIds ? { documentIds } : {}),
     });
     return doc.toObject();
   }

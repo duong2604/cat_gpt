@@ -97,6 +97,7 @@
     "DOCUMENT_NO_TEXT": "The file has no extractable text content.",
     "DOCUMENT_TOO_MANY_CHUNKS": "The document is too long to process.",
     "DOCUMENT_UNREADABLE": "The file is corrupted or unreadable.",
+    "DOCUMENT_NOT_READY": "The document isn't ready for Q&A yet.",
     "DOCUMENT_EMBEDDING_UNAVAILABLE": "Document processing is currently unavailable.",
     "DOCUMENT_PROCESSING_FAILED": "Document processing failed. Please delete it and upload again."
   },
