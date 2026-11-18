@@ -20,8 +20,8 @@ import type { SseStream } from './sse-stream.js';
 
 const USER_ID = new Types.ObjectId();
 
-function fakeConfig(systemPrompt = 'Bạn là trợ lý nội bộ.'): AppConfigService {
-  return { llm: { systemPrompt } } as unknown as AppConfigService;
+function fakeConfig(systemPrompt = 'Bạn là trợ lý nội bộ.', maxDocuments = 5): AppConfigService {
+  return { llm: { systemPrompt }, rag: { maxDocuments } } as unknown as AppConfigService;
 }
 
 /** Bản thay thế trong bộ nhớ của ConversationsService — đủ hành vi để kiểm ChatService, không chạm Mongo thật. */
@@ -38,7 +38,7 @@ class FakeConversationsService {
     return c;
   }
 
-  async create(userId: string, title: string): Promise<Conversation> {
+  async create(userId: string, title: string, documentIds?: Types.ObjectId[]): Promise<Conversation> {
     const now = new Date();
     const c = {
       _id: new Types.ObjectId(),
@@ -47,6 +47,7 @@ class FakeConversationsService {
       lastMessageAt: now,
       createdAt: now,
       updatedAt: now,
+      ...(documentIds ? { documentIds } : {}),
     } as Conversation;
     this.conversations.set(c._id.toString(), c);
     return c;
@@ -159,16 +160,42 @@ class ScriptedLlmProvider extends LlmProvider {
   }
 }
 
-function makeService(llm: LlmProvider, conversations = new FakeConversationsService()) {
-  // Không có test nào ở đây dùng documentIds — model tài liệu không bao giờ được gọi tới.
-  const fakeDocumentModel = {} as unknown as Model<DocumentEntity>;
+function makeService(
+  llm: LlmProvider,
+  conversations = new FakeConversationsService(),
+  documentModel: Model<DocumentEntity> = {} as unknown as Model<DocumentEntity>,
+  config: AppConfigService = fakeConfig(),
+) {
   const service = new ChatService(
     conversations as unknown as ConversationsService,
     llm,
-    fakeConfig(),
-    fakeDocumentModel,
+    config,
+    documentModel,
   );
   return { service, conversations };
+}
+
+interface FakeDoc {
+  _id: Types.ObjectId;
+  userId: Types.ObjectId;
+  status: string;
+  deletedAt: Date | null;
+}
+
+/** Bản thay thế trong bộ nhớ của Model<DocumentEntity> — chỉ cần đúng chuỗi gọi `.find(...).lean().exec()`. */
+function fakeDocumentModel(docs: FakeDoc[]): Model<DocumentEntity> {
+  return {
+    find(filter: { _id: { $in: Types.ObjectId[] }; userId: Types.ObjectId; deletedAt: null }) {
+      const ids = filter._id.$in.map((id) => id.toString());
+      const matches = docs.filter(
+        (d) =>
+          ids.includes(d._id.toString()) &&
+          d.userId.toString() === filter.userId.toString() &&
+          d.deletedAt === filter.deletedAt,
+      );
+      return { lean: () => ({ exec: async () => matches }) };
+    },
+  } as unknown as Model<DocumentEntity>;
 }
 
 describe('ChatService — hồi quy (trước khi thêm RagService, SE-014)', () => {
@@ -304,6 +331,88 @@ describe('ChatService — hồi quy (trước khi thêm RagService, SE-014)', ()
       await expect(
         service.regenerate(USER_ID.toString(), conversation._id.toString(), new RecordingSse() as unknown as SseStream),
       ).rejects.toMatchObject({ code: ErrorCode.CHAT_NOTHING_TO_REGENERATE });
+    });
+  });
+
+  describe('Validation documentIds khi tạo hội thoại (thiết kế mục 5, TL review CP1)', () => {
+    const OTHER_USER_ID = new Types.ObjectId();
+
+    it('conversationId kèm documentIds → 400 VALIDATION_FAILED, không gọi LLM', async () => {
+      const llm = new ScriptedLlmProvider(['không nên gọi tới']);
+      const { service, conversations } = makeService(llm);
+      const conversation = await conversations.create(USER_ID.toString(), 'Hội thoại có sẵn');
+
+      await expect(
+        service.send(
+          USER_ID.toString(),
+          { conversationId: conversation._id.toString(), content: 'x', documentIds: [new Types.ObjectId().toString()] },
+          new RecordingSse() as unknown as SseStream,
+        ),
+      ).rejects.toMatchObject({ code: ErrorCode.VALIDATION_FAILED });
+    });
+
+    it('documentIds của người khác (R4) → 404 DOCUMENT_NOT_FOUND, không phân biệt lý do', async () => {
+      const otherUsersDoc = { _id: new Types.ObjectId(), userId: OTHER_USER_ID, status: 'READY', deletedAt: null };
+      const { service } = makeService(new ScriptedLlmProvider([]), undefined, fakeDocumentModel([otherUsersDoc]));
+
+      await expect(
+        service.send(
+          USER_ID.toString(),
+          { content: 'Hỏi tài liệu của người khác', documentIds: [otherUsersDoc._id.toString()] },
+          new RecordingSse() as unknown as SseStream,
+        ),
+      ).rejects.toMatchObject({ code: ErrorCode.DOCUMENT_NOT_FOUND });
+    });
+
+    it('tài liệu chưa READY (R5) → 400 DOCUMENT_NOT_READY', async () => {
+      const processingDoc = { _id: new Types.ObjectId(), userId: USER_ID, status: 'PROCESSING', deletedAt: null };
+      const { service } = makeService(new ScriptedLlmProvider([]), undefined, fakeDocumentModel([processingDoc]));
+
+      await expect(
+        service.send(
+          USER_ID.toString(),
+          { content: 'Hỏi khi đang xử lý', documentIds: [processingDoc._id.toString()] },
+          new RecordingSse() as unknown as SseStream,
+        ),
+      ).rejects.toMatchObject({ code: ErrorCode.DOCUMENT_NOT_READY });
+    });
+
+    it('vượt RAG_MAX_DOCUMENTS → 400 VALIDATION_FAILED, không gọi Mongo', async () => {
+      const findSpy = vi.fn();
+      const model = { find: findSpy } as unknown as Model<DocumentEntity>;
+      const { service } = makeService(new ScriptedLlmProvider([]), undefined, model, fakeConfig(undefined, 2));
+
+      await expect(
+        service.send(
+          USER_ID.toString(),
+          {
+            content: 'Chọn quá nhiều tài liệu',
+            documentIds: [new Types.ObjectId().toString(), new Types.ObjectId().toString(), new Types.ObjectId().toString()],
+          },
+          new RecordingSse() as unknown as SseStream,
+        ),
+      ).rejects.toMatchObject({ code: ErrorCode.VALIDATION_FAILED });
+      expect(findSpy).not.toHaveBeenCalled();
+    });
+
+    it('tài liệu hợp lệ, READY, cùng chủ → tạo hội thoại thành công, lưu documentIds', async () => {
+      const myDoc = { _id: new Types.ObjectId(), userId: USER_ID, status: 'READY', deletedAt: null };
+      const { service, conversations } = makeService(
+        new ScriptedLlmProvider(['Trả lời có căn cứ']),
+        undefined,
+        fakeDocumentModel([myDoc]),
+      );
+      const sse = new RecordingSse();
+
+      await service.send(
+        USER_ID.toString(),
+        { content: 'Hỏi tài liệu của tôi', documentIds: [myDoc._id.toString()] },
+        sse as unknown as SseStream,
+      );
+
+      const meta = sse.events[0] as { conversation: { documentIds?: string[] } };
+      expect(meta.conversation.documentIds).toEqual([myDoc._id.toString()]);
+      expect([...conversations.conversations.values()][0].documentIds).toEqual([myDoc._id]);
     });
   });
 
