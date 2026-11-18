@@ -11,8 +11,17 @@ import type { DeleteJobData, ProcessJobData } from './documents.service.js';
 import { EmbeddingService } from './embedding.service.js';
 import { permanentErrorFor } from './permanent-error.js';
 import { DocumentEntity } from './schemas/document.schema.js';
-import { extractTxt } from './text-extract.js';
+import {
+  DocumentTooLargeToProcessError,
+  DocumentUnreadableError,
+  type ExtractedPage,
+  extractDocx,
+  extractPdf,
+  extractTxt,
+} from './text-extract.js';
 import { VectorStoreService } from './vector-store.service.js';
+
+const DOCX_MIME_TYPE = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 
 /**
  * Worker BullMQ cho queue `documents` (thiết kế mục 6.3, 6.4). Chạy trong tiến trình API
@@ -59,22 +68,34 @@ export class DocumentProcessor extends WorkerHost {
     if (!doc) return;
 
     const buffer = await this.files.getBuffer(doc.storageKey);
-    let text: string;
+    let pages: ExtractedPage[];
     try {
-      text = extractTxt(buffer);
-    } catch {
+      pages = await this.extractPages(doc.mimeType, buffer);
+    } catch (error) {
+      if (error instanceof DocumentTooLargeToProcessError) {
+        return this.failPermanently(_id, ErrorCode.DOCUMENT_TOO_MANY_CHUNKS);
+      }
+      if (error instanceof DocumentUnreadableError) {
+        return this.failPermanently(_id, ErrorCode.DOCUMENT_UNREADABLE);
+      }
       return this.failPermanently(_id, ErrorCode.DOCUMENT_NO_TEXT);
     }
 
-    const chunks = await chunkText(
-      text,
-      this.config.documents.chunkSize,
-      this.config.documents.chunkOverlap,
-    );
+    // Chia đoạn theo từng trang để giữ `page` cho payload Qdrant (thiết kế mục 4.3, SE-013)
+    // — TXT/DOCX chỉ có một "trang" ảo (page: null).
+    const pageChunks: { text: string; page: number | null }[] = [];
+    for (const p of pages) {
+      const pieces = await chunkText(
+        p.text,
+        this.config.documents.chunkSize,
+        this.config.documents.chunkOverlap,
+      );
+      for (const text of pieces) pageChunks.push({ text, page: p.page });
+    }
 
     const permanentError = permanentErrorFor(
-      text,
-      chunks,
+      pages.map((p) => p.text).join('\n'),
+      pageChunks.map((c) => c.text),
       this.config.documents.maxChunks,
       Boolean(this.config.llm.openAiApiKey),
     );
@@ -82,14 +103,19 @@ export class DocumentProcessor extends WorkerHost {
       return this.failPermanently(_id, permanentError);
     }
     // Lỗi mạng/429/5xx ném ra ngoài — BullMQ thử lại (lỗi tạm thời, thiết kế mục 6.3 bước 3).
-    const vectors = await this.embeddings.embedAll(chunks);
+    const vectors = await this.embeddings.embedAll(pageChunks.map((c) => c.text));
 
     // Xóa point cũ rồi upsert mới — chạy lại job không sinh trùng hay sót đoạn cũ (mục 6.3 bước 4).
     await this.vectors.deleteByDocumentId(documentId);
     await this.vectors.upsertChunks(
       doc.userId.toString(),
       documentId,
-      chunks.map((text, chunkIndex) => ({ chunkIndex, text, vector: vectors[chunkIndex] })),
+      pageChunks.map(({ text, page }, chunkIndex) => ({
+        chunkIndex,
+        text,
+        vector: vectors[chunkIndex],
+        ...(page !== null ? { page } : {}),
+      })),
     );
 
     const fresh = await this.documentModel.findById(_id).lean<DocumentEntity>().exec();
@@ -101,9 +127,20 @@ export class DocumentProcessor extends WorkerHost {
     await this.documentModel
       .updateOne(
         { _id, deletedAt: null },
-        { $set: { status: DocumentStatus.READY, chunkCount: chunks.length, errorCode: null } },
+        { $set: { status: DocumentStatus.READY, chunkCount: pageChunks.length, errorCode: null } },
       )
       .exec();
+  }
+
+  /** Bóc tách theo `mimeType` (thiết kế mục 5) — TXT/DOCX một "trang" ảo, PDF giữ số trang thật. */
+  private async extractPages(mimeType: string, buffer: Buffer): Promise<ExtractedPage[]> {
+    if (mimeType === 'application/pdf') {
+      return extractPdf(buffer, this.config.documents.maxPdfPages);
+    }
+    if (mimeType === DOCX_MIME_TYPE) {
+      return extractDocx(buffer, this.config.documents.maxDocxXmlBytes);
+    }
+    return [{ page: null, text: extractTxt(buffer) }];
   }
 
   /** Lỗi vĩnh viễn (thiết kế mục 6.3 bước 2–3): FAILED ngay, không thử lại. */

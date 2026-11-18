@@ -7,19 +7,33 @@ import type { Readable } from 'node:stream';
 import { type DocumentDto, DocumentStatus, ErrorCode, type Paginated } from '@cat-gpt/shared';
 import { AppException } from '../../common/exceptions/app.exception.js';
 import { escapeRegex } from '../../common/utils/escape-regex.js';
+import { withTimeout } from '../../common/utils/with-timeout.js';
 import { AppConfigService } from '../../config/app-config.service.js';
 import { DocumentFilesService } from './document-files.service.js';
 import { toDocumentDto } from './document.presenter.js';
 import type { ListDocumentsQueryDto } from './dto/list-documents-query.dto.js';
 import { fixMulterFilenameEncoding, sanitizeFileName } from './sanitize-filename.js';
 import { DocumentEntity } from './schemas/document.schema.js';
-import { isValidTxtSignature } from './text-extract.js';
+import { isValidDocxSignature, isValidPdfSignature, isValidTxtSignature } from './text-extract.js';
 
 export interface ProcessJobData {
   documentId: string;
 }
 export interface DeleteJobData {
   documentId: string;
+}
+
+const DOCX_MIME_TYPE = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+
+/** Kiểm chữ ký theo đuôi tệp (thiết kế mục 5, không tin `Content-Type` client). */
+async function detectMimeType(file: Express.Multer.File): Promise<string | null> {
+  const name = file.originalname.toLowerCase();
+  if (name.endsWith('.txt')) return isValidTxtSignature(file.buffer) ? 'text/plain' : null;
+  if (name.endsWith('.pdf')) return isValidPdfSignature(file.buffer) ? 'application/pdf' : null;
+  if (name.endsWith('.docx')) {
+    return (await isValidDocxSignature(file.buffer)) ? DOCX_MIME_TYPE : null;
+  }
+  return null;
 }
 
 const DELETE_JOB_ATTEMPTS = 5;
@@ -32,22 +46,6 @@ const FAILED_JOB_RETENTION_SECONDS = 7 * 24 * 3600;
  * và không ảnh hưởng hành vi đọc job của Worker).
  */
 const QUEUE_ADD_TIMEOUT_MS = 3000;
-
-function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-  return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error(`Hết thời gian chờ sau ${ms}ms`)), ms);
-    promise.then(
-      (value) => {
-        clearTimeout(timer);
-        resolve(value);
-      },
-      (error: unknown) => {
-        clearTimeout(timer);
-        reject(error as Error);
-      },
-    );
-  });
-}
 
 /** Nghiệp vụ + quyền + vòng đời tài liệu. Mọi truy vấn lọc theo `userId` người gọi (M3-2). */
 @Injectable()
@@ -66,15 +64,14 @@ export class DocumentsService {
     if (file.size > this.config.documents.maxSizeBytes) {
       throw AppException.badRequest(ErrorCode.FILE_TOO_LARGE);
     }
-    if (!file.originalname.toLowerCase().endsWith('.txt') || !isValidTxtSignature(file.buffer)) {
-      throw AppException.badRequest(ErrorCode.FILE_INVALID_TYPE);
-    }
+    const mimeType = await detectMimeType(file);
+    if (!mimeType) throw AppException.badRequest(ErrorCode.FILE_INVALID_TYPE);
 
     const _id = new Types.ObjectId();
     const storageKey = `documents/${userId}/${_id.toString()}`;
     const name = sanitizeFileName(fixMulterFilenameEncoding(file.originalname));
 
-    await this.files.put(storageKey, file.buffer, 'text/plain');
+    await this.files.put(storageKey, file.buffer, mimeType);
 
     let doc: DocumentEntity;
     try {
@@ -83,7 +80,7 @@ export class DocumentsService {
           _id,
           userId: new Types.ObjectId(userId),
           name,
-          mimeType: 'text/plain',
+          mimeType,
           size: file.size,
           storageKey,
           status: DocumentStatus.PENDING,
@@ -108,6 +105,7 @@ export class DocumentsService {
           },
         ),
         QUEUE_ADD_TIMEOUT_MS,
+        `Hết thời gian chờ sau ${QUEUE_ADD_TIMEOUT_MS}ms`,
       );
     } catch {
       await this.documentModel.deleteOne({ _id }).exec();
@@ -199,6 +197,7 @@ export class DocumentsService {
           },
         ),
         QUEUE_ADD_TIMEOUT_MS,
+        `Hết thời gian chờ sau ${QUEUE_ADD_TIMEOUT_MS}ms`,
       );
     } catch (error) {
       // Tài liệu đã ẩn (deletedAt đã đặt) — vẫn trả 204, chỉ cảnh báo để dọn tay (thiết kế mục 6.4 bước 4).

@@ -213,6 +213,17 @@ export class EnvironmentVariables {
   @IsInt()
   @Min(1)
   DOCUMENT_JOB_ATTEMPTS = 3;
+
+  // ===== Tài liệu PDF/DOCX (SE-013) =====
+  @Transform(({ value }) => Number(value))
+  @IsInt()
+  @Min(1)
+  DOCUMENT_MAX_PDF_PAGES = 2000;
+
+  @Transform(({ value }) => Number(value))
+  @IsInt()
+  @Min(1)
+  DOCUMENT_MAX_DOCX_XML_MB = 50;
 }
 
 export function validateEnv(config: Record<string, unknown>): EnvironmentVariables {

@@ -108,6 +108,8 @@ export class AppConfigService {
       chunkSize: this.get('DOCUMENT_CHUNK_SIZE'),
       chunkOverlap: this.get('DOCUMENT_CHUNK_OVERLAP'),
       jobAttempts: this.get('DOCUMENT_JOB_ATTEMPTS'),
+      maxPdfPages: this.get('DOCUMENT_MAX_PDF_PAGES'),
+      maxDocxXmlBytes: this.get('DOCUMENT_MAX_DOCX_XML_MB') * 1024 * 1024,
     };
   }
 }

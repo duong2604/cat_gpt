@@ -7,10 +7,13 @@ export interface ChunkPoint {
   chunkIndex: number;
   text: string;
   vector: number[];
+  /** Trang nguồn (chỉ PDF — thiết kế mục 4.3, SE-013). */
+  page?: number;
 }
 
 /**
- * Qdrant: một collection dùng chung, payload `{ userId, documentId, chunkIndex, text }`.
+ * Qdrant: một collection dùng chung, payload `{ userId, documentId, chunkIndex, text }`
+ * (PDF thêm `page` — thiết kế mục 4.3, SE-013).
  * Kích thước vector lấy từ lần embedding đầu tiên khi tạo collection (thiết kế mục 4.3).
  */
 @Injectable()
@@ -64,7 +67,13 @@ export class VectorStoreService {
       points: chunks.map((c) => ({
         id: randomUUID(),
         vector: c.vector,
-        payload: { userId, documentId, chunkIndex: c.chunkIndex, text: c.text },
+        payload: {
+          userId,
+          documentId,
+          chunkIndex: c.chunkIndex,
+          text: c.text,
+          ...(c.page !== undefined ? { page: c.page } : {}),
+        },
       })),
     });
   }

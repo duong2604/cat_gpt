@@ -96,6 +96,7 @@
     "DOCUMENT_QUEUE_UNAVAILABLE": "Hệ thống xử lý tài liệu đang bận. Vui lòng thử lại sau.",
     "DOCUMENT_NO_TEXT": "Tệp không có nội dung văn bản để xử lý.",
     "DOCUMENT_TOO_MANY_CHUNKS": "Tài liệu quá dài để xử lý.",
+    "DOCUMENT_UNREADABLE": "Tệp bị hỏng hoặc không đọc được.",
     "DOCUMENT_EMBEDDING_UNAVAILABLE": "Chức năng xử lý tài liệu hiện chưa khả dụng.",
     "DOCUMENT_PROCESSING_FAILED": "Xử lý tài liệu thất bại. Vui lòng xóa và tải lên lại."
   },
@@ -162,10 +163,10 @@
   },
   "documents": {
     "title": "Tài liệu",
-    "description": "Tải lên, tìm kiếm và theo dõi trạng thái xử lý tài liệu TXT.",
+    "description": "Tải lên, tìm kiếm và theo dõi trạng thái xử lý tài liệu TXT, PDF và DOCX.",
     "upload": "Tải lên",
     "uploading": "Đang tải lên...",
-    "uploadHint": "Chỉ tệp .txt, tối đa 20MB.",
+    "uploadHint": "Tệp .txt, .pdf (dạng text) hoặc .docx, tối đa 20MB.",
     "searchPlaceholder": "Tìm theo tên tệp",
     "allStatuses": "Tất cả trạng thái",
     "empty": "Chưa có tài liệu nào.",
