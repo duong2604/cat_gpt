@@ -3,6 +3,7 @@ import { Types } from 'mongoose';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ErrorCode, MessageRole, MessageStatus } from '@cat-gpt/shared';
 import type { AppConfigService } from '../../config/app-config.service.js';
+import { ReleaseMode } from '../../config/env.validation.js';
 import type { DocumentEntity } from '../documents/schemas/document.schema.js';
 import { type LlmFinishReason, type LlmMessage, LlmProvider, type LlmStreamOptions } from '../llm/llm.provider.js';
 import { RAG_REFUSAL_TEXT } from '../rag/rag-prompt.js';
@@ -22,8 +23,12 @@ import type { SseStream } from './sse-stream.js';
 
 const USER_ID = new Types.ObjectId();
 
-function fakeConfig(systemPrompt = 'Bạn là trợ lý nội bộ.', maxDocuments = 5): AppConfigService {
-  return { llm: { systemPrompt }, rag: { maxDocuments } } as unknown as AppConfigService;
+function fakeConfig(
+  systemPrompt = 'Bạn là trợ lý nội bộ.',
+  maxDocuments = 5,
+  releaseMode?: ReleaseMode,
+): AppConfigService {
+  return { llm: { systemPrompt }, rag: { maxDocuments }, releaseMode } as unknown as AppConfigService;
 }
 
 /** Bản thay thế trong bộ nhớ của ConversationsService — đủ hành vi để kiểm ChatService, không chạm Mongo thật. */
@@ -396,6 +401,50 @@ describe('ChatService — hồi quy (trước khi thêm RagService, SE-014)', ()
         ),
       ).rejects.toMatchObject({ code: ErrorCode.VALIDATION_FAILED });
       expect(findSpy).not.toHaveBeenCalled();
+    });
+
+    it('bản staff ẩn luôn việc tiếp tục hội thoại hỏi tài liệu đã có từ trước (không chỉ lúc tạo)', async () => {
+      const conversations = new FakeConversationsService();
+      const myDoc = { _id: new Types.ObjectId(), userId: USER_ID, status: 'READY', deletedAt: null };
+      // Hội thoại được tạo trước đó (ví dụ lúc còn ở bản demo) đã có documentIds.
+      const conversation = await conversations.create(USER_ID.toString(), 'Hội thoại cũ', [myDoc._id]);
+      const staffConfig = fakeConfig(undefined, 5, ReleaseMode.Staff);
+      const { service } = makeService(new ScriptedLlmProvider([]), conversations, fakeDocumentModel([myDoc]), staffConfig);
+
+      await expect(
+        service.send(
+          USER_ID.toString(),
+          { conversationId: conversation._id.toString(), content: 'Hỏi tiếp' },
+          new RecordingSse() as unknown as SseStream,
+        ),
+      ).rejects.toMatchObject({ code: ErrorCode.DOCUMENT_NOT_FOUND });
+
+      await expect(
+        service.regenerate(USER_ID.toString(), conversation._id.toString(), new RecordingSse() as unknown as SseStream),
+      ).rejects.toMatchObject({ code: ErrorCode.DOCUMENT_NOT_FOUND });
+    });
+
+    it('bản staff KHÔNG ảnh hưởng Chat thường (không documentIds) khi tiếp tục hội thoại', async () => {
+      const conversations = new FakeConversationsService();
+      const conversation = await conversations.create(USER_ID.toString(), 'Chat thường');
+      await conversations.createMessage({
+        conversationId: conversation._id,
+        userId: conversation.userId,
+        role: MessageRole.USER,
+        content: 'Câu đầu',
+      });
+      const staffConfig = fakeConfig(undefined, 5, ReleaseMode.Staff);
+      const { service } = makeService(new ScriptedLlmProvider(['Vẫn trả lời bình thường']), conversations, undefined, staffConfig);
+      const sse = new RecordingSse();
+
+      await service.send(
+        USER_ID.toString(),
+        { conversationId: conversation._id.toString(), content: 'Hỏi tiếp' },
+        sse as unknown as SseStream,
+      );
+
+      const done = sse.events.at(-1) as { type: 'done'; message: { status: string } };
+      expect(done.message.status).toBe(MessageStatus.COMPLETED);
     });
 
     it('tài liệu hợp lệ, READY, cùng chủ → tạo hội thoại thành công, lưu documentIds', async () => {

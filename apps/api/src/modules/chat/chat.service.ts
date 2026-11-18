@@ -73,6 +73,7 @@ export class ChatService {
       }
       conversation = await this.conversations.getOwnedOrThrow(userId, dto.conversationId);
       this.assertNotStreaming(conversation);
+      this.assertRagNotHidden(conversation);
     } else {
       const documentIds = dto.documentIds
         ? await this.validateDocumentSelection(userId, dto.documentIds)
@@ -96,6 +97,7 @@ export class ChatService {
     this.assertRateLimit(userId);
     const conversation = await this.conversations.getOwnedOrThrow(userId, conversationId);
     this.assertNotStreaming(conversation);
+    this.assertRagNotHidden(conversation);
 
     let last = await this.conversations.lastMessage(conversation._id);
     if (last?.role === MessageRole.ASSISTANT) {
@@ -239,11 +241,7 @@ export class ChatService {
    * `RagService.prepare()` tự lọc lại lúc trả lời (tài liệu có thể bị xóa sau khi tạo).
    */
   private async validateDocumentSelection(userId: string, documentIds: string[]): Promise<Types.ObjectId[]> {
-    // Hỏi tài liệu cần cả Chat bật (ChatHiddenGuard trên route) và Tài liệu hiển thị
-    // (thiết kế mục 10) — ẩn như tài liệu không tồn tại, không phân biệt lý do.
-    if (isDocumentsHidden(this.config)) {
-      throw AppException.notFound(ErrorCode.DOCUMENT_NOT_FOUND);
-    }
+    this.assertRagNotHiddenRaw();
     if (documentIds.length > this.config.rag.maxDocuments) {
       throw AppException.badRequest(
         ErrorCode.VALIDATION_FAILED,
@@ -267,6 +265,22 @@ export class ChatService {
   private assertNotStreaming(conversation: Conversation): void {
     if (this.inFlight.has(conversation._id.toString())) {
       throw AppException.conflict(ErrorCode.CHAT_STREAM_IN_PROGRESS);
+    }
+  }
+
+  /**
+   * Hỏi tài liệu cần cả Chat bật (ChatHiddenGuard trên route) và Tài liệu hiển thị
+   * (thiết kế mục 10) — ẩn như tài liệu không tồn tại, không phân biệt lý do. Kiểm cả khi
+   * tiếp tục một hội thoại đã có từ trước (không chỉ lúc tạo): bản `staff` có thể được bật
+   * sau khi hội thoại đã tồn tại từ bản `demo`.
+   */
+  private assertRagNotHidden(conversation: Conversation): void {
+    if (conversation.documentIds?.length) this.assertRagNotHiddenRaw();
+  }
+
+  private assertRagNotHiddenRaw(): void {
+    if (isDocumentsHidden(this.config)) {
+      throw AppException.notFound(ErrorCode.DOCUMENT_NOT_FOUND);
     }
   }
 
