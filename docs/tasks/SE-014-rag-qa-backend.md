@@ -77,7 +77,17 @@ Rủi ro tăng: chất lượng trả `[n]` của `gpt-5.4-mini` với prompt ti
 - Kiểm thật qua API đang chạy (không mock): Chat thường không `documentIds` vẫn ra `done` bình thường; `documentIds` không tồn tại → `404`; tài liệu `PENDING` → `400 DOCUMENT_NOT_READY`; `conversationId` + `documentIds` → `400 VALIDATION_FAILED`; không tài liệu/hội thoại mồ côi nào (kiểm trước khi tạo). Tài liệu thử xóa, xác nhận trực tiếp Mongo/MinIO/Qdrant = 0.
 - `pnpm --filter @cat-gpt/api test`: 52/52 (44 cũ + 8 mới). Root `typecheck/build/lint` xanh.
 
-Commit: `cce88f6` (nhánh `feature/module-4-rag-backend`, base `caeb519`). Đang tiếp tục CP2 (truy hồi).
+Commit: `cce88f6`. TL review: **PASS** — hồi quy xác nhận độc lập trên code chưa sửa; gate xanh; `validateDocumentSelection` đúng. Yêu cầu bổ sung bằng chứng cho CP4 (R4/R5/vượt giới hạn/conversationId+documentIds) — đã làm ngay ở CP2 (xem dưới) thay vì để tới CP4.
+
+**CP2 Truy hồi — xong, chưa TL review.** Commit `9bff1c3`.
+
+- `VectorStoreService.search(vector, { userId, documentIds, limit })`: Qdrant `query()` lọc cả `userId` (match.value) và `documentId` (match.any) — M4-4. Ngưỡng điểm không lọc ở tầng này (chính sách của `RagService`).
+- `RagService.prepare(userId, documentIds, question)`: lọc lại Mongo (`READY`, chưa xóa, đúng chủ — không tin thẳng `documentIds` của hội thoại) → embed câu hỏi mới nhất → Qdrant `search` với danh sách đã lọc → `RAG_MIN_SCORE` để trống = không lọc → `insufficient` (`DOCUMENTS_UNAVAILABLE` hoặc `NO_MATCH`) khi 0 tài liệu/0 đoạn. Log debug chỉ `(documentId, chunkIndex, score)`, không bao giờ nội dung đoạn.
+- Kiểm bằng dịch vụ thật (Mongo/Qdrant/OpenAI, script tạm xóa sau khi dùng): A hỏi tài liệu của A → truy hồi đúng, chỉ của A. B gửi `documentIds` của A → `insufficient (DOCUMENTS_UNAVAILABLE)` (lọc Mongo theo `userId=B` không thấy). B hỏi tài liệu của B (nội dung gần giống tài liệu A) → truy hồi đúng, chỉ của B, không lẫn dù nội dung tương tự. Dữ liệu thử xóa, xác nhận Mongo/Qdrant = 0.
+- Bổ sung theo yêu cầu TL (đưa từ CP4 lên ngay): 5 unit test mới trong `chat.service.spec.ts` phủ các nhánh của `validateDocumentSelection` — `conversationId` + `documentIds` → 400; tài liệu của người khác (R4) → 404 không phân biệt lý do; tài liệu chưa `READY` (R5) → 400; vượt `RAG_MAX_DOCUMENTS` → 400, không gọi Mongo; tài liệu hợp lệ → tạo hội thoại, lưu đúng `documentIds`.
+- `pnpm --filter @cat-gpt/api test`: 57/57 (52 cũ + 5 mới). Root `typecheck/build/lint` xanh.
+
+Đang tiếp tục CP3 (câu trả lời có căn cứ: `rag-prompt.ts`, nối `streamAnswer`, `verifyCitations()`).
 
 ## Lịch sử review
 
