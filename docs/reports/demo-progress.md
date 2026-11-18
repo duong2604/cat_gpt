@@ -2,6 +2,16 @@
 
 Theo mốc của [plan.md](../project/plan.md#2-mốc). Chi tiết từng ngày: [báo cáo ngày](daily/README.md). TL cập nhật cuối mỗi ngày làm việc và ngay khi phát hiện nguy cơ trễ mốc; mục mới nhất ở trên, giữ các mục cũ ([workflow mục 11](../project/workflow.md#11-theo-dõi-tiến-độ)).
 
+## Cập nhật 18/11/2026 (Module 3 hoàn thành)
+
+Chi tiết: [18/11 vòng 1–4](daily/2026-11-18.md).
+
+| Mốc / việc | Tình trạng |
+|---|---|
+| M4 Demo 20/11 | Đúng kế hoạch — `34b465d` (code `fbffd5b`) không đổi; giờ demo chưa chốt |
+| Module 3 | **Hoàn thành** trên `develop` @ `1c45249`: SE-011 backend TXT (`abc5a55`), SE-012 trang Tài liệu (`cd386e5`), SE-013 PDF/DOCX (`1c45249`); TL nghiệm thu từng PR trên service thật |
+| Module 4 | TL-008 Done (AC4 đạt trên `develop`); SE-014 **Sẵn sàng, giao ngay** (P0); SE-015…SE-017 nội dung sẵn sàng; TL-009 Chờ Review (CTO chọn phương án A) |
+
 ## Cập nhật 17/11/2026 đêm (SE-003 merged, Module 4 thiết kế)
 
 Chi tiết: [17/11 vòng 2](daily/2026-11-17.md#vòng-2--0045).

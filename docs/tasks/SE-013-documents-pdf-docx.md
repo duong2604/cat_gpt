@@ -1,10 +1,10 @@
 # SE-013 — Mở rộng định dạng: PDF dạng text và DOCX
 
-Trạng thái: Chờ Review
+Trạng thái: Done — merge [PR #25](https://github.com/duong2604/cat_gpt/pull/25) → `develop` @ `1c45249` (18/11/2026)
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 1,5 ngày làm việc
 Phụ thuộc: TL nghiệm thu lát TXT trên `develop` ([SE-011](SE-011-documents-txt-backend.md) + [SE-012](SE-012-documents-txt-frontend.md)) — **đạt 18/11/2026** (`cd386e5`); không còn phụ thuộc chặn
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
-Ngày thực tế: bắt đầu — 18/11/2026 · bàn giao review — 18/11/2026 · hoàn tất —
+Ngày thực tế: bắt đầu 18/11/2026 · bàn giao review 18/11/2026 · hoàn tất 18/11/2026
 Chốt: 16/11/2026 — CTO duyệt Wave 0–2: SE-013 mở rộng PDF/DOCX sau khi nghiệm thu TXT
 SHA cơ sở: `origin/develop` @ `b4c17be`
 PR: https://github.com/duong2604/cat_gpt/pull/25
@@ -44,6 +44,14 @@ Tài liệu PDF dạng text và DOCX đi qua cùng đường ống của lát TX
 | — | Thư viện PDF | SE đề xuất `unpdf@1.9.1` (MIT, ~2,2 MB, không phụ thuộc bắt buộc, khớp Node ≥22 của repo, có sẵn `extractText({ mergePages: false })` cho `page` theo trang) | **TL duyệt 18/11/2026** (kèm 2 điều kiện: chặn số trang PDF trước khi bóc chữ, chặn kích thước giải nén `word/document.xml` trước khi gọi mammoth — đã làm, xem AC2/AC3) |
 
 ## Kết quả review
+**Done 18/11/2026 (TL).** Merge [PR #25](https://github.com/duong2604/cat_gpt/pull/25) tại đầu PR `134468b` (= SHA TL review) → `develop` @ `1c45249`; code `develop` trùng `134468b`. CI đầu PR: [run 44327464787](https://github.com/duong2604/cat_gpt/actions/runs/44327464787) (checklist AC8 dẫn run 44327024306 của commit trước — TL xác nhận run đầu PR xanh). Ước lượng 1,5n → thực tế < 1 ngày — Sớm.
+
+| Vòng / SHA | Kết luận TL | Chi tiết |
+|---|---|---|
+| Thư viện | Duyệt có điều kiện | `unpdf@1.9.1` (MIT, không phụ thuộc bắt buộc, Node ≥ 22 khớp repo; 2.x cần Node ≥ 24) + `mammoth@1.13.0` (BSD-2); không cài `@napi-rs/canvas`; giới hạn trang PDF, kích thước XML DOCX; `pnpm audit` không có advisory mới |
+| Vòng 1 `bb750f1` | Cần sửa | Gates + 42/42; kiểm thật: PDF text READY `page: 1`, DOCX READY không `page`, scan → `DOCUMENT_NO_TEXT` 1 lần, PDF/DOCX hỏng → `DOCUMENT_UNREADABLE` 1 lần 0,6 s, đổi đuôi → `400`, TXT không hồi quy, log 0 nội dung. **Lỗi bảo mật:** chặn zip bomb dựa trên kích thước *khai báo* trong header zip (người tải lên kiểm soát được) và bỏ qua khi thiếu → vượt được. Thiếu PDF nhiều trang |
+| Vòng 2 `134468b` | **Đạt → merge** | Đếm byte giải nén thật bằng stream, dừng khi vượt, đóng an toàn khi lỗi; 44/44 test (có zip khai man header). TL tự dựng zip bomb khai man (61,6 KB, `word/document.xml` thật 62,9 MB, khai 1000 byte ở cả 2 bản ghi) → `FAILED` 1 lần trong 0,7 s, bộ nhớ API đỉnh 326 MB (trước 251 MB). PDF 3 trang → đoạn 0/1/2 mang `page` 1/2/3 khớp câu. Hồi quy các ca vòng 1 đạt; dọn 0/0/0 |
+
 **Task:** SE-013 — mở rộng PDF (dạng text) và DOCX vào đường ống tài liệu hiện có (SE-011/SE-012), không tạo pipeline riêng.
 
 **Kết quả:** Đã làm đủ phạm vi mục tiêu; tự kiểm toàn bộ AC1–AC8 bằng dịch vụ thật (Mongo/MinIO/Qdrant/Redis thật, API chạy thật qua watch mode), không mock; đã dọn toàn bộ dữ liệu thử, xác nhận bằng đếm trực tiếp 3 nơi.
