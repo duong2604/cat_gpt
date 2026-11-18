@@ -86,8 +86,23 @@ Commit: `cce88f6`. TL review: **PASS** — hồi quy xác nhận độc lập tr
 - Kiểm bằng dịch vụ thật (Mongo/Qdrant/OpenAI, script tạm xóa sau khi dùng): A hỏi tài liệu của A → truy hồi đúng, chỉ của A. B gửi `documentIds` của A → `insufficient (DOCUMENTS_UNAVAILABLE)` (lọc Mongo theo `userId=B` không thấy). B hỏi tài liệu của B (nội dung gần giống tài liệu A) → truy hồi đúng, chỉ của B, không lẫn dù nội dung tương tự. Dữ liệu thử xóa, xác nhận Mongo/Qdrant = 0.
 - Bổ sung theo yêu cầu TL (đưa từ CP4 lên ngay): 5 unit test mới trong `chat.service.spec.ts` phủ các nhánh của `validateDocumentSelection` — `conversationId` + `documentIds` → 400; tài liệu của người khác (R4) → 404 không phân biệt lý do; tài liệu chưa `READY` (R5) → 400; vượt `RAG_MAX_DOCUMENTS` → 400, không gọi Mongo; tài liệu hợp lệ → tạo hội thoại, lưu đúng `documentIds`.
 - `pnpm --filter @cat-gpt/api test`: 57/57 (52 cũ + 5 mới). Root `typecheck/build/lint` xanh.
+- TL review: **PASS**. Lưu ý cho CP3: ngưỡng đã ghi nhận (xem dưới).
 
-Đang tiếp tục CP3 (câu trả lời có căn cứ: `rag-prompt.ts`, nối `streamAnswer`, `verifyCitations()`).
+**CP3 Câu trả lời có căn cứ — xong, chưa TL review.** Commit `da52ef6`.
+
+- `rag-prompt.ts`: `RAG_REFUSAL_TEXT` + `buildRagSystemPrompt()` — đoạn đánh số `[n]`, khối phân cách "dữ liệu, không phải chỉ dẫn" (R11).
+- `RagService.verifyCitations()`: câu từ chối nguyên văn → `insufficientEvidence`; tách `[n]`/`[1,3]`/`[1][2]`, bỏ trùng, ngoài khoảng bị bỏ (ghi debug số lượng, không nội dung); không trích dẫn hợp lệ → `ungrounded`; `quote` cắt ≤300 ký tự từ `text` nguồn (luôn là chuỗi con). `prepare()` trả thêm `systemPrompt`.
+- `ChatService.streamAnswer` nối `RagService`: `insufficient` → **không gọi LLM**, gửi thẳng câu từ chối làm một `delta` duy nhất, lưu `insufficientEvidence=true, citations=[]`; `ready` → prompt RAG là tin `system` thứ hai sau `config.llm.systemPrompt`; sau khi stream xong, `verifyCitations()` trên nội dung đã sinh (kể cả STOPPED/TRUNCATED); `ERROR` → không xác minh. Không có `documentIds` → luồng y nguyên (hồi quy).
+- 16 unit test mới `rag.service.spec.ts` (logic thuần, không mock Qdrant/OpenAI — thiết kế mục 11): phủ đủ R9 (`[1,3]`, `[1][2]`, `[9]` ngoài khoảng, trùng lặp, không nhãn → ungrounded, câu từ chối → insufficientEvidence, nội dung STOPPED/TRUNCATED một phần, quote luôn là chuỗi con ≤300 ký tự) + `buildRagSystemPrompt`.
+- `chat.service.spec.ts`: sửa một lỗi thật — `FakeConversationsService.createMessage` bỏ sót các trường mới khiến 2 test trước đó "qua" dù `this.rag.prepare` ném lỗi (assertion không kiểm `done`). Thêm 2 test nối RagService ở tầng ChatService.
+- **Kiểm bằng dịch vụ thật** (Mongo/Qdrant/OpenAI/Redis, `LLM_PROVIDER=openai`, không mock, script xóa sau khi dùng):
+  - **Happy case (mục tiêu CP3):** TXT READY → hỏi câu có đáp án → SSE `meta → delta*(33) → done` → câu trả lời có `[1]` → `citations[0]` khớp đúng `documentId`, `quote` là chuỗi con thật của payload Qdrant (đối chiếu trực tiếp) → `GET .../messages` mở lại vẫn còn `citations`.
+  - **R3** (tài liệu bị xóa sau khi hỏi câu đầu, hỏi tiếp câu 2 cùng hội thoại): `meta → delta (đúng 1, không phải LLM stream từng token) → done`; `insufficientEvidence=true`; log API **không** có dòng `usage model=` mới trong cửa sổ câu hỏi 2 — xác nhận LLM thật sự không bị gọi.
+  - **Dừng/Tạo lại (RAG):** Dừng giữa chừng → `STOPPED`, giữ nội dung đã sinh tới lúc dừng. Tạo lại → truy hồi lại, sinh câu trả lời mới. Quan sát: một lần Tạo lại, model trả đúng nguyên văn câu từ chối cho câu hỏi "kể chi tiết toàn bộ câu chuyện" dù tài liệu liên quan — đúng rủi ro đã ghi trong ước lượng task ("chất lượng trả `[n]` cần vài vòng chỉnh prompt"), không phải lỗi nối dây; cơ chế (truy hồi, prompt, parse, lưu) đúng ở cả hai lần.
+  - Toàn bộ dữ liệu thử xóa, xác nhận Mongo/MinIO/Qdrant = 0 từng lần.
+- `pnpm --filter @cat-gpt/api test`: 74/74 (57 cũ + 16 `rag.service.spec.ts` + 1 sửa test cũ sai). Root `typecheck/build/lint` xanh.
+
+Đang tiếp tục CP4 (hardening: R1–R11 đầy đủ trên bộ dữ liệu TL-009, cô lập chủ sở hữu, tài liệu xóa sau khi tạo hội thoại, lệnh chèn R11, guard `staff`, `.env` ↔ `.env.example`, CI).
 
 ## Lịch sử review
 
