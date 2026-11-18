@@ -1,0 +1,25 @@
+QUY TRÌNH CÔNG TÁC VÀ THANH TOÁN CÔNG TÁC PHÍ (TÀI LIỆU MẪU — DÙNG ĐỂ ĐÁNH GIÁ, KHÔNG PHẢI QUY ĐỊNH THẬT)
+
+Văn bản này do nhóm dự án CAT GPT tự soạn để kiểm thử hệ thống hỏi đáp tài liệu. Mọi mức tiền, thời hạn và tên phòng ban là giả định, không phản ánh quy định của bất kỳ tổ chức nào.
+
+Phần 1. Đăng ký công tác
+Nhân viên đi công tác phải lập phiếu đề nghị công tác trên hệ thống nội bộ, ghi rõ mục đích, địa điểm, thời gian và dự toán chi phí. Phiếu phải được trưởng phòng duyệt trước ngày khởi hành ít nhất 5 ngày làm việc đối với công tác trong nước và 15 ngày làm việc đối với công tác nước ngoài.
+Chuyến công tác có dự toán trên 30 triệu đồng cần thêm chữ ký phê duyệt của Giám đốc tài chính.
+
+Phần 2. Phương tiện đi lại
+Công tác trong nước có quãng đường trên 300 km được đi máy bay hạng phổ thông. Quãng đường từ 300 km trở xuống ưu tiên đi tàu hỏa hoặc ô tô. Vé máy bay do phòng Hành chính đặt; nhân viên không tự đặt vé trừ khi được phòng Hành chính đồng ý bằng văn bản.
+Đi taxi hoặc xe công nghệ trong thời gian công tác được thanh toán theo hóa đơn thực tế, tối đa 500.000 đồng mỗi ngày.
+
+Phần 3. Phụ cấp lưu trú và tiền phòng
+Phụ cấp lưu trú công tác trong nước là 300.000 đồng mỗi ngày, công tác nước ngoài là 50 đô la Mỹ mỗi ngày. Ngày đi và ngày về mỗi ngày được tính một nửa mức phụ cấp.
+Tiền thuê phòng nghỉ được thanh toán theo hóa đơn, tối đa 1.200.000 đồng mỗi đêm tại Hà Nội và Thành phố Hồ Chí Minh, tối đa 900.000 đồng mỗi đêm tại các tỉnh, thành phố khác. Trường hợp vượt mức, phần chênh lệch do nhân viên tự chi trả, trừ khi Giám đốc tài chính phê duyệt ngoại lệ.
+
+Phần 4. Tạm ứng
+Nhân viên được tạm ứng tối đa 70% dự toán chi phí đã duyệt. Đề nghị tạm ứng gửi phòng Kế toán ít nhất 3 ngày làm việc trước ngày khởi hành. Khoản tạm ứng trước đó chưa quyết toán thì không được tạm ứng chuyến công tác tiếp theo.
+
+Phần 5. Quyết toán
+Trong vòng 10 ngày làm việc sau khi kết thúc chuyến công tác, nhân viên nộp hồ sơ quyết toán gồm: báo cáo kết quả công tác, hóa đơn chứng từ gốc, thẻ lên máy bay (nếu có) và bảng kê chi phí. Hồ sơ nộp muộn quá 30 ngày kể từ ngày về sẽ không được thanh toán, trừ trường hợp có lý do chính đáng được trưởng phòng xác nhận.
+Phòng Kế toán kiểm tra và thanh toán trong vòng 7 ngày làm việc kể từ khi nhận đủ hồ sơ hợp lệ. Số tiền thanh toán được chuyển khoản vào tài khoản lương của nhân viên.
+
+Phần 6. Chi phí không được thanh toán
+Các khoản sau không được thanh toán: chi phí cá nhân như giặt là, mini bar, giải trí; vé phạt giao thông; chi phí phát sinh do thay đổi lịch trình vì lý do cá nhân; chi tiếp khách chưa được duyệt trước trong phiếu đề nghị công tác.

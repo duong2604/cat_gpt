@@ -1,12 +1,12 @@
 # TL-009 — Bộ dữ liệu và quy trình đánh giá RAG tiếng Việt
 
-Trạng thái: Nháp
+Trạng thái: Chờ Review — vòng 1 bàn giao 18/11/2026
 Người phụ trách: TL · Ưu tiên: P2 · Ước lượng: 1 ngày làm việc
 Phụ thuộc: chọn tài liệu + viết câu hỏi: **không chặn**. Gắn nhãn `chunkIndex`: [SE-011](SE-011-documents-txt-backend.md) merge (cần đoạn thật). Sinh viên có thể bổ sung tài liệu thử công khai
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
-Ngày thực tế: bắt đầu — · bàn giao review — · hoàn tất —
-Chốt: — (khung đánh giá là kết quả cam kết trong đề cương; kế hoạch chuẩn bị 18/11/2026, chờ CTO chọn phương án so sánh mô hình A/B/C)
-SHA cơ sở: `origin/develop` @ SHA khi bắt đầu
+Ngày thực tế: bắt đầu 18/11/2026 · bàn giao review 18/11/2026 (vòng 1) · hoàn tất —
+Chốt: 18/11/2026 — CTO chọn **phương án A** (`text-embedding-3-small` vs `text-embedding-3-large`); **chưa chạy `-large`** cho tới khi xác nhận quyền API
+SHA cơ sở: `origin/develop` @ `b4c17be`
 PR: Không — tài liệu TL
 
 ## Mục tiêu
@@ -63,9 +63,21 @@ Phương án đơn giản nhất: **A**. Không cài thêm gì; script SE-017 ch
 Chọn và tải tài liệu công khai, viết câu hỏi + `answer_points`. Gắn nhãn `chunkIndex` sau khi SE-011 merge: tải lên `develop` và đọc `chunkIndex` từ Qdrant.
 
 ## Kết quả review
-Chưa bắt đầu.
+Vòng 1 bàn giao 18/11/2026 — chờ CTO/khách hàng duyệt (AC4).
 
 ## Lịch sử review
+### Checklist vòng 1
+**Task** — TL-009 · bộ dữ liệu [`docs/evaluation/rag-dataset/`](../evaluation/rag-dataset/README.md) · cơ sở `b4c17be` · vòng 1
+**Kết luận** — Bộ dữ liệu 6 tài liệu công khai/tự soạn, 50 câu hỏi (40 có căn cứ, 10 ngoài tài liệu), nhãn đoạn tự động từ cụm bằng chứng nguyên văn, đã đối chiếu với Qdrant thật.
+**Checklist**
+- [x] AC1 Mỗi tài liệu có nguồn công khai, giấy phép dùng được — Đạt — 4 bài Wikipedia tiếng Việt (CC BY-SA 4.0, ghi revid, ghi rõ đã sửa đổi) + 2 tài liệu nhóm tự soạn, số liệu giả định — [bảng nguồn](../evaluation/rag-dataset/README.md#tài-liệu-docs)
+- [x] AC2 Mỗi câu hỏi có đoạn đúng đối chiếu được trên Qdrant — Đạt — `label.py` gắn nhãn 40/40 câu có căn cứ (0 câu thiếu nhãn; 10 câu ngoài tài liệu không có nhãn). TL tải 6 tài liệu lên API build từ `develop` @ `b4c17be` (OpenAI thật): 6/6 `READY`, 209/209 đoạn, nội dung `text` từng point khớp đoạn cục bộ theo `chunkIndex` (0 khác biệt); dữ liệu thử đã xóa (Mongo/MinIO/Qdrant = 0, đếm trực tiếp) — [kiểm chứng](../evaluation/rag-dataset/README.md#kiểm-chứng-trên-qdrant-thật-ac2-của-tl-009)
+- [x] AC3 Định nghĩa chỉ số và cách tính rõ, tái lập được — Đạt — hit@k, MRR, refusal accuracy, false refusal, citation precision/coverage, rubric 0–2 ([mục trên](#kế-hoạch-bộ-dữ-liệu-tl-chuẩn-bị-18112026)); lệnh tái lập nhãn trong README bộ dữ liệu
+- [ ] AC4 CTO/khách hàng duyệt — chờ
+
+**Giới hạn** — Chỉ q39 thực sự trải trên 2 đoạn: tài liệu nội bộ ngắn nên các câu `multi` khác có đủ ý trong một đoạn. Chưa có câu hỏi xuyên nhiều tài liệu. Cả hai ghi ở README; bổ sung nếu SE-017 cần.
+
+**Trạng thái** — Chờ Review.
 
 ## Phản hồi UI
 Không áp dụng.
