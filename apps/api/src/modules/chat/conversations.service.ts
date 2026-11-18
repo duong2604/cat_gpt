@@ -13,7 +13,7 @@ import { escapeRegex } from '../../common/utils/escape-regex.js';
 import { toConversationDto } from './chat.presenter.js';
 import type { ListConversationsQueryDto } from './dto/chat.dto.js';
 import { Conversation } from './schemas/conversation.schema.js';
-import { Message } from './schemas/message.schema.js';
+import { Citation, Message } from './schemas/message.schema.js';
 
 export interface CreateMessageInput {
   conversationId: Types.ObjectId;
@@ -22,6 +22,10 @@ export interface CreateMessageInput {
   content: string;
   status?: MessageStatus;
   model?: string | null;
+  /** Chỉ ở tin assistant của hội thoại có `documentIds` (Module 4). */
+  citations?: Citation[];
+  insufficientEvidence?: boolean;
+  ungrounded?: boolean;
 }
 
 /** Cursor dạng `<lastMessageAt ms>_<id>`: ổn định kể cả khi nhiều hội thoại trùng thời điểm. */

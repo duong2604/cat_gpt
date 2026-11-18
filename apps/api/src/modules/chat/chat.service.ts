@@ -7,6 +7,9 @@ import { AppConfigService } from '../../config/app-config.service.js';
 import { isDocumentsHidden } from '../documents/documents-hidden.guard.js';
 import { DocumentEntity } from '../documents/schemas/document.schema.js';
 import { type LlmFinishReason, type LlmMessage, LlmProvider } from '../llm/llm.provider.js';
+import { RAG_REFUSAL_TEXT } from '../rag/rag-prompt.js';
+import type { RagPlan } from '../rag/rag.service.js';
+import { RagService } from '../rag/rag.service.js';
 import { toConversationDto, toMessageDto } from './chat.presenter.js';
 import { ConversationsService } from './conversations.service.js';
 import type { SendMessageDto } from './dto/chat.dto.js';
@@ -54,6 +57,7 @@ export class ChatService {
     private readonly llm: LlmProvider,
     private readonly config: AppConfigService,
     @InjectModel(DocumentEntity.name) private readonly documents: Model<DocumentEntity>,
+    private readonly rag: RagService,
   ) {}
 
   async send(userId: string, dto: SendMessageDto, sse: SseStream): Promise<void> {
@@ -121,12 +125,6 @@ export class ChatService {
     sse: SseStream,
   ): Promise<void> {
     const history = await this.conversations.recentMessages(conversation._id, CONTEXT_MESSAGES);
-    const messages: LlmMessage[] = [
-      { role: 'system', content: this.config.llm.systemPrompt },
-      ...history
-        .filter((m) => m.content.trim())
-        .map((m) => ({ role: LLM_ROLE[m.role], content: m.content })),
-    ];
 
     const key = conversation._id.toString();
     const controller = new AbortController();
@@ -140,6 +138,42 @@ export class ChatService {
         conversation: toConversationDto(conversation),
         userMessage: userMessage ? toMessageDto(userMessage) : null,
       });
+
+      // Hỏi đáp tài liệu (thiết kế mục 3.1): hội thoại có documentIds thì truy hồi trước
+      // khi gọi LLM — câu hỏi mới nhất luôn là tin cuối trong history (vừa tạo ở send()/
+      // regenerate() trước khi gọi streamAnswer).
+      let plan: RagPlan | null = null;
+      if (conversation.documentIds?.length) {
+        const question = history.at(-1)?.content ?? '';
+        plan = await this.rag.prepare(conversation.userId.toString(), conversation.documentIds, question);
+      }
+
+      if (plan?.kind === 'insufficient') {
+        // Không gọi LLM (AC2: không có dòng log usage) — gửi thẳng câu từ chối cố định.
+        sse.send({ type: 'delta', text: RAG_REFUSAL_TEXT });
+        if (!(await this.conversations.exists(conversation._id))) return;
+        const answer = await this.conversations.createMessage({
+          conversationId: conversation._id,
+          userId: conversation.userId,
+          role: MessageRole.ASSISTANT,
+          content: RAG_REFUSAL_TEXT,
+          status: MessageStatus.COMPLETED,
+          citations: [],
+          insufficientEvidence: true,
+        });
+        await this.conversations.touch(conversation._id);
+        sse.send({ type: 'done', message: toMessageDto(answer) });
+        return;
+      }
+
+      const messages: LlmMessage[] = [
+        { role: 'system', content: this.config.llm.systemPrompt },
+        // Prompt RAG là tin system thứ hai, đặt sau (ghi chú tích hợp TL 18/11/2026).
+        ...(plan?.kind === 'ready' ? [{ role: 'system' as const, content: plan.systemPrompt }] : []),
+        ...history
+          .filter((m) => m.content.trim())
+          .map((m) => ({ role: LLM_ROLE[m.role], content: m.content })),
+      ];
 
       let content = '';
       let status: MessageStatus = MessageStatus.COMPLETED;
@@ -165,6 +199,13 @@ export class ChatService {
       // Hội thoại bị xóa trong lúc đang stream → không lưu tin nhắn mồ côi.
       if (!(await this.conversations.exists(conversation._id))) return;
 
+      // ERROR → không có trích dẫn (thiết kế mục 6.3 bước 5); STOPPED/TRUNCATED vẫn xác
+      // minh trên phần nội dung đã sinh được.
+      const verified =
+        plan?.kind === 'ready' && status !== MessageStatus.ERROR
+          ? this.rag.verifyCitations(content, plan.sources)
+          : undefined;
+
       const answer = await this.conversations.createMessage({
         conversationId: conversation._id,
         userId: conversation.userId,
@@ -172,6 +213,13 @@ export class ChatService {
         content,
         status,
         model: this.llm.model,
+        ...(verified
+          ? {
+              citations: verified.citations.map((c) => ({ ...c, documentId: new Types.ObjectId(c.documentId) })),
+              insufficientEvidence: verified.insufficientEvidence,
+              ungrounded: verified.ungrounded,
+            }
+          : {}),
       });
       await this.conversations.touch(conversation._id);
       sse.send({ type: 'done', message: toMessageDto(answer) });

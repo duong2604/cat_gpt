@@ -5,6 +5,8 @@ import { ErrorCode, MessageRole, MessageStatus } from '@cat-gpt/shared';
 import type { AppConfigService } from '../../config/app-config.service.js';
 import type { DocumentEntity } from '../documents/schemas/document.schema.js';
 import { type LlmFinishReason, type LlmMessage, LlmProvider, type LlmStreamOptions } from '../llm/llm.provider.js';
+import { RAG_REFUSAL_TEXT } from '../rag/rag-prompt.js';
+import type { RagService } from '../rag/rag.service.js';
 import { ChatService, makeTitle } from './chat.service.js';
 import type { CreateMessageInput } from './conversations.service.js';
 import type { ConversationsService } from './conversations.service.js';
@@ -55,11 +57,8 @@ class FakeConversationsService {
 
   async createMessage(input: CreateMessageInput): Promise<Message> {
     const m = {
+      ...input,
       _id: new Types.ObjectId(),
-      conversationId: input.conversationId,
-      userId: input.userId,
-      role: input.role,
-      content: input.content,
       status: input.status ?? MessageStatus.COMPLETED,
       model: input.model ?? null,
       createdAt: new Date(),
@@ -165,12 +164,16 @@ function makeService(
   conversations = new FakeConversationsService(),
   documentModel: Model<DocumentEntity> = {} as unknown as Model<DocumentEntity>,
   config: AppConfigService = fakeConfig(),
+  // Mặc định: không có test nào ở đây đặt conversation.documentIds nên RagService không
+  // bao giờ được gọi tới — stub rỗng để lộ ngay lỗi gọi nhầm thay vì âm thầm bỏ qua.
+  rag: RagService = {} as unknown as RagService,
 ) {
   const service = new ChatService(
     conversations as unknown as ConversationsService,
     llm,
     config,
     documentModel,
+    rag,
   );
   return { service, conversations };
 }
@@ -397,10 +400,23 @@ describe('ChatService — hồi quy (trước khi thêm RagService, SE-014)', ()
 
     it('tài liệu hợp lệ, READY, cùng chủ → tạo hội thoại thành công, lưu documentIds', async () => {
       const myDoc = { _id: new Types.ObjectId(), userId: USER_ID, status: 'READY', deletedAt: null };
+      const source = { documentId: myDoc._id.toString(), documentName: 'Tài liệu của tôi', chunkIndex: 0, text: 'Nội dung đoạn.' };
+      // Fake RagService tối thiểu để kiểm ChatService nối đúng prepare() → LLM →
+      // verifyCitations() → lưu — không lặp lại logic đã kiểm trong rag.service.spec.ts.
+      const fakeRag = {
+        prepare: async () => ({ kind: 'ready' as const, systemPrompt: 'system prompt', sources: [source] }),
+        verifyCitations: () => ({
+          citations: [{ n: 1, documentId: source.documentId, documentName: source.documentName, chunkIndex: 0, quote: source.text }],
+          insufficientEvidence: false,
+          ungrounded: false,
+        }),
+      } as unknown as RagService;
       const { service, conversations } = makeService(
-        new ScriptedLlmProvider(['Trả lời có căn cứ']),
+        new ScriptedLlmProvider(['Trả lời có căn cứ [1].']),
         undefined,
         fakeDocumentModel([myDoc]),
+        fakeConfig(),
+        fakeRag,
       );
       const sse = new RecordingSse();
 
@@ -413,6 +429,34 @@ describe('ChatService — hồi quy (trước khi thêm RagService, SE-014)', ()
       const meta = sse.events[0] as { conversation: { documentIds?: string[] } };
       expect(meta.conversation.documentIds).toEqual([myDoc._id.toString()]);
       expect([...conversations.conversations.values()][0].documentIds).toEqual([myDoc._id]);
+
+      const done = sse.events.at(-1) as { type: 'done'; message: { content: string; citations: unknown[] } };
+      expect(done.message.content).toBe('Trả lời có căn cứ [1].');
+      expect(done.message.citations).toHaveLength(1);
+    });
+
+    it('insufficient → gửi câu từ chối, KHÔNG gọi LLM (AC2: không dòng log usage)', async () => {
+      const myDoc = { _id: new Types.ObjectId(), userId: USER_ID, status: 'READY', deletedAt: null };
+      const llm = new ScriptedLlmProvider(['KHÔNG được gọi tới']);
+      const streamSpy = vi.spyOn(llm, 'stream');
+      const fakeRag = {
+        prepare: async () => ({ kind: 'insufficient' as const, reason: 'NO_MATCH' as const }),
+      } as unknown as RagService;
+      const { service } = makeService(llm, undefined, fakeDocumentModel([myDoc]), fakeConfig(), fakeRag);
+      const sse = new RecordingSse();
+
+      await service.send(
+        USER_ID.toString(),
+        { content: 'Câu hỏi ngoài tài liệu', documentIds: [myDoc._id.toString()] },
+        sse as unknown as SseStream,
+      );
+
+      expect(streamSpy).not.toHaveBeenCalled();
+      expect(sse.events.map((e) => (e as { type: string }).type)).toEqual(['meta', 'delta', 'done']);
+      const done = sse.events.at(-1) as { type: 'done'; message: { content: string; insufficientEvidence: boolean; citations: unknown[] } };
+      expect(done.message.content).toBe(RAG_REFUSAL_TEXT);
+      expect(done.message.insufficientEvidence).toBe(true);
+      expect(done.message.citations).toEqual([]);
     });
   });
 
