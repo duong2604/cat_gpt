@@ -5,7 +5,7 @@ Người phụ trách: Senior Dev · Ưu tiên: P2 · Ước lượng: 2 ngày l
 Phụ thuộc (gate): [TL-009](TL-009-rag-evaluation-dataset.md) duyệt **và** [SE-014](SE-014-rag-qa-backend.md) merge (cả hai chặn); phương án mô hình CTO chọn (A cần quyền `text-embedding-3-large`)
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
 Ngày thực tế: bắt đầu — · bàn giao review — · hoàn tất —
-Chốt: 18/11/2026 — CTO chọn phương án A (`text-embedding-3-small` vs `text-embedding-3-large`); chạy `-large` chỉ sau khi xác nhận quyền API. Còn chờ TL-009 duyệt
+Chốt: 18/11/2026 — CTO chọn phương án A (`text-embedding-3-small` vs `text-embedding-3-large`); chạy `-large` chỉ sau khi xác nhận quyền API. TL-009 Done 18/11/2026; còn chờ SE-014 merge
 SHA cơ sở: `origin/develop` @ SHA khi nhận task
 PR: <link>
 
