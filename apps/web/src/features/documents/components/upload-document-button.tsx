@@ -23,7 +23,8 @@ export function UploadDocumentButton() {
     if (!file) return;
 
     // Kiểm tra sớm phía client cho phản hồi nhanh; server vẫn kiểm tra lại (chữ ký tệp).
-    if (!file.name.toLowerCase().endsWith(".txt")) {
+    const name = file.name.toLowerCase();
+    if (!name.endsWith(".txt") && !name.endsWith(".pdf") && !name.endsWith(".docx")) {
       toast.error(tErrors(ErrorCode.FILE_INVALID_TYPE));
       return;
     }
@@ -43,7 +44,7 @@ export function UploadDocumentButton() {
       <input
         ref={inputRef}
         type="file"
-        accept=".txt,text/plain"
+        accept=".txt,text/plain,.pdf,application/pdf,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         className="hidden"
         onChange={onFileChange}
       />

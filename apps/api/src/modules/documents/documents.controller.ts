@@ -46,7 +46,7 @@ export class DocumentsController {
   @Post()
   @UseFilters(UploadSizeFilter)
   @UseInterceptors(FileInterceptor('file', { limits: { fileSize: UPLOAD_HARD_LIMIT_BYTES } }))
-  @ApiOperation({ summary: 'Tải lên tệp TXT' })
+  @ApiOperation({ summary: 'Tải lên tệp TXT, PDF (dạng text) hoặc DOCX' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {

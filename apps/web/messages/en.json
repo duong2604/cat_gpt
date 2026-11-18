@@ -96,6 +96,7 @@
     "DOCUMENT_QUEUE_UNAVAILABLE": "Document processing is busy right now. Please try again later.",
     "DOCUMENT_NO_TEXT": "The file has no extractable text content.",
     "DOCUMENT_TOO_MANY_CHUNKS": "The document is too long to process.",
+    "DOCUMENT_UNREADABLE": "The file is corrupted or unreadable.",
     "DOCUMENT_EMBEDDING_UNAVAILABLE": "Document processing is currently unavailable.",
     "DOCUMENT_PROCESSING_FAILED": "Document processing failed. Please delete it and upload again."
   },
@@ -162,10 +163,10 @@
   },
   "documents": {
     "title": "Documents",
-    "description": "Upload, search and track the processing status of TXT documents.",
+    "description": "Upload, search and track the processing status of TXT, PDF and DOCX documents.",
     "upload": "Upload",
     "uploading": "Uploading...",
-    "uploadHint": "TXT files only, up to 20MB.",
+    "uploadHint": "TXT, PDF (text-based) or DOCX files, up to 20MB.",
     "searchPlaceholder": "Search by file name",
     "allStatuses": "All statuses",
     "empty": "No documents yet.",

@@ -116,7 +116,7 @@ Tài liệu không tồn tại, đã xóa, hay thuộc người khác (kể cả
 | PDF | `.pdf` | Bắt đầu `%PDF-` (SE-013) |
 | DOCX | `.docx` | Zip (`PK\x03\x04`) có `word/document.xml` (SE-013) |
 
-Trong lát TXT, `.pdf`/`.docx` trả `400 FILE_INVALID_TYPE` cho tới khi SE-013 merge.
+PDF/DOCX hỏng (đúng chữ ký, nội dung không đọc được) → `FAILED DOCUMENT_UNREADABLE` (vĩnh viễn, không thử lại — mục 7).
 
 ## 6. Vòng đời, thử lại và idempotency
 
@@ -198,6 +198,8 @@ Log chỉ ghi `documentId`, `userId`, mã lỗi, số đoạn, số token embedd
 | `DOCUMENT_MAX_CHUNKS` | `500` | |
 | `DOCUMENT_CHUNK_SIZE`, `DOCUMENT_CHUNK_OVERLAP` | `1000`, `150` (ký tự) | Tạm; hiệu chỉnh ở đánh giá WP-11 |
 | `DOCUMENT_JOB_ATTEMPTS` | `3` | |
+| `DOCUMENT_MAX_PDF_PAGES` | `2000` | Chặn chi phí trước khi bóc chữ từng trang (SE-013) |
+| `DOCUMENT_MAX_DOCX_XML_MB` | `50` | Giới hạn kích thước đã giải nén của `word/document.xml` — chặn zip bomb (SE-013) |
 
 Tất cả có giá trị mặc định trong `env.validation.ts` trừ `MINIO_ACCESS_KEY`/`MINIO_SECRET_KEY` (bắt buộc). Tên cuối cùng do SE-010/SE-011 chốt theo cấu trúc thực tế, giữ nguyên ý nghĩa.
 
