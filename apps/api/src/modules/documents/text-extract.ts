@@ -1,5 +1,6 @@
 import JSZip from 'jszip';
 import mammoth from 'mammoth';
+import type { Readable } from 'node:stream';
 import { extractText, getDocumentProxy } from 'unpdf';
 
 /** Giải mã TXT: UTF-8 hợp lệ, bỏ BOM. Ném lỗi nếu không giải mã được. */
@@ -74,12 +75,41 @@ export async function isValidDocxSignature(buffer: Buffer): Promise<boolean> {
 }
 
 /**
- * Bóc tách DOCX bằng mammoth. Kiểm kích thước đã giải nén của `word/document.xml`
- * trước (zip bomb — jszip biết kích thước này từ header mà không cần giải nén toàn bộ,
- * `_data` là trường nội bộ của jszip nhưng là cách duy nhất lấy giá trị này mà không
- * tự giải nén), để tránh giải nén một entry khổng lồ (maxXmlBytes, mặc định
- * `DOCUMENT_MAX_DOCX_XML_MB`).
+ * Đếm thật số byte đã giải nén của một entry zip bằng stream, dừng ngay khi vượt giới
+ * hạn — KHÔNG đọc kích thước khai trong header zip (`uncompressedSize`), vì đó là giá
+ * trị tự khai của người tải lên và jszip không đối chiếu với dữ liệu giải nén thật: một
+ * tệp zip dựng tay có thể khai nhỏ trong khi dữ liệu nén bên trong giải ra gấp hàng
+ * nghìn lần — "zip bomb" (TL phát hiện khi review 18/11/2026). Đo không được (lỗi
+ * stream) thì coi là hỏng, đóng an toàn thay vì bỏ qua.
  */
+function assertEntryWithinSize(entry: JSZip.JSZipObject, maxBytes: number): Promise<void> {
+  return new Promise((resolve, reject) => {
+    let total = 0;
+    let settled = false;
+    const stream = entry.nodeStream('nodebuffer') as Readable;
+    const fail = (error: Error) => {
+      if (settled) return;
+      settled = true;
+      stream.destroy();
+      reject(error);
+    };
+    stream.on('data', (chunk: Buffer) => {
+      total += chunk.length;
+      if (total > maxBytes) {
+        fail(new DocumentTooLargeToProcessError(`word/document.xml giải nén vượt ${maxBytes} byte`));
+      }
+    });
+    stream.on('error', (error: Error) => fail(new DocumentUnreadableError(error.message)));
+    stream.on('end', () => {
+      if (!settled) {
+        settled = true;
+        resolve();
+      }
+    });
+  });
+}
+
+/** Bóc tách DOCX bằng mammoth, sau khi xác nhận `word/document.xml` không phải zip bomb. */
 export async function extractDocx(buffer: Buffer, maxXmlBytes: number): Promise<ExtractedPage[]> {
   let zip: JSZip;
   try {
@@ -88,13 +118,10 @@ export async function extractDocx(buffer: Buffer, maxXmlBytes: number): Promise<
     throw new DocumentUnreadableError((error as Error).message);
   }
   const entry = zip.file('word/document.xml');
-  const uncompressedSize = (entry as unknown as { _data?: { uncompressedSize?: number } } | null)?._data
-    ?.uncompressedSize;
-  if (typeof uncompressedSize === 'number' && uncompressedSize > maxXmlBytes) {
-    throw new DocumentTooLargeToProcessError(
-      `word/document.xml giải nén ${uncompressedSize} byte, vượt giới hạn ${maxXmlBytes}`,
-    );
+  if (!entry) {
+    throw new DocumentUnreadableError('Không tìm thấy word/document.xml');
   }
+  await assertEntryWithinSize(entry, maxXmlBytes);
   try {
     const result = await mammoth.extractRawText({ buffer });
     return [{ page: null, text: result.value }];

@@ -57,6 +57,15 @@ describe('text-extract', () => {
       }
     });
 
+    it('PDF nhiều trang: mỗi đoạn giữ đúng số trang nguồn (AC4, payload page)', async () => {
+      const pages = await extractPdf(readFixture('se013-pdf-multipage-vi.pdf'), 2000);
+      expect(pages).toHaveLength(3);
+      pages.forEach((p, i) => {
+        expect(p.page).toBe(i + 1);
+        expect(p.text.trim()).toBe(SENTENCES[i]);
+      });
+    });
+
     it('PDF scan (chỉ ảnh) trả về trang với text rỗng — tầng gọi coi là DOCUMENT_NO_TEXT', async () => {
       const pages = await extractPdf(readFixture('se013-pdf-scan.pdf'), 2000);
       expect(pages).toHaveLength(1);
@@ -108,10 +117,48 @@ describe('text-extract', () => {
       ).rejects.toBeInstanceOf(DocumentUnreadableError);
     });
 
-    it('vượt giới hạn kích thước word/document.xml → DocumentTooLargeToProcessError, không gọi mammoth', async () => {
-      await expect(extractDocx(readFixture('se013-docx-valid.docx'), 1)).rejects.toBeInstanceOf(
-        DocumentTooLargeToProcessError,
-      );
+    it('document.xml giải nén thật lớn hơn giới hạn → DocumentTooLargeToProcessError, không gọi mammoth', async () => {
+      const JSZip = (await import('jszip')).default;
+      const zip = new JSZip();
+      zip.file('word/document.xml', ' '.repeat(2000), { compression: 'DEFLATE' });
+      const buf = await zip.generateAsync({ type: 'nodebuffer' });
+      await expect(extractDocx(buf, 1000)).rejects.toBeInstanceOf(DocumentTooLargeToProcessError);
+    });
+
+    it('header zip khai kích thước nhỏ giả (zip bomb) vẫn bị chặn — đếm byte giải nén thật, không tin header', async () => {
+      const JSZip = (await import('jszip')).default;
+      const zip = new JSZip();
+      zip.file('word/document.xml', 'A'.repeat(5000), { compression: 'DEFLATE' });
+      let buf = await zip.generateAsync({ type: 'nodebuffer', streamFiles: false });
+
+      // Khai man trường "uncompressed size" (4 byte) trong local header VÀ central directory
+      // record của riêng entry "word/document.xml" (không phải thư mục cha "word/" mà
+      // JSZip tự tạo) — tìm theo đúng tên tệp để không vá nhầm bản ghi.
+      const filenameBytes = Buffer.from('word/document.xml');
+      const lie = Buffer.alloc(4);
+      lie.writeUInt32LE(1, 0);
+      let searchFrom = 0;
+      let patched = 0;
+      while (true) {
+        const nameIdx = buf.indexOf(filenameBytes, searchFrom);
+        if (nameIdx === -1) break;
+        searchFrom = nameIdx + 1;
+        const localHeaderStart = nameIdx - 30;
+        if (localHeaderStart >= 0 && buf.readUInt32LE(localHeaderStart) === 0x04034b50) {
+          lie.copy(buf, localHeaderStart + 22);
+          patched++;
+          continue;
+        }
+        const centralHeaderStart = nameIdx - 46;
+        if (centralHeaderStart >= 0 && buf.readUInt32LE(centralHeaderStart) === 0x02014b50) {
+          lie.copy(buf, centralHeaderStart + 24);
+          patched++;
+        }
+      }
+      expect(patched).toBe(2); // local header + central directory record của word/document.xml
+
+      // Header giờ khai 1 byte; đếm thật vẫn thấy 5000 byte và chặn đúng.
+      await expect(extractDocx(buf, 1000)).rejects.toBeInstanceOf(DocumentTooLargeToProcessError);
     });
   });
 });
