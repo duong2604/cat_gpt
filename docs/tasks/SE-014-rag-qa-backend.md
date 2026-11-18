@@ -1,13 +1,13 @@
 # SE-014 — Module 4, backend: hỏi đáp có trích dẫn (`RagService`)
 
-Trạng thái: Sẵn sàng — TL chuyển 18/11/2026 (Module 3 hoàn thành: SE-011, SE-012, SE-013 merge; TL-008 AC4 đạt)
+Trạng thái: Đang làm
 Người phụ trách: Senior Dev · Ưu tiên: **P0** (Module 4 — CTO 18/11/2026 (chỉ thị chuẩn bị Module 4)) · Ước lượng: 3 ngày làm việc
 Phụ thuộc (gate kỹ thuật): [SE-011](SE-011-documents-txt-backend.md) **merge** + [TL-008](TL-008-module-4-design.md) **AC4 PASS** trên `develop` (kiến trúc đã duyệt 17/11). **Thứ tự nhận (CTO 18/11/2026):** sau khi Module 3 hoàn thành theo phạm vi đã duyệt ([SE-012](SE-012-documents-txt-frontend.md), [SE-013](SE-013-documents-pdf-docx.md) merge); TL tự chuyển `Sẵn sàng` và giao khi đạt, không cần xin duyệt lại
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
-Ngày thực tế: bắt đầu — · bàn giao review — · hoàn tất —
+Ngày thực tế: bắt đầu — 18/11/2026 · bàn giao review — · hoàn tất —
 Chốt: 17/11/2026 — CTO duyệt kiến trúc TL-008, Q-M4-1…5; nội dung task chuẩn bị 18/11/2026 (CTO 18/11/2026 (chỉ thị chuẩn bị Module 4))
-SHA cơ sở: `origin/develop` @ SHA khi nhận task
-PR: <link>
+SHA cơ sở: `origin/develop` @ `caeb519`
+PR: <link, Senior Dev ghi khi bàn giao>
 
 ## Mục tiêu
 Người dùng chọn tài liệu `READY` của mình, hỏi bằng tiếng Việt và nhận câu trả lời dựa trên nội dung tài liệu, hiện dần qua SSE, kèm trích dẫn kiểm chứng được; câu hỏi ngoài tài liệu không sinh câu trả lời hay nguồn bịa.
@@ -65,7 +65,19 @@ Trích dẫn hợp lệ **không** chứng minh toàn bộ câu trả lời đú
 Rủi ro tăng: chất lượng trả `[n]` của `gpt-5.4-mini` với prompt tiếng Việt cần vài vòng chỉnh prompt.
 
 ## Kết quả review
-Chưa có.
+**CP1 Hợp đồng dữ liệu + hồi quy — xong, chưa TL review.**
+
+- `chat.service.spec.ts` (mới, ChatService trước đó chưa có test): hồi quy xanh trên code cũ rồi trên code mới — 4 trạng thái kết thúc (COMPLETED/TRUNCATED/STOPPED/ERROR), thứ tự SSE `meta → delta* → done`, Dừng (qua `stop()` và qua đóng kết nối), Tạo lại.
+- `packages/shared`: `CitationDto`; `ConversationDto.documentIds`; `MessageDto` thêm `citations/insufficientEvidence/ungrounded`; mã lỗi `DOCUMENT_NOT_READY` (+ dịch vi/en).
+- Schema: `conversations.documentIds`; `messages` thêm `Citation` (sub-schema) + `citations/insufficientEvidence/ungrounded`.
+- `SendMessageDto.documentIds` (hình dạng); `ChatService.send()` kiểm: `conversationId` + `documentIds` → `400 VALIDATION_FAILED`; tạo mới có `documentIds` → một truy vấn Mongo `{_id ∈ ids, userId, deletedAt: null}` → thiếu id nào → `404 DOCUMENT_NOT_FOUND`; có tài liệu chưa `READY` → `400 DOCUMENT_NOT_READY`; ẩn ở `staff` như Tài liệu.
+- `RAG_TOP_K/RAG_MIN_SCORE (trống=tắt)/RAG_MAX_DOCUMENTS/RAG_SUMMARY_GROUP_CHARS` thêm vào cấu hình.
+- `DocumentsModule` export `EmbeddingService`, `VectorStoreService`, `MongooseModule` (model `DocumentEntity`) cho `ChatModule`.
+- **Sửa kèm (chặn test):** `document.schema.ts` có mấy `@Prop()` không khai `type` rõ ràng, dựa vào `Reflect.getMetadata('design:type')` — production build (`nest build` qua `tsc`) phát đủ metadata nên chạy đúng, nhưng transform của vitest (esbuild) không phát, lộ ra khi `DocumentEntity` lần đầu được import giá trị thật trong test (`ChatService` cần `@InjectModel`): lỗi "PENDING is not a valid type at path PENDING". Khai rõ `type` cho từng trường — hành vi production không đổi.
+- Kiểm thật qua API đang chạy (không mock): Chat thường không `documentIds` vẫn ra `done` bình thường; `documentIds` không tồn tại → `404`; tài liệu `PENDING` → `400 DOCUMENT_NOT_READY`; `conversationId` + `documentIds` → `400 VALIDATION_FAILED`; không tài liệu/hội thoại mồ côi nào (kiểm trước khi tạo). Tài liệu thử xóa, xác nhận trực tiếp Mongo/MinIO/Qdrant = 0.
+- `pnpm --filter @cat-gpt/api test`: 52/52 (44 cũ + 8 mới). Root `typecheck/build/lint` xanh.
+
+Commit: `cce88f6` (nhánh `feature/module-4-rag-backend`, base `caeb519`). Đang tiếp tục CP2 (truy hồi).
 
 ## Lịch sử review
 
