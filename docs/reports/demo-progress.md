@@ -2,6 +2,16 @@
 
 Theo mốc của [plan.md](../project/plan.md#2-mốc). Chi tiết từng ngày: [báo cáo ngày](daily/README.md). TL cập nhật cuối mỗi ngày làm việc và ngay khi phát hiện nguy cơ trễ mốc; mục mới nhất ở trên, giữ các mục cũ ([workflow mục 11](../project/workflow.md#11-theo-dõi-tiến-độ)).
 
+## Cập nhật 20/11/2026 01:10 (Module 4: hỏi đáp + tóm tắt có UI)
+
+Chi tiết: [20/11 vòng 1](daily/2026-11-20.md).
+
+| Mốc / việc | Tình trạng |
+|---|---|
+| M4 Demo 20/11 | Bản đóng băng `34b465d` không đổi (M1 + Chat mẫu); chưa chạy thử khởi động; giờ demo chưa chốt |
+| Module 4 | SE-014, SE-015, SE-016 **Done** trên `develop` @ `7ff3c62` (hỏi đáp có trích dẫn + tóm tắt, có UI, TL nghiệm thu với 2 tài khoản); SE-017 đánh giá: đã giao, phần `text-embedding-3-large` bị chặn chờ quyền API |
+| Sự cố | Xóa nhầm 2 hội thoại admin khi dọn dữ liệu thử (19/11); chờ CTO quyết khôi phục |
+
 ## Cập nhật 19/11/2026 (SE-014 merge, backend Module 4)
 
 Chi tiết: [19/11 vòng 1–2](daily/2026-11-19.md).
