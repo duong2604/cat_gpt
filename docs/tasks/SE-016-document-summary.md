@@ -1,12 +1,12 @@
 # SE-016 — Module 4: tóm tắt tài liệu
 
-Trạng thái: Nháp
+Trạng thái: Đang làm
 Người phụ trách: Senior Dev · Ưu tiên: **P1** (CTO 18/11/2026 (chỉ thị chuẩn bị Module 4)) · Ước lượng: 1,5 ngày làm việc
 Phụ thuộc (gate): [SE-012](SE-012-documents-txt-frontend.md) merge **và** [SE-014](SE-014-rag-qa-backend.md) hoàn thành (dùng chung export Module 3 + cách gọi LLM); kiến trúc TL-008 đã duyệt
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
-Ngày thực tế: bắt đầu — · bàn giao review — · hoàn tất —
+Ngày thực tế: bắt đầu — 20/11/2026 · bàn giao review — · hoàn tất —
 Chốt: 17/11/2026 — Q-M4-4 (job nền); nội dung task chuẩn bị 18/11/2026
-SHA cơ sở: `origin/develop` @ SHA khi nhận task
+SHA cơ sở: `origin/develop` @ `3cf1d73`
 PR: <link>
 
 ## Mục tiêu
