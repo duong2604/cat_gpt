@@ -46,6 +46,8 @@ export function MessageList({
               content={message.content}
               status={message.status}
               citations={message.citations}
+              insufficientEvidence={message.insufficientEvidence}
+              ungrounded={message.ungrounded}
               onRegenerate={!stream && message === last ? onRegenerate : undefined}
             />
           ),
