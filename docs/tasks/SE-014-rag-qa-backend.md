@@ -1,13 +1,13 @@
 # SE-014 — Module 4, backend: hỏi đáp có trích dẫn (`RagService`)
 
-Trạng thái: Chờ Review
+Trạng thái: Done
 Người phụ trách: Senior Dev · Ưu tiên: **P0** (Module 4 — CTO 18/11/2026 (chỉ thị chuẩn bị Module 4)) · Ước lượng: 3 ngày làm việc
 Phụ thuộc (gate kỹ thuật): [SE-011](SE-011-documents-txt-backend.md) **merge** + [TL-008](TL-008-module-4-design.md) **AC4 PASS** trên `develop` (kiến trúc đã duyệt 17/11). **Thứ tự nhận (CTO 18/11/2026):** sau khi Module 3 hoàn thành theo phạm vi đã duyệt ([SE-012](SE-012-documents-txt-frontend.md), [SE-013](SE-013-documents-pdf-docx.md) merge); TL tự chuyển `Sẵn sàng` và giao khi đạt, không cần xin duyệt lại
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
-Ngày thực tế: bắt đầu — 18/11/2026 · bàn giao review — · hoàn tất —
+Ngày thực tế: bắt đầu — 18/11/2026 · bàn giao review — 19/11/2026 · hoàn tất — 19/11/2026
 Chốt: 17/11/2026 — CTO duyệt kiến trúc TL-008, Q-M4-1…5; nội dung task chuẩn bị 18/11/2026 (CTO 18/11/2026 (chỉ thị chuẩn bị Module 4))
 SHA cơ sở: `origin/develop` @ `caeb519`
-PR: <link, Senior Dev ghi khi bàn giao>
+PR: https://github.com/duong2604/cat_gpt/pull/28 (head `e4d01e8`, merge `124ccee`)
 
 ## Mục tiêu
 Người dùng chọn tài liệu `READY` của mình, hỏi bằng tiếng Việt và nhận câu trả lời dựa trên nội dung tài liệu, hiện dần qua SSE, kèm trích dẫn kiểm chứng được; câu hỏi ngoài tài liệu không sinh câu trả lời hay nguồn bịa.
@@ -65,6 +65,8 @@ Trích dẫn hợp lệ **không** chứng minh toàn bộ câu trả lời đú
 Rủi ro tăng: chất lượng trả `[n]` của `gpt-5.4-mini` với prompt tiếng Việt cần vài vòng chỉnh prompt.
 
 ## Kết quả review
+**TL 19/11/2026: Đạt, đã merge.** [PR #28](https://github.com/duong2604/cat_gpt/pull/28) · SHA đã review `e4d01e8` (code trùng `6e9649b`) · merge vào `develop` @ `124ccee` (`git diff e4d01e8 124ccee -- apps packages` rỗng). Chi tiết: [Review vòng 1](#review-vòng-1).
+
 **CP1 Hợp đồng dữ liệu + hồi quy — xong, chưa TL review.**
 
 - `chat.service.spec.ts` (mới, ChatService trước đó chưa có test): hồi quy xanh trên code cũ rồi trên code mới — 4 trạng thái kết thúc (COMPLETED/TRUNCATED/STOPPED/ERROR), thứ tự SSE `meta → delta* → done`, Dừng (qua `stop()` và qua đóng kết nối), Tạo lại.
@@ -142,6 +144,25 @@ Commit: `24622b6` (staff guard), `6c204b2` (R11), `6e9649b` (R8). Dịch vụ th
 - Lịch sử gửi LLM chứa câu trả lời RAG cũ có `[n]` đánh số theo lượt trước; model có thể dùng lại số cũ và bị ánh xạ sang đoạn mới. Chưa đo; để SE-017.
 - Chất lượng trả `[n]` với prompt tiếng Việt cần vài vòng chỉnh (ước lượng ban đầu).
 - Trạng thái stream và giới hạn gửi tin trong bộ nhớ một tiến trình API (KT-4 ma trận quyền), chưa dùng nhiều instance.
+
+#### Review vòng 1
+**Task** — SE-014 · PR https://github.com/duong2604/cat_gpt/pull/28 · SHA đã review `e4d01e8` · vòng 1
+**Kết luận** — Đạt. Đã merge bằng `--match-head-commit e4d01e8` → `develop` @ `124ccee`.
+**Checklist** (TL tự kiểm; API chạy `e4d01e8`, `LLM_PROVIDER=openai`, chế độ `demo`; 2 tài khoản USER tạm `tl-review-a/b@example.test`)
+- [x] AC1 R1 — Đạt — A tải `noi-bo-nghi-phep.txt` (READY, `chunkCount` 4), hỏi q03. SSE `meta → delta ×60 → done`, trạng thái `COMPLETED`, câu trả lời có `[1]`. `citations[0]` thuộc tài liệu của A, `chunkIndex` 1 (trùng nhãn gold TL-009); `quote` dài 300 ký tự, là chuỗi con của payload Qdrant tương ứng (TL đối chiếu trực tiếp bằng `points/scroll`). Mở lại `GET /conversations/:id/messages`: `USER:COMPLETED → ASSISTANT:COMPLETED`, vẫn còn 1 trích dẫn.
+- [x] AC2 R2/R3 — Đạt — câu ngoài tài liệu ("Thủ đô của Pháp là gì?") → câu từ chối nguyên văn, `insufficientEvidence=true`, `citations=[]`. Tỷ lệ 10/10 và R3 (không gọi LLM): theo bằng chứng SE, và TL đọc code thấy nhánh `insufficient` trả về trước `llm.stream`.
+- [x] AC3 R4/R5/R6 — Đạt — TL kiểm: B tạo hội thoại với `documentIds` của A → `404 DOCUMENT_NOT_FOUND`; B `GET` tài liệu của A → 404; B đọc tin trong hội thoại của A → 404; B tiếp tục hội thoại của A → 404. Chưa đăng nhập: `POST /chat/stream` và `GET /documents` → 401. R5 và R4 với admin: theo bằng chứng SE + unit test `validateDocumentSelection`. R6: TL đọc code thấy Qdrant `search` lọc `userId` + `documentId ∈` (`vector-store.service.ts`), và RagService lọc lại Mongo theo `userId`.
+- [x] AC4 R7/R10 — Đạt — code: STOPPED/TRUNCATED vẫn chạy `verifyCitations`, ERROR thì không. Test hồi quy CP1 xanh trên `develop` (79/79). Dừng trên service thật: theo bằng chứng SE (19 delta → STOPPED, giữ 64 ký tự).
+- [x] AC5 R9 — Đạt — `rag.service.spec.ts` (logic thuần) phủ `[1,3]`, `[1][2]`, số ngoài khoảng, trùng lặp, câu từ chối, `quote` ≤ 300 ký tự, và việc vô hiệu chuỗi phân cách.
+- [x] AC6 R8/R11 — Đạt — TL phát hiện ở `24622b6` R8 lệch thiết kế mục 6.1: lỗi truy hồi không lưu tin `ERROR`. SE sửa ở `6e9649b`; TL đọc diff: lỗi được bắt tại chỗ, không gọi LLM, lưu tin `ERROR` không có trích dẫn. R8 trên service thật: TL cho SE `docker stop/start` Qdrant (không `down -v`); kết quả theo bằng chứng SE. R11: chuỗi phân cách trong nội dung và tên tài liệu bị vô hiệu (`6c204b2`, có unit test), cộng quan sát thật của SE.
+- [x] AC7 staff + log — Đạt — unit test chế độ `staff`: tạo, tiếp tục, tạo lại hội thoại có tài liệu đều → 404; Chat thường không bị ảnh hưởng. Kiểm thật với `RELEASE_MODE=staff`: theo bằng chứng SE. Log: TL đọc code thấy RagService chỉ ghi `documentId#chunkIndex(score)`; grep log: theo bằng chứng SE.
+- [x] AC8 — Đạt — tại `e4d01e8`: api test 79/79; `typecheck`, `lint`, `build` exit 0; `env:check` OK. CI PR `build` SUCCESS ([run 44560783745](https://github.com/duong2604/cat_gpt/actions/runs/44560783745)); `mergeStateStatus` CLEAN. Có checklist hai vai; phần giao diện không áp dụng (task backend).
+- [x] Dữ liệu thử của TL — Đạt — đã xóa 2 hội thoại (204) và tài liệu (204); Qdrant `document_chunks` 0 → 4 → 0. Tài khoản tạm do SE xóa (ghi ở báo cáo ngày).
+
+**Giới hạn ghi nhận (không chặn merge):** q01 truy hồi đúng đoạn (hạng 2) nhưng model vẫn từ chối; lịch sử gửi LLM còn số `[n]` của lượt trước; tỷ lệ R1/R2 mới đo trên mẫu nhỏ. Cả ba đo ở SE-017.
+**Kiểm tra đã chạy** — `pnpm --filter @cat-gpt/api test`, `pnpm typecheck`, `pnpm lint`, `pnpm build`, `pnpm env:check`; script kiểm của TL (để ở scratchpad, không đưa vào repo; mật khẩu truyền qua biến môi trường).
+**Dọn nhánh sau merge** — chưa dọn. Thư mục Senior Dev (`cat_gpt`) còn ở `feature/module-4-rag-backend`; SE tự dọn trước khi nhận SE-015. Nhánh remote `feature/module-4-rag-backend`: TL xóa sau khi SE xác nhận đã chuyển nhánh. Worktree `cat_gpt-review` giữ lại (worktree review của TL).
+**Trạng thái** — Done.
 
 ## Phản hồi UI
 Không áp dụng (backend).
