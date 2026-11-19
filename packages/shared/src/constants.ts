@@ -15,3 +15,6 @@ export const DEFAULT_LOCALE: Locale = 'vi';
 
 export const DEFAULT_PAGE_SIZE = 10;
 export const MAX_PAGE_SIZE = 100;
+
+/** Số tài liệu tối đa trong một hội thoại hỏi tài liệu (khớp mặc định RAG_MAX_DOCUMENTS của API). */
+export const CHAT_MAX_DOCUMENTS = 5;

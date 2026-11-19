@@ -1,12 +1,12 @@
 # SE-015 — Module 4, giao diện: hỏi tài liệu và hiển thị trích dẫn
 
-Trạng thái: Sẵn sàng
+Trạng thái: Chờ Review
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 2 ngày làm việc
 Phụ thuộc (gate): [SE-014](SE-014-rag-qa-backend.md) merge **và** [SE-012](SE-012-documents-txt-frontend.md) merge (cả hai chặn); kiến trúc TL-008 đã duyệt. **Đạt 19/11/2026** (SE-014 → `124ccee`, SE-012 → `cd386e5`); TL chuyển `Sẵn sàng`
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
-Ngày thực tế: bắt đầu — · bàn giao review — · hoàn tất —
+Ngày thực tế: bắt đầu — 19/11/2026 · bàn giao review — 19/11/2026 · hoàn tất —
 Chốt: 17/11/2026 — Q-M4-1 (chỉ lối vào trang Tài liệu), Q-M4-3; nội dung task chuẩn bị 18/11/2026
-SHA cơ sở: `origin/develop` @ SHA khi nhận task
+SHA cơ sở: `origin/develop` @ `605fd5e`
 PR: <link>
 
 ## Mục tiêu
@@ -51,5 +51,41 @@ Chưa có.
 
 ## Lịch sử review
 
+### Checklist vòng 1 (bàn giao CP1–CP5)
+
+Commit theo checkpoint: CP1 `130bf71` (nút Hỏi tài liệu), CP2 `62555d7` (hộp thoại chọn, `?documents=`), CP3 `e4e0c8f` (trích dẫn bấm được, thanh tài liệu đầu hội thoại), CP4 `da52fad` (nhãn không đủ căn cứ/chưa có nguồn, sửa tràn ngang 375px), CP5 = commit tài liệu này. Gate local: typecheck, lint, build (web + api), `pnpm test` 79/79, `pnpm env:check` OK.
+
+| Tiêu chí | Kết quả | Bằng chứng |
+|---|---|---|
+| AC1 luồng chính: Tài liệu → Hỏi tài liệu → hỏi → hiện dần → bấm `[n]` thấy đúng đoạn | Đạt: nhãn 4 mở popover "Source 4" — tài liệu `wiki-vinh-ha-long.txt`, đoạn trích từ payload. Lưu ý: câu trả lời nêu năm 1994 nhưng đoạn trích không có năm này (xem giới hạn) | Ảnh trình duyệt (phiên 19/11); `citations` khớp API |
+| AC2 câu ngoài tài liệu → thiếu căn cứ, không nhãn nguồn; `ungrounded` → cảnh báo | Đạt cho thiếu căn cứ: "Không đủ căn cứ trong tài liệu đã chọn", không nhãn. `ungrounded` **chưa tái hiện trên UI** (code có, chưa có tin nào để kiểm) | Ảnh "Not enough evidence…" |
+| AC3 chỉ tài liệu READY của mình; tối đa 5 | Đạt: dialog chỉ liệt kê READY của người dùng; chọn 5/5 OK, chọn thứ 6 bị chặn với thông báo "Một hội thoại hỏi tối đa 5 tài liệu". Cô lập 2 tài khoản qua API: A thấy 2, B thấy 1, giao nhau 0, truy cập chéo 404, ẩn danh 401 | Ảnh dialog 5/5 + toast; đếm API |
+| AC4 trống/tải/lỗi; desktop + 375px; sáng/tối; vi/en; `staff` | Đạt một phần: tải ("Đang tải tài liệu..."), không tải được ("Không tải được tài liệu"), dialog trống chưa chụp. 375px kiểm bằng iframe 375px trong trang (không phải viewport thật). Sáng + vi, tối + en đã chụp. `staff` ẩn đúng | Ảnh trình duyệt |
+| AC5 Chat thường không hồi quy | Đạt: chat thường không có thanh tài liệu/nhãn; gửi tin gợi ý thành công; SSE hiện như cũ | Ảnh + gửi tin trên UI |
+| AC6 checklist hai vai; CI xanh | Checklist bên dưới; CI xem trên PR | — |
+
+**Chế độ `staff`** (API `RELEASE_MODE=staff`, web `NEXT_PUBLIC_RELEASE_MODE=staff`): sidebar không còn "Tài liệu"; `/documents` → trang "Không tìm thấy trang"; `/chat?documents=<id>` hiện "Không tải được tài liệu" (API trả 404 chung, không lộ tài liệu); gửi tin bị chặn (hội thoại không được tạo — danh sách không đổi). Toast lỗi không chụp được trong cửa sổ chụp.
+
+**Kiểm tra đã chạy:** `pnpm typecheck`, `pnpm lint`, `pnpm build` đều exit 0; `pnpm --filter @cat-gpt/api test` 79/79; `pnpm env:check` OK; `pnpm --filter @cat-gpt/web` typecheck/lint sạch sau mỗi CP.
+
+**Checklist hai vai** (workflow 9.1):
+- [x] Quyền: ca được phép — admin hỏi tài liệu của admin (UI, 200/SSE). Ca bị từ chối — chưa đăng nhập `401` (`/documents`, `POST /chat/stream`); người khác `404` (`GET /documents/:id`, hỏi tài liệu chéo A↔B, `POST /chat/stream` với tài liệu người khác)
+- [x] Đường dẫn trực tiếp tới màn không có quyền: `/documents` ở `staff` → "Không tìm thấy trang"
+- [x] Trạng thái trống / tải / lỗi / thành công: tải, không tải được, thành công có ảnh; dialog trống chưa chụp (ghi giới hạn)
+- [x] Desktop + 375px, sáng + tối, vi + en: có ảnh (375px qua iframe; tối/en và sáng/vi đều đã chụp)
+- [x] Chế độ `demo` / `staff`: đã kiểm cả hai (bảng trên)
+- [x] Ma trận quyền: không đổi — không có endpoint mới; hỏi tài liệu dùng `POST /chat/stream` sẵn có; quyền tài liệu theo CS-1/M3-2
+- [x] Dữ liệu thử đã dọn: Mongo `documents`/`users`/`conversations` của tài khoản thử = 0; tài liệu thử của admin (6) = 0; Qdrant point = 0; MinIO object = 0. Lưu ý: đã xóa nhầm 2 hội thoại không thuộc phiên này (xem giới hạn)
+
+**Quy tắc dọn dữ liệu thử (TL yêu cầu sau sự cố, 19/11/2026):** chỉ xóa theo `_id` đã ghi lại lúc tạo trong chính phiên đó; không lọc theo tiêu đề hay regex; trước khi xóa phải in danh sách id + chủ sở hữu để đối chiếu.
+
+**Giới hạn còn lại:**
+- Hội thoại `6af97fa9…` (15/11) và `6ae0bae8…` (27/10) bị xóa nhầm do lọc theo tiêu đề quá rộng; không khôi phục được từ phía ứng dụng.
+- Câu trả lời "1994" (Vịnh Hạ Long) có trích dẫn [4] nhưng đoạn trích nói về hồ sơ năm 1993: trích dẫn chỉ hỗ trợ một phần câu trả lời. Đây là chất lượng sinh câu trả lời, để SE-017 đo; không sửa trong SE-015.
+- `ungrounded` và nhãn mờ (`[n]` không có trong citations) chưa tái hiện trên UI; code đã có.
+- `DOCUMENT_NOT_READY` chưa kiểm trên UI (đã có ở API từ SE-014).
+- Không ghi GIF luồng chính; bằng chứng là ảnh chụp.
+- Chất lượng `[n]` trong lịch sử (lượt trước) và q01 vẫn thuộc SE-017.
+
 ## Phản hồi UI
-Chưa có.
+Có ảnh trình duyệt trong phiên bàn giao (ảnh lưu tại thư mục ảnh chụp của Chrome, không commit vào repo). Giao diện: nút ở menu Tài liệu; hộp thoại "Hỏi tài liệu" (vi/en); Chat có thanh "Tài liệu:" đầu hội thoại; nhãn `[n]` bấm được; câu từ chối có nhãn "Không đủ căn cứ trong tài liệu đã chọn".

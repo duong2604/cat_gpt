@@ -160,7 +160,25 @@
       "description": "Cuộc trò chuyện \"{title}\" và toàn bộ tin nhắn sẽ bị xóa vĩnh viễn.",
       "confirm": "Xóa",
       "done": "Đã xóa cuộc trò chuyện."
-    }
+    },
+    "documents": {
+      "label": "Tài liệu",
+      "deleted": "Đã bị xóa",
+      "loading": "Đang tải tài liệu...",
+      "unavailable": "Không tải được tài liệu"
+    },
+    "citation": {
+      "open": "Xem nguồn {n}",
+      "title": "Nguồn {n}",
+      "document": "Tài liệu",
+      "page": "Trang {page}",
+      "quote": "Đoạn trích",
+      "unavailable": "Nguồn không khả dụng",
+      "missing": "Nguồn không có trong danh sách trích dẫn"
+    },
+    "insufficient": "Không đủ căn cứ trong tài liệu đã chọn.",
+    "ungrounded": "Câu trả lời chưa có nguồn kiểm chứng.",
+    "newDocsHint": "Câu trả lời chỉ dựa trên các tài liệu đã chọn."
   },
   "documents": {
     "title": "Tài liệu",
@@ -188,7 +206,9 @@
     "actions": {
       "open": "Mở thao tác",
       "download": "Tải xuống",
-      "delete": "Xóa"
+      "delete": "Xóa",
+      "ask": "Hỏi tài liệu",
+      "askDisabled": "Chỉ hỏi được tài liệu đã sẵn sàng"
     },
     "deleteDialog": {
       "title": "Xóa tài liệu?",
@@ -197,7 +217,16 @@
     },
     "uploaded": "Đã tải lên \"{name}\".",
     "deleted": "Đã xóa \"{name}\".",
-    "errorCodeLabel": "Mã lỗi"
+    "errorCodeLabel": "Mã lỗi",
+    "ask": {
+      "title": "Hỏi tài liệu",
+      "description": "Chọn tối đa {max} tài liệu đã sẵn sàng. Câu trả lời chỉ dựa trên các tài liệu này.",
+      "selected": "Đã chọn {count}/{max}",
+      "maxReached": "Một hội thoại hỏi tối đa {max} tài liệu.",
+      "empty": "Chưa có tài liệu sẵn sàng. Hãy tải lên và chờ xử lý xong.",
+      "start": "Bắt đầu hỏi",
+      "cancel": "Hủy"
+    }
   },
   "profile": {
     "title": "Hồ sơ cá nhân",

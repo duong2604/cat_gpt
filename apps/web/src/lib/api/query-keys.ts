@@ -33,5 +33,6 @@ export const queryKeys = {
   documents: {
     all: ["documents"] as const,
     list: (filter: DocumentsFilter) => ["documents", "list", filter] as const,
+    detail: (id: string) => ["documents", "detail", id] as const,
   },
 };
