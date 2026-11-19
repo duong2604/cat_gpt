@@ -14,6 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Markdown } from "@/features/chat/components/markdown";
 import { Spinner } from "@/components/ui/spinner";
 import { useErrorMessage } from "@/hooks/use-error-message";
 import { useDocumentDetail, useSummarizeDocument } from "../hooks";
@@ -57,7 +58,7 @@ export function SummaryDocumentDialog({
         <div className="min-h-0 flex-1 overflow-y-auto">
           {status === SummaryStatus.READY && current.summary ? (
             <div className="space-y-3">
-              <p className="text-sm leading-6 whitespace-pre-wrap">{current.summary}</p>
+              <Markdown content={current.summary} />
               {current.summaryModel || current.summarizedAt ? (
                 <p className="text-xs text-muted-foreground">
                   {current.summaryModel ? t("model", { model: current.summaryModel }) : null}

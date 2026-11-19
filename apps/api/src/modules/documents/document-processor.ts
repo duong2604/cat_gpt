@@ -5,7 +5,7 @@ import { type Job, UnrecoverableError } from 'bullmq';
 import { Model, Types } from 'mongoose';
 import { DocumentStatus, ErrorCode, SummaryStatus } from '@cat-gpt/shared';
 import { AppConfigService } from '../../config/app-config.service.js';
-import { type LlmMessage, LlmProvider } from '../llm/llm.provider.js';
+import { type LlmFinishReason, type LlmMessage, LlmProvider } from '../llm/llm.provider.js';
 import { chunkText } from './chunk-text.js';
 import { DocumentFilesService } from './document-files.service.js';
 import { type DeleteJobData, type ProcessJobData, type SummarizeJobData } from './documents.service.js';
@@ -79,7 +79,7 @@ export class DocumentProcessor extends WorkerHost {
     const summary = await summarizeInGroups(
       chunks.map((c) => c.text),
       this.config.rag.summaryGroupChars,
-      (prompt) => this.complete(prompt),
+      (prompt) => this.complete(prompt, documentId),
     );
 
     const saved = await this.documentModel
@@ -102,14 +102,22 @@ export class DocumentProcessor extends WorkerHost {
   }
 
   /** Gọi LLM một lần và gom toàn bộ stream (không đẩy ra client). */
-  private async complete(userPrompt: string): Promise<string> {
+  private async complete(userPrompt: string, documentId: string): Promise<string> {
     const messages: LlmMessage[] = [
       { role: 'system', content: SUMMARY_SYSTEM_PROMPT },
       { role: 'user', content: userPrompt },
     ];
     let out = '';
+    let truncated = false;
     const controller = new AbortController();
-    for await (const chunk of this.llm.stream(messages, { signal: controller.signal })) out += chunk;
+    const onFinish = (reason: LlmFinishReason) => {
+      truncated = reason === 'max_output_tokens';
+    };
+    for await (const chunk of this.llm.stream(messages, { signal: controller.signal, onFinish })) out += chunk;
+    // Chỉ ghi số liệu để chẩn đoán — không ghi nội dung tài liệu (thiết kế mục 7).
+    if (truncated) {
+      this.logger.warn(`documentId=${documentId} job=summarize bản con bị cắt do giới hạn đầu ra (${out.length} ký tự)`);
+    }
     const text = out.trim();
     if (!text) throw new Error('LLM trả về nội dung rỗng');
     return text;

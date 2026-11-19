@@ -1,6 +1,6 @@
 # SE-016 — Module 4: tóm tắt tài liệu
 
-Trạng thái: Chờ Review
+Trạng thái: Cần sửa
 Người phụ trách: Senior Dev · Ưu tiên: **P1** (CTO 18/11/2026 (chỉ thị chuẩn bị Module 4)) · Ước lượng: 1,5 ngày làm việc
 Phụ thuộc (gate): [SE-012](SE-012-documents-txt-frontend.md) merge **và** [SE-014](SE-014-rag-qa-backend.md) hoàn thành (dùng chung export Module 3 + cách gọi LLM); kiến trúc TL-008 đã duyệt
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
@@ -81,6 +81,31 @@ Commit theo checkpoint: CP1 `8413486` (API + summaryStatus), CP2 `b3099c7` (job 
 - Hộp thoại tóm tắt chưa kiểm dark mode và 375 px.
 - Tóm tắt lưu trong MongoDB cùng bản ghi tài liệu, nên danh sách tài liệu trả kèm nội dung tóm tắt (payload lớn hơn); chưa tối ưu.
 - Không tóm tắt nhiều tài liệu một lúc (đúng phạm vi).
+
+#### Review vòng 1
+
+**Yêu cầu sửa lại — SE-016** (review vòng 1, SHA đã review `2d39e9d`). TL chuyển `Cần sửa`. Hãy chép nguyên văn khối này vào "Lịch sử review" của SE-016 dưới mục `#### Review vòng 1`, đổi trạng thái task thành `Cần sửa`.
+
+Phần TL đã kiểm đạt, không cần làm lại:
+- Gates: typecheck/lint/build xanh, api test 83/83, CI xanh.
+- API thật với tl-review-se016-a/b:
+  - Một nhóm (`noi-bo-nghi-phep`): 202 → READY 5 s.
+  - Nhiều nhóm (`wiki-pho`, 33 đoạn): READY 12 s.
+  - Nội dung đúng ý chính; TL đã đối chiếu với nguồn.
+  - S1: gọi lại → 200, không có dòng usage mới.
+  - B → 404; ẩn danh → 401.
+- UI: trạng thái "đang tóm tắt" + polling → READY ở 375px không tràn.
+
+1. **AC1 / CP3 chưa đạt: hộp thoại tóm tắt hiển thị markdown thô.**
+   - Tái hiện: `/documents` → menu "Tóm tắt" của `noi-bo-nghi-phep.txt` hoặc `wiki-vinh-ha-long.txt` → nội dung hiện nguyên `**Phạm vi áp dụng:**`, `**14 ngày/năm**`, `- ` … vì `summary-dialog.tsx:60` render `<p className="whitespace-pre-wrap">{current.summary}</p>`.
+   - Mong đợi: tóm tắt hiển thị đúng định dạng (đậm, danh sách), không còn ký tự `**`. Cách đơn giản nhất: dùng lại component `Markdown` có sẵn (`features/chat/components/markdown.tsx`), không thêm thư viện. Không đổi prompt hay backend.
+   - Kiểm lại: ảnh hộp thoại với một bản có danh sách/đậm, ở desktop + 375px, sáng + tối, vi + en (vòng 1 còn thiếu tối/375px cho hộp thoại).
+
+Không bắt buộc, ghi vào giới hạn còn lại nếu không làm:
+- `complete()` không bắt `onFinish('max_output_tokens')`, nên bản nhóm/gộp bị cắt vẫn được lưu READY. Đề xuất ghi log cảnh báo (chỉ số, không nội dung). Không tự nâng `LLM_MAX_OUTPUT_TOKENS`.
+- Danh sách tài liệu trả kèm `summary`.
+
+Sau khi sửa: cập nhật cùng PR #32, thêm `### Checklist vòng 2`, chuyển `Chờ Review` và báo TL SHA mới. Giữ app chạy ở SHA mới để TL kiểm lại UI. Dữ liệu thử của TL đã xóa theo id (3 tài liệu, Qdrant = 0). Hai tài khoản tl-review-se016-a/b giữ lại cho vòng 2.
 
 ## Phản hồi UI
 Hộp thoại "Tóm tắt tài liệu" (vi/en) hiển thị trạng thái và bản tóm tắt; mục menu "Tóm tắt" ở dòng tài liệu READY. Ảnh lưu tại thư mục ảnh chụp của Chrome, không commit vào repo.
