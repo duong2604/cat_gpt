@@ -145,9 +145,16 @@ export class ChatService {
       // khi gọi LLM — câu hỏi mới nhất luôn là tin cuối trong history (vừa tạo ở send()/
       // regenerate() trước khi gọi streamAnswer).
       let plan: RagPlan | null = null;
+      let status: MessageStatus = MessageStatus.COMPLETED;
       if (conversation.documentIds?.length) {
         const question = history.at(-1)?.content ?? '';
-        plan = await this.rag.prepare(conversation.userId.toString(), conversation.documentIds, question);
+        try {
+          plan = await this.rag.prepare(conversation.userId.toString(), conversation.documentIds, question);
+        } catch (error) {
+          // Lỗi embed/Qdrant (thiết kế mục 6.1): lưu tin ERROR như lỗi LLM, không gọi LLM, Tạo lại được.
+          this.logger.error(`Truy hồi lỗi ở hội thoại ${key}`, (error as Error).stack);
+          status = MessageStatus.ERROR;
+        }
       }
 
       if (plan?.kind === 'insufficient') {
@@ -178,23 +185,25 @@ export class ChatService {
       ];
 
       let content = '';
-      let status: MessageStatus = MessageStatus.COMPLETED;
       let truncated = false;
       const onFinish = (reason: LlmFinishReason) => {
         truncated = reason === 'max_output_tokens';
       };
-      try {
-        for await (const chunk of this.llm.stream(messages, { signal: controller.signal, onFinish })) {
-          content += chunk;
-          sse.send({ type: 'delta', text: chunk });
-          if (controller.signal.aborted) break;
-        }
-        if (controller.signal.aborted) status = MessageStatus.STOPPED;
-        else if (truncated) status = MessageStatus.TRUNCATED;
-      } catch (error) {
-        status = controller.signal.aborted ? MessageStatus.STOPPED : MessageStatus.ERROR;
-        if (status === MessageStatus.ERROR) {
-          this.logger.error(`LLM lỗi ở hội thoại ${key}`, (error as Error).stack);
+      // Truy hồi lỗi (status ERROR ở trên) → không gọi LLM.
+      if (status === MessageStatus.COMPLETED) {
+        try {
+          for await (const chunk of this.llm.stream(messages, { signal: controller.signal, onFinish })) {
+            content += chunk;
+            sse.send({ type: 'delta', text: chunk });
+            if (controller.signal.aborted) break;
+          }
+          if (controller.signal.aborted) status = MessageStatus.STOPPED;
+          else if (truncated) status = MessageStatus.TRUNCATED;
+        } catch (error) {
+          status = controller.signal.aborted ? MessageStatus.STOPPED : MessageStatus.ERROR;
+          if (status === MessageStatus.ERROR) {
+            this.logger.error(`LLM lỗi ở hội thoại ${key}`, (error as Error).stack);
+          }
         }
       }
 

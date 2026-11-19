@@ -507,6 +507,48 @@ describe('ChatService — hồi quy (trước khi thêm RagService, SE-014)', ()
       expect(done.message.insufficientEvidence).toBe(true);
       expect(done.message.citations).toEqual([]);
     });
+
+    it('prepare lỗi (embed/Qdrant, R8) → lưu tin ERROR, không gọi LLM, done; Tạo lại được khi truy hồi OK', async () => {
+      const myDoc = { _id: new Types.ObjectId(), userId: USER_ID, status: 'READY', deletedAt: null };
+      const source = { documentId: myDoc._id.toString(), documentName: 'Tài liệu của tôi', chunkIndex: 0, text: 'Nội dung đoạn.' };
+      let qdrantDown = true;
+      const fakeRag = {
+        prepare: async () => {
+          if (qdrantDown) throw new Error('qdrant unreachable');
+          return { kind: 'ready' as const, systemPrompt: 'system prompt', sources: [source] };
+        },
+        verifyCitations: () => ({
+          citations: [{ n: 1, documentId: source.documentId, documentName: source.documentName, chunkIndex: 0, quote: source.text }],
+          insufficientEvidence: false,
+          ungrounded: false,
+        }),
+      } as unknown as RagService;
+      const llm = new ScriptedLlmProvider(['Trả lời có căn cứ [1].']);
+      const streamSpy = vi.spyOn(llm, 'stream');
+      const { service, conversations } = makeService(llm, undefined, fakeDocumentModel([myDoc]), fakeConfig(), fakeRag);
+      const sse = new RecordingSse();
+
+      await service.send(
+        USER_ID.toString(),
+        { content: 'Hỏi tài liệu của tôi', documentIds: [myDoc._id.toString()] },
+        sse as unknown as SseStream,
+      );
+
+      expect(streamSpy).not.toHaveBeenCalled();
+      const failed = sse.events.at(-1) as { type: 'done'; message: { status: string; citations: unknown[] } };
+      expect(failed.type).toBe('done');
+      expect(failed.message.status).toBe(MessageStatus.ERROR);
+      expect(failed.message.citations ?? []).toEqual([]);
+
+      qdrantDown = false;
+      const conversation = [...conversations.conversations.values()][0];
+      const sse2 = new RecordingSse();
+      await service.regenerate(USER_ID.toString(), conversation._id.toString(), sse2 as unknown as SseStream);
+
+      const retried = sse2.events.at(-1) as { type: 'done'; message: { status: string; content: string } };
+      expect(retried.message.status).toBe(MessageStatus.COMPLETED);
+      expect(retried.message.content).toBe('Trả lời có căn cứ [1].');
+    });
   });
 
   it('makeTitle: cắt khoảng 50 ký tự ở ranh giới từ', () => {
