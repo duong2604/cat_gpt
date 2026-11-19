@@ -99,7 +99,8 @@
     "DOCUMENT_UNREADABLE": "The file is corrupted or unreadable.",
     "DOCUMENT_NOT_READY": "The document isn't ready for Q&A yet.",
     "DOCUMENT_EMBEDDING_UNAVAILABLE": "Document processing is currently unavailable.",
-    "DOCUMENT_PROCESSING_FAILED": "Document processing failed. Please delete it and upload again."
+    "DOCUMENT_PROCESSING_FAILED": "Document processing failed. Please delete it and upload again.",
+    "DOCUMENT_SUMMARY_FAILED": "Document summary failed. Please try again."
   },
   "roles": {
     "ADMIN": "Administrator",
@@ -208,7 +209,8 @@
       "download": "Download",
       "delete": "Delete",
       "ask": "Ask document",
-      "askDisabled": "Only ready documents can be asked"
+      "askDisabled": "Only ready documents can be asked",
+      "summarize": "Summarize"
     },
     "deleteDialog": {
       "title": "Delete this document?",
@@ -226,6 +228,14 @@
       "empty": "No ready documents yet. Upload one and wait for processing.",
       "start": "Start asking",
       "cancel": "Cancel"
+    },
+    "summary": {
+      "title": "Document summary",
+      "pending": "Summarizing the document, please wait…",
+      "failed": "Summary failed.",
+      "retry": "Try again",
+      "close": "Close",
+      "model": "Model: {model}"
     }
   },
   "profile": {

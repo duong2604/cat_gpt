@@ -18,6 +18,9 @@ export const documentsApi = {
 
   delete: (id: string) => api.delete<void>(`/documents/${id}`).then(() => undefined),
 
+  /** 202 khi đã xếp job, 200 khi đã có bản tóm tắt lưu — cả hai đều trả DocumentDto. */
+  summarize: (id: string) => api.post<DocumentDto>(`/documents/${id}/summary`).then((r) => r.data),
+
   /** Đường dẫn tải xuống trực tiếp — trình duyệt tự gửi cookie (cùng origin qua Next.js rewrites). */
   downloadUrl: (id: string) => `/api/v1/documents/${id}/download`,
 };
