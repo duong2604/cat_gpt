@@ -1,0 +1,283 @@
+{
+  "model": "text-embedding-3-small",
+  "llmModel": "gpt-5.4-mini",
+  "evalCollection": "document_chunks_eval_text-embedding-3-small",
+  "productCollection": "document_chunks",
+  "productPointsBefore": 0,
+  "chunkCounts": {
+    "noi-bo-cong-tac-phi.txt": 3,
+    "noi-bo-nghi-phep.txt": 4,
+    "wiki-ao-dai.txt": 27,
+    "wiki-dong-bang-song-cuu-long.txt": 31,
+    "wiki-pho.txt": 33,
+    "wiki-vinh-ha-long.txt": 77
+  },
+  "labelMismatchStoredChunkIndex": [
+    "q01",
+    "q02",
+    "q04",
+    "q05",
+    "q07",
+    "q08",
+    "q12",
+    "q15",
+    "q17",
+    "q18",
+    "q20",
+    "q21",
+    "q24",
+    "q25",
+    "q26",
+    "q28",
+    "q29",
+    "q30",
+    "q33",
+    "q34",
+    "q39",
+    "q40"
+  ],
+  "goldCounts": {
+    "q01": 1,
+    "q02": 1,
+    "q03": 1,
+    "q04": 1,
+    "q05": 1,
+    "q06": 1,
+    "q07": 1,
+    "q08": 1,
+    "q09": 1,
+    "q10": 1,
+    "q11": 1,
+    "q12": 1,
+    "q13": 1,
+    "q14": 1,
+    "q15": 1,
+    "q16": 1,
+    "q17": 1,
+    "q18": 1,
+    "q19": 1,
+    "q20": 1,
+    "q21": 1,
+    "q22": 1,
+    "q23": 1,
+    "q24": 1,
+    "q25": 1,
+    "q26": 1,
+    "q27": 1,
+    "q28": 1,
+    "q29": 1,
+    "q30": 1,
+    "q31": 1,
+    "q32": 1,
+    "q33": 1,
+    "q34": 1,
+    "q35": 2,
+    "q36": 1,
+    "q37": 2,
+    "q38": 1,
+    "q39": 2,
+    "q40": 1,
+    "o01": 0,
+    "o02": 0,
+    "o03": 0,
+    "o04": 0,
+    "o05": 0,
+    "o06": 0,
+    "o07": 0,
+    "o08": 0,
+    "o09": 0,
+    "o10": 0
+  },
+  "phase": "retrieval",
+  "retrieval": {
+    "run1Ms": 10852,
+    "run2Ms": 10391,
+    "rankingHashRun1": "155ffd12cfca6dc5",
+    "rankingHashRun2": "155ffd12cfca6dc5",
+    "sameRanking": true,
+    "metrics": {
+      "answerableCount": 40,
+      "hitAt1": 0.65,
+      "hitAt3": 0.85,
+      "hitAt5": 0.925,
+      "mrr": 0.7579166666666666,
+      "top1ScoreAnswerable": {
+        "min": 0.46407515,
+        "p25": 0.55147564,
+        "median": 0.6079473,
+        "p75": 0.67139626,
+        "max": 0.74851364
+      },
+      "top1ScoreOutOfScope": {
+        "min": 0.26035964,
+        "p25": 0.35586572,
+        "median": 0.46999308,
+        "p75": 0.544477,
+        "max": 0.5989206
+      },
+      "perQuestion": [
+        {
+          "id": "q01",
+          "first": 3
+        },
+        {
+          "id": "q02",
+          "first": 1
+        },
+        {
+          "id": "q03",
+          "first": 1
+        },
+        {
+          "id": "q04",
+          "first": 1
+        },
+        {
+          "id": "q05",
+          "first": 1
+        },
+        {
+          "id": "q06",
+          "first": 1
+        },
+        {
+          "id": "q07",
+          "first": 1
+        },
+        {
+          "id": "q08",
+          "first": 1
+        },
+        {
+          "id": "q09",
+          "first": 2
+        },
+        {
+          "id": "q10",
+          "first": 2
+        },
+        {
+          "id": "q11",
+          "first": 1
+        },
+        {
+          "id": "q12",
+          "first": 2
+        },
+        {
+          "id": "q13",
+          "first": 1
+        },
+        {
+          "id": "q14",
+          "first": 1
+        },
+        {
+          "id": "q15",
+          "first": 1
+        },
+        {
+          "id": "q16",
+          "first": 1
+        },
+        {
+          "id": "q17",
+          "first": 1
+        },
+        {
+          "id": "q18",
+          "first": 1
+        },
+        {
+          "id": "q19",
+          "first": 1
+        },
+        {
+          "id": "q20",
+          "first": 3
+        },
+        {
+          "id": "q21",
+          "first": 1
+        },
+        {
+          "id": "q22",
+          "first": 5
+        },
+        {
+          "id": "q23",
+          "first": null
+        },
+        {
+          "id": "q24",
+          "first": 1
+        },
+        {
+          "id": "q25",
+          "first": 1
+        },
+        {
+          "id": "q26",
+          "first": null
+        },
+        {
+          "id": "q27",
+          "first": 5
+        },
+        {
+          "id": "q28",
+          "first": 1
+        },
+        {
+          "id": "q29",
+          "first": 1
+        },
+        {
+          "id": "q30",
+          "first": 1
+        },
+        {
+          "id": "q31",
+          "first": 1
+        },
+        {
+          "id": "q32",
+          "first": 4
+        },
+        {
+          "id": "q33",
+          "first": 2
+        },
+        {
+          "id": "q34",
+          "first": 1
+        },
+        {
+          "id": "q35",
+          "first": 2
+        },
+        {
+          "id": "q36",
+          "first": 1
+        },
+        {
+          "id": "q37",
+          "first": 2
+        },
+        {
+          "id": "q38",
+          "first": null
+        },
+        {
+          "id": "q39",
+          "first": 1
+        },
+        {
+          "id": "q40",
+          "first": 1
+        }
+      ]
+    }
+  },
+  "productPointsAfter": 0
+}
