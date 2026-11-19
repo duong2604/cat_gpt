@@ -9,20 +9,20 @@ export class DocumentEntity {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   userId: Types.ObjectId;
 
-  @Prop({ required: true, trim: true, maxlength: 255 })
+  @Prop({ type: String, required: true, trim: true, maxlength: 255 })
   name: string;
 
-  @Prop({ required: true })
+  @Prop({ type: String, required: true })
   mimeType: string;
 
-  @Prop({ required: true })
+  @Prop({ type: Number, required: true })
   size: number;
 
   /** `documents/<userId>/<documentId>` — không chứa tên tệp gốc. */
-  @Prop({ required: true })
+  @Prop({ type: String, required: true })
   storageKey: string;
 
-  @Prop({ required: true, enum: Object.values(DocumentStatus), default: DocumentStatus.PENDING })
+  @Prop({ type: String, required: true, enum: Object.values(DocumentStatus), default: DocumentStatus.PENDING })
   status: DocumentStatus;
 
   @Prop({ type: String, default: null })

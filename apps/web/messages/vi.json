@@ -97,6 +97,7 @@
     "DOCUMENT_NO_TEXT": "Tệp không có nội dung văn bản để xử lý.",
     "DOCUMENT_TOO_MANY_CHUNKS": "Tài liệu quá dài để xử lý.",
     "DOCUMENT_UNREADABLE": "Tệp bị hỏng hoặc không đọc được.",
+    "DOCUMENT_NOT_READY": "Tài liệu chưa sẵn sàng để hỏi đáp.",
     "DOCUMENT_EMBEDDING_UNAVAILABLE": "Chức năng xử lý tài liệu hiện chưa khả dụng.",
     "DOCUMENT_PROCESSING_FAILED": "Xử lý tài liệu thất bại. Vui lòng xóa và tải lên lại."
   },

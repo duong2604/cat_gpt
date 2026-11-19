@@ -5,6 +5,7 @@ import {
   IsEnum,
   IsInt,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   Max,
@@ -224,6 +225,28 @@ export class EnvironmentVariables {
   @IsInt()
   @Min(1)
   DOCUMENT_MAX_DOCX_XML_MB = 50;
+
+  // ===== Hỏi đáp tài liệu, RAG (SE-014) =====
+  @Transform(({ value }) => Number(value))
+  @IsInt()
+  @Min(1)
+  RAG_TOP_K = 5;
+
+  /** Để trống (tắt lọc) cho tới khi có đánh giá (TL-009/SE-017, quyết định M4-3). */
+  @IsOptional()
+  @Transform(({ value }) => (value === undefined || value === '' ? undefined : Number(value)))
+  @IsNumber()
+  RAG_MIN_SCORE?: number;
+
+  @Transform(({ value }) => Number(value))
+  @IsInt()
+  @Min(1)
+  RAG_MAX_DOCUMENTS = 5;
+
+  @Transform(({ value }) => Number(value))
+  @IsInt()
+  @Min(1)
+  RAG_SUMMARY_GROUP_CHARS = 12000;
 }
 
 export function validateEnv(config: Record<string, unknown>): EnvironmentVariables {

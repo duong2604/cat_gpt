@@ -11,6 +11,20 @@ export interface ChunkPoint {
   page?: number;
 }
 
+export interface SearchResult {
+  documentId: string;
+  chunkIndex: number;
+  score: number;
+  text: string;
+  page?: number;
+}
+
+export interface SearchOptions {
+  userId: string;
+  documentIds: string[];
+  limit: number;
+}
+
 /**
  * Qdrant: một collection dùng chung, payload `{ userId, documentId, chunkIndex, text }`
  * (PDF thêm `page` — thiết kế mục 4.3, SE-013).
@@ -90,6 +104,39 @@ export class VectorStoreService {
     await this.client.delete(this.collection, {
       wait: true,
       filter: { must: [{ key: 'documentId', match: { value: documentId } }] },
+    });
+  }
+
+  /**
+   * Truy hồi top-K đoạn gần nhất, lọc cả `userId` **và** `documentId ∈ danh sách` (M4-4,
+   * thiết kế mục 6.1 bước 3) — gọi với danh sách tài liệu đã lọc hợp lệ ở Mongo, không
+   * tin thẳng `documentIds` của hội thoại (tài liệu có thể bị xóa sau khi tạo).
+   * Ngưỡng điểm (`RAG_MIN_SCORE`) là chính sách của RagService, không lọc ở đây.
+   */
+  async search(vector: number[], options: SearchOptions): Promise<SearchResult[]> {
+    if (options.documentIds.length === 0) return [];
+    const { exists } = await this.client.collectionExists(this.collection);
+    if (!exists) return [];
+    const result = await this.client.query(this.collection, {
+      query: vector,
+      filter: {
+        must: [
+          { key: 'userId', match: { value: options.userId } },
+          { key: 'documentId', match: { any: options.documentIds } },
+        ],
+      },
+      limit: options.limit,
+      with_payload: true,
+    });
+    return result.points.map((p) => {
+      const payload = p.payload as Record<string, unknown>;
+      return {
+        documentId: String(payload.documentId),
+        chunkIndex: Number(payload.chunkIndex),
+        score: p.score,
+        text: String(payload.text),
+        ...(payload.page !== undefined ? { page: Number(payload.page) } : {}),
+      };
     });
   }
 

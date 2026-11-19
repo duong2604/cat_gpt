@@ -1,6 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  ArrayNotEmpty,
+  ArrayUnique,
+  IsArray,
   IsInt,
   IsMongoId,
   IsNotEmpty,
@@ -59,4 +62,17 @@ export class SendMessageDto {
   @IsNotEmpty()
   @MaxLength(CHAT_MAX_MESSAGE_LENGTH)
   content: string;
+
+  /**
+   * Hỏi đáp tài liệu (Module 4) — chỉ khi tạo hội thoại mới (không kèm `conversationId`,
+   * kiểm ở service). Số lượng tối đa theo `RAG_MAX_DOCUMENTS` (kiểm ở service, có thể
+   * cấu hình, DTO chỉ kiểm hình dạng).
+   */
+  @ApiPropertyOptional({ type: [String], description: 'Chỉ khi tạo hội thoại mới' })
+  @IsOptional()
+  @IsArray()
+  @ArrayNotEmpty()
+  @ArrayUnique()
+  @IsMongoId({ each: true })
+  documentIds?: string[];
 }

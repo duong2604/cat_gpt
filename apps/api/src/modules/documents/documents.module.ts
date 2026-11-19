@@ -32,5 +32,8 @@ import { VectorStoreService } from './vector-store.service.js';
     VectorStoreService,
     EmbeddingService,
   ],
+  // RagModule (SE-014) cần EmbeddingService/VectorStoreService và model DocumentEntity
+  // (qua MongooseModule) để kiểm quyền + truy hồi — không tạo pipeline riêng.
+  exports: [EmbeddingService, VectorStoreService, MongooseModule],
 })
 export class DocumentsModule {}

@@ -112,4 +112,13 @@ export class AppConfigService {
       maxDocxXmlBytes: this.get('DOCUMENT_MAX_DOCX_XML_MB') * 1024 * 1024,
     };
   }
+
+  get rag() {
+    return {
+      topK: this.get('RAG_TOP_K'),
+      minScore: this.get('RAG_MIN_SCORE'),
+      maxDocuments: this.get('RAG_MAX_DOCUMENTS'),
+      summaryGroupChars: this.get('RAG_SUMMARY_GROUP_CHARS'),
+    };
+  }
 }
