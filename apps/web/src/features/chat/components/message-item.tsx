@@ -2,12 +2,13 @@
 
 import { CheckIcon, CopyIcon, RefreshCwIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
-import { MessageStatus } from "@cat-gpt/shared";
+import { useMemo, useState } from "react";
+import { type CitationDto, MessageStatus } from "@cat-gpt/shared";
 import { AppLogo } from "@/components/app-logo";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { citationComponents, linkCitations } from "./citations";
 import { Markdown } from "./markdown";
 
 export function UserMessage({ content }: { content: string }) {
@@ -23,23 +24,34 @@ export function UserMessage({ content }: { content: string }) {
 export function AssistantMessage({
   content,
   status,
+  citations,
+  insufficientEvidence = false,
+  ungrounded = false,
   streaming = false,
   onRegenerate,
 }: {
   content: string;
   status?: MessageStatus;
+  /** Chỉ có ở tin của hội thoại hỏi tài liệu: bật nhãn trích dẫn `[n]`. */
+  citations?: CitationDto[];
+  /** Tài liệu đã chọn không đủ căn cứ (FR-M4-04). */
+  insufficientEvidence?: boolean;
+  /** Có câu trả lời nhưng không có trích dẫn hợp lệ (FR-M4-05). */
+  ungrounded?: boolean;
   streaming?: boolean;
   /** Chỉ truyền cho câu trả lời cuối cùng. */
   onRegenerate?: () => void;
 }) {
   const t = useTranslations("chat.message");
+  const tChat = useTranslations("chat");
+  const overrides = useMemo(() => (citations ? citationComponents(citations) : undefined), [citations]);
 
   return (
     <div className="group flex gap-3">
       <AppLogo className="mt-0.5 size-7 shrink-0" />
       <div className="min-w-0 flex-1 space-y-2">
         {content ? (
-          <Markdown content={content} />
+          <Markdown content={citations ? linkCitations(content) : content} overrides={overrides} />
         ) : streaming ? (
           <TypingIndicator />
         ) : (
@@ -48,10 +60,20 @@ export function AssistantMessage({
         {streaming && content ? <span className="inline-block h-4 w-1.5 animate-pulse bg-foreground/70 align-middle" /> : null}
 
         {!streaming ? (
-          <div className="flex items-center gap-1">
+          <div className="flex flex-wrap items-center gap-1">
             {status === MessageStatus.STOPPED ? <Badge variant="secondary">{t("stopped")}</Badge> : null}
             {status === MessageStatus.ERROR ? <Badge variant="destructive">{t("error")}</Badge> : null}
             {status === MessageStatus.TRUNCATED ? <Badge variant="outline">{t("truncated")}</Badge> : null}
+            {insufficientEvidence ? (
+              <Badge variant="secondary" className="h-auto max-w-full py-0.5 whitespace-normal">
+                {tChat("insufficient")}
+              </Badge>
+            ) : null}
+            {ungrounded ? (
+              <Badge variant="outline" className="h-auto max-w-full py-0.5 whitespace-normal">
+                {tChat("ungrounded")}
+              </Badge>
+            ) : null}
             {content ? <CopyButton text={content} /> : null}
             {onRegenerate ? (
               <Tooltip>

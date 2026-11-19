@@ -20,6 +20,7 @@ import { getErrorCode } from "@/lib/api/errors";
 import { routes } from "@/lib/routes";
 import { useChatStream } from "../chat-stream-provider";
 import { useConversation, useMessages } from "../hooks";
+import { ChatDocuments } from "./chat-documents";
 import { ChatInput } from "./chat-input";
 import { ChatTopBar } from "./chat-layout";
 import { DeleteConversationDialog, RenameConversationDialog } from "./conversation-dialogs";
@@ -96,6 +97,8 @@ export function ConversationView({ conversationId }: { conversationId: string })
           ) : null
         }
       />
+
+      <ChatDocuments ids={data?.documentIds ?? []} />
 
       {messages.data ? (
         <MessageList messages={messages.data} stream={stream} onRegenerate={() => regenerate(conversationId)} />
