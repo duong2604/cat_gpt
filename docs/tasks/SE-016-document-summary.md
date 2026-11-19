@@ -1,6 +1,6 @@
 # SE-016 — Module 4: tóm tắt tài liệu
 
-Trạng thái: Cần sửa
+Trạng thái: Chờ Review
 Người phụ trách: Senior Dev · Ưu tiên: **P1** (CTO 18/11/2026 (chỉ thị chuẩn bị Module 4)) · Ước lượng: 1,5 ngày làm việc
 Phụ thuộc (gate): [SE-012](SE-012-documents-txt-frontend.md) merge **và** [SE-014](SE-014-rag-qa-backend.md) hoàn thành (dùng chung export Module 3 + cách gọi LLM); kiến trúc TL-008 đã duyệt
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
@@ -107,5 +107,26 @@ Không bắt buộc, ghi vào giới hạn còn lại nếu không làm:
 
 Sau khi sửa: cập nhật cùng PR #32, thêm `### Checklist vòng 2`, chuyển `Chờ Review` và báo TL SHA mới. Giữ app chạy ở SHA mới để TL kiểm lại UI. Dữ liệu thử của TL đã xóa theo id (3 tài liệu, Qdrant = 0). Hai tài khoản tl-review-se016-a/b giữ lại cho vòng 2.
 
+### Checklist vòng 2 (sửa theo Review vòng 1)
+
+Commit: `4fbabb8` (hộp thoại dùng `Markdown` của Chat; worker cảnh báo khi lượt LLM bị cắt; ghi chép yêu cầu sửa). Gates: `tsc`, `lint`, `pnpm --filter @cat-gpt/api test` 83/83 đều OK; web `tsc` và `lint` OK. Build web không chạy lại ở vòng này (web dev đang chạy); CI trên PR sẽ kiểm build.
+
+| Yêu cầu | Kết quả | Bằng chứng |
+|---|---|---|
+| Hộp thoại hiển thị markdown (đậm, danh sách), không còn `**` | Đạt: API trả bản tóm tắt có `**` và `- `; UI hiển thị chữ đậm và gạch đầu dòng đúng | Ảnh: desktop en sáng; desktop vi tối; 375px vi tối |
+| 375px không tràn ngang trong hộp thoại | Đạt: `scrollWidth = clientWidth` (374) cả trang và hộp thoại (JS trong iframe 375px) | Đo DOM |
+| Desktop + 375px, sáng + tối, vi + en | Đã kiểm: desktop sáng/en, desktop tối/vi, 375 tối/vi. **Chưa kiểm**: desktop sáng/vi, 375 sáng, 375 en, và tối/en | Ảnh đính kèm như trên |
+| Cảnh báo khi lượt LLM bị cắt (không bắt buộc) | Đã làm: log `WARN documentId=… job=summarize bản con bị cắt do giới hạn đầu ra (N ký tự)`, chỉ id và số ký tự. Đã kích hoạt trên tài liệu `noi-bo-nghi-phep` | Log API `api-v2` |
+| Không đổi prompt, backend, `LLM_MAX_OUTPUT_TOKENS` | Đạt | Diff `4fbabb8` |
+
+**Phát hiện mới (cần TL quyết định):** bản tóm tắt `noi-bo-nghi-phep` (một nhóm, một lần gọi LLM) vẫn bị cắt ở `max_output_tokens` (500) với 1550 ký tự, và hộp thoại dừng giữa câu. Tức là giới hạn đầu ra làm cắt cả tài liệu ngắn, không chỉ bản nhóm. Chưa nâng giới hạn theo yêu cầu.
+
+**Dọn dữ liệu thử của vòng 2:** tài liệu thử `6aff37ce…` tạo bởi `tl-review-se016-a` đã xóa theo id (204), tài khoản đếm lại 0 tài liệu. Hai tài khoản `tl-review-se016-a/b` giữ lại cho TL.
+
+**Giới hạn còn lại (cập nhật):**
+- Bản tóm tắt bị cắt bởi `LLM_MAX_OUTPUT_TOKENS` (xem phát hiện trên). Cần quyết định của TL/CTO.
+- Map-reduce một lượt; với nhiều nhóm bản gộp có thể vượt `RAG_SUMMARY_GROUP_CHARS`.
+- Danh sách tài liệu vẫn trả kèm `summary` (payload lớn hơn).
+
 ## Phản hồi UI
-Hộp thoại "Tóm tắt tài liệu" (vi/en) hiển thị trạng thái và bản tóm tắt; mục menu "Tóm tắt" ở dòng tài liệu READY. Ảnh lưu tại thư mục ảnh chụp của Chrome, không commit vào repo.
+Hộp thoại "Tóm tắt tài liệu" (vi/en) hiển thị trạng thái và bản tóm tắt dạng markdown; mục menu "Tóm tắt" ở dòng tài liệu READY. Ảnh lưu tại thư mục ảnh chụp của Chrome, không commit vào repo.
