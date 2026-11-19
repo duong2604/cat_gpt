@@ -1,8 +1,8 @@
 # SE-015 — Module 4, giao diện: hỏi tài liệu và hiển thị trích dẫn
 
-Trạng thái: Nháp
+Trạng thái: Sẵn sàng
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 2 ngày làm việc
-Phụ thuộc (gate): [SE-014](SE-014-rag-qa-backend.md) merge **và** [SE-012](SE-012-documents-txt-frontend.md) merge (cả hai chặn); kiến trúc TL-008 đã duyệt
+Phụ thuộc (gate): [SE-014](SE-014-rag-qa-backend.md) merge **và** [SE-012](SE-012-documents-txt-frontend.md) merge (cả hai chặn); kiến trúc TL-008 đã duyệt. **Đạt 19/11/2026** (SE-014 → `124ccee`, SE-012 → `cd386e5`); TL chuyển `Sẵn sàng`
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
 Ngày thực tế: bắt đầu — · bàn giao review — · hoàn tất —
 Chốt: 17/11/2026 — Q-M4-1 (chỉ lối vào trang Tài liệu), Q-M4-3; nội dung task chuẩn bị 18/11/2026

@@ -2,6 +2,15 @@
 
 Theo mốc của [plan.md](../project/plan.md#2-mốc). Chi tiết từng ngày: [báo cáo ngày](daily/README.md). TL cập nhật cuối mỗi ngày làm việc và ngay khi phát hiện nguy cơ trễ mốc; mục mới nhất ở trên, giữ các mục cũ ([workflow mục 11](../project/workflow.md#11-theo-dõi-tiến-độ)).
 
+## Cập nhật 19/11/2026 (SE-014 merge, backend Module 4)
+
+Chi tiết: [19/11 vòng 1–2](daily/2026-11-19.md).
+
+| Mốc / việc | Tình trạng |
+|---|---|
+| M4 Demo 20/11 | Có nguy cơ (quy trình): bản `34b465d` không đổi, code vẫn trùng `fbffd5b`; chưa có xác nhận tin trước demo đã tới khách hàng; giờ demo chưa chốt |
+| Module 4 | SE-014 **Done** (PR #28 → `124ccee`; R1–R11 trên service thật, TL tự kiểm R1/R2/R4); SE-015 **Sẵn sàng**, giao; SE-016, SE-017 Nháp theo gate; SE-017 còn chờ quyền `text-embedding-3-large` |
+
 ## Cập nhật 18/11/2026 (Module 3 hoàn thành)
 
 Chi tiết: [18/11 vòng 1–4](daily/2026-11-18.md).
