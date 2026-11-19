@@ -160,7 +160,25 @@
       "description": "\"{title}\" and all of its messages will be permanently deleted.",
       "confirm": "Delete",
       "done": "Conversation deleted."
-    }
+    },
+    "documents": {
+      "label": "Documents",
+      "deleted": "Deleted",
+      "loading": "Loading documents...",
+      "unavailable": "Could not load documents"
+    },
+    "citation": {
+      "open": "View source {n}",
+      "title": "Source {n}",
+      "document": "Document",
+      "page": "Page {page}",
+      "quote": "Excerpt",
+      "unavailable": "Source unavailable",
+      "missing": "Source is not in the citation list"
+    },
+    "insufficient": "Not enough evidence in the selected documents.",
+    "ungrounded": "This answer has no verified source.",
+    "newDocsHint": "Answers are based only on the selected documents."
   },
   "documents": {
     "title": "Documents",
@@ -188,7 +206,9 @@
     "actions": {
       "open": "Open actions",
       "download": "Download",
-      "delete": "Delete"
+      "delete": "Delete",
+      "ask": "Ask document",
+      "askDisabled": "Only ready documents can be asked"
     },
     "deleteDialog": {
       "title": "Delete this document?",
@@ -197,7 +217,16 @@
     },
     "uploaded": "\"{name}\" uploaded.",
     "deleted": "\"{name}\" deleted.",
-    "errorCodeLabel": "Error code"
+    "errorCodeLabel": "Error code",
+    "ask": {
+      "title": "Ask document",
+      "description": "Choose up to {max} ready documents. Answers are based only on these documents.",
+      "selected": "Selected {count}/{max}",
+      "maxReached": "A conversation can ask up to {max} documents.",
+      "empty": "No ready documents yet. Upload one and wait for processing.",
+      "start": "Start asking",
+      "cancel": "Cancel"
+    }
   },
   "profile": {
     "title": "Profile",

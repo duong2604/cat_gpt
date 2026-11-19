@@ -5,11 +5,13 @@ import {
   ChevronRightIcon,
   DownloadIcon,
   FileTextIcon,
+  MessageSquareIcon,
   MoreHorizontalIcon,
   SearchIcon,
   Trash2Icon,
 } from "lucide-react";
 import { useFormatter, useNow, useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { DEFAULT_PAGE_SIZE, type DocumentDto, DocumentStatus, type ErrorCode } from "@cat-gpt/shared";
@@ -41,6 +43,7 @@ import {
 } from "@/components/ui/table";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useErrorMessage } from "@/hooks/use-error-message";
+import { routes } from "@/lib/routes";
 import { useDocuments, useDownloadDocument } from "../hooks";
 import { DeleteDocumentDialog } from "./delete-document-dialog";
 import { DocumentStatusBadge } from "./document-status-badge";
@@ -238,7 +241,9 @@ export function DocumentsManagement() {
 function DocumentActions({ document, onDelete }: { document: DocumentDto; onDelete: () => void }) {
   const t = useTranslations("documents");
   const errorMessage = useErrorMessage();
+  const router = useRouter();
   const download = useDownloadDocument();
+  const ready = document.status === DocumentStatus.READY;
 
   const onDownload = () => {
     download.mutate(document, {
@@ -255,7 +260,14 @@ function DocumentActions({ document, onDelete }: { document: DocumentDto; onDele
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem
-          disabled={document.status !== DocumentStatus.READY || download.isPending}
+          disabled={!ready}
+          onSelect={() => router.push(`${routes.chat}?documents=${document.id}`)}
+        >
+          <MessageSquareIcon />
+          {t("actions.ask")}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          disabled={!ready || download.isPending}
           onSelect={onDownload}
         >
           <DownloadIcon />
