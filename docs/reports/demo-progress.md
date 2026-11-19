@@ -2,6 +2,14 @@
 
 Theo mốc của [plan.md](../project/plan.md#2-mốc). Chi tiết từng ngày: [báo cáo ngày](daily/README.md). TL cập nhật cuối mỗi ngày làm việc và ngay khi phát hiện nguy cơ trễ mốc; mục mới nhất ở trên, giữ các mục cũ ([workflow mục 11](../project/workflow.md#11-theo-dõi-tiến-độ)).
 
+## Cập nhật 20/11/2026 01:30 (SE-017 merge)
+
+Chi tiết: [20/11 vòng 2](daily/2026-11-20.md).
+
+| Mốc / việc | Tình trạng |
+|---|---|
+| Module 4 | SE-014…SE-017 trên `develop` @ `09fbcff`; SE-017 chỉ có `text-embedding-3-small` (hit@5 92,5%, MRR 0,758); so sánh `-large` bị chặn chờ quyền API |
+
 ## Cập nhật 20/11/2026 01:10 (Module 4: hỏi đáp + tóm tắt có UI)
 
 Chi tiết: [20/11 vòng 1](daily/2026-11-20.md).
