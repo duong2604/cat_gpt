@@ -96,6 +96,20 @@ export class DocumentsController {
     stream.pipe(res);
   }
 
+  /** 202 khi đã xếp (hoặc đang chạy) job tóm tắt; 200 khi trả bản đã lưu, không gọi LLM. */
+  @Post(':id/summary')
+  @ApiOperation({ summary: 'Tóm tắt tài liệu (xếp job nền, hoặc trả bản đã lưu)' })
+  @ApiOkResponse({ type: DocumentResponse })
+  async summarize(
+    @CurrentUser() user: AuthUser,
+    @Param('id') id: string,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<DocumentDto> {
+    const { document, accepted } = await this.documents.requestSummary(user.userId, id);
+    res.status(accepted ? HttpStatus.ACCEPTED : HttpStatus.OK);
+    return document;
+  }
+
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Xóa tài liệu (kể cả đang xử lý)' })

@@ -99,7 +99,8 @@
     "DOCUMENT_UNREADABLE": "Tệp bị hỏng hoặc không đọc được.",
     "DOCUMENT_NOT_READY": "Tài liệu chưa sẵn sàng để hỏi đáp.",
     "DOCUMENT_EMBEDDING_UNAVAILABLE": "Chức năng xử lý tài liệu hiện chưa khả dụng.",
-    "DOCUMENT_PROCESSING_FAILED": "Xử lý tài liệu thất bại. Vui lòng xóa và tải lên lại."
+    "DOCUMENT_PROCESSING_FAILED": "Xử lý tài liệu thất bại. Vui lòng xóa và tải lên lại.",
+    "DOCUMENT_SUMMARY_FAILED": "Tóm tắt tài liệu thất bại. Vui lòng thử lại."
   },
   "roles": {
     "ADMIN": "Quản trị viên",
@@ -208,7 +209,8 @@
       "download": "Tải xuống",
       "delete": "Xóa",
       "ask": "Hỏi tài liệu",
-      "askDisabled": "Chỉ hỏi được tài liệu đã sẵn sàng"
+      "askDisabled": "Chỉ hỏi được tài liệu đã sẵn sàng",
+      "summarize": "Tóm tắt"
     },
     "deleteDialog": {
       "title": "Xóa tài liệu?",
@@ -226,6 +228,14 @@
       "empty": "Chưa có tài liệu sẵn sàng. Hãy tải lên và chờ xử lý xong.",
       "start": "Bắt đầu hỏi",
       "cancel": "Hủy"
+    },
+    "summary": {
+      "title": "Tóm tắt tài liệu",
+      "pending": "Đang tóm tắt tài liệu, vui lòng chờ…",
+      "failed": "Tóm tắt chưa thành công.",
+      "retry": "Thử lại",
+      "close": "Đóng",
+      "model": "Mô hình: {model}"
     }
   },
   "profile": {

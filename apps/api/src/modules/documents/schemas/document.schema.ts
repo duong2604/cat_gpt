@@ -35,6 +35,22 @@ export class DocumentEntity {
   @Prop({ type: Date, default: null })
   deletedAt: Date | null;
 
+  /** Tóm tắt (SE-016): sinh một lần, lưu lại — mở lại không gọi LLM lần hai. */
+  @Prop({ type: String, default: null })
+  summary: string | null;
+
+  @Prop({ type: String, enum: ['PENDING', 'READY', 'FAILED'], default: null })
+  summaryStatus: string | null;
+
+  @Prop({ type: String, default: null })
+  summaryErrorCode: string | null;
+
+  @Prop({ type: String, default: null })
+  summaryModel: string | null;
+
+  @Prop({ type: Date, default: null })
+  summarizedAt: Date | null;
+
   createdAt: Date;
   updatedAt: Date;
 }

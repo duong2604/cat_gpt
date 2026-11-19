@@ -149,4 +149,27 @@ export class VectorStoreService {
     });
     return result.count;
   }
+
+  /** Mọi đoạn của một tài liệu, sắp theo `chunkIndex` (SE-016: tóm tắt toàn bộ nội dung). */
+  async scrollByDocumentId(documentId: string): Promise<{ chunkIndex: number; text: string }[]> {
+    const { exists } = await this.client.collectionExists(this.collection);
+    if (!exists) return [];
+    const chunks: { chunkIndex: number; text: string }[] = [];
+    let offset: string | number | Record<string, unknown> | null | undefined;
+    do {
+      const page = await this.client.scroll(this.collection, {
+        filter: { must: [{ key: 'documentId', match: { value: documentId } }] },
+        limit: 256,
+        with_payload: true,
+        with_vector: false,
+        offset,
+      });
+      for (const point of page.points) {
+        const payload = point.payload as Record<string, unknown>;
+        chunks.push({ chunkIndex: Number(payload.chunkIndex), text: String(payload.text) });
+      }
+      offset = page.next_page_offset;
+    } while (offset !== null && offset !== undefined);
+    return chunks.sort((a, b) => a.chunkIndex - b.chunkIndex);
+  }
 }
