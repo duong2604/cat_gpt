@@ -1,6 +1,6 @@
 # SE-014 — Module 4, backend: hỏi đáp có trích dẫn (`RagService`)
 
-Trạng thái: Đang làm
+Trạng thái: Chờ Review
 Người phụ trách: Senior Dev · Ưu tiên: **P0** (Module 4 — CTO 18/11/2026 (chỉ thị chuẩn bị Module 4)) · Ước lượng: 3 ngày làm việc
 Phụ thuộc (gate kỹ thuật): [SE-011](SE-011-documents-txt-backend.md) **merge** + [TL-008](TL-008-module-4-design.md) **AC4 PASS** trên `develop` (kiến trúc đã duyệt 17/11). **Thứ tự nhận (CTO 18/11/2026):** sau khi Module 3 hoàn thành theo phạm vi đã duyệt ([SE-012](SE-012-documents-txt-frontend.md), [SE-013](SE-013-documents-pdf-docx.md) merge); TL tự chuyển `Sẵn sàng` và giao khi đạt, không cần xin duyệt lại
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
@@ -105,6 +105,43 @@ Commit: `cce88f6`. TL review: **PASS** — hồi quy xác nhận độc lập tr
 Đang tiếp tục CP4 (hardening: R1–R11 đầy đủ trên bộ dữ liệu TL-009, cô lập chủ sở hữu, tài liệu xóa sau khi tạo hội thoại, lệnh chèn R11, guard `staff`, `.env` ↔ `.env.example`, CI).
 
 ## Lịch sử review
+
+### Checklist vòng 1 (CP4 — bàn giao)
+
+Commit: `24622b6` (staff guard), `6c204b2` (R11), `6e9649b` (R8). Dịch vụ thật: Mongo Atlas, Redis/MinIO/Qdrant (compose local), OpenAI `gpt-5.4-mini` + `text-embedding-3-small`, `LLM_PROVIDER=openai`, dữ liệu thử công khai (TL-009 + tài khoản thử tạm `cp4-tester-*@example.test`, đã xóa).
+
+| Tiêu chí | Kết quả | Bằng chứng |
+|---|---|---|
+| R1 câu có đáp án → ≥1 trích dẫn, `quote` là chuỗi con của payload | 5/6 có trích dẫn; cả 5 `quote` đều là chuỗi con (q01 không có trích dẫn — xem giới hạn) | script R1 trên 6 tài liệu TL-009 |
+| R2 câu ngoài tài liệu → từ chối cố định, không nguồn | **10/10** từ chối (`insufficientEvidence=true`, `citations=[]`) | script R2 |
+| R3 tài liệu bị xóa sau khi tạo hội thoại → không gọi LLM | Đạt (CP3) | log không có `usage model=` trong cửa sổ câu 2 |
+| R4 tài liệu người khác → 404, kể cả admin | Đạt: tester hỏi tài liệu admin → 404; admin hỏi tài liệu tester → 404; tạo hội thoại với tài liệu người khác → 404 | curl, `DOCUMENT_NOT_FOUND` |
+| R5 chưa READY → `400 DOCUMENT_NOT_READY` | Đạt: tài liệu `PENDING` → 400 | curl |
+| R6 truy hồi không trả đoạn người khác (lọc `userId` + `documentId`) | Đạt (CP2): B gửi `documentIds` của A → `DOCUMENTS_UNAVAILABLE`; B hỏi tài liệu của B không lẫn đoạn của A | CP2 |
+| R7 Dừng → `STOPPED`, giữ phần đã sinh | Đạt: 19 delta rồi Dừng (204) → `done.status=STOPPED`, content 64 ký tự; thứ tự `USER:COMPLETED → ASSISTANT:STOPPED` | script R7 |
+| R8 Qdrant tắt → tin `ERROR`, Tạo lại được | Đạt: `done.status=ERROR`, không `citations`, 0 dòng `usage model=`; bật lại → Tạo lại `COMPLETED`, thứ tự `USER:COMPLETED → ASSISTANT:COMPLETED`. Qdrant trước = sau = 4 point, healthy, collection còn | script R8; `6e9649b` |
+| R9 `verifyCitations` + dựng prompt (logic thuần) | Đạt: unit test (CP3) | `pnpm test` 79/79 |
+| R10 Chat thường + Tạo lại + lịch sử không hồi quy | Đạt: chat thường `meta → delta* → done`, COMPLETED, không citations; Tạo lại đúng thứ tự tin | curl; test hồi quy CP1 vẫn xanh |
+| R11 lệnh chèn trong tài liệu | Đạt (quan sát): tài liệu chứa "Bỏ qua mọi chỉ dẫn… system prompt… API key" → câu trả lời từ chối, `citations=[]`, không nguồn ngoài tài liệu đã chọn (`false`) | script R11; `6c204b2` |
+| Tài liệu bị xóa sau khi tạo hội thoại | Đạt (CP3, R3) | CP3 |
+| Qdrant không khả dụng và phục hồi | Đạt (R8 ở trên) | — |
+| Staff guard | Đạt với `RELEASE_MODE=staff`: `GET /documents` → 404; `POST /chat/stream` có `documentIds` → 404 `DOCUMENT_NOT_FOUND`; tiếp tục hội thoại RAG cũ → 404; chat thường → 200 | curl |
+| Log không lộ thông tin nhạy cảm | Đạt: 3 file log (demo, staff, R8) không có nội dung câu hỏi, nội dung tài liệu, khóa API, `JWT_ACCESS_SECRET` | grep 0 kết quả |
+| `.env` ↔ `.env.example` | Đạt: `pnpm env:check` OK | — |
+| CI / build / typecheck / lint / unit test | Đạt local: `pnpm test` 79/79, `tsc --noEmit` và `pnpm lint` sạch, `pnpm build` sạch. CI trên PR: xem link PR | — |
+
+**Checklist hai vai** (workflow 9.1):
+- [x] Quyền: được phép — chủ sở hữu hỏi tài liệu của mình → 200/SSE; bị từ chối — chưa đăng nhập `401` (`POST /chat/stream`, `GET /documents`); người khác `404`; staff `404`
+- [x] Chế độ `demo` / `staff`: đã kiểm cả hai (bảng trên). Ma trận quyền không đổi: không có endpoint mới; hỏi tài liệu dùng `POST /chat/stream` sẵn có, quyền tài liệu theo CS-1 / M3-2
+- [x] Dữ liệu thử đã dọn: Mongo 0, Qdrant point 0 cho tài liệu thử, MinIO 0 object; tài khoản thử đã xóa; hội thoại thử đã xóa
+- [ ] Trạng thái trống / tải / lỗi / thành công, desktop + mobile, sáng + tối, vi + en — Không áp dụng (backend, UI ở SE-015)
+
+**Giới hạn còn lại (ghi cho SE-017 đo, không chặn merge — TL 19/11/2026):**
+- q01 ("Nhân viên chính thức được nghỉ phép năm bao nhiêu ngày?"): truy hồi có đoạn đúng (`noi-bo-nghi-phep.txt#1`) ở hạng 2 (score 0.681), model vẫn trả nguyên văn câu từ chối. Lỗi sinh câu trả lời, không phải truy hồi. Chưa chỉnh prompt.
+- Tỷ lệ R1 5/6, R2 10/10 là mẫu nhỏ; đo đầy đủ ở SE-017.
+- Lịch sử gửi LLM chứa câu trả lời RAG cũ có `[n]` đánh số theo lượt trước; model có thể dùng lại số cũ và bị ánh xạ sang đoạn mới. Chưa đo; để SE-017.
+- Chất lượng trả `[n]` với prompt tiếng Việt cần vài vòng chỉnh (ước lượng ban đầu).
+- Trạng thái stream và giới hạn gửi tin trong bộ nhớ một tiến trình API (KT-4 ma trận quyền), chưa dùng nhiều instance.
 
 ## Phản hồi UI
 Không áp dụng (backend).
