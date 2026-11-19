@@ -3,14 +3,16 @@ import { Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { type Job, UnrecoverableError } from 'bullmq';
 import { Model, Types } from 'mongoose';
-import { DocumentStatus, ErrorCode } from '@cat-gpt/shared';
+import { DocumentStatus, ErrorCode, SummaryStatus } from '@cat-gpt/shared';
 import { AppConfigService } from '../../config/app-config.service.js';
+import { type LlmMessage, LlmProvider } from '../llm/llm.provider.js';
 import { chunkText } from './chunk-text.js';
 import { DocumentFilesService } from './document-files.service.js';
-import type { DeleteJobData, ProcessJobData } from './documents.service.js';
+import { type DeleteJobData, type ProcessJobData, type SummarizeJobData } from './documents.service.js';
 import { EmbeddingService } from './embedding.service.js';
 import { permanentErrorFor } from './permanent-error.js';
 import { DocumentEntity } from './schemas/document.schema.js';
+import { SUMMARY_SYSTEM_PROMPT, summarizeInGroups } from './document-summary.js';
 import {
   DocumentTooLargeToProcessError,
   DocumentUnreadableError,
@@ -38,15 +40,79 @@ export class DocumentProcessor extends WorkerHost {
     private readonly vectors: VectorStoreService,
     private readonly embeddings: EmbeddingService,
     private readonly config: AppConfigService,
+    private readonly llm: LlmProvider,
   ) {
     super();
   }
 
-  async process(job: Job<ProcessJobData | DeleteJobData>): Promise<void> {
+  async process(job: Job<ProcessJobData | DeleteJobData | SummarizeJobData>): Promise<void> {
     if (job.name === 'delete') {
       return this.handleDelete(job as Job<DeleteJobData>);
     }
+    if (job.name === 'summarize') {
+      return this.handleSummarize(job as Job<SummarizeJobData>);
+    }
     return this.handleProcess(job as Job<ProcessJobData>);
+  }
+
+  /**
+   * Tóm tắt (SE-016): đọc các đoạn từ Qdrant → map-reduce → lưu. Tài liệu đã bị xóa khi
+   * đang tóm tắt → không lưu (update có điều kiện `deletedAt: null`, thiết kế mục 8).
+   */
+  private async handleSummarize(job: Job<SummarizeJobData>): Promise<void> {
+    const { documentId } = job.data;
+    const _id = new Types.ObjectId(documentId);
+
+    const doc = await this.documentModel
+      .findOne({ _id, deletedAt: null, status: DocumentStatus.READY })
+      .lean<DocumentEntity>()
+      .exec();
+    if (!doc) {
+      this.logger.log(`documentId=${documentId} bỏ qua tóm tắt: đã bị xóa hoặc chưa READY`);
+      return;
+    }
+
+    const chunks = await this.vectors.scrollByDocumentId(documentId);
+    // Không có đoạn nào (Qdrant chưa đủ dữ liệu / tạm lỗi): ném lỗi để BullMQ thử lại.
+    if (chunks.length === 0) throw new Error('Không tìm thấy đoạn nào trong Qdrant');
+
+    const summary = await summarizeInGroups(
+      chunks.map((c) => c.text),
+      this.config.rag.summaryGroupChars,
+      (prompt) => this.complete(prompt),
+    );
+
+    const saved = await this.documentModel
+      .updateOne(
+        { _id, deletedAt: null, summaryStatus: SummaryStatus.PENDING },
+        {
+          $set: {
+            summary,
+            summaryStatus: SummaryStatus.READY,
+            summaryErrorCode: null,
+            summaryModel: this.llm.model,
+            summarizedAt: new Date(),
+          },
+        },
+      )
+      .exec();
+    if (saved.matchedCount === 0) {
+      this.logger.log(`documentId=${documentId} không lưu tóm tắt: đã bị xóa trong lúc xử lý`);
+    }
+  }
+
+  /** Gọi LLM một lần và gom toàn bộ stream (không đẩy ra client). */
+  private async complete(userPrompt: string): Promise<string> {
+    const messages: LlmMessage[] = [
+      { role: 'system', content: SUMMARY_SYSTEM_PROMPT },
+      { role: 'user', content: userPrompt },
+    ];
+    let out = '';
+    const controller = new AbortController();
+    for await (const chunk of this.llm.stream(messages, { signal: controller.signal })) out += chunk;
+    const text = out.trim();
+    if (!text) throw new Error('LLM trả về nội dung rỗng');
+    return text;
   }
 
   private async handleProcess(job: Job<ProcessJobData>): Promise<void> {
@@ -164,7 +230,21 @@ export class DocumentProcessor extends WorkerHost {
     const attempts = job.opts.attempts ?? 1;
     if (job.attemptsMade < attempts) return;
 
-    const { documentId } = job.data as ProcessJobData | DeleteJobData;
+    const { documentId } = job.data as ProcessJobData | DeleteJobData | SummarizeJobData;
+
+    if (job.name === 'summarize') {
+      await this.documentModel
+        .updateOne(
+          { _id: new Types.ObjectId(documentId), deletedAt: null, summaryStatus: SummaryStatus.PENDING },
+          { $set: { summaryStatus: SummaryStatus.FAILED, summaryErrorCode: ErrorCode.DOCUMENT_SUMMARY_FAILED } },
+        )
+        .exec();
+      // Chỉ số liệu để chẩn đoán — không ghi nội dung tài liệu (thiết kế mục 7).
+      this.logger.warn(
+        `documentId=${documentId} job=summarize errorCode=${ErrorCode.DOCUMENT_SUMMARY_FAILED} reason=${error.message}`,
+      );
+      return;
+    }
 
     if (job.name === 'delete') {
       // Hết lượt thử dọn (vd MinIO không sẵn sàng suốt): bản ghi còn deletedAt là dấu vết

@@ -184,7 +184,12 @@ export class DocumentsService {
       return { document: toDocumentDto(doc), accepted: false };
     }
     if (doc.summaryStatus === SummaryStatus.PENDING) {
-      return { document: toDocumentDto(doc), accepted: true };
+      // Job còn sống thì không xếp thêm. Job đã mất (ví dụ bị phiên bản cũ bỏ qua) thì xếp lại:
+      // trạng thái PENDING trong Mongo không tự chứng minh job đang chạy.
+      if (await this.isSummaryJobAlive(id)) return { document: toDocumentDto(doc), accepted: true };
+      await this.enqueueSummary(id, SummaryStatus.PENDING);
+      const refreshed = await this.getOwnedOrThrow(userId, id);
+      return { document: toDocumentDto(refreshed), accepted: true };
     }
 
     const _id = new Types.ObjectId(id);
@@ -205,6 +210,23 @@ export class DocumentsService {
       return { document: toDocumentDto(current), accepted: current.summaryStatus === SummaryStatus.PENDING };
     }
 
+    await this.enqueueSummary(id, doc.summaryStatus ?? null);
+    const fresh = await this.getOwnedOrThrow(userId, id);
+    return { document: toDocumentDto(fresh), accepted: true };
+  }
+
+  /** Job tóm tắt còn trong queue và chưa FAILED. */
+  private async isSummaryJobAlive(id: string): Promise<boolean> {
+    const job = await this.queue.getJob(`summarize-${id}`);
+    if (!job) return false;
+    return !(await job.isFailed());
+  }
+
+  /**
+   * Xếp job `summarize-<id>`. Job FAILED cũ còn trong queue bị xóa để xếp lại (jobId trùng sẽ
+   * bị BullMQ bỏ qua). Lỗi xếp → trả `summaryStatus` về `revertTo` rồi báo 503.
+   */
+  private async enqueueSummary(id: string, revertTo: string | null): Promise<void> {
     const jobId = `summarize-${id}`;
     try {
       await withTimeout(
@@ -227,15 +249,11 @@ export class DocumentsService {
         `Hết thời gian chờ sau ${QUEUE_ADD_TIMEOUT_MS}ms`,
       );
     } catch {
-      // Không xếp được job → trả trạng thái về như trước để có thể thử lại.
       await this.documentModel
-        .updateOne({ _id, deletedAt: null }, { $set: { summaryStatus: doc.summaryStatus ?? null } })
+        .updateOne({ _id: new Types.ObjectId(id), deletedAt: null }, { $set: { summaryStatus: revertTo } })
         .exec();
       throw new AppException(ErrorCode.DOCUMENT_QUEUE_UNAVAILABLE, HttpStatus.SERVICE_UNAVAILABLE);
     }
-
-    const fresh = await this.getOwnedOrThrow(userId, id);
-    return { document: toDocumentDto(fresh), accepted: true };
   }
 
   async download(userId: string, id: string): Promise<{ document: DocumentEntity; stream: Readable }> {
