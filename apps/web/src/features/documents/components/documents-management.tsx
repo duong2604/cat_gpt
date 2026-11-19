@@ -44,6 +44,7 @@ import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useErrorMessage } from "@/hooks/use-error-message";
 import { useDocuments, useDownloadDocument } from "../hooks";
 import { AskDocumentDialog } from "./ask-document-dialog";
+import { SummaryDocumentDialog } from "./summary-dialog";
 import { DeleteDocumentDialog } from "./delete-document-dialog";
 import { DocumentStatusBadge } from "./document-status-badge";
 import { UploadDocumentButton } from "./upload-document-button";
@@ -69,6 +70,7 @@ export function DocumentsManagement() {
   const debouncedSearch = useDebouncedValue(search.trim());
   const [deleteTarget, setDeleteTarget] = useState<DocumentDto | null>(null);
   const [askTarget, setAskTarget] = useState<DocumentDto | null>(null);
+  const [summaryTarget, setSummaryTarget] = useState<DocumentDto | null>(null);
 
   const documents = useDocuments({
     page,
@@ -162,6 +164,7 @@ export function DocumentsManagement() {
                   key={doc.id}
                   document={doc}
                   onAsk={() => setAskTarget(doc)}
+                  onSummarize={() => setSummaryTarget(doc)}
                   onDelete={() => setDeleteTarget(doc)}
                 />
               ))
@@ -194,6 +197,7 @@ export function DocumentsManagement() {
               key={doc.id}
               document={doc}
               onAsk={() => setAskTarget(doc)}
+              onSummarize={() => setSummaryTarget(doc)}
               onDelete={() => setDeleteTarget(doc)}
             />
           ))
@@ -231,6 +235,10 @@ export function DocumentsManagement() {
         <AskDocumentDialog document={askTarget} onOpenChange={(open) => !open && setAskTarget(null)} />
       ) : null}
 
+      {summaryTarget ? (
+        <SummaryDocumentDialog document={summaryTarget} onOpenChange={(open) => !open && setSummaryTarget(null)} />
+      ) : null}
+
       <DeleteDocumentDialog
         document={deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
@@ -255,10 +263,12 @@ export function DocumentsManagement() {
 function DocumentActions({
   document,
   onAsk,
+  onSummarize,
   onDelete,
 }: {
   document: DocumentDto;
   onAsk: () => void;
+  onSummarize: () => void;
   onDelete: () => void;
 }) {
   const t = useTranslations("documents");
@@ -283,6 +293,10 @@ function DocumentActions({
         <DropdownMenuItem disabled={!ready} onSelect={onAsk}>
           <MessageSquareIcon />
           {t("actions.ask")}
+        </DropdownMenuItem>
+        <DropdownMenuItem disabled={!ready} onSelect={onSummarize}>
+          <FileTextIcon />
+          {t("actions.summarize")}
         </DropdownMenuItem>
         <DropdownMenuItem
           disabled={!ready || download.isPending}
@@ -318,10 +332,12 @@ function DocumentNameCell({ document }: { document: DocumentDto }) {
 function DocumentRow({
   document,
   onAsk,
+  onSummarize,
   onDelete,
 }: {
   document: DocumentDto;
   onAsk: () => void;
+  onSummarize: () => void;
   onDelete: () => void;
 }) {
   const format = useFormatter();
@@ -339,7 +355,7 @@ function DocumentRow({
         {formatSize(document.size)} · {format.relativeTime(new Date(document.createdAt), now)}
       </TableCell>
       <TableCell>
-        <DocumentActions document={document} onAsk={onAsk} onDelete={onDelete} />
+        <DocumentActions document={document} onAsk={onAsk} onSummarize={onSummarize} onDelete={onDelete} />
       </TableCell>
     </TableRow>
   );
@@ -348,10 +364,12 @@ function DocumentRow({
 function DocumentCard({
   document,
   onAsk,
+  onSummarize,
   onDelete,
 }: {
   document: DocumentDto;
   onAsk: () => void;
+  onSummarize: () => void;
   onDelete: () => void;
 }) {
   const format = useFormatter();
@@ -368,7 +386,7 @@ function DocumentCard({
           </span>
         </div>
       </div>
-      <DocumentActions document={document} onAsk={onAsk} onDelete={onDelete} />
+      <DocumentActions document={document} onAsk={onAsk} onSummarize={onSummarize} onDelete={onDelete} />
     </div>
   );
 }
