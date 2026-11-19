@@ -45,6 +45,7 @@ export function MessageList({
               key={message.id}
               content={message.content}
               status={message.status}
+              citations={message.citations}
               onRegenerate={!stream && message === last ? onRegenerate : undefined}
             />
           ),

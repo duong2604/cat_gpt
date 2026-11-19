@@ -2,12 +2,13 @@
 
 import { CheckIcon, CopyIcon, RefreshCwIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
-import { MessageStatus } from "@cat-gpt/shared";
+import { useMemo, useState } from "react";
+import { type CitationDto, MessageStatus } from "@cat-gpt/shared";
 import { AppLogo } from "@/components/app-logo";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { citationComponents, linkCitations } from "./citations";
 import { Markdown } from "./markdown";
 
 export function UserMessage({ content }: { content: string }) {
@@ -23,23 +24,27 @@ export function UserMessage({ content }: { content: string }) {
 export function AssistantMessage({
   content,
   status,
+  citations,
   streaming = false,
   onRegenerate,
 }: {
   content: string;
   status?: MessageStatus;
+  /** Chỉ có ở tin của hội thoại hỏi tài liệu: bật nhãn trích dẫn `[n]`. */
+  citations?: CitationDto[];
   streaming?: boolean;
   /** Chỉ truyền cho câu trả lời cuối cùng. */
   onRegenerate?: () => void;
 }) {
   const t = useTranslations("chat.message");
+  const overrides = useMemo(() => (citations ? citationComponents(citations) : undefined), [citations]);
 
   return (
     <div className="group flex gap-3">
       <AppLogo className="mt-0.5 size-7 shrink-0" />
       <div className="min-w-0 flex-1 space-y-2">
         {content ? (
-          <Markdown content={content} />
+          <Markdown content={citations ? linkCitations(content) : content} overrides={overrides} />
         ) : streaming ? (
           <TypingIndicator />
         ) : (
