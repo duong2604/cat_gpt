@@ -77,6 +77,8 @@ Commit theo checkpoint: CP1 `130bf71` (nút Hỏi tài liệu), CP2 `62555d7` (h
 - [x] Ma trận quyền: không đổi — không có endpoint mới; hỏi tài liệu dùng `POST /chat/stream` sẵn có; quyền tài liệu theo CS-1/M3-2
 - [x] Dữ liệu thử đã dọn: Mongo `documents`/`users`/`conversations` của tài khoản thử = 0; tài liệu thử của admin (6) = 0; Qdrant point = 0; MinIO object = 0. Lưu ý: đã xóa nhầm 2 hội thoại không thuộc phiên này (xem giới hạn)
 
+**Quy tắc dọn dữ liệu thử (TL yêu cầu sau sự cố, 19/11/2026):** chỉ xóa theo `_id` đã ghi lại lúc tạo trong chính phiên đó; không lọc theo tiêu đề hay regex; trước khi xóa phải in danh sách id + chủ sở hữu để đối chiếu.
+
 **Giới hạn còn lại:**
 - Hội thoại `6af97fa9…` (15/11) và `6ae0bae8…` (27/10) bị xóa nhầm do lọc theo tiêu đề quá rộng; không khôi phục được từ phía ứng dụng.
 - Câu trả lời "1994" (Vịnh Hạ Long) có trích dẫn [4] nhưng đoạn trích nói về hồ sơ năm 1993: trích dẫn chỉ hỗ trợ một phần câu trả lời. Đây là chất lượng sinh câu trả lời, để SE-017 đo; không sửa trong SE-015.
