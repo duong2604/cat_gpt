@@ -11,7 +11,6 @@ import {
   Trash2Icon,
 } from "lucide-react";
 import { useFormatter, useNow, useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { DEFAULT_PAGE_SIZE, type DocumentDto, DocumentStatus, type ErrorCode } from "@cat-gpt/shared";
@@ -43,8 +42,8 @@ import {
 } from "@/components/ui/table";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useErrorMessage } from "@/hooks/use-error-message";
-import { routes } from "@/lib/routes";
 import { useDocuments, useDownloadDocument } from "../hooks";
+import { AskDocumentDialog } from "./ask-document-dialog";
 import { DeleteDocumentDialog } from "./delete-document-dialog";
 import { DocumentStatusBadge } from "./document-status-badge";
 import { UploadDocumentButton } from "./upload-document-button";
@@ -69,6 +68,7 @@ export function DocumentsManagement() {
   const [page, setPage] = useState(1);
   const debouncedSearch = useDebouncedValue(search.trim());
   const [deleteTarget, setDeleteTarget] = useState<DocumentDto | null>(null);
+  const [askTarget, setAskTarget] = useState<DocumentDto | null>(null);
 
   const documents = useDocuments({
     page,
@@ -158,7 +158,12 @@ export function DocumentsManagement() {
               </TableRow>
             ) : (
               documents.data.items.map((doc) => (
-                <DocumentRow key={doc.id} document={doc} onDelete={() => setDeleteTarget(doc)} />
+                <DocumentRow
+                  key={doc.id}
+                  document={doc}
+                  onAsk={() => setAskTarget(doc)}
+                  onDelete={() => setDeleteTarget(doc)}
+                />
               ))
             )}
           </TableBody>
@@ -185,7 +190,12 @@ export function DocumentsManagement() {
           </div>
         ) : (
           documents.data.items.map((doc) => (
-            <DocumentCard key={doc.id} document={doc} onDelete={() => setDeleteTarget(doc)} />
+            <DocumentCard
+              key={doc.id}
+              document={doc}
+              onAsk={() => setAskTarget(doc)}
+              onDelete={() => setDeleteTarget(doc)}
+            />
           ))
         )}
       </div>
@@ -217,6 +227,10 @@ export function DocumentsManagement() {
         </div>
       ) : null}
 
+      {askTarget ? (
+        <AskDocumentDialog document={askTarget} onOpenChange={(open) => !open && setAskTarget(null)} />
+      ) : null}
+
       <DeleteDocumentDialog
         document={deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
@@ -238,10 +252,17 @@ export function DocumentsManagement() {
   }
 }
 
-function DocumentActions({ document, onDelete }: { document: DocumentDto; onDelete: () => void }) {
+function DocumentActions({
+  document,
+  onAsk,
+  onDelete,
+}: {
+  document: DocumentDto;
+  onAsk: () => void;
+  onDelete: () => void;
+}) {
   const t = useTranslations("documents");
   const errorMessage = useErrorMessage();
-  const router = useRouter();
   const download = useDownloadDocument();
   const ready = document.status === DocumentStatus.READY;
 
@@ -259,10 +280,7 @@ function DocumentActions({ document, onDelete }: { document: DocumentDto; onDele
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem
-          disabled={!ready}
-          onSelect={() => router.push(`${routes.chat}?documents=${document.id}`)}
-        >
+        <DropdownMenuItem disabled={!ready} onSelect={onAsk}>
           <MessageSquareIcon />
           {t("actions.ask")}
         </DropdownMenuItem>
@@ -297,7 +315,15 @@ function DocumentNameCell({ document }: { document: DocumentDto }) {
   );
 }
 
-function DocumentRow({ document, onDelete }: { document: DocumentDto; onDelete: () => void }) {
+function DocumentRow({
+  document,
+  onAsk,
+  onDelete,
+}: {
+  document: DocumentDto;
+  onAsk: () => void;
+  onDelete: () => void;
+}) {
   const format = useFormatter();
   const now = useNow({ updateInterval: 60_000 });
 
@@ -313,13 +339,21 @@ function DocumentRow({ document, onDelete }: { document: DocumentDto; onDelete: 
         {formatSize(document.size)} · {format.relativeTime(new Date(document.createdAt), now)}
       </TableCell>
       <TableCell>
-        <DocumentActions document={document} onDelete={onDelete} />
+        <DocumentActions document={document} onAsk={onAsk} onDelete={onDelete} />
       </TableCell>
     </TableRow>
   );
 }
 
-function DocumentCard({ document, onDelete }: { document: DocumentDto; onDelete: () => void }) {
+function DocumentCard({
+  document,
+  onAsk,
+  onDelete,
+}: {
+  document: DocumentDto;
+  onAsk: () => void;
+  onDelete: () => void;
+}) {
   const format = useFormatter();
   const now = useNow({ updateInterval: 60_000 });
 
@@ -334,7 +368,7 @@ function DocumentCard({ document, onDelete }: { document: DocumentDto; onDelete:
           </span>
         </div>
       </div>
-      <DocumentActions document={document} onDelete={onDelete} />
+      <DocumentActions document={document} onAsk={onAsk} onDelete={onDelete} />
     </div>
   );
 }

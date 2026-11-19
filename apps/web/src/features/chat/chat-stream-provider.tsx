@@ -34,7 +34,8 @@ export interface ActiveStream {
 
 interface ChatStreamContextValue {
   active: ActiveStream | null;
-  send: (content: string, conversationId: string | null) => void;
+  /** `documentIds` chỉ gửi khi tạo hội thoại mới (API từ chối khi kèm `conversationId`). */
+  send: (content: string, conversationId: string | null, documentIds?: string[]) => void;
   regenerate: (conversationId: string) => void;
   stop: () => void;
 }
@@ -107,10 +108,14 @@ export function ChatStreamProvider({ children }: { children: ReactNode }) {
   );
 
   const send = useCallback(
-    (content: string, conversationId: string | null) =>
+    (content: string, conversationId: string | null, documentIds?: string[]) =>
       void run(
         "/chat/stream",
-        { content, conversationId: conversationId ?? undefined },
+        {
+          content,
+          conversationId: conversationId ?? undefined,
+          documentIds: conversationId || !documentIds?.length ? undefined : documentIds,
+        },
         { conversationId, pendingContent: content, newChatContent: conversationId ? null : content, text: "" },
       ),
     [run],
