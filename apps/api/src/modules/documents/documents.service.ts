@@ -4,7 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import type { Queue } from 'bullmq';
 import { isValidObjectId, Model, type QueryFilter, Types } from 'mongoose';
 import type { Readable } from 'node:stream';
-import { type DocumentDto, DocumentStatus, ErrorCode, type Paginated } from '@cat-gpt/shared';
+import { type DocumentDto, DocumentStatus, ErrorCode, type Paginated, SummaryStatus } from '@cat-gpt/shared';
 import { AppException } from '../../common/exceptions/app.exception.js';
 import { escapeRegex } from '../../common/utils/escape-regex.js';
 import { withTimeout } from '../../common/utils/with-timeout.js';
@@ -22,6 +22,12 @@ export interface ProcessJobData {
 export interface DeleteJobData {
   documentId: string;
 }
+export interface SummarizeJobData {
+  documentId: string;
+}
+
+/** Thiết kế mục 8: job tóm tắt thử tối đa 2 lượt. */
+const SUMMARY_JOB_ATTEMPTS = 2;
 
 const DOCX_MIME_TYPE = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 
@@ -164,6 +170,72 @@ export class DocumentsService {
 
   async getDto(userId: string, id: string): Promise<DocumentDto> {
     return toDocumentDto(await this.getOwnedOrThrow(userId, id));
+  }
+
+  /**
+   * Yêu cầu tóm tắt (SE-016). Đã có bản lưu → `accepted: false` (controller trả 200, không gọi LLM).
+   * Đang PENDING → `accepted: true` không xếp thêm job. Còn lại → đặt PENDING có điều kiện rồi
+   * xếp job `summarize-<id>`; nếu job cũ đã FAILED còn trong queue thì xóa để xếp lại.
+   */
+  async requestSummary(userId: string, id: string): Promise<{ document: DocumentDto; accepted: boolean }> {
+    const doc = await this.getOwnedOrThrow(userId, id);
+    if (doc.status !== DocumentStatus.READY) throw AppException.badRequest(ErrorCode.DOCUMENT_NOT_READY);
+    if (doc.summaryStatus === SummaryStatus.READY && doc.summary) {
+      return { document: toDocumentDto(doc), accepted: false };
+    }
+    if (doc.summaryStatus === SummaryStatus.PENDING) {
+      return { document: toDocumentDto(doc), accepted: true };
+    }
+
+    const _id = new Types.ObjectId(id);
+    const claim = await this.documentModel
+      .updateOne(
+        {
+          _id,
+          deletedAt: null,
+          status: DocumentStatus.READY,
+          summaryStatus: { $ne: SummaryStatus.PENDING },
+        },
+        { $set: { summaryStatus: SummaryStatus.PENDING, summaryErrorCode: null } },
+      )
+      .exec();
+    if (claim.matchedCount === 0) {
+      // Yêu cầu đồng thời đã thắng, hoặc tài liệu vừa bị xóa.
+      const current = await this.getOwnedOrThrow(userId, id);
+      return { document: toDocumentDto(current), accepted: current.summaryStatus === SummaryStatus.PENDING };
+    }
+
+    const jobId = `summarize-${id}`;
+    try {
+      await withTimeout(
+        (async () => {
+          const old = await this.queue.getJob(jobId);
+          if (old && (await old.isFailed())) await old.remove();
+          await this.queue.add(
+            'summarize',
+            { documentId: id } satisfies SummarizeJobData,
+            {
+              jobId,
+              attempts: SUMMARY_JOB_ATTEMPTS,
+              backoff: { type: 'exponential', delay: JOB_BACKOFF_DELAY_MS },
+              removeOnComplete: true,
+              removeOnFail: { age: FAILED_JOB_RETENTION_SECONDS },
+            },
+          );
+        })(),
+        QUEUE_ADD_TIMEOUT_MS,
+        `Hết thời gian chờ sau ${QUEUE_ADD_TIMEOUT_MS}ms`,
+      );
+    } catch {
+      // Không xếp được job → trả trạng thái về như trước để có thể thử lại.
+      await this.documentModel
+        .updateOne({ _id, deletedAt: null }, { $set: { summaryStatus: doc.summaryStatus ?? null } })
+        .exec();
+      throw new AppException(ErrorCode.DOCUMENT_QUEUE_UNAVAILABLE, HttpStatus.SERVICE_UNAVAILABLE);
+    }
+
+    const fresh = await this.getOwnedOrThrow(userId, id);
+    return { document: toDocumentDto(fresh), accepted: true };
   }
 
   async download(userId: string, id: string): Promise<{ document: DocumentEntity; stream: Readable }> {
