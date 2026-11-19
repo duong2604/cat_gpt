@@ -128,5 +128,44 @@ Commit: `4fbabb8` (hộp thoại dùng `Markdown` của Chat; worker cảnh báo
 - Map-reduce một lượt; với nhiều nhóm bản gộp có thể vượt `RAG_SUMMARY_GROUP_CHARS`.
 - Danh sách tài liệu vẫn trả kèm `summary` (payload lớn hơn).
 
+#### Review vòng 2
+
+TL review vòng 2 SE-016 (`7e7375a`, code `4fbabb8`). Phần markdown và log WARN khi bị cắt: diff **đạt**. Tuy vậy, việc SE phát hiện vẫn khiến **AC1 chưa đạt**: một bản tóm tắt dừng giữa câu thì không dùng được, kể cả với tài liệu ngắn. TL quyết **Cần sửa vòng 2**. Hãy ghi nguyên văn yêu cầu dưới đây vào `#### Review vòng 2` trong task SE-016.
+
+1. **AC1: bản tóm tắt bị cắt bởi `max_output_tokens`** (500 token).
+   - Tái hiện: tóm tắt `noi-bo-nghi-phep.txt`, log có WARN, hộp thoại dừng giữa câu.
+   - Hướng sửa: **chỉ sửa prompt**, tức `SUMMARY_SYSTEM_PROMPT` và/hoặc `mapPrompt`/`reducePrompt`. Yêu cầu độ dài cụ thể, ví dụ "tối đa khoảng 150–200 từ, kết thúc trọn câu", áp dụng cho cả bản nhóm lẫn bản gộp.
+   - Không làm: nâng `LLM_MAX_OUTPUT_TOKENS`, thêm biến cấu hình, đổi `LlmProvider` hay kiến trúc. Nếu chỉnh prompt mà vẫn bị cắt, dừng lại và báo TL số liệu; TL sẽ trình CTO.
+   - Kiểm lại trên API thật với 3 tài liệu TL-009: `noi-bo-nghi-phep` (1 nhóm), `wiki-pho` và `wiki-vinh-ha-long` (nhiều nhóm). Cần thấy: **0 dòng WARN "bị cắt"** trong cửa sổ chạy; tóm tắt kết thúc trọn câu và vẫn nêu ý chính. Ghi số ký tự từng bản; dán đoạn cuối mỗi bản (≤ 1 câu).
+   - Unit test hiện có phải vẫn xanh.
+2. Chụp nốt các ảnh UI còn thiếu: desktop sáng/vi và 375px sáng/en.
+
+Sau khi sửa: cùng PR #32, `### Checklist vòng 3`, chuyển `Chờ Review`, báo SHA mới. Giữ app chạy ở SHA mới. Dọn dữ liệu theo id.
+
+### Checklist vòng 3 (sửa theo Review vòng 2)
+
+Commit: code `7bbddda` (chỉ `document-summary.ts`: prompt; không đổi backend, `LlmProvider`, `LLM_MAX_OUTPUT_TOKENS`). Gate: API `tsc` OK, `lint` OK, `pnpm test` 83/83 OK.
+
+Thay đổi prompt: `SUMMARY_SYSTEM_PROMPT` thêm "Luôn kết thúc bằng câu trọn vẹn, không dừng giữa câu"; `mapPrompt` yêu cầu "tối đa khoảng 100–150 từ, kết thúc trọn câu"; `reducePrompt` yêu cầu "tối đa khoảng 150–200 từ, kết thúc trọn câu". Bản nhóm đặt ngắn hơn để bản gộp còn chỗ trong 500 token.
+
+Kiểm trên API thật (`LLM_PROVIDER=openai`, `gpt-5.4-mini`, `LLM_MAX_OUTPUT_TOKENS=500` giữ nguyên), tài khoản thử `tl-review-se016-a`:
+
+| Tài liệu TL-009 | Số nhóm | Trạng thái | Độ dài | Dòng WARN "bị cắt" | Câu cuối (trích) |
+|---|---|---|---|---|---|
+| `noi-bo-nghi-phep.txt` | 1 | READY (3 s) | 683 ký tự, ~151 từ | 0 | "…làm việc từ xa tối đa 4 ngày/tháng và phòng Nhân sự là đầu mối hỗ trợ." |
+| `wiki-pho.txt` | nhiều | READY (14 s) | 910 ký tự, ~204 từ | 0 | "…tháng 8/2024 phở Hà Nội cùng phở Nam Định được công nhận là Di sản văn hóa phi vật thể quốc gia." |
+| `wiki-vinh-ha-long.txt` | nhiều | READY (27 s) | 965 ký tự, ~211 từ | 0 | "…nên đã có nhiều biện pháp bảo tồn được triển khai." |
+
+- Cửa sổ chạy: 0 dòng WARN "bị cắt" trên 11 lần gọi `usage model=` (log `api-v3`).
+- Cả ba bản kết thúc trọn câu và vẫn nêu ý chính (tài liệu quy định nghỉ phép; phở; Vịnh Hạ Long).
+- `wiki-vinh-ha-long` dài khoảng 211 từ, hơi vượt khung 150–200 từ của bản gộp nhưng vẫn trọn câu; ghi nhận, không ảnh hưởng AC1.
+
+**Ảnh UI còn thiếu (vòng 2) — đã chụp:**
+- Desktop sáng/vi: hộp thoại tóm tắt `wiki-vinh-ha-long` (bản mới, kết thúc trọn câu).
+- 375px sáng/en: trang Tài liệu (bố cục đúng, không tràn) và hộp thoại "Document summary".
+- Đã có từ vòng 2: desktop sáng/en, desktop tối/vi, 375px tối/vi. Chưa kiểm: desktop tối/en và 375px en/tối — không nằm trong yêu cầu vòng 3.
+
+**Dọn dữ liệu theo id:** 3 tài liệu thử vòng 3 (`6aff390f…dcd6a`, `…dcd6c`, `…dcd6e`) do `tl-review-se016-a` tạo đã xóa (204); tài khoản đếm lại 0 tài liệu. Hai tài khoản `tl-review-se016-a/b` giữ lại.
+
 ## Phản hồi UI
 Hộp thoại "Tóm tắt tài liệu" (vi/en) hiển thị trạng thái và bản tóm tắt dạng markdown; mục menu "Tóm tắt" ở dòng tài liệu READY. Ảnh lưu tại thư mục ảnh chụp của Chrome, không commit vào repo.
