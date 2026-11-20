@@ -1,6 +1,6 @@
 # TL-009 — Bộ dữ liệu và quy trình đánh giá RAG tiếng Việt
 
-Trạng thái: Done — CTO duyệt vòng 1 (AC1–AC4) 18/11/2026 22:10
+Trạng thái: Chờ Review (vòng 2: nhãn nhiều đoạn nguồn hợp lệ, theo yêu cầu CTO 20/11/2026) — vòng 1 CTO duyệt 18/11/2026 22:10
 Người phụ trách: TL · Ưu tiên: P2 · Ước lượng: 1 ngày làm việc
 Phụ thuộc: chọn tài liệu + viết câu hỏi: **không chặn**. Gắn nhãn `chunkIndex`: [SE-011](SE-011-documents-txt-backend.md) merge (cần đoạn thật). Sinh viên có thể bổ sung tài liệu thử công khai
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
@@ -78,6 +78,16 @@ Chọn và tải tài liệu công khai, viết câu hỏi + `answer_points`. G�
 **Giới hạn** — Chỉ q39 thực sự trải trên 2 đoạn: tài liệu nội bộ ngắn nên các câu `multi` khác có đủ ý trong một đoạn. Chưa có câu hỏi xuyên nhiều tài liệu. Cả hai ghi ở README; bổ sung nếu SE-017 cần.
 
 **Trạng thái** — Done (CTO duyệt 18/11/2026).
+
+### Checklist vòng 2
+Yêu cầu CTO 20/11/2026: nhãn hỗ trợ nhiều đoạn nguồn hợp lệ cho cùng câu hỏi; bảo toàn nhãn gốc, ghi lý do; chạy lại đánh giá; không đổi code sản phẩm; không chạy `text-embedding-3-large`.
+- [x] Nhãn gốc bảo toàn — Đạt — `questions.v1.jsonl`, `questions.src.v1.json` là bản vòng 1 nguyên vẹn. Bằng chứng: `git diff` vòng này không đổi hai tệp đó.
+- [x] Nhãn vòng 1 **không cũ** (đính chính phát hiện của SE-017 vòng 1) — Đạt — sinh đoạn bằng `chunkText` của ứng dụng trên tài liệu LF (nội dung repo) → 209 đoạn, `label.py` sinh lại `questions.jsonl` **không khác một byte** so với vòng 1. "22/50 nhãn lệch, 175 đoạn" của SE-017 vòng 1 là do chạy trên bản checkout CRLF (`core.autocrlf=true`): CR LF CR LF không khớp dấu tách đoạn LF LF nên ranh giới đoạn đổi. Biện pháp: `docs/evaluation/rag-dataset/.gitattributes` ép `docs/*.txt` luôn LF.
+- [x] Nhiều đoạn hợp lệ — Đạt — 7 câu thêm cụm bằng chứng nguyên văn (trường `evidence`), lý do ghi ở trường `label_note` của từng câu: q23, q26, q27, q31, q32, q38, q39. Tổng gold 41 → 56. Tiêu chí: đoạn **tự nó** trả lời được ý chính của câu hỏi; loại đoạn chỉ nhắc số liệu ngẫu nhiên (ví dụ `wiki-vinh-ha-long` #36 "trên 1.969 đảo" khi nói về hang động; `wiki-ao-dai` #12 "năm 1935" nói về chuyến đi). Chi tiết: [README bộ dữ liệu — Lịch sử nhãn](../evaluation/rag-dataset/README.md#lịch-sử-nhãn).
+- [x] `answer_points` q38 — sửa — thêm ý lần công nhận thứ 3 (2023) vì nguồn có; lý do ở `label_note`.
+- [x] Chạy lại đánh giá — Đạt — [SE-017 Review vòng 3](SE-017-rag-evaluation-script.md#review-vòng-3); bảng so sánh: [TL-RERUN-2026-11-21](../evaluation/rag-dataset/results/TL-RERUN-2026-11-21.md). Không đổi code sản phẩm, không đổi `rag-eval.mjs`.
+- [ ] Ứng viên gold bỏ sót sau khi chạy lại — **chưa áp dụng, có chủ đích**: q22 `wiki-pho` #12 ("ninh từ xương ống của bò") là nguồn hợp lệ; không thêm sau khi đã xem kết quả để tránh chỉnh nhãn theo kết quả. Đưa vào vòng nhãn sau, trước lượt đo của task cải thiện RAG.
+- [ ] CTO duyệt vòng 2 — chờ.
 
 ## Phản hồi UI
 Không áp dụng.

@@ -50,3 +50,24 @@ Vì vậy nhãn `{file, chunkIndex}` đối chiếu được trực tiếp với
 ## Chỉ số và rubric
 
 Định nghĩa: [TL-009 — Kế hoạch bộ dữ liệu](../../tasks/TL-009-rag-evaluation-dataset.md#kế-hoạch-bộ-dữ-liệu-tl-chuẩn-bị-18112026). Gồm hit@k (k = 1, 3, 5), MRR, refusal accuracy, false refusal, citation precision / coverage, và rubric 0–2 theo `answer_points`.
+
+## Lịch sử nhãn
+
+**Ký tự xuống dòng phải là LF.** Bộ chia đoạn tách đoạn văn theo hai lần xuống dòng LF. Trên Windows với `core.autocrlf=true`, tệp checkout ra CRLF, khiến số đoạn đổi từ 209 thành 175 và nhãn `chunkIndex` không còn khớp. `.gitattributes` trong thư mục này ép `docs/*.txt` luôn LF. Bản checkout cũ đang có CRLF thì xóa 6 tệp `.txt` trong `docs/` rồi chạy `git checkout -- docs/evaluation/rag-dataset/docs` để lấy lại bản LF (không đổi nội dung repo). Kiểm: `git ls-files --eol docs/evaluation/rag-dataset/docs` phải ghi `w/lf`.
+
+| Vòng | Ngày | Tệp | Thay đổi |
+|---|---|---|---|
+| 1 | 18/11/2026 | `questions.v1.jsonl`, `questions.src.v1.json` (bản lưu) | Một cụm bằng chứng (hoặc một cụm mỗi ý với câu `multi`) → 41 gold |
+| 2 | 20/11/2026 | `questions.jsonl`, `questions.src.json` | Yêu cầu CTO: chấp nhận mọi đoạn **tự nó** trả lời được ý chính. Thêm cụm bằng chứng nguyên văn cho 7 câu → 56 gold. Lý do từng câu ở trường `label_note`. q38 thêm ý lần công nhận 2023 vào `answer_points` |
+
+Câu đổi ở vòng 2 (chỉ số đoạn theo 209 đoạn LF):
+
+| Câu | Gold vòng 1 | Gold vòng 2 | Đoạn thêm chứa |
+|---|---|---|---|
+| q23 | `wiki-ao-dai` 0 | 0, 8, 10 | #8 Lemur Cát Tường cải cách áo ngũ thân; #10 Cát Tường đưa ra mẫu Lemur (1934) |
+| q26 | `wiki-vinh-ha-long` 8 | 1, 8, 10, 16, 70 | Mỗi đoạn nêu tổng số 1.969 đảo (chỉ #8 có "989 đảo có tên") |
+| q27 | 4 | 4, 71 | #71 mục "Di sản thế giới lần 1", ngày 17/12/1994 |
+| q31 | 4 | 4, 92 | #92 mục "Trong thi ca", Nguyễn Trãi, "Lộ nhập Vân Đồn" |
+| q32 | `wiki-dong-bang-song-cuu-long` 0 | 0, 25 | #25 mục dân cư, 15,7 triệu người (2024) |
+| q38 | 4 | 4, 71, 76, 77 | #71 lần 1 (1994, thẩm mỹ), #76 lần 2 (2000, tiêu chuẩn viii), #77 lần 3 (2023) |
+| q39 | 8, 10 | 1, 8, 10, 16, 70 | Như q26 (ý 1.969 đảo); #10 có cả ý "40 đảo có dân" |

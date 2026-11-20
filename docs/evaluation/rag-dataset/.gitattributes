@@ -1,0 +1,3 @@
+# TL-009: tài liệu đánh giá luôn checkout LF để chunkText cho cùng số đoạn trên mọi máy.
+# Với CRLF, hai lần xuống dòng là CR LF CR LF, không khớp dấu tách đoạn LF LF: 209 đoạn thành 175.
+docs/*.txt text eol=lf
