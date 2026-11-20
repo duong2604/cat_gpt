@@ -1,13 +1,13 @@
 # SE-015 — Module 4, giao diện: hỏi tài liệu và hiển thị trích dẫn
 
-Trạng thái: Chờ Review
+Trạng thái: Done
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 2 ngày làm việc
 Phụ thuộc (gate): [SE-014](SE-014-rag-qa-backend.md) merge **và** [SE-012](SE-012-documents-txt-frontend.md) merge (cả hai chặn); kiến trúc TL-008 đã duyệt. **Đạt 19/11/2026** (SE-014 → `124ccee`, SE-012 → `cd386e5`); TL chuyển `Sẵn sàng`
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
-Ngày thực tế: bắt đầu — 19/11/2026 · bàn giao review — 19/11/2026 · hoàn tất —
+Ngày thực tế: bắt đầu — 19/11/2026 · bàn giao review — 19/11/2026 · hoàn tất — 20/11/2026
 Chốt: 17/11/2026 — Q-M4-1 (chỉ lối vào trang Tài liệu), Q-M4-3; nội dung task chuẩn bị 18/11/2026
 SHA cơ sở: `origin/develop` @ `605fd5e`
-PR: <link>
+PR: https://github.com/duong2604/cat_gpt/pull/31 (head `0756c68`, merge `3cf1d73`)
 
 ## Mục tiêu
 Từ trang Tài liệu (nút "Hỏi tài liệu", chọn sẵn tài liệu đó — Q-M4-1, CTO chốt 17/11/2026), người dùng chọn tài liệu `READY`, hỏi và thấy câu trả lời hiện dần kèm nhãn trích dẫn bấm được để xem đoạn nguồn; thấy rõ khi tài liệu không đủ căn cứ.
@@ -47,7 +47,7 @@ Từ trang Tài liệu (nút "Hỏi tài liệu", chọn sẵn tài liệu đó 
 2 ngày, giữ nguyên. Khung Chat, SSE và trang Tài liệu (SE-012) đã có; phần mới là hộp thoại chọn tài liệu, popover trích dẫn và các trạng thái.
 
 ## Kết quả review
-Chưa có.
+**TL 20/11/2026: Đạt, đã merge.** [PR #31](https://github.com/duong2604/cat_gpt/pull/31) · SHA đã review `0756c68` (code trùng `5eba8b2`; commit cuối chỉ sửa file task) · merge vào `develop` @ `3cf1d73`. Chi tiết: [Review vòng 1](#review-vòng-1).
 
 ## Lịch sử review
 
@@ -86,6 +86,37 @@ Commit theo checkpoint: CP1 `130bf71` (nút Hỏi tài liệu), CP2 `62555d7` (h
 - `DOCUMENT_NOT_READY` chưa kiểm trên UI (đã có ở API từ SE-014).
 - Không ghi GIF luồng chính; bằng chứng là ảnh chụp.
 - Chất lượng `[n]` trong lịch sử (lượt trước) và q01 vẫn thuộc SE-017.
+
+#### Review vòng 1
+**Task** — SE-015 · PR https://github.com/duong2604/cat_gpt/pull/31 · SHA đã review `0756c68` · vòng 1
+**Kết luận** — Đạt. Merge bằng `--match-head-commit 0756c68` → `develop` @ `3cf1d73`.
+**Checklist** (TL tự kiểm trên Chrome, app chạy `5eba8b2` = code của head, `LLM_PROVIDER=openai`, chế độ `demo`; 2 tài khoản USER tạm `tl-review-se015-a/b@example.test`; A có 2 tài liệu, B có 1, đều tải qua API)
+- [x] AC1 luồng chính — Đạt — A vào `/documents` → menu "Hỏi tài liệu" của `noi-bo-nghi-phep.txt` → hộp thoại chọn sẵn tài liệu đó (Đã chọn 1/5), chỉ liệt kê 2 tài liệu READY của A → "Bắt đầu hỏi" → `/chat?documents=…`, thanh "Tài liệu:" hiện đúng tên → hỏi q03 → câu trả lời hiện dần, có nhãn `1` → bấm nhãn: popover "Nguồn 1", tên tài liệu và đoạn trích khớp nội dung câu trả lời. Nhãn trên UI khớp API: `[1]` ↔ chunk 1, `[3]` ↔ chunk 2 (`GET …/messages`)
+- [x] AC2 — Đạt — câu ngoài tài liệu ("Thủ đô của Pháp là gì?") → câu từ chối cố định + nhãn "Không đủ căn cứ trong tài liệu đã chọn.", không có nhãn nguồn. Nhãn `ungrounded` "Câu trả lời chưa có nguồn kiểm chứng" hiện trên UI (tái hiện qua tin Dừng trước token đầu)
+- [x] AC3 — Đạt — A chỉ thấy 2 tài liệu của A; B chỉ thấy `wiki-ao-dai.txt`. B mở `/chat?documents=<id tài liệu A>` → thanh tài liệu ghi "Đã bị xóa" (không lộ tên), gửi tin → toast "Không tìm thấy tài liệu.", không tạo hội thoại. B mở `/chat/<id hội thoại A>` → "Không tìm thấy cuộc trò chuyện". API với cookie B: tài liệu, hội thoại, tin của A → 404. Giới hạn 5 tài liệu: theo bằng chứng SE + code `toggle()`
+- [x] AC4 — Đạt — 375px (iframe 372px vì cửa sổ Chrome không thu nhỏ được): `scrollWidth` = chiều rộng, không phần tử nào tràn; popover nguồn nằm gọn. Đã xem tối + en (desktop) và sáng + vi (375px), nhãn dịch đúng. Trạng thái tải / lỗi / `staff`: theo bằng chứng SE. Hộp thoại trống: theo code (`Empty`)
+- [x] AC5 — Đạt — B, Chat thường: gửi → hiện dần → **Dừng** → "Đã dừng" → **Tạo lại** → câu mới (TRUNCATED) → tải lại trang → `USER:COMPLETED → ASSISTANT:TRUNCATED`, không có thanh tài liệu, không có nhãn nguồn. Hội thoại hỏi tài liệu (A): Dừng → Tạo lại → tải lại trang → 6 tin đúng thứ tự, trích dẫn còn
+- [x] AC6 — Đạt — tại `5eba8b2`: `typecheck`, `lint`, `build` exit 0; api test 79/79. CI PR `build` SUCCESS ở `0756c68`; CLEAN. Có checklist hai vai
+- [x] Dữ liệu thử của TL — Đạt — xóa theo id ghi lúc tạo (in danh sách id + tiêu đề trước khi xóa): 2 hội thoại, 3 tài liệu (204); Qdrant đếm theo `documentId` của 3 tài liệu = 0, tổng = 0. Mongo/MinIO và 2 tài khoản tạm: SE xóa và đếm (ghi ở báo cáo ngày)
+
+**Nhận xét không chặn (ghi cho việc sau):**
+- Tin hỏi tài liệu bị Dừng trước token đầu: "Không có nội dung" + "Đã dừng" + "Câu trả lời chưa có nguồn kiểm chứng". Nhãn cuối thừa với tin rỗng (backend đặt `ungrounded=true` khi nội dung rỗng). Đề xuất: không đặt `ungrounded` khi `content` rỗng (P3).
+- Gửi tin với tài liệu không hợp lệ: toast lỗi đúng nhưng nội dung đã gõ bị mất.
+- `quote` là 300 ký tự đầu của đoạn (theo thiết kế), có thể kèm phần không liên quan (ví dụ đầu "Điều 3").
+- Sự cố xóa nhầm 2 hội thoại admin trong lúc dọn dữ liệu của SE: xem báo cáo ngày 19/11; quy tắc dọn mới đã ghi ở checklist vòng 1.
+
+**Dọn nhánh sau merge** — nhánh remote `feature/module-4-rag-frontend`: TL xóa sau khi SE chuyển khỏi nhánh. Worktree `cat_gpt-review` giữ.
+**Trạng thái** — Done.
+
+#### Xác minh tích hợp trên `develop` (TL, 20/11/2026)
+Lấp các mục vòng 1 còn dựa vào bằng chứng SE. API thật `develop` @ `09fbcff`, `LLM_PROVIDER=openai` (`gpt-5.4-mini`), `LLM_MAX_OUTPUT_TOKENS=500`, chế độ `demo`; 2 tài khoản USER tạm `tl-smoke-a/b-*@example.test` do admin tạo; 6 tài liệu TL-009. Kết quả 38/38 kiểm tra API đạt (báo cáo ngày [20/11 vòng 3](../reports/daily/2026-11-20.md)).
+- [x] Tối đa 5 tài liệu — gửi 6 `documentIds` → `400` "Tối đa 5 tài liệu mỗi hội thoại"; 5 tài liệu → trả lời, có trích dẫn đúng `wiki-pho.txt`.
+- [x] `DOCUMENT_NOT_READY` — hỏi ngay sau khi tải `wiki-vinh-ha-long.txt` (đang xử lý) → `400 DOCUMENT_NOT_READY`. Kiểm ở API; thông báo trên UI chưa chụp.
+- [x] `DOCUMENT_NOT_FOUND` — B hỏi tài liệu của A → `404 DOCUMENT_NOT_FOUND`.
+- [x] Trích dẫn — câu q03 → 1 trích dẫn `[1]` ↔ `noi-bo-nghi-phep.txt` chunk 1, nội dung khớp; câu ngoài tài liệu → `insufficientEvidence`, 0 trích dẫn.
+- [x] Chat thường không hồi quy — SSE `meta → delta… → done`, không có `citations`, lịch sử 2 tin, Tạo lại → `done`.
+- Chưa làm (không chặn): GIF luồng chính; viewport 375 px thật (vòng 1 dùng iframe 372 px). Đưa vào checklist CTO nghiệm thu trực tiếp.
+- Dữ liệu thử: xóa theo `userId` của 2 tài khoản tạm sau khi in danh sách id + chủ sở hữu; Qdrant theo `documentId` = 0, tài khoản `tl-smoke-*` còn 0.
 
 ## Phản hồi UI
 Có ảnh trình duyệt trong phiên bàn giao (ảnh lưu tại thư mục ảnh chụp của Chrome, không commit vào repo). Giao diện: nút ở menu Tài liệu; hộp thoại "Hỏi tài liệu" (vi/en); Chat có thanh "Tài liệu:" đầu hội thoại; nhãn `[n]` bấm được; câu từ chối có nhãn "Không đủ căn cứ trong tài liệu đã chọn".

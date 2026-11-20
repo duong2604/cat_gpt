@@ -1,13 +1,13 @@
 # SE-017 — Script đánh giá RAG và so sánh mô hình embedding
 
-Trạng thái: Chờ Review
+Trạng thái: Chờ Review — phần `text-embedding-3-small` đã nghiệm thu và merge (PR #33 → `09fbcff`); phần `text-embedding-3-large` **bị chặn** (chờ CTO xác nhận quyền API). Chưa `Done` vì AC2 yêu cầu bảng cho từng mô hình (TL đính chính 20/11/2026, [Review vòng 2](#review-vòng-2))
 Người phụ trách: Senior Dev · Ưu tiên: P2 · Ước lượng: 2 ngày làm việc
 Phụ thuộc (gate): [TL-009](TL-009-rag-evaluation-dataset.md) duyệt **và** [SE-014](SE-014-rag-qa-backend.md) merge (cả hai chặn); phương án mô hình CTO chọn (A cần quyền `text-embedding-3-large`)
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
-Ngày thực tế: bắt đầu — 20/11/2026 · bàn giao review — · hoàn tất —
-Chốt: 18/11/2026 — CTO chọn phương án A (`text-embedding-3-small` vs `text-embedding-3-large`); chạy `-large` chỉ sau khi xác nhận quyền API. TL-009 Done 18/11/2026; còn chờ SE-014 merge
+Ngày thực tế: bắt đầu — 20/11/2026 · bàn giao review — 20/11/2026 · hoàn tất — 20/11/2026 (phần `-small`)
+Chốt: 18/11/2026 — CTO chọn phương án A (`text-embedding-3-small` vs `text-embedding-3-large`); chạy `-large` chỉ sau khi xác nhận quyền API. TL-009 Done 18/11/2026; SE-014 merge 19/11 (`124ccee`). **CTO 19/11/2026:** được chạy `text-embedding-3-small`; **chưa chạy `-large`** khi quyền chưa xác nhận; không đổi phương án/mô hình mặc định; ghi rõ phần xong / phần bị chặn. TL chuyển `Sẵn sàng` 20/11 (sau SE-016 Done `7ff3c62`)
 SHA cơ sở: `origin/develop` @ `7ff3c62`
-PR: <link>
+PR: https://github.com/duong2604/cat_gpt/pull/33 (head `bed18f8`, merge `09fbcff`)
 
 ## Mục tiêu
 Một lệnh chạy lại được để đo chất lượng truy hồi và câu trả lời trên bộ dữ liệu TL-009, so sánh ít nhất 2 mô hình embedding, xuất bảng kết quả cho báo cáo đồ án. Mô hình so sánh theo phương án CTO chọn ở [TL-009](TL-009-rag-evaluation-dataset.md#tính-khả-thi-so-sánh-mô-hình-embedding-để-cto-quyết); đề xuất: `text-embedding-3-small` và `text-embedding-3-large`.
@@ -41,7 +41,7 @@ Một lệnh chạy lại được để đo chất lượng truy hồi và câu
 2 ngày với phương án A. Phương án B/C cộng ~0,5n (cài và kiểm Ollama, cần CTO duyệt).
 
 ## Kết quả review
-Chưa có.
+**TL 20/11/2026: phần `text-embedding-3-small` đạt, đã merge.** [PR #33](https://github.com/duong2604/cat_gpt/pull/33) · SHA đã review `bed18f8` · merge vào `develop` @ `09fbcff`. Phần `text-embedding-3-large` (AC2 cột mô hình 2) **bị chặn** theo chỉ thị CTO 19/11. Khi CTO xác nhận quyền, chạy `RAG_EVAL_PERMISSION_CONFIRMED=yes node scripts/rag-eval.mjs --model text-embedding-3-large` và bổ sung bảng so sánh (vòng mới của task này). Chi tiết: [Review vòng 1](#review-vòng-1).
 
 ## Lịch sử review
 
@@ -73,6 +73,40 @@ Commit theo checkpoint: CP1 `3e68f64` (script `apps/api/scripts/rag-eval.mjs`, n
 - Chưa đo chuỗi nhiều lượt (lịch sử, `[n]` cũ).
 
 **Dọn dữ liệu:** không có dữ liệu thử trên sản phẩm. Collection đánh giá `document_chunks_eval_text-embedding-3-small` được giữ có tên rõ (CTO/TL có thể xóa khi cần); không ghi vào collection sản phẩm.
+
+#### Review vòng 1
+**Task** — SE-017 · PR https://github.com/duong2604/cat_gpt/pull/33 · SHA đã review `bed18f8` · vòng 1
+**Kết luận** — Đạt cho phần `text-embedding-3-small`; merge bằng `--match-head-commit bed18f8` → `develop` @ `09fbcff`. Phần `-large` bị chặn (không phải lỗi bàn giao).
+**Checklist** (TL kiểm trên tệp kết quả đã commit + Qdrant + code; TL không chạy lại script vì script đọc `apps/api/.env` của thư mục SE)
+- [x] AC1 lặp lại — Đạt — 3 tệp truy hồi (hai lượt trong mỗi tiến trình, ba tiến trình) cùng hash xếp hạng `155ffd12cfca6dc5`, cùng hit@5 0,925, MRR 0,758.
+- [x] AC2 (mô hình 1) — Đạt — `-small`: hit@1 65,0%, hit@3 85,0%, hit@5 92,5%, MRR 0,758; từ chối đúng 10/10; từ chối nhầm 3/40 (q01, q09, q37); precision trích dẫn 35/43 = 81,4%; coverage 85%. TL đọc tệp `answers`: số liệu khớp, 0 câu bị cắt. **Mô hình 2: bị chặn** (guard `RAG_EVAL_PERMISSION_CONFIRMED`, ném lỗi trước mọi lệnh gọi mạng; TL đọc code).
+- [x] AC3 — Đạt — token 94.654 vào / 1.975 ra; truy hồi 11–12 s / 50 câu; trả lời 70,5 s.
+- [x] AC4 — Đạt — collection sản phẩm `document_chunks` 0 trước / 0 sau (trong tệp kết quả + TL xem Qdrant). Không có diff ở `apps/api/src`, `apps/web`, `packages`. Không có secret trong script/kết quả. typecheck/lint xanh, api test 83/83, CI `build` SUCCESS. Collection đánh giá `document_chunks_eval_text-embedding-3-small` được giữ, tên rõ (CP4).
+- [x] Nhãn gold — Chấp nhận cách SE tính lại theo `evidence`. TL xác nhận số đoạn script (wiki-pho 33, wiki-vinh-ha-long 77, noi-bo-nghi-phep 4) khớp số đoạn sản phẩm TL tự đo khi review SE-015/016. Nhãn `chunkIndex` của TL-009 (209 đoạn) đã cũ → **việc của TL**: cập nhật nhãn TL-009 (không chặn SE-017).
+
+**Ghi nhận cho TL/CTO (không chặn):**
+- Bước trả lời gọi `responses.create` trực tiếp (không stream) với cùng prompt (`LLM_SYSTEM_PROMPT` + `buildRagSystemPrompt`, nối `\n\n` như `OpenAiLlmProvider`) và `verifyCitations` của sản phẩm; không qua `RagService.prepare()` vì tài liệu đánh giá không nằm trong Mongo. Truy hồi dùng `VectorStoreService.search` như `prepare()`.
+- `RAG_MIN_SCORE`: điểm top-1 chồng lấn (có căn cứ 0,464–0,749; ngoài tài liệu 0,260–0,599). Mọi ngưỡng đều đổi lấy từ chối nhầm → TL đề xuất **giữ để trống** (prompt + câu từ chối đã đạt 10/10 câu ngoài tài liệu); CTO quyết.
+- Chưa đo: `[n]` của lượt trước (cần kịch bản nhiều lượt), rubric 0–2.
+
+**Dọn nhánh sau merge** — chờ SE chuyển khỏi nhánh; TL xóa remote.
+**Trạng thái** — Done (phần `-small`); phần `-large` bị chặn.
+
+#### Review vòng 2
+**Task** — SE-017 · PR https://github.com/duong2604/cat_gpt/pull/33 (đã merge) · `develop` @ `09fbcff` · vòng 2 (TL, 20/11/2026, theo chỉ thị CTO 20/11: chất lượng câu trả lời, chi phí, ca hallucination/trích dẫn sai)
+**Kết luận** — Phần `-small` đủ các chỉ số CTO yêu cầu (bổ sung bằng chấm tay của TL, không cần SE làm thêm). **Đính chính trạng thái:** vòng 1 ghi "Done (phần `-small`)" — không đúng workflow mục 4 (`Done` cần mọi tiêu chí đạt; AC2 cần bảng cho từng mô hình). Chuyển về **`Chờ Review`, bị chặn bởi quyền `text-embedding-3-large`**. Khi CTO xác nhận quyền: SE chạy `-large` (vòng 3), TL review bảng so sánh rồi `Done`. Nếu CTO bỏ yêu cầu so sánh: TL ghi quyết định vào `Chốt:` và chuyển `Done`.
+**Checklist** (TL kiểm trên tệp `results-text-embedding-3-small-answers-…T18-11-00-864Z.json` + văn bản đoạn lấy từ collection đánh giá `document_chunks_eval_text-embedding-3-small`; chi tiết từng câu: [`TL-REVIEW-text-embedding-3-small.md`](../evaluation/rag-dataset/results/TL-REVIEW-text-embedding-3-small.md))
+- [x] Chất lượng câu trả lời (rubric 0–2 của TL-009, TL chấm tay **40/40** câu có căn cứ, ≥ 20 theo TL-009) — điểm 2: 31 (77,5%); điểm 1: 6 (q06, q08, q16, q23, q26, q31 — đúng nhưng thiếu một ý `answer_points`); điểm 0: 3 (q01, q09, q37 — từ chối nhầm). Trung bình **1,70/2**.
+- [x] Hallucination — **0/37** câu đã trả lời có dữ kiện không nằm trong đoạn được trích. 10/10 câu ngoài tài liệu từ chối đúng, không bịa.
+- [x] Trích dẫn sai — 8/43 trích dẫn "không trúng gold" (q23, q26 ×2, q27, q31, q32, q38 ×2). TL đọc từng đoạn: **cả 8 đoạn đều chứa dữ kiện được trích** (ví dụ q26 trích #1 và #57, cả hai ghi "1.969 hòn đảo"). Precision theo đoạn hỗ trợ (TL chấm tay) = **43/43**; 81,4% là giới hạn dưới do nhãn gold chỉ ghi một đoạn trong khi dữ kiện lặp ở nhiều đoạn. → việc TL-009 (nhãn nhiều gold).
+- [x] Độ trễ — trả lời tuần tự 50 câu: p50 1,35 s, p95 2,06 s, max 2,30 s (tổng 70,5 s); truy hồi 50 câu 11–12 s.
+- [x] Chi phí — LLM `gpt-5.4-mini`: 94.654 token vào × $0,75/1M + 1.975 token ra × $4,50/1M = **≈ $0,080 / 50 câu (≈ $0,0016/câu)**, giá theo [trang model OpenAI](https://developers.openai.com/api/docs/models/gpt-5.4-mini) tra 20/11/2026. Embedding: script không ghi token; tài liệu + câu hỏi ≈ 146 nghìn ký tự → **< $0,01** với `text-embedding-3-small` (ước lượng, không phải số đo).
+- [x] Collection đánh giá riêng — `document_chunks_eval_text-embedding-3-small` 175 point; `document_chunks` (sản phẩm) không bị ghi (vòng 1).
+- [ ] So sánh mô hình 2 — **bị chặn**: chờ CTO xác nhận quyền `text-embedding-3-large`. Không gọi mô hình này.
+
+**Phát hiện cho TL-009 (việc của TL, vòng mới TL-009):** (1) nhãn `chunkIndex` cũ không khớp chunker hiện tại (22/50); (2) nhãn chỉ một gold/câu trong khi dữ kiện lặp ở nhiều đoạn → precision trích dẫn bị tính thấp; (3) q38 `answer_points` ghi 2 lần UNESCO công nhận, nguồn có lần thứ 3 (2023) — câu trả lời nêu 3 lần là đúng theo nguồn.
+**Phát hiện chất lượng (chưa có task, đề xuất sau nghiệm thu M4):** 3 câu từ chối nhầm dù đoạn đúng nằm trong top-3 (q01 hạng 3, q09 và q37 hạng 2) — prompt RAG thiên về từ chối; câu trả lời hay bỏ ý phụ (6 câu điểm 1).
+**Trạng thái** — `Chờ Review` (phần `-large` bị chặn).
 
 ## Phản hồi UI
 Không áp dụng.

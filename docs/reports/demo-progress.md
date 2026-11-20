@@ -2,6 +2,36 @@
 
 Theo mốc của [plan.md](../project/plan.md#2-mốc). Chi tiết từng ngày: [báo cáo ngày](daily/README.md). TL cập nhật cuối mỗi ngày làm việc và ngay khi phát hiện nguy cơ trễ mốc; mục mới nhất ở trên, giữ các mục cũ ([workflow mục 11](../project/workflow.md#11-theo-dõi-tiến-độ)).
 
+## Cập nhật 20/11/2026 23:40 (kiểm tích hợp M1–M4, chuẩn bị CTO nghiệm thu)
+
+Chi tiết: [20/11 vòng 3](daily/2026-11-20.md).
+
+| Mốc / việc | Tình trạng |
+|---|---|
+| Nghiệm thu M1–M4 (CTO chạy local) | **Sẵn sàng trên `develop` @ `09fbcff`**: TL kiểm API thật 38/38 đạt; hướng dẫn chạy + checklist 20 bước ở vòng 3 mục 11 |
+| Bản đóng băng `34b465d` | Khởi động được (M1 + Chat mẫu, 5/5); không có M3–M4; không sửa |
+| Module 4 | SE-014/015/016 Done; SE-017 **Chờ Review** (đính chính: phần `-small` xong, rubric 1,70/2, 0 hallucination, ≈ $0,0016/câu; `-large` chờ quyền API) |
+| Senior Dev | SE-018 (vá bảo mật) Sẵn sàng, chỉ thị đã soạn, chưa có xác nhận nhận việc |
+| Sự cố dữ liệu 19/11 | Quy tắc phòng ngừa đưa vào workflow 9.1; 2 hội thoại admin chưa khôi phục, chờ CTO |
+
+## Cập nhật 20/11/2026 01:30 (SE-017 merge)
+
+Chi tiết: [20/11 vòng 2](daily/2026-11-20.md).
+
+| Mốc / việc | Tình trạng |
+|---|---|
+| Module 4 | SE-014…SE-017 trên `develop` @ `09fbcff`; SE-017 chỉ có `text-embedding-3-small` (hit@5 92,5%, MRR 0,758); so sánh `-large` bị chặn chờ quyền API |
+
+## Cập nhật 20/11/2026 01:10 (Module 4: hỏi đáp + tóm tắt có UI)
+
+Chi tiết: [20/11 vòng 1](daily/2026-11-20.md).
+
+| Mốc / việc | Tình trạng |
+|---|---|
+| M4 Demo 20/11 | Bản đóng băng `34b465d` không đổi (M1 + Chat mẫu); chưa chạy thử khởi động; giờ demo chưa chốt |
+| Module 4 | SE-014, SE-015, SE-016 **Done** trên `develop` @ `7ff3c62` (hỏi đáp có trích dẫn + tóm tắt, có UI, TL nghiệm thu với 2 tài khoản); SE-017 đánh giá: đã giao, phần `text-embedding-3-large` bị chặn chờ quyền API |
+| Sự cố | Xóa nhầm 2 hội thoại admin khi dọn dữ liệu thử (19/11); chờ CTO quyết khôi phục |
+
 ## Cập nhật 19/11/2026 (SE-014 merge, backend Module 4)
 
 Chi tiết: [19/11 vòng 1–2](daily/2026-11-19.md).

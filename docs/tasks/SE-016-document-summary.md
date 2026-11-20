@@ -1,13 +1,13 @@
 # SE-016 — Module 4: tóm tắt tài liệu
 
-Trạng thái: Chờ Review
+Trạng thái: Done
 Người phụ trách: Senior Dev · Ưu tiên: **P1** (CTO 18/11/2026 (chỉ thị chuẩn bị Module 4)) · Ước lượng: 1,5 ngày làm việc
-Phụ thuộc (gate): [SE-012](SE-012-documents-txt-frontend.md) merge **và** [SE-014](SE-014-rag-qa-backend.md) hoàn thành (dùng chung export Module 3 + cách gọi LLM); kiến trúc TL-008 đã duyệt
+Phụ thuộc (gate): [SE-012](SE-012-documents-txt-frontend.md) merge **và** [SE-014](SE-014-rag-qa-backend.md) hoàn thành (dùng chung export Module 3 + cách gọi LLM); kiến trúc TL-008 đã duyệt. **Đạt 20/11/2026** (SE-012 `cd386e5`, SE-014 `124ccee`); thứ tự CTO 19/11: sau SE-015 (Done `3cf1d73`); TL chuyển `Sẵn sàng`
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
-Ngày thực tế: bắt đầu — 20/11/2026 · bàn giao review — 20/11/2026 ·
+Ngày thực tế: bắt đầu — 20/11/2026 · bàn giao review — 20/11/2026 · hoàn tất — 20/11/2026
 Chốt: 17/11/2026 — Q-M4-4 (job nền); nội dung task chuẩn bị 18/11/2026
 SHA cơ sở: `origin/develop` @ `3cf1d73`
-PR: <link>
+PR: https://github.com/duong2604/cat_gpt/pull/32 (head `9679358`, merge `7ff3c62`)
 
 ## Mục tiêu
 Người dùng bấm "Tóm tắt" ở một tài liệu `READY` của mình và nhận bản tóm tắt tiếng Việt dựa trên toàn bộ nội dung; bản tóm tắt được lưu để mở lại không phải sinh lại.
@@ -43,7 +43,7 @@ Người dùng bấm "Tóm tắt" ở một tài liệu `READY` của mình và 
 1,5 ngày, giữ nguyên. Queue/worker BullMQ, polling trạng thái và `LlmProvider` đã có; phần mới là `scroll`, job tóm tắt và hộp thoại.
 
 ## Kết quả review
-Chưa có.
+**TL 20/11/2026: Đạt sau 3 vòng, đã merge.** [PR #32](https://github.com/duong2604/cat_gpt/pull/32) · SHA đã review `9679358` (code `7bbddda`) · merge vào `develop` @ `7ff3c62`. Vòng 1 Cần sửa: hộp thoại hiện markdown thô. Vòng 2 Cần sửa: tóm tắt bị cắt bởi `max_output_tokens`, sửa bằng prompt, không đổi cấu hình. Chi tiết: [Review vòng 3](#review-vòng-3).
 
 ## Lịch sử review
 
@@ -166,6 +166,33 @@ Kiểm trên API thật (`LLM_PROVIDER=openai`, `gpt-5.4-mini`, `LLM_MAX_OUTPUT_
 - Đã có từ vòng 2: desktop sáng/en, desktop tối/vi, 375px tối/vi. Chưa kiểm: desktop tối/en và 375px en/tối — không nằm trong yêu cầu vòng 3.
 
 **Dọn dữ liệu theo id:** 3 tài liệu thử vòng 3 (`6aff390f…dcd6a`, `…dcd6c`, `…dcd6e`) do `tl-review-se016-a` tạo đã xóa (204); tài khoản đếm lại 0 tài liệu. Hai tài khoản `tl-review-se016-a/b` giữ lại.
+
+#### Review vòng 3
+**Task** — SE-016 · PR https://github.com/duong2604/cat_gpt/pull/32 · SHA đã review `9679358` · vòng 3
+**Kết luận** — Đạt. Merge bằng `--match-head-commit 9679358` → `develop` @ `7ff3c62`.
+**Checklist** (TL tự kiểm; API chạy `7bbddda`, `LLM_PROVIDER=openai`, chế độ `demo`; tài khoản tạm `tl-review-se016-a/b`)
+- [x] AC1 — Đạt. Vòng 1: TL đối chiếu bản tóm tắt với nguồn, đúng ý chính, không thấy ý bịa. Vòng 3: TL chạy lại 3 tài liệu `noi-bo-nghi-phep` (4 đoạn, 1 nhóm), `wiki-pho` (33 đoạn), `wiki-vinh-ha-long` (77 đoạn) → `202` → READY sau 4 / 10 / 14 s; 149 / 212 / 199 từ; cả ba kết thúc trọn câu; log có **0** dòng "bị cắt" trên 11 lần gọi LLM. Diff vòng 3 chỉ sửa prompt (`document-summary.ts`).
+- [x] AC2 S1 — Đạt — gọi lại khi READY → `200`; số dòng `usage model=` không tăng (TL đếm 3/3 và 7/7).
+- [x] AC3 — Đạt — B → `404` (POST summary, GET tài liệu của A); ẩn danh → `401`. `staff` và trường hợp chưa READY: theo bằng chứng SE + code (`getOwnedOrThrow`, `DOCUMENT_NOT_READY`).
+- [x] AC4 — Đạt (bằng chứng SE + đọc code): S2 lưu có điều kiện `deletedAt: null`; FAILED sau `attempts = 2` → `DOCUMENT_SUMMARY_FAILED`; tóm tắt lại sau FAILED → 202 (xóa job FAILED cũ rồi xếp lại).
+- [x] UI — Đạt. TL tự kiểm vòng 1: hộp thoại, trạng thái "đang tóm tắt" + polling → READY, 375px không tràn. Vòng 2: dùng component `Markdown` của Chat (TL đọc diff, 1 dòng); ảnh sáng/tối, vi/en, 375px theo bằng chứng SE.
+- [x] AC5 — Đạt — tại `9679358`: api test 83/83, `typecheck`/`lint`/`build` exit 0; CI `build` SUCCESS; CLEAN. Có checklist hai vai.
+- [x] Dữ liệu thử TL — Đạt — xóa theo id ghi lúc tạo (vòng 1: 3 tài liệu, vòng 3: 3 tài liệu), Qdrant theo `documentId` = 0. Tài khoản tạm: SE xóa.
+
+**Nhận xét không chặn:**
+- Danh sách tài liệu trả kèm `summary` (payload lớn hơn).
+- Reduce chỉ một lượt (`ponytail:` trong code).
+- Độ dài tóm tắt phụ thuộc prompt, `LLM_MAX_OUTPUT_TOKENS` = 500 chung với Chat; log WARN khi bị cắt đã có để theo dõi.
+
+**Dọn nhánh sau merge** — nhánh remote: TL xóa sau khi SE chuyển khỏi nhánh.
+**Trạng thái** — Done.
+
+#### Xác minh tích hợp trên `develop` (TL, 20/11/2026)
+API thật `develop` @ `09fbcff`, `gpt-5.4-mini`, `LLM_MAX_OUTPUT_TOKENS=500`, tài khoản tạm `tl-smoke-*` (xem [SE-015](SE-015-rag-qa-frontend.md#xác-minh-tích-hợp-trên-develop-tl-20112026)).
+- [x] AC4 S2 xóa khi job đang chạy (vòng 3 chỉ theo bằng chứng SE + code) — `POST summary` `wiki-vinh-ha-long.txt` (77 đoạn) → `202`; 0,8 s sau `DELETE` → `204`; log worker: `documentId=… không lưu tóm tắt: đã bị xóa trong lúc xử lý`; `GET` → `404`; không còn bản ghi.
+- [x] AC1 — `noi-bo-nghi-phep.txt` → READY sau 3,4 s, 149 từ, kết thúc trọn câu; không có WARN "bị cắt".
+- [x] AC2 cache — gọi lại → `200`. AC3 — B → `404`, ẩn danh → `401`.
+- Vẫn theo bằng chứng SE + code: FAILED và tóm tắt lại sau FAILED (cần giả lập lỗi LLM, không làm trên API thật); ảnh sáng/tối, vi/en của hộp thoại markdown. Đưa vào checklist CTO.
 
 ## Phản hồi UI
 Hộp thoại "Tóm tắt tài liệu" (vi/en) hiển thị trạng thái và bản tóm tắt dạng markdown; mục menu "Tóm tắt" ở dòng tài liệu READY. Ảnh lưu tại thư mục ảnh chụp của Chrome, không commit vào repo.

@@ -1,6 +1,6 @@
 # SE-018 — Nâng bản vá bảo mật phụ thuộc (`multer`, `next`)
 
-Trạng thái: Nháp
+Trạng thái: Sẵn sàng (TL chuyển 20/11/2026: gate thứ tự CTO 18/11 "sau khi SE-014 merge" đã đạt — SE-014 `124ccee`; Module 4 hết task SE. Khi TL chạy thử `34b465d` ngày 20/11, `next dev` dừng ở thông báo khuyến nghị nâng bản vá bảo mật Next.js — cùng bản `next` 16.4.2 với `develop`. Chỉ vá trên `develop`; **không** sửa bản đóng băng `34b465d`. AC1 chạy `pnpm audit --prod` tại thời điểm nhận task: advisory mới phát sinh sau 18/11 cũng phải được ghi lại)
 Người phụ trách: Senior Dev · Ưu tiên: P2 · Ước lượng: 0,25 ngày làm việc
 Phụ thuộc: không chặn kỹ thuật. **Thứ tự:** làm sau khi SE-014 merge, không xen vào SE-014 (CTO 18/11/2026)
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
