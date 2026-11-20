@@ -1,0 +1,969 @@
+{
+  "model": "text-embedding-3-small",
+  "llmModel": "gpt-5.4-mini",
+  "evalCollection": "document_chunks_eval_text-embedding-3-small",
+  "productCollection": "document_chunks",
+  "productPointsBefore": 0,
+  "chunkCounts": {
+    "noi-bo-cong-tac-phi.txt": 4,
+    "noi-bo-nghi-phep.txt": 4,
+    "wiki-ao-dai.txt": 32,
+    "wiki-dong-bang-song-cuu-long.txt": 37,
+    "wiki-pho.txt": 38,
+    "wiki-vinh-ha-long.txt": 94
+  },
+  "labelMismatchStoredChunkIndex": [],
+  "goldCounts": {
+    "q01": 1,
+    "q02": 1,
+    "q03": 1,
+    "q04": 1,
+    "q05": 1,
+    "q06": 1,
+    "q07": 1,
+    "q08": 1,
+    "q09": 1,
+    "q10": 1,
+    "q11": 1,
+    "q12": 1,
+    "q13": 1,
+    "q14": 1,
+    "q15": 1,
+    "q16": 1,
+    "q17": 1,
+    "q18": 1,
+    "q19": 1,
+    "q20": 1,
+    "q21": 1,
+    "q22": 1,
+    "q23": 3,
+    "q24": 1,
+    "q25": 1,
+    "q26": 5,
+    "q27": 2,
+    "q28": 1,
+    "q29": 1,
+    "q30": 1,
+    "q31": 2,
+    "q32": 2,
+    "q33": 1,
+    "q34": 1,
+    "q35": 1,
+    "q36": 1,
+    "q37": 1,
+    "q38": 4,
+    "q39": 5,
+    "q40": 1,
+    "o01": 0,
+    "o02": 0,
+    "o03": 0,
+    "o04": 0,
+    "o05": 0,
+    "o06": 0,
+    "o07": 0,
+    "o08": 0,
+    "o09": 0,
+    "o10": 0
+  },
+  "phase": "answers",
+  "answers": {
+    "ms": 74119,
+    "metrics": {
+      "refusalAccuracy": 1,
+      "outOfScopeCount": 10,
+      "falseRefusal": 0.05,
+      "answerableCount": 40,
+      "citationPrecision": 0.9375,
+      "citationsTotal": 48,
+      "citationsOnGold": 45,
+      "citationCoverage": 0.95,
+      "inputTokens": 87713,
+      "outputTokens": 1842,
+      "refusedAnswerableIds": [
+        "q09",
+        "q10"
+      ]
+    },
+    "rows": [
+      {
+        "id": "q01",
+        "type": "single",
+        "refused": false,
+        "answer": "Nhân viên chính thức được hưởng **14 ngày nghỉ phép năm có hưởng nguyên lương**. [1]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "noi-bo-nghi-phep.txt",
+            "chunkIndex": 1,
+            "n": 1
+          }
+        ],
+        "citationsOnGold": 1,
+        "inputTokens": 1719,
+        "outputTokens": 27,
+        "ms": 2006
+      },
+      {
+        "id": "q02",
+        "type": "single",
+        "refused": false,
+        "answer": "Có. Nhân viên chính thức được hưởng 14 ngày nghỉ phép năm; cứ đủ 5 năm làm việc liên tục thì số ngày nghỉ phép năm được cộng thêm 1 ngày. [1]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "noi-bo-nghi-phep.txt",
+            "chunkIndex": 1,
+            "n": 1
+          }
+        ],
+        "citationsOnGold": 1,
+        "inputTokens": 1663,
+        "outputTokens": 45,
+        "ms": 1506
+      },
+      {
+        "id": "q03",
+        "type": "single",
+        "refused": false,
+        "answer": "Có. Ngày nghỉ phép năm chưa dùng hết được chuyển sang năm sau, tối đa 5 ngày, và phải dùng trước ngày 31 tháng 3 của năm sau; số ngày quá hạn không được quy đổi thành tiền, trừ trường hợp nhân viên nghỉ việc. [1]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "noi-bo-nghi-phep.txt",
+            "chunkIndex": 1,
+            "n": 1
+          }
+        ],
+        "citationsOnGold": 1,
+        "inputTokens": 1644,
+        "outputTokens": 63,
+        "ms": 1626
+      },
+      {
+        "id": "q04",
+        "type": "single",
+        "refused": false,
+        "answer": "Nếu muốn nghỉ **5 ngày làm việc liên tục trở lên** thì phải gửi đề nghị nghỉ phép **ít nhất 10 ngày làm việc trước ngày nghỉ**. [1]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "noi-bo-nghi-phep.txt",
+            "chunkIndex": 2,
+            "n": 1
+          }
+        ],
+        "citationsOnGold": 1,
+        "inputTokens": 1722,
+        "outputTokens": 40,
+        "ms": 2203
+      },
+      {
+        "id": "q05",
+        "type": "single",
+        "refused": false,
+        "answer": "Nếu quá thời hạn 2 ngày làm việc mà quản lý trực tiếp chưa phản hồi, đề nghị nghỉ sẽ được chuyển lên trưởng phòng để xử lý. [1]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "noi-bo-nghi-phep.txt",
+            "chunkIndex": 2,
+            "n": 1
+          }
+        ],
+        "citationsOnGold": 1,
+        "inputTokens": 1722,
+        "outputTokens": 38,
+        "ms": 1283
+      },
+      {
+        "id": "q06",
+        "type": "single",
+        "refused": false,
+        "answer": "Nhân viên kết hôn được nghỉ 3 ngày có hưởng nguyên lương. [1]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "noi-bo-nghi-phep.txt",
+            "chunkIndex": 2,
+            "n": 1
+          }
+        ],
+        "citationsOnGold": 1,
+        "inputTokens": 1720,
+        "outputTokens": 24,
+        "ms": 1290
+      },
+      {
+        "id": "q07",
+        "type": "single",
+        "refused": false,
+        "answer": "Nhân viên nghỉ ốm từ **3 ngày liên tục trở lên** phải nộp giấy xác nhận của cơ sở y tế cho phòng Nhân sự. [1]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "noi-bo-nghi-phep.txt",
+            "chunkIndex": 3,
+            "n": 1
+          }
+        ],
+        "citationsOnGold": 1,
+        "inputTokens": 1727,
+        "outputTokens": 41,
+        "ms": 1435
+      },
+      {
+        "id": "q08",
+        "type": "single",
+        "refused": false,
+        "answer": "Nhân viên có thể đề nghị làm việc từ xa tối đa **4 ngày mỗi tháng** thay vì nghỉ phép, nếu công việc cho phép. [3]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "noi-bo-nghi-phep.txt",
+            "chunkIndex": 3,
+            "n": 3
+          }
+        ],
+        "citationsOnGold": 1,
+        "inputTokens": 1719,
+        "outputTokens": 37,
+        "ms": 1334
+      },
+      {
+        "id": "q09",
+        "type": "single",
+        "refused": true,
+        "answer": "Tôi không tìm thấy thông tin này trong các tài liệu đã chọn.",
+        "endReason": "completed",
+        "citations": [],
+        "citationsOnGold": 0,
+        "inputTokens": 1668,
+        "outputTokens": 25,
+        "ms": 1372
+      },
+      {
+        "id": "q10",
+        "type": "single",
+        "refused": true,
+        "answer": "Tôi không tìm thấy thông tin này trong các tài liệu đã chọn.",
+        "endReason": "completed",
+        "citations": [],
+        "citationsOnGold": 0,
+        "inputTokens": 1815,
+        "outputTokens": 19,
+        "ms": 998
+      },
+      {
+        "id": "q11",
+        "type": "single",
+        "refused": false,
+        "answer": "Chuyến công tác có **dự toán trên 30 triệu đồng** cần thêm chữ ký phê duyệt của **Giám đốc tài chính**. [1]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "noi-bo-cong-tac-phi.txt",
+            "chunkIndex": 0,
+            "n": 1
+          }
+        ],
+        "citationsOnGold": 1,
+        "inputTokens": 1734,
+        "outputTokens": 40,
+        "ms": 1331
+      },
+      {
+        "id": "q12",
+        "type": "single",
+        "refused": false,
+        "answer": "Không. Công tác trong nước có quãng đường **trên 300 km** mới được đi máy bay hạng phổ thông; quãng đường **từ 300 km trở xuống** thì ưu tiên đi tàu hỏa hoặc ô tô. [3]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "noi-bo-cong-tac-phi.txt",
+            "chunkIndex": 1,
+            "n": 3
+          }
+        ],
+        "citationsOnGold": 1,
+        "inputTokens": 1805,
+        "outputTokens": 58,
+        "ms": 1461
+      },
+      {
+        "id": "q13",
+        "type": "single",
+        "refused": false,
+        "answer": "Phụ cấp lưu trú công tác trong nước là **300.000 đồng mỗi ngày**. [1]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "noi-bo-cong-tac-phi.txt",
+            "chunkIndex": 1,
+            "n": 1
+          }
+        ],
+        "citationsOnGold": 1,
+        "inputTokens": 1648,
+        "outputTokens": 26,
+        "ms": 1313
+      },
+      {
+        "id": "q14",
+        "type": "single",
+        "refused": false,
+        "answer": "Tiền thuê phòng nghỉ được thanh toán tối đa **900.000 đồng mỗi đêm** tại các tỉnh, thành phố khác ngoài Hà Nội và Thành phố Hồ Chí Minh. Đà Nẵng thuộc nhóm này nên áp dụng mức tối đa **900.000 đồng/đêm**. [1]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "noi-bo-cong-tac-phi.txt",
+            "chunkIndex": 1,
+            "n": 1
+          }
+        ],
+        "citationsOnGold": 1,
+        "inputTokens": 1820,
+        "outputTokens": 68,
+        "ms": 1376
+      },
+      {
+        "id": "q15",
+        "type": "single",
+        "refused": false,
+        "answer": "Nhân viên được tạm ứng tối đa **70% dự toán chi phí đã duyệt**. [1]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "noi-bo-cong-tac-phi.txt",
+            "chunkIndex": 2,
+            "n": 1
+          }
+        ],
+        "citationsOnGold": 1,
+        "inputTokens": 1559,
+        "outputTokens": 28,
+        "ms": 1312
+      },
+      {
+        "id": "q16",
+        "type": "single",
+        "refused": false,
+        "answer": "Trong vòng **10 ngày làm việc** sau khi kết thúc chuyến công tác, nhân viên phải nộp hồ sơ quyết toán. [1]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "noi-bo-cong-tac-phi.txt",
+            "chunkIndex": 2,
+            "n": 1
+          }
+        ],
+        "citationsOnGold": 1,
+        "inputTokens": 1814,
+        "outputTokens": 35,
+        "ms": 1434
+      },
+      {
+        "id": "q17",
+        "type": "single",
+        "refused": false,
+        "answer": "Không. Chi phí cá nhân như **mini bar** trong khách sạn **không được thanh toán**. [1]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "noi-bo-cong-tac-phi.txt",
+            "chunkIndex": 3,
+            "n": 1
+          }
+        ],
+        "citationsOnGold": 1,
+        "inputTokens": 1439,
+        "outputTokens": 30,
+        "ms": 1419
+      },
+      {
+        "id": "q18",
+        "type": "single",
+        "refused": false,
+        "answer": "Phở như ngày nay được cho là đã ra đời và định hình vào những năm đầu thế kỷ 20. [1]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "wiki-pho.txt",
+            "chunkIndex": 5,
+            "n": 1
+          }
+        ],
+        "citationsOnGold": 1,
+        "inputTokens": 2061,
+        "outputTokens": 31,
+        "ms": 1269
+      },
+      {
+        "id": "q19",
+        "type": "single",
+        "refused": false,
+        "answer": "Phở bò và phở gà cùng phổ biến, song hành với nhau từ sau năm 1939. [1]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "wiki-pho.txt",
+            "chunkIndex": 7,
+            "n": 1
+          }
+        ],
+        "citationsOnGold": 1,
+        "inputTokens": 2148,
+        "outputTokens": 30,
+        "ms": 1523
+      },
+      {
+        "id": "q20",
+        "type": "single",
+        "refused": false,
+        "answer": "Một bát phở có chứa khoảng **18–20 loại thực phẩm** gốc động vật và thực vật tự nhiên. [1]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "wiki-pho.txt",
+            "chunkIndex": 9,
+            "n": 1
+          }
+        ],
+        "citationsOnGold": 1,
+        "inputTokens": 1731,
+        "outputTokens": 33,
+        "ms": 1475
+      },
+      {
+        "id": "q21",
+        "type": "single",
+        "refused": false,
+        "answer": "Phở ăn liền của Acecook Việt Nam đã xuất khẩu đi **42 nước trên thế giới**. [1]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "wiki-pho.txt",
+            "chunkIndex": 19,
+            "n": 1
+          }
+        ],
+        "citationsOnGold": 1,
+        "inputTokens": 1783,
+        "outputTokens": 29,
+        "ms": 1318
+      },
+      {
+        "id": "q22",
+        "type": "single",
+        "refused": false,
+        "answer": "Nước dùng phở bò thường được ninh từ **xương ống bò** kèm với các loại gia vị như **quế, hồi, thảo quả nướng**. [2][4]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "wiki-pho.txt",
+            "chunkIndex": 12,
+            "n": 2
+          },
+          {
+            "file": "wiki-pho.txt",
+            "chunkIndex": 1,
+            "n": 4
+          }
+        ],
+        "citationsOnGold": 1,
+        "inputTokens": 1771,
+        "outputTokens": 48,
+        "ms": 1577
+      },
+      {
+        "id": "q23",
+        "type": "single",
+        "refused": false,
+        "answer": "Lemur Cát Tường đã cách tân áo dài theo hướng Tây hóa vào những năm 1930. [1][4]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "wiki-ao-dai.txt",
+            "chunkIndex": 0,
+            "n": 1
+          },
+          {
+            "file": "wiki-ao-dai.txt",
+            "chunkIndex": 8,
+            "n": 4
+          }
+        ],
+        "citationsOnGold": 2,
+        "inputTokens": 1845,
+        "outputTokens": 33,
+        "ms": 1329
+      },
+      {
+        "id": "q24",
+        "type": "single",
+        "refused": false,
+        "answer": "Chúa Nguyễn Phúc Khoát ban sắc lệnh về quần áo vào năm **1744**. [1]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "wiki-ao-dai.txt",
+            "chunkIndex": 4,
+            "n": 1
+          }
+        ],
+        "citationsOnGold": 1,
+        "inputTokens": 1868,
+        "outputTokens": 29,
+        "ms": 1537
+      },
+      {
+        "id": "q25",
+        "type": "single",
+        "refused": false,
+        "answer": "Những chiếc áo dài Lemur đầu tiên được xuất xưởng vào **năm 1935**. [1]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "wiki-ao-dai.txt",
+            "chunkIndex": 10,
+            "n": 1
+          }
+        ],
+        "citationsOnGold": 1,
+        "inputTokens": 1672,
+        "outputTokens": 29,
+        "ms": 1369
+      },
+      {
+        "id": "q26",
+        "type": "single",
+        "refused": false,
+        "answer": "Vịnh Hạ Long có **1.969 hòn đảo**. [1][2][3][5]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "wiki-vinh-ha-long.txt",
+            "chunkIndex": 1,
+            "n": 1
+          },
+          {
+            "file": "wiki-vinh-ha-long.txt",
+            "chunkIndex": 15,
+            "n": 2
+          },
+          {
+            "file": "wiki-vinh-ha-long.txt",
+            "chunkIndex": 10,
+            "n": 3
+          },
+          {
+            "file": "wiki-vinh-ha-long.txt",
+            "chunkIndex": 16,
+            "n": 5
+          }
+        ],
+        "citationsOnGold": 3,
+        "inputTokens": 1889,
+        "outputTokens": 28,
+        "ms": 1439
+      },
+      {
+        "id": "q27",
+        "type": "single",
+        "refused": false,
+        "answer": "Vịnh Hạ Long được UNESCO công nhận Di sản Thiên nhiên Thế giới lần đầu vào **năm 1994**. [1][4]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "wiki-vinh-ha-long.txt",
+            "chunkIndex": 71,
+            "n": 1
+          },
+          {
+            "file": "wiki-vinh-ha-long.txt",
+            "chunkIndex": 4,
+            "n": 4
+          }
+        ],
+        "citationsOnGold": 2,
+        "inputTokens": 1656,
+        "outputTokens": 37,
+        "ms": 1284
+      },
+      {
+        "id": "q28",
+        "type": "single",
+        "refused": false,
+        "answer": "Vùng lõi di sản trên vịnh Hạ Long có diện tích **434 km²**. [1]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "wiki-vinh-ha-long.txt",
+            "chunkIndex": 15,
+            "n": 1
+          }
+        ],
+        "citationsOnGold": 1,
+        "inputTokens": 1873,
+        "outputTokens": 28,
+        "ms": 1677
+      },
+      {
+        "id": "q29",
+        "type": "single",
+        "refused": false,
+        "answer": "Nước biển trong vùng vịnh Hạ Long khá cạn, có độ sâu chỉ khoảng **6m đến 10m**. [2]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "wiki-vinh-ha-long.txt",
+            "chunkIndex": 9,
+            "n": 2
+          }
+        ],
+        "citationsOnGold": 1,
+        "inputTokens": 1682,
+        "outputTokens": 35,
+        "ms": 1345
+      },
+      {
+        "id": "q30",
+        "type": "single",
+        "refused": false,
+        "answer": "Trong số 1.969 đảo của Hạ Long hiện nay chỉ có khoảng 40 đảo là có dân sinh sống. [1]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "wiki-vinh-ha-long.txt",
+            "chunkIndex": 10,
+            "n": 1
+          }
+        ],
+        "citationsOnGold": 1,
+        "inputTokens": 1832,
+        "outputTokens": 32,
+        "ms": 2917
+      },
+      {
+        "id": "q31",
+        "type": "single",
+        "refused": false,
+        "answer": "Nguyễn Trãi là người lần đầu ca ngợi vịnh Hạ Long là “kỳ quan đá dựng giữa trời cao”. [3]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "wiki-vinh-ha-long.txt",
+            "chunkIndex": 4,
+            "n": 3
+          }
+        ],
+        "citationsOnGold": 1,
+        "inputTokens": 1806,
+        "outputTokens": 34,
+        "ms": 1324
+      },
+      {
+        "id": "q32",
+        "type": "single",
+        "refused": false,
+        "answer": "Đồng bằng sông Cửu Long có dân số **15,7 triệu người (năm 2024)**. [2][4]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "wiki-dong-bang-song-cuu-long.txt",
+            "chunkIndex": 25,
+            "n": 2
+          },
+          {
+            "file": "wiki-dong-bang-song-cuu-long.txt",
+            "chunkIndex": 0,
+            "n": 4
+          }
+        ],
+        "citationsOnGold": 2,
+        "inputTokens": 1672,
+        "outputTokens": 35,
+        "ms": 1264
+      },
+      {
+        "id": "q33",
+        "type": "single",
+        "refused": false,
+        "answer": "Tam giác châu sông Mê Kông có lượng nước chảy vào biển trung bình nhiều năm là **475 tỉ mét khối**. [2]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "wiki-dong-bang-song-cuu-long.txt",
+            "chunkIndex": 15,
+            "n": 2
+          }
+        ],
+        "citationsOnGold": 1,
+        "inputTokens": 2035,
+        "outputTokens": 38,
+        "ms": 1456
+      },
+      {
+        "id": "q34",
+        "type": "single",
+        "refused": false,
+        "answer": "Khoảng **40%** diện tích vùng đồng bằng sông Cửu Long có thể bị ngập do biến đổi khí hậu. [1]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "wiki-dong-bang-song-cuu-long.txt",
+            "chunkIndex": 19,
+            "n": 1
+          }
+        ],
+        "citationsOnGold": 1,
+        "inputTokens": 1741,
+        "outputTokens": 35,
+        "ms": 1475
+      },
+      {
+        "id": "q35",
+        "type": "multi",
+        "refused": false,
+        "answer": "Nhân viên chính thức làm đủ 10 năm liên tục được **16 ngày nghỉ phép năm**. [1]\n\nNgày nghỉ phép năm chưa dùng hết được chuyển sang năm sau, tối đa **5 ngày**. [1]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "noi-bo-nghi-phep.txt",
+            "chunkIndex": 1,
+            "n": 1
+          }
+        ],
+        "citationsOnGold": 1,
+        "inputTokens": 1738,
+        "outputTokens": 51,
+        "ms": 2616
+      },
+      {
+        "id": "q36",
+        "type": "multi",
+        "refused": false,
+        "answer": "Tiền phòng tối đa tại Hà Nội là **1.200.000 đồng mỗi đêm**; đi **3 đêm** thì tối đa là **3.600.000 đồng**.[1]\n\nPhụ cấp lưu trú công tác trong nước là **300.000 đồng mỗi ngày**; ngày đi và ngày về mỗi ngày tính **một nửa**, nên đi công tác **4 ngày** thì phụ cấp lưu trú là **900.000 đồng**.[1]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "noi-bo-cong-tac-phi.txt",
+            "chunkIndex": 1,
+            "n": 1
+          }
+        ],
+        "citationsOnGold": 1,
+        "inputTokens": 1732,
+        "outputTokens": 102,
+        "ms": 4877
+      },
+      {
+        "id": "q37",
+        "type": "multi",
+        "refused": false,
+        "answer": "Đề nghị tạm ứng phải gửi phòng Kế toán **ít nhất 3 ngày làm việc trước ngày khởi hành**. [1]\n\nSau khi phòng Kế toán nhận **đủ hồ sơ hợp lệ**, việc kiểm tra và thanh toán được thực hiện trong **vòng 7 ngày làm việc**; số tiền thanh toán được chuyển khoản vào tài khoản lương của nhân viên. [1]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "noi-bo-cong-tac-phi.txt",
+            "chunkIndex": 2,
+            "n": 1
+          }
+        ],
+        "citationsOnGold": 1,
+        "inputTokens": 1701,
+        "outputTokens": 88,
+        "ms": 1821
+      },
+      {
+        "id": "q38",
+        "type": "multi",
+        "refused": false,
+        "answer": "Vịnh Hạ Long được UNESCO công nhận **2 lần**:  \n- **Năm 1994**: công nhận là **Di sản thiên nhiên thế giới** với **giá trị thẩm mỹ** (tiêu chuẩn vii). [1][3]  \n- **Năm 2000**: tái công nhận với **giá trị địa chất – địa mạo** / giá trị toàn cầu về **địa chất, địa mạo** (tiêu chuẩn viii). [2][3]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "wiki-vinh-ha-long.txt",
+            "chunkIndex": 71,
+            "n": 1
+          },
+          {
+            "file": "wiki-vinh-ha-long.txt",
+            "chunkIndex": 74,
+            "n": 2
+          },
+          {
+            "file": "wiki-vinh-ha-long.txt",
+            "chunkIndex": 4,
+            "n": 3
+          }
+        ],
+        "citationsOnGold": 2,
+        "inputTokens": 1848,
+        "outputTokens": 112,
+        "ms": 1843
+      },
+      {
+        "id": "q39",
+        "type": "multi",
+        "refused": false,
+        "answer": "Vịnh Hạ Long có tổng cộng **1.969 đảo** và trong đó có khoảng **40 đảo có dân sinh sống**. [1][2]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "wiki-vinh-ha-long.txt",
+            "chunkIndex": 10,
+            "n": 1
+          },
+          {
+            "file": "wiki-vinh-ha-long.txt",
+            "chunkIndex": 1,
+            "n": 2
+          }
+        ],
+        "citationsOnGold": 2,
+        "inputTokens": 1990,
+        "outputTokens": 37,
+        "ms": 1415
+      },
+      {
+        "id": "q40",
+        "type": "multi",
+        "refused": false,
+        "answer": "Năm 1990, sông Cửu Long đưa ra biển **160 triệu tấn phù sa**, còn năm 2015 chỉ còn **75 triệu tấn**, tức là **giảm hơn một nửa**. [1]",
+        "endReason": "completed",
+        "citations": [
+          {
+            "file": "wiki-dong-bang-song-cuu-long.txt",
+            "chunkIndex": 20,
+            "n": 1
+          }
+        ],
+        "citationsOnGold": 1,
+        "inputTokens": 1885,
+        "outputTokens": 54,
+        "ms": 1426
+      },
+      {
+        "id": "o01",
+        "type": "out_of_scope",
+        "refused": true,
+        "answer": "Tôi không tìm thấy thông tin này trong các tài liệu đã chọn.",
+        "endReason": "completed",
+        "citations": [],
+        "citationsOnGold": 0,
+        "inputTokens": 1958,
+        "outputTokens": 19,
+        "ms": 945
+      },
+      {
+        "id": "o02",
+        "type": "out_of_scope",
+        "refused": true,
+        "answer": "Tôi không tìm thấy thông tin này trong các tài liệu đã chọn.",
+        "endReason": "completed",
+        "citations": [],
+        "citationsOnGold": 0,
+        "inputTokens": 1807,
+        "outputTokens": 19,
+        "ms": 942
+      },
+      {
+        "id": "o03",
+        "type": "out_of_scope",
+        "refused": true,
+        "answer": "Tôi không tìm thấy thông tin này trong các tài liệu đã chọn.",
+        "endReason": "completed",
+        "citations": [],
+        "citationsOnGold": 0,
+        "inputTokens": 1718,
+        "outputTokens": 19,
+        "ms": 866
+      },
+      {
+        "id": "o04",
+        "type": "out_of_scope",
+        "refused": true,
+        "answer": "Tôi không tìm thấy thông tin này trong các tài liệu đã chọn.",
+        "endReason": "completed",
+        "citations": [],
+        "citationsOnGold": 0,
+        "inputTokens": 1233,
+        "outputTokens": 19,
+        "ms": 1536
+      },
+      {
+        "id": "o05",
+        "type": "out_of_scope",
+        "refused": true,
+        "answer": "Tôi không tìm thấy thông tin này trong các tài liệu đã chọn.",
+        "endReason": "completed",
+        "citations": [],
+        "citationsOnGold": 0,
+        "inputTokens": 1631,
+        "outputTokens": 19,
+        "ms": 928
+      },
+      {
+        "id": "o06",
+        "type": "out_of_scope",
+        "refused": true,
+        "answer": "Tôi không tìm thấy thông tin này trong các tài liệu đã chọn.",
+        "endReason": "completed",
+        "citations": [],
+        "citationsOnGold": 0,
+        "inputTokens": 1501,
+        "outputTokens": 19,
+        "ms": 852
+      },
+      {
+        "id": "o07",
+        "type": "out_of_scope",
+        "refused": true,
+        "answer": "Tôi không tìm thấy thông tin này trong các tài liệu đã chọn.",
+        "endReason": "completed",
+        "citations": [],
+        "citationsOnGold": 0,
+        "inputTokens": 1985,
+        "outputTokens": 19,
+        "ms": 947
+      },
+      {
+        "id": "o08",
+        "type": "out_of_scope",
+        "refused": true,
+        "answer": "Tôi không tìm thấy thông tin này trong các tài liệu đã chọn.",
+        "endReason": "completed",
+        "citations": [],
+        "citationsOnGold": 0,
+        "inputTokens": 1765,
+        "outputTokens": 19,
+        "ms": 1002
+      },
+      {
+        "id": "o09",
+        "type": "out_of_scope",
+        "refused": true,
+        "answer": "Tôi không tìm thấy thông tin này trong các tài liệu đã chọn.",
+        "endReason": "completed",
+        "citations": [],
+        "citationsOnGold": 0,
+        "inputTokens": 1520,
+        "outputTokens": 19,
+        "ms": 921
+      },
+      {
+        "id": "o10",
+        "type": "out_of_scope",
+        "refused": true,
+        "answer": "Tôi không tìm thấy thông tin này trong các tài liệu đã chọn.",
+        "endReason": "completed",
+        "citations": [],
+        "citationsOnGold": 0,
+        "inputTokens": 1698,
+        "outputTokens": 19,
+        "ms": 901
+      }
+    ]
+  },
+  "productPointsAfter": 0
+}

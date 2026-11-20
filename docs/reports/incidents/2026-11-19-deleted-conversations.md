@@ -38,6 +38,20 @@ Bằng driver MongoDB của ứng dụng, chỉ dùng `hello`, `buildInfo`, `atl
 
 **Không kiểm được từ phía TL:** cấu hình backup/snapshot của Atlas (cần quyền Atlas UI hoặc Atlas Admin API; máy này không có Atlas CLI, `.env` không có API key).
 
+### 3.1. Xác minh thêm loại cluster (21/11/2026, chỉ đọc, theo CTO mục D)
+
+| Dấu hiệu (lệnh đọc) | Kết quả | Ý nghĩa |
+|---|---|---|
+| `hello.tags` | `provider: AWS`, `region: AP_SOUTHEAST_1`, `nodeType: ELECTABLE`, `workloadType: OPERATIONAL` | Không có trường phân biệt gói |
+| `serverStatus` | Chỉ trả tập trường rút gọn | Đặc trưng proxy của cluster dùng chung |
+| `dbStats` | `fileSize: 0`, `totalFreeStorageSize: 0`, `numExtents: 0` | Đặc trưng proxy dùng chung (cluster riêng trả số thật) |
+| Oplog | Namespace có tiền tố tenant; truy vấn bị proxy viết lại | Chắc chắn là **cluster dùng chung** |
+| Quyền user ứng dụng | `atlasAdmin` | Có trên mọi gói, không phân biệt |
+
+**Kết luận:** chắc chắn là cluster dùng chung, tức **M0 hoặc Flex**. Từ phía cơ sở dữ liệu **không phân biệt được** M0 với Flex; cần Atlas UI hoặc Admin API. TL không dùng phiên trình duyệt hay tài khoản Atlas của CTO để tự xem.
+
+**Việc CTO cần làm (khoảng 1 phút, chỉ xem):** Atlas → Project → Clusters → `Cluster0`. Thẻ cluster ghi `M0 Sandbox` hoặc `Flex`. Nếu là Flex: tab **Backup** → danh sách snapshot → ghi thời điểm snapshot gần nhất **trước 19/11/2026 16:47 UTC**.
+
 ## 4. Backup và khả năng khôi phục
 
 | Nếu cluster là | Backup | Khôi phục 2 hội thoại |
@@ -54,6 +68,15 @@ Bằng driver MongoDB của ứng dụng, chỉ dùng `hello`, `buildInfo`, `atl
 - Giá trị dữ liệu mất thấp: 2 bản ghi hội thoại; không có tin nhắn nào bị xóa cùng lúc sự cố.
 
 ## 6. Phương án đề xuất (chờ CTO duyệt, TL không tự thực hiện)
+
+| CTO thấy trên Atlas | Phương án | Rủi ro | Công sức |
+|---|---|---|---|
+| `M0 Sandbox` | **A — Chấp nhận mất**, đóng sự cố; ghi vào báo cáo đồ án nếu 2 hội thoại có trong ảnh chụp | Không | ~0 |
+| `Flex`, không có snapshot trước 19/11 16:47 UTC | A | Không | ~0 |
+| `Flex`, có snapshot phù hợp, CTO cần 2 hội thoại | **B — Khôi phục chọn lọc**: restore snapshot sang cluster tạm (không đè `Cluster0`) → đọc 2 bản ghi theo `_id` → CTO duyệt → chèn đúng 2 bản ghi → đếm trước/sau → xóa cluster tạm | Thấp nếu không đè cluster thật; có phí cluster tạm | ~1 giờ |
+| Bất kỳ | **Không** restore đè `Cluster0` | Mất mọi dữ liệu từ thời điểm snapshot | — |
+
+Khuyến nghị của TL: **A**, trừ khi 2 hội thoại có trong ảnh báo cáo đồ án.
 
 1. **Khuyến nghị: chấp nhận mất**, nếu Atlas là M0, hoặc nếu 2 hội thoại không xuất hiện trong ảnh chụp của báo cáo đồ án.
 2. Nếu là Flex, có snapshot phù hợp và CTO cần khôi phục: restore snapshot sang **một cluster/bản tải xuống riêng** (không đè cluster đang chạy) → đọc đúng 2 bản ghi theo `_id` (và tin nhắn theo `conversationId`, nếu có) → CTO duyệt danh sách → chèn lại đúng các bản ghi đó → kiểm đếm trước/sau. Mỗi bước ghi vào báo cáo này.

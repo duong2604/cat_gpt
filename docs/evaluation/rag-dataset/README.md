@@ -53,7 +53,7 @@ Vì vậy nhãn `{file, chunkIndex}` đối chiếu được trực tiếp với
 
 ## Lịch sử nhãn
 
-**Ký tự xuống dòng phải là LF.** Bộ chia đoạn tách đoạn văn theo hai lần xuống dòng LF. Trên Windows với `core.autocrlf=true`, tệp checkout ra CRLF, khiến số đoạn đổi từ 209 thành 175 và nhãn `chunkIndex` không còn khớp. `.gitattributes` trong thư mục này ép `docs/*.txt` luôn LF. Bản checkout cũ đang có CRLF thì xóa 6 tệp `.txt` trong `docs/` rồi chạy `git checkout -- docs/evaluation/rag-dataset/docs` để lấy lại bản LF (không đổi nội dung repo). Kiểm: `git ls-files --eol docs/evaluation/rag-dataset/docs` phải ghi `w/lf`.
+**Ký tự xuống dòng phải là LF.** Bộ chia đoạn tách đoạn văn theo hai lần xuống dòng LF. Trên Windows với `core.autocrlf=true`, tệp checkout ra CRLF, khiến số đoạn đổi từ 209 thành 175 và nhãn `chunkIndex` không còn khớp. `.gitattributes` trong thư mục này ép mọi tệp văn bản của bộ dữ liệu (tài liệu, nhãn, kết quả) luôn LF; đã kiểm trên clone `core.autocrlf=true`: 23/23 tệp LF, 209 đoạn. Bản checkout cũ đang có CRLF thì xóa 6 tệp `.txt` trong `docs/` rồi chạy `git checkout -- docs/evaluation/rag-dataset/docs` để lấy lại bản LF (không đổi nội dung repo). Kiểm: `git ls-files --eol docs/evaluation/rag-dataset/docs` phải ghi `w/lf`.
 
 | Vòng | Ngày | Tệp | Thay đổi |
 |---|---|---|---|

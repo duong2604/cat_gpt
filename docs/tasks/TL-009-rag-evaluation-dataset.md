@@ -1,6 +1,6 @@
 # TL-009 — Bộ dữ liệu và quy trình đánh giá RAG tiếng Việt
 
-Trạng thái: Chờ Review (vòng 2: nhãn nhiều đoạn nguồn hợp lệ, theo yêu cầu CTO 20/11/2026) — vòng 1 CTO duyệt 18/11/2026 22:10
+Trạng thái: Chờ Review — vòng 2 (nhãn nhiều đoạn nguồn hợp lệ, CTO 20/11/2026): bằng chứng B1–B7 đạt 21/11/2026, chờ CTO cho merge PR #34 để `Done` · vòng 1 CTO duyệt 18/11/2026 22:10
 Người phụ trách: TL · Ưu tiên: P2 · Ước lượng: 1 ngày làm việc
 Phụ thuộc: chọn tài liệu + viết câu hỏi: **không chặn**. Gắn nhãn `chunkIndex`: [SE-011](SE-011-documents-txt-backend.md) merge (cần đoạn thật). Sinh viên có thể bổ sung tài liệu thử công khai
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
@@ -87,7 +87,18 @@ Yêu cầu CTO 20/11/2026: nhãn hỗ trợ nhiều đoạn nguồn hợp lệ c
 - [x] `answer_points` q38 — sửa — thêm ý lần công nhận thứ 3 (2023) vì nguồn có; lý do ở `label_note`.
 - [x] Chạy lại đánh giá — Đạt — [SE-017 Review vòng 3](SE-017-rag-evaluation-script.md#review-vòng-3); bảng so sánh: [TL-RERUN-2026-11-21](../evaluation/rag-dataset/results/TL-RERUN-2026-11-21.md). Không đổi code sản phẩm, không đổi `rag-eval.mjs`.
 - [ ] Ứng viên gold bỏ sót sau khi chạy lại — **chưa áp dụng, có chủ đích**: q22 `wiki-pho` #12 ("ninh từ xương ống của bò") là nguồn hợp lệ; không thêm sau khi đã xem kết quả để tránh chỉnh nhãn theo kết quả. Đưa vào vòng nhãn sau, trước lượt đo của task cải thiện RAG.
-- [ ] CTO duyệt vòng 2 — chờ.
+- [x] CTO duyệt có điều kiện phương pháp vòng 2 — 21/11/2026 (chỉ thị "TL review round 4" mục B).
+
+**Bằng chứng theo điều kiện CTO 21/11/2026 (mục B):**
+- [x] B1 — 209 đoạn trên Windows và LF — Đạt — clone sạch repo vào thư mục tạm với `core.autocrlf=true` (mặc định Windows), đếm bằng `chunkText` của ứng dụng: `develop` @ `b2d2098` (chưa có `.gitattributes`) → tài liệu checkout **CRLF, 175 đoạn** (3/4/27/31/33/77); nhánh PR #34 → **LF, 209 đoạn** (4/4/32/37/38/94).
+- [x] B2 — `.gitattributes` thật sự kiểm soát — Đạt — commit `bf9abfc` mở rộng luật thành `* text=auto eol=lf` cho cả thư mục `docs/evaluation/rag-dataset` (tài liệu, nhãn, kết quả). Clone `autocrlf=true`: `git ls-files --eol` cho **23/23 tệp `w/lf`**. `git add --renormalize` không đổi nội dung tệp nào (repo vốn lưu LF, 23/23 `i/lf`).
+- [x] B3 — giữ dataset và nhãn gốc — Đạt — `git diff b2d2098..` không đổi 6 tài liệu; `questions.v1.jsonl` và `questions.src.v1.json` giống từng byte bản trên `develop`; trên clone LF, `label.py` sinh lại cả nhãn v1 lẫn v2 trùng với bản đã commit (bỏ qua CR).
+- [x] B4 — ghi rõ cách đo, cách chấm, dao động — Đạt — [TL-RERUN-2026-11-21](../evaluation/rag-dataset/results/TL-RERUN-2026-11-21.md): bảng tách môi trường đo (CRLF→LF) và cách chấm (nhãn v1→v2); 3 lượt trả lời cùng cấu hình: từ chối nhầm 1–2/40, precision 92,0–95,7%.
+- [x] B5 — không diễn giải là cải thiện sản phẩm — Đạt — ghi rõ trong TL-RERUN và báo cáo ngày: code sản phẩm không đổi (`apps/` giống `09fbcff`); chênh lệch đến từ môi trường đo, cách chấm và dao động của mô hình.
+- [x] B6 — lỗi nội dung q38 — Đạt — `answer_points` vòng 1 thiếu lần công nhận 2023 (đã sửa ở v2, lý do trong `label_note`); mô hình nói "2 lần" ở cả 3 lượt 21/11 (đưa vào SE-019). Ghi thêm q28: tài liệu nguồn tự mâu thuẫn (434 và 335 km²).
+- [x] B7 — giữ q22 cho vòng độc lập sau — Đạt — q22 `wiki-pho` #12 không thêm vào nhãn v2.
+
+**Vòng 2: bằng chứng đạt đủ B1–B7.** Chuyển `Done` sau khi PR #34 được CTO cho merge và nội dung có trên `develop` (workflow mục 4).
 
 ## Phản hồi UI
 Không áp dụng.
