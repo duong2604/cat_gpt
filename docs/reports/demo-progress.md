@@ -2,6 +2,16 @@
 
 Theo mốc của [plan.md](../project/plan.md#2-mốc). Chi tiết từng ngày: [báo cáo ngày](daily/README.md). TL cập nhật cuối mỗi ngày làm việc và ngay khi phát hiện nguy cơ trễ mốc; mục mới nhất ở trên, giữ các mục cũ ([workflow mục 11](../project/workflow.md#11-theo-dõi-tiến-độ)).
 
+## Cập nhật 21/11/2026 01:40 (SE-018 Done, kết thúc phiên TL)
+
+Chi tiết: [21/11 vòng 3](daily/2026-11-21.md).
+
+| Mốc / việc | Tình trạng |
+|---|---|
+| Bảo mật phụ thuộc | SE-018 **Done** (PR #36 → `6f2271d`): `next` 16.4.6, `multer` 2.5.0; audit 34 → 26; còn 8 high ngoài phạm vi, đề xuất task riêng |
+| Nghiệm thu M1–M4 (CTO) | Chờ CTO. Trước khi chạy: đưa `D:\workspace\buggysoft\cat_gpt` về `develop` và `pnpm install` (mục 4.2 vòng 3) |
+| Module 4 | TL-009 Done (baseline); SE-017 Chờ Review (`-large` bị chặn); SE-019 Nháp, chờ nghiệm thu |
+
 ## Cập nhật 21/11/2026 00:40 (PR #34 merge, sẵn sàng CTO nghiệm thu)
 
 Chi tiết: [21/11 vòng 2](daily/2026-11-21.md).
