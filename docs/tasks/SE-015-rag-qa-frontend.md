@@ -108,5 +108,15 @@ Commit theo checkpoint: CP1 `130bf71` (nút Hỏi tài liệu), CP2 `62555d7` (h
 **Dọn nhánh sau merge** — nhánh remote `feature/module-4-rag-frontend`: TL xóa sau khi SE chuyển khỏi nhánh. Worktree `cat_gpt-review` giữ.
 **Trạng thái** — Done.
 
+#### Xác minh tích hợp trên `develop` (TL, 20/11/2026)
+Lấp các mục vòng 1 còn dựa vào bằng chứng SE. API thật `develop` @ `09fbcff`, `LLM_PROVIDER=openai` (`gpt-5.4-mini`), `LLM_MAX_OUTPUT_TOKENS=500`, chế độ `demo`; 2 tài khoản USER tạm `tl-smoke-a/b-*@example.test` do admin tạo; 6 tài liệu TL-009. Kết quả 38/38 kiểm tra API đạt (báo cáo ngày [20/11 vòng 3](../reports/daily/2026-11-20.md)).
+- [x] Tối đa 5 tài liệu — gửi 6 `documentIds` → `400` "Tối đa 5 tài liệu mỗi hội thoại"; 5 tài liệu → trả lời, có trích dẫn đúng `wiki-pho.txt`.
+- [x] `DOCUMENT_NOT_READY` — hỏi ngay sau khi tải `wiki-vinh-ha-long.txt` (đang xử lý) → `400 DOCUMENT_NOT_READY`. Kiểm ở API; thông báo trên UI chưa chụp.
+- [x] `DOCUMENT_NOT_FOUND` — B hỏi tài liệu của A → `404 DOCUMENT_NOT_FOUND`.
+- [x] Trích dẫn — câu q03 → 1 trích dẫn `[1]` ↔ `noi-bo-nghi-phep.txt` chunk 1, nội dung khớp; câu ngoài tài liệu → `insufficientEvidence`, 0 trích dẫn.
+- [x] Chat thường không hồi quy — SSE `meta → delta… → done`, không có `citations`, lịch sử 2 tin, Tạo lại → `done`.
+- Chưa làm (không chặn): GIF luồng chính; viewport 375 px thật (vòng 1 dùng iframe 372 px). Đưa vào checklist CTO nghiệm thu trực tiếp.
+- Dữ liệu thử: xóa theo `userId` của 2 tài khoản tạm sau khi in danh sách id + chủ sở hữu; Qdrant theo `documentId` = 0, tài khoản `tl-smoke-*` còn 0.
+
 ## Phản hồi UI
 Có ảnh trình duyệt trong phiên bàn giao (ảnh lưu tại thư mục ảnh chụp của Chrome, không commit vào repo). Giao diện: nút ở menu Tài liệu; hộp thoại "Hỏi tài liệu" (vi/en); Chat có thanh "Tài liệu:" đầu hội thoại; nhãn `[n]` bấm được; câu từ chối có nhãn "Không đủ căn cứ trong tài liệu đã chọn".

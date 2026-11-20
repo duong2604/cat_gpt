@@ -2,6 +2,18 @@
 
 Theo mốc của [plan.md](../project/plan.md#2-mốc). Chi tiết từng ngày: [báo cáo ngày](daily/README.md). TL cập nhật cuối mỗi ngày làm việc và ngay khi phát hiện nguy cơ trễ mốc; mục mới nhất ở trên, giữ các mục cũ ([workflow mục 11](../project/workflow.md#11-theo-dõi-tiến-độ)).
 
+## Cập nhật 20/11/2026 23:40 (kiểm tích hợp M1–M4, chuẩn bị CTO nghiệm thu)
+
+Chi tiết: [20/11 vòng 3](daily/2026-11-20.md).
+
+| Mốc / việc | Tình trạng |
+|---|---|
+| Nghiệm thu M1–M4 (CTO chạy local) | **Sẵn sàng trên `develop` @ `09fbcff`**: TL kiểm API thật 38/38 đạt; hướng dẫn chạy + checklist 20 bước ở vòng 3 mục 11 |
+| Bản đóng băng `34b465d` | Khởi động được (M1 + Chat mẫu, 5/5); không có M3–M4; không sửa |
+| Module 4 | SE-014/015/016 Done; SE-017 **Chờ Review** (đính chính: phần `-small` xong, rubric 1,70/2, 0 hallucination, ≈ $0,0016/câu; `-large` chờ quyền API) |
+| Senior Dev | SE-018 (vá bảo mật) Sẵn sàng, chỉ thị đã soạn, chưa có xác nhận nhận việc |
+| Sự cố dữ liệu 19/11 | Quy tắc phòng ngừa đưa vào workflow 9.1; 2 hội thoại admin chưa khôi phục, chờ CTO |
+
 ## Cập nhật 20/11/2026 01:30 (SE-017 merge)
 
 Chi tiết: [20/11 vòng 2](daily/2026-11-20.md).

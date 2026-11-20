@@ -187,5 +187,12 @@ Kiểm trên API thật (`LLM_PROVIDER=openai`, `gpt-5.4-mini`, `LLM_MAX_OUTPUT_
 **Dọn nhánh sau merge** — nhánh remote: TL xóa sau khi SE chuyển khỏi nhánh.
 **Trạng thái** — Done.
 
+#### Xác minh tích hợp trên `develop` (TL, 20/11/2026)
+API thật `develop` @ `09fbcff`, `gpt-5.4-mini`, `LLM_MAX_OUTPUT_TOKENS=500`, tài khoản tạm `tl-smoke-*` (xem [SE-015](SE-015-rag-qa-frontend.md#xác-minh-tích-hợp-trên-develop-tl-20112026)).
+- [x] AC4 S2 xóa khi job đang chạy (vòng 3 chỉ theo bằng chứng SE + code) — `POST summary` `wiki-vinh-ha-long.txt` (77 đoạn) → `202`; 0,8 s sau `DELETE` → `204`; log worker: `documentId=… không lưu tóm tắt: đã bị xóa trong lúc xử lý`; `GET` → `404`; không còn bản ghi.
+- [x] AC1 — `noi-bo-nghi-phep.txt` → READY sau 3,4 s, 149 từ, kết thúc trọn câu; không có WARN "bị cắt".
+- [x] AC2 cache — gọi lại → `200`. AC3 — B → `404`, ẩn danh → `401`.
+- Vẫn theo bằng chứng SE + code: FAILED và tóm tắt lại sau FAILED (cần giả lập lỗi LLM, không làm trên API thật); ảnh sáng/tối, vi/en của hộp thoại markdown. Đưa vào checklist CTO.
+
 ## Phản hồi UI
 Hộp thoại "Tóm tắt tài liệu" (vi/en) hiển thị trạng thái và bản tóm tắt dạng markdown; mục menu "Tóm tắt" ở dòng tài liệu READY. Ảnh lưu tại thư mục ảnh chụp của Chrome, không commit vào repo.

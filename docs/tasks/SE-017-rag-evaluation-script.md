@@ -1,6 +1,6 @@
 # SE-017 — Script đánh giá RAG và so sánh mô hình embedding
 
-Trạng thái: Done (phần `text-embedding-3-small`) · phần `text-embedding-3-large` **bị chặn** (chờ xác nhận quyền API)
+Trạng thái: Chờ Review — phần `text-embedding-3-small` đã nghiệm thu và merge (PR #33 → `09fbcff`); phần `text-embedding-3-large` **bị chặn** (chờ CTO xác nhận quyền API). Chưa `Done` vì AC2 yêu cầu bảng cho từng mô hình (TL đính chính 20/11/2026, [Review vòng 2](#review-vòng-2))
 Người phụ trách: Senior Dev · Ưu tiên: P2 · Ước lượng: 2 ngày làm việc
 Phụ thuộc (gate): [TL-009](TL-009-rag-evaluation-dataset.md) duyệt **và** [SE-014](SE-014-rag-qa-backend.md) merge (cả hai chặn); phương án mô hình CTO chọn (A cần quyền `text-embedding-3-large`)
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
@@ -91,6 +91,22 @@ Commit theo checkpoint: CP1 `3e68f64` (script `apps/api/scripts/rag-eval.mjs`, n
 
 **Dọn nhánh sau merge** — chờ SE chuyển khỏi nhánh; TL xóa remote.
 **Trạng thái** — Done (phần `-small`); phần `-large` bị chặn.
+
+#### Review vòng 2
+**Task** — SE-017 · PR https://github.com/duong2604/cat_gpt/pull/33 (đã merge) · `develop` @ `09fbcff` · vòng 2 (TL, 20/11/2026, theo chỉ thị CTO 20/11: chất lượng câu trả lời, chi phí, ca hallucination/trích dẫn sai)
+**Kết luận** — Phần `-small` đủ các chỉ số CTO yêu cầu (bổ sung bằng chấm tay của TL, không cần SE làm thêm). **Đính chính trạng thái:** vòng 1 ghi "Done (phần `-small`)" — không đúng workflow mục 4 (`Done` cần mọi tiêu chí đạt; AC2 cần bảng cho từng mô hình). Chuyển về **`Chờ Review`, bị chặn bởi quyền `text-embedding-3-large`**. Khi CTO xác nhận quyền: SE chạy `-large` (vòng 3), TL review bảng so sánh rồi `Done`. Nếu CTO bỏ yêu cầu so sánh: TL ghi quyết định vào `Chốt:` và chuyển `Done`.
+**Checklist** (TL kiểm trên tệp `results-text-embedding-3-small-answers-…T18-11-00-864Z.json` + văn bản đoạn lấy từ collection đánh giá `document_chunks_eval_text-embedding-3-small`; chi tiết từng câu: [`TL-REVIEW-text-embedding-3-small.md`](../evaluation/rag-dataset/results/TL-REVIEW-text-embedding-3-small.md))
+- [x] Chất lượng câu trả lời (rubric 0–2 của TL-009, TL chấm tay **40/40** câu có căn cứ, ≥ 20 theo TL-009) — điểm 2: 31 (77,5%); điểm 1: 6 (q06, q08, q16, q23, q26, q31 — đúng nhưng thiếu một ý `answer_points`); điểm 0: 3 (q01, q09, q37 — từ chối nhầm). Trung bình **1,70/2**.
+- [x] Hallucination — **0/37** câu đã trả lời có dữ kiện không nằm trong đoạn được trích. 10/10 câu ngoài tài liệu từ chối đúng, không bịa.
+- [x] Trích dẫn sai — 8/43 trích dẫn "không trúng gold" (q23, q26 ×2, q27, q31, q32, q38 ×2). TL đọc từng đoạn: **cả 8 đoạn đều chứa dữ kiện được trích** (ví dụ q26 trích #1 và #57, cả hai ghi "1.969 hòn đảo"). Precision theo đoạn hỗ trợ (TL chấm tay) = **43/43**; 81,4% là giới hạn dưới do nhãn gold chỉ ghi một đoạn trong khi dữ kiện lặp ở nhiều đoạn. → việc TL-009 (nhãn nhiều gold).
+- [x] Độ trễ — trả lời tuần tự 50 câu: p50 1,35 s, p95 2,06 s, max 2,30 s (tổng 70,5 s); truy hồi 50 câu 11–12 s.
+- [x] Chi phí — LLM `gpt-5.4-mini`: 94.654 token vào × $0,75/1M + 1.975 token ra × $4,50/1M = **≈ $0,080 / 50 câu (≈ $0,0016/câu)**, giá theo [trang model OpenAI](https://developers.openai.com/api/docs/models/gpt-5.4-mini) tra 20/11/2026. Embedding: script không ghi token; tài liệu + câu hỏi ≈ 146 nghìn ký tự → **< $0,01** với `text-embedding-3-small` (ước lượng, không phải số đo).
+- [x] Collection đánh giá riêng — `document_chunks_eval_text-embedding-3-small` 175 point; `document_chunks` (sản phẩm) không bị ghi (vòng 1).
+- [ ] So sánh mô hình 2 — **bị chặn**: chờ CTO xác nhận quyền `text-embedding-3-large`. Không gọi mô hình này.
+
+**Phát hiện cho TL-009 (việc của TL, vòng mới TL-009):** (1) nhãn `chunkIndex` cũ không khớp chunker hiện tại (22/50); (2) nhãn chỉ một gold/câu trong khi dữ kiện lặp ở nhiều đoạn → precision trích dẫn bị tính thấp; (3) q38 `answer_points` ghi 2 lần UNESCO công nhận, nguồn có lần thứ 3 (2023) — câu trả lời nêu 3 lần là đúng theo nguồn.
+**Phát hiện chất lượng (chưa có task, đề xuất sau nghiệm thu M4):** 3 câu từ chối nhầm dù đoạn đúng nằm trong top-3 (q01 hạng 3, q09 và q37 hạng 2) — prompt RAG thiên về từ chối; câu trả lời hay bỏ ý phụ (6 câu điểm 1).
+**Trạng thái** — `Chờ Review` (phần `-large` bị chặn).
 
 ## Phản hồi UI
 Không áp dụng.
