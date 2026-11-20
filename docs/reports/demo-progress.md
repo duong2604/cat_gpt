@@ -2,7 +2,27 @@
 
 Theo mốc của [plan.md](../project/plan.md#2-mốc). Chi tiết từng ngày: [báo cáo ngày](daily/README.md). TL cập nhật cuối mỗi ngày làm việc và ngay khi phát hiện nguy cơ trễ mốc; mục mới nhất ở trên, giữ các mục cũ ([workflow mục 11](../project/workflow.md#11-theo-dõi-tiến-độ)).
 
-## Cập nhật 21/11/2026 01:15 (chỉ thị CTO round 4)
+## Cập nhật 21/11/2026 01:40 (SE-018 Done, kết thúc phiên TL)
+
+Chi tiết: [21/11 vòng 3](daily/2026-11-21.md).
+
+| Mốc / việc | Tình trạng |
+|---|---|
+| Bảo mật phụ thuộc | SE-018 **Done** (PR #36 → `6f2271d`): `next` 16.4.6, `multer` 2.5.0; audit 34 → 26; còn 8 high ngoài phạm vi, đề xuất task riêng |
+| Nghiệm thu M1–M4 (CTO) | Chờ CTO. Trước khi chạy: đưa `D:\workspace\buggysoft\cat_gpt` về `develop` và `pnpm install` (mục 4.2 vòng 3) |
+| Module 4 | TL-009 Done (baseline); SE-017 Chờ Review (`-large` bị chặn); SE-019 Nháp, chờ nghiệm thu |
+
+## Cập nhật 21/11/2026 00:40 (PR #34 merge, sẵn sàng CTO nghiệm thu)
+
+Chi tiết: [21/11 vòng 2](daily/2026-11-21.md).
+
+| Mốc / việc | Tình trạng |
+|---|---|
+| Nghiệm thu M1–M4 (CTO) | **Môi trường sẵn sàng** trên `develop` @ `356e6a6` (code = `09fbcff`, đã kiểm 38/38); `.env` đúng cấu hình demo; Docker healthy; chờ CTO chạy checklist 20 bước |
+| Đánh giá RAG | TL-009 **Done**, CTO chấp nhận baseline (209 đoạn LF, hit@5 100%, precision 92–96%, từ chối nhầm 1–2/40); SE-017 Chờ Review (`-large` bị chặn) |
+| Senior Dev | SE-018 chưa bắt đầu, đã yêu cầu báo blocker; SE-019 Nháp |
+
+## Cập nhật 21/11/2026 00:30 (chỉ thị CTO round 4)
 
 Chi tiết: [21/11 vòng 1](daily/2026-11-21.md).
 
@@ -14,7 +34,7 @@ Chi tiết: [21/11 vòng 1](daily/2026-11-21.md).
 | Senior Dev | SE-018 chưa bắt đầu (chưa có nhánh); SE-019 Nháp |
 | Sự cố 19/11 | Cluster dùng chung; M0/Flex cần CTO xem Atlas UI; khuyến nghị chấp nhận mất |
 
-## Cập nhật 21/11/2026 00:45 (thực hiện quyết định CTO 20/11)
+## Cập nhật 21/11/2026 00:10 (thực hiện quyết định CTO 20/11)
 
 Chi tiết: [20/11 vòng 4](daily/2026-11-20.md).
 

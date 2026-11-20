@@ -1,6 +1,6 @@
 # TL-009 — Bộ dữ liệu và quy trình đánh giá RAG tiếng Việt
 
-Trạng thái: Chờ Review — vòng 2 (nhãn nhiều đoạn nguồn hợp lệ, CTO 20/11/2026): bằng chứng B1–B7 đạt 21/11/2026, chờ CTO cho merge PR #34 để `Done` · vòng 1 CTO duyệt 18/11/2026 22:10
+Trạng thái: Done — vòng 2 (nhãn nhiều đoạn nguồn hợp lệ): CTO duyệt 21/11/2026, merge [PR #34](https://github.com/duong2604/cat_gpt/pull/34) → `develop` @ `356e6a6`; **baseline đánh giá hiện hành** · vòng 1 CTO duyệt 18/11/2026 22:10
 Người phụ trách: TL · Ưu tiên: P2 · Ước lượng: 1 ngày làm việc
 Phụ thuộc: chọn tài liệu + viết câu hỏi: **không chặn**. Gắn nhãn `chunkIndex`: [SE-011](SE-011-documents-txt-backend.md) merge (cần đoạn thật). Sinh viên có thể bổ sung tài liệu thử công khai
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
@@ -63,7 +63,14 @@ Phương án đơn giản nhất: **A**. Không cài thêm gì; script SE-017 ch
 Chọn và tải tài liệu công khai, viết câu hỏi + `answer_points`. Gắn nhãn `chunkIndex` sau khi SE-011 merge: tải lên `develop` và đọc `chunkIndex` từ Qdrant.
 
 ## Kết quả review
-**Done 18/11/2026** — CTO duyệt vòng 1 (AC1–AC4) theo bằng chứng đã báo cáo (chỉ thị CTO 18/11/2026 22:10). Ước lượng 1n → thực tế < 1 ngày — Đúng ước lượng. `text-embedding-3-large` vẫn chưa chạy, chờ xác nhận quyền API (SE-017).
+**Vòng 2 — Done 21/11/2026.** CTO chấp nhận làm **baseline đánh giá hiện hành** (chỉ thị 21/11/2026). Head đã review `15749ff`, merge `356e6a6`. Baseline gồm:
+- 209 đoạn sau chuẩn hóa LF; nhãn v2 (56 gold); 40 câu có căn cứ, 10 câu ngoài tài liệu.
+- `text-embedding-3-small` + `gpt-5.4-mini`, `LLM_MAX_OUTPUT_TOKENS=500`: hit@5 100% (nhãn v2), MRR 0,881; từ chối đúng 10/10; từ chối nhầm 1–2/40; precision trích dẫn 92,0–95,7% (3 lượt); rubric 1,78/2 (lượt 1).
+- Lỗi đã biết: q38 trả lời sai ổn định ("2 lần", nguồn có 3); q26 có 1 trích dẫn sai (lượt 2); q28 nguồn tự mâu thuẫn (434 / 335 km²).
+- Chênh lệch so với 19/11 **không phải cải tiến code sản phẩm**: do môi trường đo (CRLF → LF), cách chấm (v1 → v2) và dao động của mô hình.
+- **Không đổi baseline sau khi đã quan sát kết quả** (CTO 21/11). q22 `wiki-pho` #12 **không** thêm vào baseline; chỉ xét trong một vòng đánh giá độc lập riêng, có baseline mới được CTO duyệt trước khi đo.
+
+**Vòng 1 — Done 18/11/2026** — CTO duyệt vòng 1 (AC1–AC4) theo bằng chứng đã báo cáo (chỉ thị CTO 18/11/2026 22:10). Ước lượng 1n → thực tế < 1 ngày — Đúng ước lượng. `text-embedding-3-large` vẫn chưa chạy, chờ xác nhận quyền API (SE-017).
 
 ## Lịch sử review
 ### Checklist vòng 1
@@ -99,6 +106,9 @@ Yêu cầu CTO 20/11/2026: nhãn hỗ trợ nhiều đoạn nguồn hợp lệ c
 - [x] B7 — giữ q22 cho vòng độc lập sau — Đạt — q22 `wiki-pho` #12 không thêm vào nhãn v2.
 
 **Vòng 2: bằng chứng đạt đủ B1–B7.** Chuyển `Done` sau khi PR #34 được CTO cho merge và nội dung có trên `develop` (workflow mục 4).
+
+#### Review vòng 2
+**CTO 21/11/2026** — chấp nhận làm baseline, cho merge PR #34. TL merge bằng `--match-head-commit 15749ff` (CI `build` SUCCESS tại head, MERGEABLE/CLEAN, 3 commit đã review) → `develop` @ `356e6a6`; xác minh `15749ff` nằm trong `origin/develop`. **Đính chính:** checklist vòng 2 ghi "đưa q22 vào vòng nhãn sau, trước lượt đo của SE-019" — bỏ. SE-019 đo trước/sau trên baseline này, không đổi nhãn. **Trạng thái** — Done.
 
 ## Phản hồi UI
 Không áp dụng.

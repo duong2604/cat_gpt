@@ -2,7 +2,7 @@
 
 Trạng thái: Nháp
 Người phụ trách: Senior Dev · Ưu tiên: P2 · Ước lượng: 2 ngày làm việc (TL ước lượng, xem lại khi chuyển `Sẵn sàng`)
-Phụ thuộc: **CTO nghiệm thu trực tiếp M1–M4 xong** (CTO 20/11/2026: làm sau nghiệm thu); [TL-009](TL-009-rag-evaluation-dataset.md) vòng 2 được duyệt (bộ nhãn dùng để đo trước/sau); [SE-018](SE-018-dependency-security-patch.md) merge (không làm song song trên cùng phần phụ thuộc)
+Phụ thuộc: **CTO nghiệm thu trực tiếp M1–M4 xong** (CTO 20/11/2026: làm sau nghiệm thu); [TL-009](TL-009-rag-evaluation-dataset.md) vòng 2 Done (đạt 21/11/2026, `356e6a6`: bộ nhãn baseline dùng để đo trước/sau, **không đổi** trong task này); [SE-018](SE-018-dependency-security-patch.md) merge (không làm song song trên cùng phần phụ thuộc)
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
 Ngày thực tế: bắt đầu — · bàn giao review — · hoàn tất —
 Chốt: 20/11/2026 — CTO cho phép TL tạo task và acceptance criteria; **chưa triển khai, chưa đổi production** cho tới khi gate đạt và TL chuyển `Sẵn sàng`
@@ -18,7 +18,7 @@ PR: <link, Senior Dev ghi khi bàn giao>
 
 ## Phạm vi
 - **Làm (nghiên cứu, đo):**
-  - Mốc trước: chạy `rag-eval.mjs --model text-embedding-3-small` trên `develop` lúc nhận task, nhãn TL-009 hiện hành, tài liệu LF. Ghi SHA, nhãn, cấu hình.
+  - Mốc trước: baseline TL-009 vòng 2 (CTO chấp nhận 21/11/2026: 209 đoạn LF, nhãn v2, từ chối nhầm 1–2/40, precision 92,0–95,7%). Chạy lại `rag-eval.mjs --model text-embedding-3-small` ≥ 2 lượt trên `develop` lúc nhận task, **cùng** nhãn và tài liệu, để có mốc trên đúng SHA. Ghi SHA, nhãn, cấu hình. Không sửa nhãn hay tài liệu đánh giá trong task này.
   - Giả thuyết H1 — prompt (`apps/api/src/modules/rag/rag-prompt.ts`): hướng dẫn trả lời khi bằng chứng không ở hạng 1, nêu đủ các ý có trong nguồn, không khẳng định số lượng/tổng khi ngữ cảnh có thể chưa đủ.
   - Giả thuyết H2 — ký tự xuống dòng: chuẩn hóa CRLF → LF trước `chunkText` (tệp CRLF cho 175 đoạn thay vì 209 và chỉ số thấp hơn, xem [TL-RERUN-2026-11-21](../evaluation/rag-dataset/results/TL-RERUN-2026-11-21.md)). Đo trên cả bản LF và CRLF của bộ tài liệu.
   - Đánh giá citation grounding: mỗi trích dẫn có hỗ trợ dữ kiện được trích không (TL chấm tay; script giữ precision theo gold).
