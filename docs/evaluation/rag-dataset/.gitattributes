@@ -1,3 +1,4 @@
-# TL-009: tài liệu đánh giá luôn checkout LF để chunkText cho cùng số đoạn trên mọi máy.
+# TL-009: mọi tệp văn bản của bộ dữ liệu đánh giá luôn checkout LF, kể cả trên Windows (core.autocrlf=true).
 # Với CRLF, hai lần xuống dòng là CR LF CR LF, không khớp dấu tách đoạn LF LF: 209 đoạn thành 175.
-docs/*.txt text eol=lf
+# Nhãn (questions*.json, questions*.jsonl) cũng LF để label.py sinh lại không tạo diff giả.
+* text=auto eol=lf
