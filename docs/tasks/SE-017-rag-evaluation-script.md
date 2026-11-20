@@ -108,5 +108,18 @@ Commit theo checkpoint: CP1 `3e68f64` (script `apps/api/scripts/rag-eval.mjs`, n
 **Phát hiện chất lượng (chưa có task, đề xuất sau nghiệm thu M4):** 3 câu từ chối nhầm dù đoạn đúng nằm trong top-3 (q01 hạng 3, q09 và q37 hạng 2) — prompt RAG thiên về từ chối; câu trả lời hay bỏ ý phụ (6 câu điểm 1).
 **Trạng thái** — `Chờ Review` (phần `-large` bị chặn).
 
+#### Review vòng 3
+**Task** — SE-017 · `develop` @ `b2d2098` · vòng 3 (TL, 21/11/2026, theo quyết định CTO 20/11: chưa cấp quyền `-large`; sửa nhãn TL-009 nhiều nguồn; chạy lại đánh giá; không đổi code sản phẩm)
+**Kết luận** — Phần `text-embedding-3-small` đạt trên nhãn v2. Giữ **`Chờ Review`, bị chặn** bởi quyền `text-embedding-3-large` (AC2 cột mô hình 2). Không có việc cho SE ở vòng này.
+**Đính chính vòng 1–2:** "nhãn TL-009 cũ, 22/50 lệch, chunker hiện tại cho 175 đoạn" là **sai nguyên nhân**. Chunker không đổi; lượt 19/11 chạy trên bản checkout CRLF (`core.autocrlf=true`), làm ranh giới đoạn đổi (175 thay vì 209). Trên tài liệu LF (nội dung repo), nhãn TL-009 vòng 1 khớp 100%. Chỉ số 19/11 vì vậy đo trên văn bản khác với repo. Biện pháp: `.gitattributes` ép LF cho tài liệu đánh giá ([TL-009 vòng 2](TL-009-rag-evaluation-dataset.md#checklist-vòng-2)).
+**Checklist** (bảng đầy đủ: [TL-RERUN-2026-11-21.md](../evaluation/rag-dataset/results/TL-RERUN-2026-11-21.md))
+- [x] AC1 lặp lại — Đạt — 2 lượt cùng hash `52d2f7346de0caae`.
+- [x] AC2 `text-embedding-3-small` — Đạt — nhãn v2: hit@1 80,0%, hit@3 97,5%, hit@5 100%, MRR 0,881; từ chối đúng 10/10; từ chối nhầm 1/40 (q09); precision trích dẫn 95,7% (45/47), TL đọc đoạn 46/47 hỗ trợ đúng. Tách tác động: riêng sửa CRLF→LF với nhãn v1 cho hit@5 97,5%, MRR 0,798, precision 80,9%.
+- [ ] AC2 `text-embedding-3-large` — **Bị chặn** — CTO 20/11/2026 chưa cấp quyền. Không gọi mô hình này.
+- [x] AC3 — Đạt — 87.713 / 1.846 token; ≈ $0,074 / 50 câu; trả lời p50 1,30 s, p95 1,72 s.
+- [x] AC4 — Đạt — `document_chunks` 0 trước / 0 sau; collection đánh giá 209/209 point; không đổi code sản phẩm hay script.
+- [x] Chất lượng câu trả lời (TL chấm tay 40 câu) — rubric 1,78/2 (32 / 7 / 1); 1 khẳng định không có căn cứ (q38 "2 lần", nguồn có 3); 0 dữ kiện bịa ngoài tài liệu.
+**Trạng thái** — `Chờ Review` (phần `-large` bị chặn).
+
 ## Phản hồi UI
 Không áp dụng.

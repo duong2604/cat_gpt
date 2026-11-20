@@ -2,6 +2,30 @@
 
 Theo mốc của [plan.md](../project/plan.md#2-mốc). Chi tiết từng ngày: [báo cáo ngày](daily/README.md). TL cập nhật cuối mỗi ngày làm việc và ngay khi phát hiện nguy cơ trễ mốc; mục mới nhất ở trên, giữ các mục cũ ([workflow mục 11](../project/workflow.md#11-theo-dõi-tiến-độ)).
 
+## Cập nhật 21/11/2026 01:15 (chỉ thị CTO round 4)
+
+Chi tiết: [21/11 vòng 1](daily/2026-11-21.md).
+
+| Mốc / việc | Tình trạng |
+|---|---|
+| Nghiệm thu M1–M4 (CTO) | Không đổi: sẵn sàng trên `develop` @ `b2d2098`; Docker healthy |
+| Tài liệu | PR #34 mở, CI pass, chờ CTO cho merge |
+| Đánh giá RAG | TL-009 v2 bằng chứng đạt; SE-017 `Chờ Review` (`-large` bị chặn); 3 lượt: từ chối nhầm 1–2/40, precision 92–96% |
+| Senior Dev | SE-018 chưa bắt đầu (chưa có nhánh); SE-019 Nháp |
+| Sự cố 19/11 | Cluster dùng chung; M0/Flex cần CTO xem Atlas UI; khuyến nghị chấp nhận mất |
+
+## Cập nhật 21/11/2026 00:45 (thực hiện quyết định CTO 20/11)
+
+Chi tiết: [20/11 vòng 4](daily/2026-11-20.md).
+
+| Mốc / việc | Tình trạng |
+|---|---|
+| Nghiệm thu M1–M4 (CTO) | Sẵn sàng trên `develop` @ `b2d2098` (code = `09fbcff`, đã kiểm 38/38); Docker healthy; checklist 20 bước ở vòng 3 mục 11 |
+| Module 4 | SE-017 chạy lại sau TL-009 v2: hit@5 100%, MRR 0,881, từ chối nhầm 1/40, rubric 1,78; **Chờ Review**, `-large` bị chặn |
+| Tài liệu | PR #30 merge (`b2d2098`); PR docs vòng 4 chờ CTO |
+| Senior Dev | SE-018 đã giao, SE xác nhận; SE-019 Nháp (sau nghiệm thu) |
+| Sự cố 19/11 | Báo cáo sự cố; 2 hội thoại mất, 0 tin nhắn mất; backup chưa xác định (cần Atlas UI) |
+
 ## Cập nhật 20/11/2026 23:40 (kiểm tích hợp M1–M4, chuẩn bị CTO nghiệm thu)
 
 Chi tiết: [20/11 vòng 3](daily/2026-11-20.md).

@@ -10,7 +10,7 @@
 |---|---|---|
 | M4-1 | Hỏi đáp tài liệu = **hội thoại Chat có gắn `documentIds`**. Dùng lại toàn bộ SSE, Dừng, Tạo lại, lịch sử, giới hạn 20 tin/phút, Chat UI | CTO vòng 2 mục 4 |
 | M4-2 | Nghiệp vụ truy hồi, dựng ngữ cảnh, xác minh trích dẫn nằm trong **`RagService`** (module `rag`); `ChatService` chỉ gọi 2 hàm của nó khi hội thoại có `documentIds` | CTO vòng 2 mục 4 |
-| M4-3 | Không có ngưỡng điểm mặc định: `RAG_MIN_SCORE` để trống (tắt) cho tới khi [TL-009](../tasks/TL-009-rag-evaluation-dataset.md)/[SE-017](../tasks/SE-017-rag-evaluation-script.md) đo xong | CTO vòng 2 mục 5 |
+| M4-3 | Không có ngưỡng điểm mặc định: `RAG_MIN_SCORE` để trống (tắt) cho tới khi [TL-009](../tasks/TL-009-rag-evaluation-dataset.md)/[SE-017](../tasks/SE-017-rag-evaluation-script.md) đo xong. **Đã đo, giữ để trống** (CTO 20/11/2026): điểm cosine top-1 của câu có căn cứ và câu ngoài tài liệu chồng lấn ở cả hai lượt đo — 19/11 (CRLF): 0,464–0,749 so với 0,260–0,599; 21/11 (LF, nhãn v2): 0,468–0,748 so với 0,260–0,597. Lượt 21/11: ngưỡng 0,50 vẫn để 4/10 câu ngoài tài liệu đi tiếp mà đã loại 3/40 câu có căn cứ; muốn chặn hết câu ngoài tài liệu cần 0,60, khi đó loại 15/40 câu có căn cứ. Câu ngoài tài liệu đã bị từ chối đúng 10/10 nhờ prompt, không cần ngưỡng. Xem lại khi đổi mô hình embedding | CTO vòng 2 mục 5; CTO 20/11/2026 |
 | M4-4 | Quyền: chỉ truy hồi tài liệu **của người gọi**, `READY`, chưa xóa — kiểm ở Mongo **và** lọc `userId` + `documentId` ở Qdrant | M3-2, [CS-1](access-control.md#4-chính-sách-đã-chốt) |
 | M4-5 | Trích dẫn (tên tài liệu, trang, đoạn trích) **do máy chủ lấy từ payload Qdrant**, không lấy chữ do model sinh → nguồn không thể bịa | CTO vòng 2 mục 5 |
 | M4-6 | Không dùng chain/agent của LangChain; gọi embedding + `LlmProvider` có sẵn trực tiếp (Q4 chỉ dùng `@langchain/textsplitters` ở Module 3) | Simplicity First, Q4 |
@@ -130,7 +130,7 @@ Quy tắc này kiểm chứng được mà **không** cần ngưỡng: nguồn c
 | Biến | Mặc định | Ghi chú |
 |---|---|---|
 | `RAG_TOP_K` | `5` | Số đoạn đưa vào ngữ cảnh |
-| `RAG_MIN_SCORE` | *(trống — tắt)* | Đặt sau đánh giá (M4-3) |
+| `RAG_MIN_SCORE` | *(trống — tắt)* | Đã đánh giá, giữ trống (M4-3, CTO 20/11/2026) |
 | `RAG_MAX_DOCUMENTS` | `5` | Số tài liệu tối đa mỗi hội thoại |
 | `RAG_SUMMARY_GROUP_CHARS` | `12000` | Kích thước nhóm khi tóm tắt |
 
