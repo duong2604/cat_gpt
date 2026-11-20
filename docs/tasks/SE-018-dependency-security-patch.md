@@ -7,7 +7,7 @@ Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tấ
 Ngày thực tế: bắt đầu 21/11/2026 · bàn giao review — · hoàn tất —
 Chốt: 18/11/2026 — CTO yêu cầu ghi đề xuất nâng bản vá thành task riêng
 SHA cơ sở: `origin/develop` @ `356e6a6`
-PR: <link, Senior Dev ghi khi bàn giao>
+PR: https://github.com/duong2604/cat_gpt/pull/36 (SHA đầu PR `f92b175`)
 
 ## Mục tiêu
 Đóng 2 advisory của `pnpm audit --prod` do TL phát hiện ngày 18/11/2026 bằng nâng bản vá. Không đổi kiến trúc, không tốn chi phí.
@@ -48,7 +48,7 @@ Nhánh `fix/dependency-security-patch` từ `origin/develop` @ `356e6a6`. Đổi
 - [x] Regression RAG/Summary — `POST /documents/:id/summary` `202` → `summaryStatus` `READY` (PDF).
 - [x] Chế độ `staff`/`demo` — `demo`: `GET /documents` `200`; `staff` (khởi động lại API với `RELEASE_MODE=staff`): `GET /documents` `404` (guard `documents-hidden`). `/me/features` trả `{"chatEnabled":true}` ở cả hai chế độ.
 - [ ] AC3 giao diện — chưa kiểm bằng trình duyệt (đăng nhập, Chat stream/Dừng/Tạo lại, trang Tài liệu, ảnh). Đã kiểm HTTP: `next start` build 16.4.6, `/login` `200`, route bảo vệ `307` tới đăng nhập, rewrite `/api/v1/health` `200`. Lý do: phạm vi kiểm này là API + build; ảnh UI chưa chụp.
-- [ ] AC4 CI tại PR head — chưa có (đợi PR).
+- [x] AC4 CI tại PR head — `build` SUCCESS tại `f92b175` (run [44790199947](https://github.com/duong2604/cat_gpt/actions/runs/44790199947)); `mergeStateStatus` CLEAN.
 - [x] Dữ liệu thử đã dọn — tài khoản thử tạo bằng admin, tên `SE-018 regression tester`, ID `6b008bd67101bbcc7c52cd6e`. Đã xóa theo ID đã ghi: 4 tài liệu (`6b008bd8…cd70/cd72/cd74/cd76`), 2 hội thoại (`6b008bdf…cd7b`, `6b008bdc…cd78`), avatar; xác nhận `404` sau xóa. Tài khoản **bị khóa** (`BLOCKED`) vì chưa có API xóa user. Không đụng dữ liệu khác; không chạy `text-embedding-3-large`; không đụng SE-017, PR #30/#35, worktree review, `34b465d`.
 - Checklist hai vai (mục 9.1): Quyền — ca được phép và từ chối đã kiểm (401/403/404 ở trên); trạng thái trống/tải/lỗi, desktop/mobile, sáng/tối, vi/en — Không áp dụng (không đổi giao diện); chế độ `staff`/`demo` — đã kiểm; ma trận quyền/chuẩn giao diện — không đổi.
 - Simplicity First: đổi 2 gói + lock; không abstraction, không dependency mới; giới hạn: vá không kéo thêm advisory ngoài phạm vi.
