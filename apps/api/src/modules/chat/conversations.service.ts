@@ -145,14 +145,6 @@ export class ConversationsService {
     return rows.reverse();
   }
 
-  async lastMessage(conversationId: Types.ObjectId): Promise<Message | null> {
-    return this.messageModel
-      .findOne({ conversationId })
-      .sort({ createdAt: -1, _id: -1 })
-      .lean<Message>()
-      .exec();
-  }
-
   async createMessage(input: CreateMessageInput): Promise<Message> {
     const doc = await this.messageModel.create(input);
     return doc.toObject();

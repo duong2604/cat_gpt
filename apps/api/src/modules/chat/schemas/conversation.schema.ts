@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Types } from 'mongoose';
+import { Types } from 'mongoose';
 import { CONVERSATION_TITLE_MAX_LENGTH } from '@cat-gpt/shared';
 
 @Schema({ collection: 'conversations', timestamps: true })
@@ -24,7 +24,6 @@ export class Conversation {
   updatedAt: Date;
 }
 
-export type ConversationDocument = HydratedDocument<Conversation>;
 export const ConversationSchema = SchemaFactory.createForClass(Conversation);
 
 ConversationSchema.index({ userId: 1, lastMessageAt: -1, _id: -1 });

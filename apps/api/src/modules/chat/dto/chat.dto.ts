@@ -16,7 +16,7 @@ import {
 import { CHAT_MAX_MESSAGE_LENGTH, CONVERSATION_TITLE_MAX_LENGTH } from '@cat-gpt/shared';
 import { Trim } from '../../../common/validation/transforms.js';
 
-export const CONVERSATIONS_PAGE_SIZE = 30;
+const CONVERSATIONS_PAGE_SIZE = 30;
 
 export class ListConversationsQueryDto {
   @ApiPropertyOptional({ description: 'Tìm theo tiêu đề' })

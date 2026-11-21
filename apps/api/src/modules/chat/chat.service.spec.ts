@@ -11,12 +11,12 @@ import type { DocumentEntity } from '../documents/schemas/document.schema.js';
 import { type LlmFinishReason, type LlmMessage, LlmProvider, type LlmStreamOptions } from '../llm/llm.provider.js';
 import { RAG_REFUSAL_TEXT } from '../rag/rag-prompt.js';
 import type { RagService } from '../rag/rag.service.js';
-import { ChatService, makeTitle } from './chat.service.js';
+import { ChatService, type ChatTurn, makeTitle } from './chat.service.js';
 import type { AnswerFields, CreateMessageInput } from './conversations.service.js';
 import type { ConversationsService } from './conversations.service.js';
 import type { Conversation } from './schemas/conversation.schema.js';
 import type { Message } from './schemas/message.schema.js';
-import type { SseStream } from './sse-stream.js';
+import type { SendMessageDto } from './dto/chat.dto.js';
 
 /**
  * Hồi quy cho ChatService.streamAnswer (chưa có test trước SE-014 — ghi chú tích hợp TL
@@ -96,10 +96,6 @@ class FakeConversationsService {
     return this.messagesFor(conversationId).slice(-limit);
   }
 
-  async lastMessage(conversationId: Types.ObjectId): Promise<Message | null> {
-    const list = this.messagesFor(conversationId);
-    return list.length ? list[list.length - 1] : null;
-  }
 
   async replaceAnswer(id: Types.ObjectId, conversationId: Types.ObjectId, fields: AnswerFields): Promise<boolean> {
     const m = this.messages.get(id.toString());
@@ -122,25 +118,34 @@ class FakeConversationsService {
 /** Ghi lại các sự kiện SSE theo đúng thứ tự gửi, không chạm Express thật. */
 class RecordingSse {
   events: unknown[] = [];
-  private onClientClose?: () => void;
   ended = false;
-
-  open(onClientClose: () => void): void {
-    this.onClientClose = onClientClose;
-  }
-
-  send(event: unknown): void {
-    this.events.push(event);
-  }
-
-  end(): void {
-    this.ended = true;
-  }
+  /** Gắn khi chạy lượt: mô phỏng người dùng đóng tab (gọi cancel). */
+  onClientClose?: () => void;
 
   /** Mô phỏng người dùng đóng tab/mất mạng giữa chừng. */
   simulateClientClose(): void {
     this.onClientClose?.();
   }
+}
+
+/** Chạy pha trước stream (lỗi ném ra như JSON) rồi thu các event của lượt. */
+async function sendTo(service: ChatService, userId: string, dto: SendMessageDto, sse: RecordingSse): Promise<void> {
+  const plan = await service.prepareSend(userId, dto);
+  await runTurn(service, plan, sse);
+}
+
+async function regenerateTo(service: ChatService, userId: string, conversationId: string, sse: RecordingSse): Promise<void> {
+  const plan = await service.prepareRegenerate(userId, conversationId);
+  await runTurn(service, plan, sse);
+}
+
+/** Chạy một lượt (run) và gom event vào sse; ngắt tab (simulateClientClose) → cancel lượt. */
+async function runTurn(service: ChatService, turn: ChatTurn, sse: RecordingSse): Promise<void> {
+  sse.onClientClose = () => service.cancel(turn);
+  await service.run(turn, (event) => {
+    sse.events.push(event);
+  });
+  sse.ended = true;
 }
 
 function sleep(ms = 0): Promise<void> {
@@ -238,7 +243,7 @@ describe('ChatService — hồi quy (trước khi thêm RagService, SE-014)', ()
       const { service, conversations } = makeService(llm);
       const sse = new RecordingSse();
 
-      await service.send(USER_ID.toString(), { content: 'Chào bạn' }, sse as unknown as SseStream);
+      await sendTo(service, USER_ID.toString(), { content: 'Chào bạn' }, sse);
 
       expect(sse.events.map((e) => (e as { type: string }).type)).toEqual([
         'meta',
@@ -261,7 +266,7 @@ describe('ChatService — hồi quy (trước khi thêm RagService, SE-014)', ()
       const { service } = makeService(llm);
       const sse = new RecordingSse();
 
-      await service.send(USER_ID.toString(), { content: 'Câu hỏi dài' }, sse as unknown as SseStream);
+      await sendTo(service, USER_ID.toString(), { content: 'Câu hỏi dài' }, sse);
 
       const done = sse.events.at(-1) as { type: 'done'; message: { status: string; content: string } };
       expect(done.message.status).toBe(MessageStatus.TRUNCATED);
@@ -273,7 +278,7 @@ describe('ChatService — hồi quy (trước khi thêm RagService, SE-014)', ()
       const { service } = makeService(llm);
       const sse = new RecordingSse();
 
-      await service.send(USER_ID.toString(), { content: 'Câu hỏi' }, sse as unknown as SseStream);
+      await sendTo(service, USER_ID.toString(), { content: 'Câu hỏi' }, sse);
 
       expect(sse.events.map((e) => (e as { type: string }).type)).toEqual(['meta', 'delta', 'done']);
       const done = sse.events.at(-1) as { type: 'done'; message: { status: string; content: string } };
@@ -293,7 +298,7 @@ describe('ChatService — hồi quy (trước khi thêm RagService, SE-014)', ()
       });
       llm.onChunkSent = () => resolveFirstChunk();
 
-      const sendPromise = service.send(USER_ID.toString(), { content: 'Kể chuyện dài' }, sse as unknown as SseStream);
+      const sendPromise = sendTo(service, USER_ID.toString(), { content: 'Kể chuyện dài' }, sse);
       await firstChunkSent;
       conversationId = (sse.events[0] as { conversation: { id: string } }).conversation.id;
 
@@ -307,9 +312,9 @@ describe('ChatService — hồi quy (trước khi thêm RagService, SE-014)', ()
       expect(saved[1].status).toBe(MessageStatus.STOPPED);
     });
 
-    it('đóng tab/mất mạng giữa chừng cũng tạo ra STOPPED (SseStream.open gọi onClientClose)', async () => {
+    it('đóng tab/mất mạng giữa chừng (client ngắt) cũng tạo ra STOPPED đã lưu', async () => {
       const llm = new ScriptedLlmProvider(['Chunk1', 'Chunk2']);
-      const { service } = makeService(llm);
+      const { service, conversations } = makeService(llm);
       const sse = new RecordingSse();
 
       let resolveFirstChunk!: () => void;
@@ -318,13 +323,16 @@ describe('ChatService — hồi quy (trước khi thêm RagService, SE-014)', ()
       });
       llm.onChunkSent = () => resolveFirstChunk();
 
-      const sendPromise = service.send(USER_ID.toString(), { content: 'Hỏi' }, sse as unknown as SseStream);
+      const sendPromise = sendTo(service, USER_ID.toString(), { content: 'Hỏi' }, sse);
       await firstChunkSent;
       sse.simulateClientClose();
       await sendPromise;
 
-      const done = sse.events.at(-1) as { type: 'done'; message: { status: string } };
-      expect(done.message.status).toBe(MessageStatus.STOPPED);
+      // Client đã ngắt nên không còn event `done`; trạng thái được kiểm trên tin đã lưu.
+      await vi.waitFor(() => {
+        const saved = [...conversations.messages.values()].find((m) => m.role === MessageRole.ASSISTANT);
+        expect(saved?.status).toBe(MessageStatus.STOPPED);
+      });
     });
   });
 
@@ -333,14 +341,14 @@ describe('ChatService — hồi quy (trước khi thêm RagService, SE-014)', ()
       const llm = new ScriptedLlmProvider(['Trả lời lần 1']);
       const { service, conversations } = makeService(llm);
       const sse1 = new RecordingSse();
-      await service.send(USER_ID.toString(), { content: 'Câu hỏi' }, sse1 as unknown as SseStream);
+      await sendTo(service, USER_ID.toString(), { content: 'Câu hỏi' }, sse1);
       const conversationId = (sse1.events[0] as { conversation: { id: string } }).conversation.id;
       expect([...conversations.messages.values()]).toHaveLength(2);
 
       const llm2 = new ScriptedLlmProvider(['Trả lời lần 2 (tạo lại)']);
       const { service: service2 } = makeService(llm2, conversations);
       const sse2 = new RecordingSse();
-      await service2.regenerate(USER_ID.toString(), conversationId, sse2 as unknown as SseStream);
+      await regenerateTo(service2, USER_ID.toString(), conversationId, sse2);
 
       expect(sse2.events.map((e) => (e as { type: string }).type)).toEqual(['meta', 'delta', 'done']);
       // meta của regenerate không có userMessage mới (sinh lại cho câu hỏi cũ).
@@ -360,7 +368,7 @@ describe('ChatService — hồi quy (trước khi thêm RagService, SE-014)', ()
       const conversation = await conversations.create(USER_ID.toString(), 'Trống');
 
       await expect(
-        service.regenerate(USER_ID.toString(), conversation._id.toString(), new RecordingSse() as unknown as SseStream),
+        regenerateTo(service, USER_ID.toString(), conversation._id.toString(), new RecordingSse()),
       ).rejects.toMatchObject({ code: ErrorCode.CHAT_NOTHING_TO_REGENERATE });
     });
   });
@@ -374,10 +382,10 @@ describe('ChatService — hồi quy (trước khi thêm RagService, SE-014)', ()
       const conversation = await conversations.create(USER_ID.toString(), 'Hội thoại có sẵn');
 
       await expect(
-        service.send(
+        sendTo(service, 
           USER_ID.toString(),
           { conversationId: conversation._id.toString(), content: 'x', documentIds: [new Types.ObjectId().toString()] },
-          new RecordingSse() as unknown as SseStream,
+          new RecordingSse(),
         ),
       ).rejects.toMatchObject({ code: ErrorCode.VALIDATION_FAILED });
     });
@@ -387,10 +395,10 @@ describe('ChatService — hồi quy (trước khi thêm RagService, SE-014)', ()
       const { service } = makeService(new ScriptedLlmProvider([]), undefined, fakeDocumentModel([otherUsersDoc]));
 
       await expect(
-        service.send(
+        sendTo(service, 
           USER_ID.toString(),
           { content: 'Hỏi tài liệu của người khác', documentIds: [otherUsersDoc._id.toString()] },
-          new RecordingSse() as unknown as SseStream,
+          new RecordingSse(),
         ),
       ).rejects.toMatchObject({ code: ErrorCode.DOCUMENT_NOT_FOUND });
     });
@@ -400,10 +408,10 @@ describe('ChatService — hồi quy (trước khi thêm RagService, SE-014)', ()
       const { service } = makeService(new ScriptedLlmProvider([]), undefined, fakeDocumentModel([processingDoc]));
 
       await expect(
-        service.send(
+        sendTo(service, 
           USER_ID.toString(),
           { content: 'Hỏi khi đang xử lý', documentIds: [processingDoc._id.toString()] },
-          new RecordingSse() as unknown as SseStream,
+          new RecordingSse(),
         ),
       ).rejects.toMatchObject({ code: ErrorCode.DOCUMENT_NOT_READY });
     });
@@ -414,13 +422,13 @@ describe('ChatService — hồi quy (trước khi thêm RagService, SE-014)', ()
       const { service } = makeService(new ScriptedLlmProvider([]), undefined, model, fakeConfig(undefined, 2));
 
       await expect(
-        service.send(
+        sendTo(service, 
           USER_ID.toString(),
           {
             content: 'Chọn quá nhiều tài liệu',
             documentIds: [new Types.ObjectId().toString(), new Types.ObjectId().toString(), new Types.ObjectId().toString()],
           },
-          new RecordingSse() as unknown as SseStream,
+          new RecordingSse(),
         ),
       ).rejects.toMatchObject({ code: ErrorCode.VALIDATION_FAILED });
       expect(findSpy).not.toHaveBeenCalled();
@@ -435,15 +443,15 @@ describe('ChatService — hồi quy (trước khi thêm RagService, SE-014)', ()
       const { service } = makeService(new ScriptedLlmProvider([]), conversations, fakeDocumentModel([myDoc]), staffConfig);
 
       await expect(
-        service.send(
+        sendTo(service, 
           USER_ID.toString(),
           { conversationId: conversation._id.toString(), content: 'Hỏi tiếp' },
-          new RecordingSse() as unknown as SseStream,
+          new RecordingSse(),
         ),
       ).rejects.toMatchObject({ code: ErrorCode.DOCUMENT_NOT_FOUND });
 
       await expect(
-        service.regenerate(USER_ID.toString(), conversation._id.toString(), new RecordingSse() as unknown as SseStream),
+        regenerateTo(service, USER_ID.toString(), conversation._id.toString(), new RecordingSse()),
       ).rejects.toMatchObject({ code: ErrorCode.DOCUMENT_NOT_FOUND });
     });
 
@@ -460,10 +468,10 @@ describe('ChatService — hồi quy (trước khi thêm RagService, SE-014)', ()
       const { service } = makeService(new ScriptedLlmProvider(['Vẫn trả lời bình thường']), conversations, undefined, staffConfig);
       const sse = new RecordingSse();
 
-      await service.send(
+      await sendTo(service, 
         USER_ID.toString(),
         { conversationId: conversation._id.toString(), content: 'Hỏi tiếp' },
-        sse as unknown as SseStream,
+        sse,
       );
 
       const done = sse.events.at(-1) as { type: 'done'; message: { status: string } };
@@ -492,10 +500,10 @@ describe('ChatService — hồi quy (trước khi thêm RagService, SE-014)', ()
       );
       const sse = new RecordingSse();
 
-      await service.send(
+      await sendTo(service, 
         USER_ID.toString(),
         { content: 'Hỏi tài liệu của tôi', documentIds: [myDoc._id.toString()] },
-        sse as unknown as SseStream,
+        sse,
       );
 
       const meta = sse.events[0] as { conversation: { documentIds?: string[] } };
@@ -517,10 +525,10 @@ describe('ChatService — hồi quy (trước khi thêm RagService, SE-014)', ()
       const { service } = makeService(llm, undefined, fakeDocumentModel([myDoc]), fakeConfig(), fakeRag);
       const sse = new RecordingSse();
 
-      await service.send(
+      await sendTo(service, 
         USER_ID.toString(),
         { content: 'Câu hỏi ngoài tài liệu', documentIds: [myDoc._id.toString()] },
-        sse as unknown as SseStream,
+        sse,
       );
 
       expect(streamSpy).not.toHaveBeenCalled();
@@ -551,10 +559,10 @@ describe('ChatService — hồi quy (trước khi thêm RagService, SE-014)', ()
       const { service, conversations } = makeService(llm, undefined, fakeDocumentModel([myDoc]), fakeConfig(), fakeRag);
       const sse = new RecordingSse();
 
-      await service.send(
+      await sendTo(service, 
         USER_ID.toString(),
         { content: 'Hỏi tài liệu của tôi', documentIds: [myDoc._id.toString()] },
-        sse as unknown as SseStream,
+        sse,
       );
 
       expect(streamSpy).not.toHaveBeenCalled();
@@ -566,7 +574,7 @@ describe('ChatService — hồi quy (trước khi thêm RagService, SE-014)', ()
       qdrantDown = false;
       const conversation = [...conversations.conversations.values()][0];
       const sse2 = new RecordingSse();
-      await service.regenerate(USER_ID.toString(), conversation._id.toString(), sse2 as unknown as SseStream);
+      await regenerateTo(service, USER_ID.toString(), conversation._id.toString(), sse2);
 
       const retried = sse2.events.at(-1) as { type: 'done'; message: { status: string; content: string } };
       expect(retried.message.status).toBe(MessageStatus.COMPLETED);

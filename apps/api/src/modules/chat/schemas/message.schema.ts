@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Types } from 'mongoose';
+import { Types } from 'mongoose';
 import { MessageRole, MessageStatus } from '@cat-gpt/shared';
 
 /**
@@ -27,7 +27,7 @@ export class Citation {
   @Prop({ type: String, required: true, maxlength: 300 })
   quote: string;
 }
-export const CitationSchema = SchemaFactory.createForClass(Citation);
+const CitationSchema = SchemaFactory.createForClass(Citation);
 
 @Schema({ collection: 'messages', timestamps: { createdAt: true, updatedAt: false } })
 export class Message {
@@ -66,7 +66,6 @@ export class Message {
   createdAt: Date;
 }
 
-export type MessageDocument = HydratedDocument<Message>;
 export const MessageSchema = SchemaFactory.createForClass(Message);
 
 MessageSchema.index({ conversationId: 1, createdAt: 1 });
