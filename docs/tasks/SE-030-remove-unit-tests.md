@@ -1,6 +1,6 @@
 # SE-030 — Gỡ toàn bộ unit test khỏi `apps/api`
 
-Trạng thái: Sẵn sàng — làm **sau khi SE-029 (PR #54) merge**
+Trạng thái: **TẠM DỪNG — CTO NOT APPROVED (22/11/2026)**; chờ CTO duyệt riêng sau giải trình TL ([báo cáo Chat mục 18](../reports/chat-module-structural-review.md))
 Người phụ trách: Senior Dev · Ưu tiên: P2 · Ước lượng: 0,25 ngày
 Phụ thuộc: SE-029 merge (cùng `package.json`/lockfile)
 Hạn bàn giao review: theo SE-029 · Hạn hoàn tất: không đặt

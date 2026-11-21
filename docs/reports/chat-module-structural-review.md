@@ -3,7 +3,7 @@
 Người lập: TL · Cơ sở: `origin/develop` @ `547b06f` (CI success) · Bắt đầu: 21/11/2026 21:30 · Kết thúc triển khai: 21:57 · `develop` @ `86b9f3f`
 Task triển khai: [SE-022](../tasks/SE-022-chat-module-structural-refactor.md) · Chỉ thị: CTO "Chat Module Structural Refactor" (P1)
 
-**Trạng thái: SE-022 `CTO STRUCTURAL ACCEPTED` (21/11/2026) · F03 `PARTIAL` — SE-023 đã merge (`83704bc`), TL đề nghị CTO nghiệm thu chức năng (mục 11).** Xem mục 9. Convention review (test, `guards/`, SSE): mục 10 — chờ CTO duyệt mục 10.6. **SSE: mục 12–15 — SE-027 merge `11106c8`; POC B, C xong; CTO chọn **C — Native Streaming** (mục 16); migration SE-029 PR #54 TL đạt AC1–AC11 — **chờ CTO duyệt merge** (mục 17).**
+**Trạng thái: SE-022 `CTO STRUCTURAL ACCEPTED` (21/11/2026) · F03 `PARTIAL` — SE-023 đã merge (`83704bc`), TL đề nghị CTO nghiệm thu chức năng (mục 11).** Xem mục 9. Convention review (test, `guards/`, SSE): mục 10 — chờ CTO duyệt mục 10.6. **SSE: mục 12–15 — SE-027 merge `11106c8`; POC B, C xong; CTO chọn **C — Native Streaming** (mục 16); migration SE-029 **merge `29160c4`** (CTO duyệt, mục 18). SE-030 tạm dừng.**
 
 Ký hiệu: **[CODE]** đã kiểm chứng bằng code/lệnh · **[NHẬN ĐỊNH]** đánh giá kỹ thuật · **[ĐỀ XUẤT]**.
 
@@ -550,3 +550,31 @@ Kịch bản cũ có kỳ vọng lỗi thời đã ghi nhận và sửa riêng (
 - Nhánh POC B/C giữ tới khi migration merge; xóa sau đó.
 
 **Trạng thái: IMPLEMENTED — TL APPROVED — AWAITING CTO APPROVAL TO MERGE.**
+
+## 18. SE-029 merge; giải trình SE-030 — 22/11/2026 01:24
+
+### 18.1 SE-029 — DONE
+CTO duyệt (HEAD `018e941`, CI pass, không ngoài phạm vi). TL kiểm lại trước merge: HEAD PR = `018e941`; `mergeStateStatus` CLEAN, CI `build` pass; `git diff --stat develop...PR` = 13 tệp đúng phạm vi (`apps/api/package.json`, lockfile, `modules/chat/*`, `docs/design/module-2-chat.md`, `docs/thesis/03-implementation.md`). `gh pr merge 54 --merge --match-head-commit 018e941…` → **`29160c4`**; `018e941` là tổ tiên `origin/develop`; CI `develop` @ `29160c4` **success**. Nhánh remote `refactor/api-chat-native-streaming` đã xóa; SE đã dọn worktree + nhánh local. **Trạng thái module Chat:** không còn lifecycle HTTP streaming tự viết, `ChatService` không phụ thuộc Express. Nhánh POC B/C (`poc/api-chat-nest-sse`, `poc/api-chat-native-stream`) chưa từng vào `develop` — **chờ CTO xác nhận xóa** (cùng `test/se023-fault`).
+
+### 18.2 SE-030 — giải trình (CTO yêu cầu)
+**Nguồn gốc yêu cầu:** chủ dự án yêu cầu "SE xóa các file unit test khi làm xong" (22/11); TL hỏi lại phạm vi, chủ dự án chọn "xóa toàn bộ 8 file spec". TL đã ghi rõ việc này trái mục 1 chỉ thị Convention Review và tạo task ở trạng thái chờ — CTO chưa duyệt → **không thực hiện**.
+
+**Giá trị của từng tệp (98 ca `it`, CI chạy < 10 giây):**
+| Tệp | Ca | Bảo vệ | Còn giá trị? |
+|---|---|---|---|
+| `chat/chat.service.spec.ts` | 17 | 4 trạng thái kết thúc (COMPLETED/TRUNCATED/STOPPED/ERROR), thứ tự `meta→delta→done`, Dừng/đóng tab, Tạo lại (SE-F9), validate `documentIds` (404/400), RAG insufficient/lỗi truy hồi | **Có** — đúng các luồng vừa refactor 4 lần trong 2 ngày; là lưới duy nhất chạy tự động |
+| `rag/rag.service.spec.ts` | 18 | `verifyCitations` (`[1,3]`, ngoài khoảng, trùng), dựng prompt | **Có** — logic thuần, chống trích dẫn bịa |
+| `documents/text-extract.spec.ts` | 18 | Trích văn bản TXT/PDF/DOCX, giới hạn kích thước | **Có** — liên quan F04-N1 (zip bomb) |
+| `documents/sanitize-filename.spec.ts` | 7 | Làm sạch tên tệp (path traversal, ký tự điều khiển) | **Có** — bảo mật |
+| `llm/openai-llm.provider.spec.ts` | 12 | Ánh xạ lỗi/`cause`, `finish_reason`, hủy | **Có** |
+| `documents/chunk-text.spec.ts`, `document-summary.spec.ts`, `permanent-error.spec.ts` | 3 + 4 + 4 | Cắt đoạn, gom tóm tắt, phân loại lỗi vĩnh viễn (không retry vô hạn) | **Có** |
+Không tệp nào kiểm code đã bị xóa; không ca nào đang hỏng hay bị skip → **không có test "không còn giá trị"** theo bằng chứng hiện có.
+
+**Ảnh hưởng nếu xóa:** CI chỉ còn typecheck/lint/build → mọi hồi quy hành vi chỉ phát hiện được khi TL chạy tay kịch bản runtime (ngoài repo, cần API + Mongo + Redis + Qdrant, ~15 phút/lượt, phụ thuộc người chạy). Ví dụ thực tế tuần này: các lần đổi `streamAnswer`/`saveAnswer` (SE-022, SE-023, SE-029) đều được spec Chat chạy lại tự động ở mỗi PR.
+
+**Giải pháp thay thế (TL đề xuất):**
+1. **Giữ 8 tệp spec** (khuyến nghị). Giữ quy định "không viết unit test mới ngoài phạm vi được duyệt"; khi code bị xóa thì xóa test tương ứng trong cùng PR (đã làm, vd `lastMessage` ở SE-029).
+2. Nếu mục tiêu là giảm công bảo trì test: rà định kỳ, chỉ xóa ca kiểm chi tiết cài đặt (mock quá sâu) — hiện chưa thấy ca nào như vậy.
+3. Bổ sung (tùy chọn, cần duyệt): đưa các kịch bản runtime của TL vào repo dưới `scripts/verify/` để ai cũng chạy được — không thay thế unit test.
+
+**Đề xuất quyết định:** đóng SE-030 (không xóa), giữ nguyên quy định test hiện hành. Chờ CTO.

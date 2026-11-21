@@ -1,6 +1,6 @@
 # SE-029 — Migration Chat sang NestJS Native Streaming Responses
 
-Trạng thái: Chờ Review — PR #54 (`018e941`) TL đạt AC1–AC11; **chờ CTO duyệt merge**
+Trạng thái: Done — PR #54 → `29160c4` (22/11/2026 01:19, CTO duyệt merge); CI `develop` success
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 0,75 ngày
 Phụ thuộc: không. SE-005 (hạn 27/11) làm ngay sau — báo TL nếu ảnh hưởng hạn
 Hạn bàn giao review: 22/11/2026 · Hạn hoàn tất: theo CTO nghiệm thu
@@ -47,7 +47,7 @@ Route, body, mã HTTP (200 stream; 400/401/404/409/429 JSON), event `meta`/`delt
 PR `refactor/api-chat-native-streaming` nhắm `develop`, mô tả 6.1 + trước/sau (cấu trúc, trách nhiệm, dependency). **Không merge** — TL review → báo CTO → CTO duyệt → TL merge.
 
 ## Kết quả review
-Chưa có.
+22/11/2026 — CTO APPROVED merge (HEAD `018e941`, CI pass, đúng phạm vi). TL merge `29160c4`, `018e941` là tổ tiên của `origin/develop`, CI `develop` success. Nhánh remote đã xóa; SE dọn worktree/nhánh local.
 
 ## Lịch sử review
 ### PR #54 — TL review vòng 1 (SHA `af27bb7`, base `11106c8`) — **Cần sửa** (22/11 00:43)
