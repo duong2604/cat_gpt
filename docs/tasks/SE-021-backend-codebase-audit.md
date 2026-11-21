@@ -285,5 +285,16 @@ SE bàn giao: đo byte giải nén thật của mọi entry `.xml`/`.rels` (tr�
 - [x] Phạm vi, mapping lỗi, không đổi API contract — đạt.
 **Trạng thái** — Cần sửa (PR #46).
 
+### Checklist vòng 10 — PR-B9 vòng 2 ([PR #46](https://github.com/duong2604/cat_gpt/pull/46), head `bcbab5e`)
+SE sửa tại chỗ: bỏ lọc theo tên; ngân sách giải nén = `DOCUMENT_MAX_SIZE_MB` + `DOCUMENT_MAX_DOCX_XML_MB` cho mọi entry không phải thư mục (không biến môi trường mới). SE kiểm trên DB `cat_gpt_loadtest`: 3 biến thể bom → `DOCUMENT_TOO_MANY_CHUNKS`; DOCX + ảnh 6 MB READY; DOCX hỏng UNREADABLE; test 83/83; CI SUCCESS.
+
+#### Review vòng 10 — PR-B9
+**PR** #46 · SHA đã review `bcbab5e` · **APPROVED** — merge → `develop` @ `fe06486`. **F04-N1 (BLOCKER) đóng.**
+- [x] Yêu cầu vòng 9 — Đạt: probe TL (ngân sách 35 MB), rel **styles** trỏ `styles.xml` / `st` / `media/image1.png` → cả ba `DocumentTooLargeToProcessError`, RSS chỉ tăng ~45 MB (trước: thành công, 157 → 459 MB).
+- [x] Không chặn nhầm — fixture `se013-docx-valid.docx` OK; DOCX hợp lệ + ảnh ngẫu nhiên 6 MB (không nén được) OK; `se013-docx-corrupt.docx` → `DocumentUnreadableError`.
+- [x] Gate — typecheck/lint/build `--force`, test 83/83, CI SUCCESS, CLEAN.
+- [x] Sau merge — `develop` `fe06486` (gồm #45 + #46): build, test 83/83, hồi quy 27/27 và probe bom trên DB `cat_gpt_loadtest`.
+- MINOR (không chặn): thông điệp lỗi "Các phần XML của DOCX…" chưa cập nhật (nay đo mọi entry) — sửa ở PR sau.
+
 ## Phản hồi UI
 Không áp dụng.
