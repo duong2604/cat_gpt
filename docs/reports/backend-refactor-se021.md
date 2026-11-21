@@ -101,3 +101,42 @@ Quy trình bắt buộc: SE inventory + **dry-run (chỉ đọc)** → TL đối
 |---|---|---|---|
 | C1 Data Cleanup | **Chưa bắt đầu** — TL lập danh sách; chờ SE inventory + dry-run (sau PR-B3) | — | Không xóa gì trước khi TL duyệt manifest |
 | C2 Code Cleanup | **Chưa bắt đầu** — TL audit xong; B8/B9 nằm trong PR-B8; B2, B12 sẽ thành PR-C2 | — | PR riêng, không gộp với C1 |
+
+## 6. Chính sách cấu hình theo môi trường (chỉ thị CTO vòng 20) — audit TL 12:5x, `develop` `4cd1784`
+
+### 6.1. Hiện trạng (đọc code)
+| Biến | Giá trị | Dùng ở đâu | Ý nghĩa thực tế |
+|---|---|---|---|
+| `NODE_ENV` | `development` (mặc định) / `production` / `test` | `AppConfigService.isProduction` → chỉ `main.ts:24` (cảnh báo mock, #42) | Trục runtime Node; gần như không điều khiển chính sách |
+| `RELEASE_MODE` | `demo` (mặc định) / `staff` | `chat-hidden.guard.ts:9`, `documents-hidden.guard.ts:8`, `swaggerEnabled` (`app-config.service.ts:53`) | Trục mở tính năng (CS-6, SE-003) |
+| `NEXT_PUBLIC_RELEASE_MODE` (web) | `demo` / `staff` | `apps/web/src/lib/release-mode.ts:2` — chỉ so `=== "staff"`; Chat lấy từ `/me/features` | Phải khớp API (ghi trong `.env.example` web) |
+| `LLM_PROVIDER` | `mock` (mặc định) / `openai` | `llm.module.ts` | Không có fallback âm thầm khi OpenAI lỗi |
+| `COOKIE_SECURE` | `false` (mặc định) | `auth-cookie.service.ts` | Không có ràng buộc theo môi trường |
+| `SWAGGER_ENABLED` | không đặt → theo `demo` | `app-config.service.ts:51-54` | Bật mặc định ở `demo` |
+
+**Rủi ro nếu làm theo kế hoạch cũ:** PR-B8/C2 gắn ràng buộc vào `NODE_ENV=production`, còn CTO yêu cầu `RELEASE_MODE=production` → **hai hệ thống cạnh tranh**. **Quyết định TL:** một nguồn chính sách duy nhất là `RELEASE_MODE`; `NODE_ENV` chỉ được kiểm nhất quán.
+
+### 6.2. Quy tắc (thực hiện trong `validateEnv`, fail startup với thông báo rõ)
+| # | Điều kiện | Kết quả |
+|---|---|---|
+| R1 | Thêm giá trị `RELEASE_MODE=production` (giữ `demo`, `staff`) | Guard `staff` không đổi; Swagger mặc định = chỉ `demo` → `production` **tắt** |
+| R2 | `NODE_ENV=production` mà **không khai báo** `RELEASE_MODE` | **Fail** — triển khai thật phải khai báo rõ |
+| R3 | `RELEASE_MODE=production` mà `NODE_ENV≠production` | **Fail** (mâu thuẫn) |
+| R4 | `RELEASE_MODE=production` và `LLM_PROVIDER≠openai` (hoặc thiếu `OPENAI_API_KEY`) | **Fail** — thay cảnh báo của #42 |
+| R5 | `RELEASE_MODE=production` và `COOKIE_SECURE≠true` | **Fail** — production bắt buộc HTTPS + cookie `secure`; không fallback ngầm |
+| R6 | `RELEASE_MODE=production` và `SWAGGER_ENABLED=true` | Cho phép (bật rõ ràng), **log cảnh báo** lúc khởi động |
+| R7 | `NODE_ENV=production`, `RELEASE_MODE=staff` (staging/thử nội bộ) và `LLM_PROVIDER=mock` | Cho phép (Chat tự ẩn theo CS-6); log cảnh báo "không dùng dữ liệu thật với mock" |
+| R8 | `NODE_ENV=production`, `RELEASE_MODE=demo` và `LLM_PROVIDER=mock` | **Fail** (bản demo phát hành trả lời giả lập) |
+| R9 | `RELEASE_MODE=production` và `TRUST_PROXY` = mặc định `loopback` | Cảnh báo (cần cấu hình proxy thật để lấy IP đúng cho giới hạn đăng nhập) |
+| R10 | Development (`NODE_ENV=development`, mặc định) | **Không đổi**: `demo` mặc định, `mock` được phép, `COOKIE_SECURE=false` được phép |
+
+Máy demo (`NODE_ENV=development`, `RELEASE_MODE=demo`, `LLM_PROVIDER=openai`) không bị ảnh hưởng. **Web:** không cần sửa code (chỉ so `=== "staff"`); chú thích `.env.example` web nêu `demo`/`staff` sẽ thiếu `production` — ghi nhận, sửa khi frontend được duyệt.
+
+### 6.3. Gộp PR (đổi thứ tự có lý do)
+Vì R4–R8 cùng sửa `env.validation.ts` và `main.ts` với SE-F24, SE-F26 và C2-B2: gộp thành **một PR cấu hình** (PR-B8 mở rộng). PR-C2 còn lại chỉ gỡ `ioredis` (B12) — tách riêng, không phụ thuộc. DNS (`DNS_SERVERS`) vẫn trong PR-B8.
+
+### 6.4. PR-B3 — gate bổ sung của CTO và điều chỉnh thiết kế
+**Phát hiện (TL):** với B2a như đã duyệt, bên **thua** CAS khi 2 tab refresh đồng thời **xoay thêm một lần** (h0 → h1 → h2). Nếu trình duyệt giữ cookie của **bên thắng** (h1 — phản hồi đến sau), h1 trở thành `previous` rồi vào lịch sử; lần refresh kế tiếp (~15 phút, ngoài ân hạn) khớp lịch sử → **thu hồi phiên nhầm** → **không qua gate 2**.
+**Điều chỉnh (TL duyệt, không làm yếu bảo mật):** ở nhánh **thua CAS** (lần đọc đầu thấy token là `current`, CAS thất bại, đọc lại thấy token = `previous` vừa được xoay) → **không xoay thêm**; chỉ cấp **access token** cho cùng phiên và **không đặt lại refresh cookie** → cookie trong trình duyệt là của bên thắng = `current`. Nhánh ân hạn thông thường (lần đọc đầu đã thấy `previous`, vd thử lại sau khi mất phản hồi) giữ như cũ.
+**Gate 1 (replay):** token chỉ được dùng ở nhánh ân hạn **một lần** (sau đó nó là lịch sử → dùng lại = thu hồi); token lịch sử không bao giờ dùng để xoay; nhánh thua CAS chỉ xảy ra trong lúc đua (mili giây), không kéo dài ân hạn.
+**Bằng chứng bắt buộc:** kịch bản thật mô phỏng cookie jar trình duyệt (Set-Cookie đến sau thắng), chạy cả hai thứ tự phản hồi; sau đó refresh ngoài ân hạn (đợi > 30 s) → phiên **không** bị thu hồi.
