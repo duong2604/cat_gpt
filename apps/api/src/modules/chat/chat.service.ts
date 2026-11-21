@@ -259,10 +259,8 @@ export class ChatService {
   }
 
   /**
-   * Kiểm tài liệu khi tạo hội thoại hỏi đáp (thiết kế mục 5): một truy vấn Mongo
-   * `{ _id ∈ ids, userId, deletedAt: null }` — thiếu bất kỳ id nào (không có / đã xóa /
-   * của người khác, không phân biệt) → `404`; có tài liệu chưa `READY` → `400`.
-   * `RagService.prepare()` tự lọc lại lúc trả lời (tài liệu có thể bị xóa sau khi tạo).
+   * Kiểm tài liệu của hội thoại mới: Tài liệu phải hiển thị, số lượng không quá RAG_MAX_DOCUMENTS,
+   * rồi ủy quyền kiểm sở hữu/READY cho DocumentsService.findReadyOwnedDocuments (404/400).
    */
   private async validateDocumentSelection(userId: string, documentIds: string[]): Promise<Types.ObjectId[]> {
     this.assertDocumentsVisible();
@@ -276,21 +274,12 @@ export class ChatService {
   }
 
   /**
-   * Hỏi tài liệu cần cả Chat bật (ChatHiddenGuard trên route) và Tài liệu hiển thị
-   * (thiết kế mục 10) — ẩn như tài liệu không tồn tại, không phân biệt lý do. Kiểm cả khi
-   * tiếp tục một hội thoại đã có từ trước (không chỉ lúc tạo): bản `staff` có thể được bật
-   * sau khi hội thoại đã tồn tại từ bản `demo`.
-   */
-  /**
-   * Hỏi tài liệu cần cả Chat bật (ChatHiddenGuard trên route) và Tài liệu hiển thị
-   * (thiết kế mục 10) — ẩn như tài liệu không tồn tại, không phân biệt lý do. Kiểm cả khi
-   * tiếp tục một hội thoại đã có từ trước (không chỉ lúc tạo): bản `staff` có thể được bật
-   * sau khi hội thoại đã tồn tại từ bản `demo`.
+   * Chat chỉ dùng tài liệu khi module Tài liệu hiển thị (thiết kế mục 10); ẩn → 404 như tài liệu không tồn tại.
+   * Gọi cả khi tiếp tục hội thoại cũ, vì bản staff có thể được bật sau khi hội thoại đã tạo.
    */
   private assertDocumentsVisible(): void {
     if (isDocumentsHidden(this.config)) {
       throw AppException.notFound(ErrorCode.DOCUMENT_NOT_FOUND);
     }
   }
-
 }
