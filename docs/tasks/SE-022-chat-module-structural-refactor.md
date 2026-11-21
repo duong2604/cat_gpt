@@ -1,6 +1,6 @@
 # SE-022 — Refactor cấu trúc module Chat (module mẫu)
 
-Trạng thái: Chờ CTO nghiệm thu — `IMPLEMENTED — TL APPROVED — AWAITING CTO ACCEPTANCE` (#49 → `e0adb75`, #51 → `86b9f3f`; PR-B10 #50 → `2569caf`)
+Trạng thái: Done — **CTO STRUCTURAL ACCEPTED** 21/11/2026 (#49 → `e0adb75`, #51 → `86b9f3f`; PR-B10 #50 → `2569caf`)
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 0,75 ngày (PR-C3a 0,25 + PR-C3b 0,5)
 Phụ thuộc: PR-C3a không phụ thuộc; PR-C3b sau PR-B10 (cùng vùng code). SE-005 tạm dừng ở điểm an toàn
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
@@ -42,7 +42,7 @@ Route, mã HTTP, mã lỗi, hình dạng event SSE (`meta`/`delta`/`done`/`error
 | AC7 | Báo cáo trước/sau trong mô tả PR (cấu trúc, dependency, hàm thay đổi) | Mô tả PR |
 
 ## Kết quả review
-Chưa có.
+21/11/2026 22:07 — CTO Review Verdict: **ACCEPT** structural refactor (giữ `ChatService`, tách bằng private method + hàm thuần). Follow-up không thuộc task này: B10-M1 → [SE-023](SE-023-chat-regenerate-data-consistency.md) (MAJOR), B10-M2 → [SE-024](SE-024-chat-regenerate-failure-notice.md) (MINOR). F03 vẫn PARTIAL.
 
 ## Lịch sử review
 ### PR-C3a #49 — TL review vòng 1 (SHA `68333ca`, base `547b06f`) — **Cần sửa**

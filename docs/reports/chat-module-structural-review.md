@@ -3,7 +3,7 @@
 Người lập: TL · Cơ sở: `origin/develop` @ `547b06f` (CI success) · Bắt đầu: 21/11/2026 21:30 · Kết thúc triển khai: 21:57 · `develop` @ `86b9f3f`
 Task triển khai: [SE-022](../tasks/SE-022-chat-module-structural-refactor.md) · Chỉ thị: CTO "Chat Module Structural Refactor" (P1)
 
-**Trạng thái: `IMPLEMENTED — TL APPROVED — AWAITING CTO ACCEPTANCE`** (xem mục 8). Không tự đánh dấu CTO ACCEPTED.
+**Trạng thái: SE-022 `CTO STRUCTURAL ACCEPTED` (21/11/2026) · F03 `PARTIAL` — chờ SE-023 (nhất quán dữ liệu Tạo lại).** Xem mục 9.
 
 Ký hiệu: **[CODE]** đã kiểm chứng bằng code/lệnh · **[NHẬN ĐỊNH]** đánh giá kỹ thuật · **[ĐỀ XUẤT]**.
 
@@ -184,13 +184,13 @@ Không vòng phụ thuộc mới. `RagService` vẫn đọc model `DocumentEntit
 - `f03-verify` 15/15 trên `578e0cd`: tạo/gửi/SSE, lưu, Dừng, Tạo lại, Tạo lại + Dừng (câu cũ còn), 2 stream song song 200+409, LLM lỗi, Tạo lại khi LLM lỗi (câu cũ còn), RAG (tạo, Tạo lại thay đúng 1 câu, `documentIds` người khác 404), phân quyền (7 thao tác người khác 404, ẩn danh 401).
 - `c3a-check` 5/5 trên `578e0cd`: 400 chưa READY, 404 người khác, 404 đã xóa, 400 vượt số lượng, 200 hợp lệ.
 - Build/typecheck/lint sạch, test 83/83 tại từng SHA; CI pass tại SHA đầu từng PR. CI `develop` @ `86b9f3f`: **success**.
-- **Chưa chạy runtime:** nhánh "không đủ căn cứ" khi Tạo lại và nhánh truy hồi lỗi (embedding mock không tạo ra; phải tắt Qdrant) — test đơn vị hiện có phủ (`insufficient`, `prepare lỗi`), đọc code khớp.
+- ~~Chưa chạy runtime~~ nhánh "không đủ căn cứ" khi Tạo lại và nhánh truy hồi lỗi: **đã kiểm runtime sau CTO verdict, 12/12** — mục 9.2.
 
 ### 8.7 Vấn đề còn tồn tại
 | ID | Mức | Mô tả | Hướng |
 |---|---|---|---|
-| B10-M1 | MINOR | Mongo lỗi đúng lúc xóa câu cũ sau khi lưu câu mới → 2 câu trả lời liên tiếp; Tạo lại sau đó 400 | Backlog (hành vi) |
-| B10-M2 | MINOR (UX) | Tạo lại bị lỗi LLM: câu cũ hiện lại, không thông báo | Backlog (web) |
+| B10-M1 | **MAJOR** (CTO nâng) | Mongo lỗi đúng lúc xóa câu cũ sau khi lưu câu mới → 2 câu trả lời liên tiếp; Tạo lại sau đó 400 | [SE-023](../tasks/SE-023-chat-regenerate-data-consistency.md) — thiết kế trước |
+| B10-M2 | MINOR (UX) | Tạo lại bị lỗi LLM: câu cũ hiện lại, không thông báo | [SE-024](../tasks/SE-024-chat-regenerate-failure-notice.md) — backlog, Senior Dev |
 | C-6 | Ghi nhận | `inFlight` trong bộ nhớ một tiến trình | Khi chạy nhiều instance (SE-F21) |
 | C-7 | Ghi nhận | Tham số tìm kiếm `q` khác `search` của admin | Đổi là đổi API contract |
 | SE-F10 | DEFERRED | GET messages không phân trang | Theo CTO |
@@ -198,4 +198,31 @@ Không vòng phụ thuộc mới. `RagService` vẫn đọc model `DocumentEntit
 ### 8.8 TL final review verdict
 **ĐẠT.** Module Chat đạt mục tiêu chỉ thị: trách nhiệm từng hàm rõ, luồng stream đọc theo bước, coupling sang Documents qua API công khai, không abstraction thừa, không đổi API contract/schema/bảo mật; SE-F9 đã sửa — F03 không còn bị chặn chức năng.
 
-**CTO acceptance:** `IMPLEMENTED — TL APPROVED — AWAITING CTO ACCEPTANCE`. CTO kiểm trực tiếp: `apps/api/src/modules/chat/chat.service.ts` @ `86b9f3f`.
+**CTO acceptance:** ~~AWAITING~~ → **CTO STRUCTURAL ACCEPTED** (mục 9). CTO kiểm trực tiếp: `apps/api/src/modules/chat/chat.service.ts` @ `86b9f3f`.
+
+## 9. CTO Review Verdict và follow-up — 21/11/2026 22:07
+
+### 9.1 Quyết định CTO
+1. **ACCEPT** structural refactor SE-022 → **SE-022: CTO STRUCTURAL ACCEPTED.**
+2. Chấp nhận giữ `ChatService`, tách trách nhiệm bằng private method + hàm thuần; không thêm service/interface/folder.
+3. **F03: PARTIAL** — chờ nhất quán dữ liệu (B10-M1) và kiểm chứng runtime RAG.
+4. Không mở thêm structural refactor cho Chat khi chưa có finding mới có bằng chứng.
+
+| Follow-up | Mức | Xử lý | Trạng thái |
+|---|---|---|---|
+| B10-M1 nhất quán dữ liệu khi thay câu trả lời | **MAJOR** | [SE-023](../tasks/SE-023-chat-regenerate-data-consistency.md): SE phân tích ≥1 phương án (atomicity, concurrency, retry, recovery; không đổi schema/contract) → TL duyệt thiết kế → code → TL failure injection + hồi quy | Sẵn sàng (giai đoạn thiết kế) |
+| B10-M2 thông báo khi Tạo lại thất bại | MINOR | [SE-024](../tasks/SE-024-chat-regenerate-failure-notice.md), owner Senior Dev, P3, không gộp với SE-023 | Nháp (backlog) |
+| RAG runtime: Tạo lại khi insufficient; truy hồi lỗi | — | TL tự kiểm (9.2) | **Đạt 12/12** |
+
+### 9.2 Kiểm chứng runtime RAG [CODE]
+Kịch bản TL `rag-runtime.mjs` (ngoài repo) trên `develop` `86b9f3f`, DB `cat_gpt_loadtest`, **collection Qdrant riêng `tl_review_chunks`**, cấu hình đổi **chỉ qua biến môi trường tiến trình** (không sửa `.env`), 4 lần khởi động API:
+| Pha | Cấu hình | Kết quả |
+|---|---|---|
+| setup | thường | 2/2 — tài liệu READY; câu trả lời RAG bình thường `COMPLETED` |
+| insufficient | `RAG_MIN_SCORE=1.01` (lọc hết kết quả → `NO_MATCH`) | **5/5** — Tạo lại → câu từ chối `insufficientEvidence=true`, thay đúng câu cũ (số tin không đổi, câu cũ bị xóa); không gọi LLM (tin không có `model`); gửi tin mới → câu từ chối, `citations` rỗng; Tạo lại câu từ chối → câu từ chối mới thay câu cũ |
+| retrieval failure | `QDRANT_URL` trỏ cổng không có dịch vụ | **5/5** — Tạo lại → `done` mang câu cũ (không phải event `error`), câu cũ còn, không thêm tin, không có `delta` (không gọi LLM); gửi tin mới → lưu tin `ERROR` rỗng, không trích dẫn; Tạo lại tin `ERROR` khi vẫn lỗi → tin `ERROR` cũ còn. Log: `Truy hồi lỗi ở hội thoại <id>` — chỉ ID, không nội dung |
+| cleanup | thường | hội thoại `204`, tài liệu `204`, tài khoản thử `BLOCKED` |
+**Tổng 12/12.** Dữ liệu thật không bị tác động: DB `cat_gpt_loadtest`, collection riêng (điểm vector của tài liệu thử đã xóa cùng tài liệu; collection rỗng còn lại, không chứa dữ liệu).
+
+### 9.3 Trạng thái F03
+**PARTIAL.** Đã đạt: cấu trúc (CTO accepted), SE-F9, hồi quy 15/15, RAG runtime 12/12. Còn mở: **SE-023 (B10-M1 MAJOR)**. F03 có thể đề nghị DONE khi SE-023 merge và TL failure injection đạt. SE-F10 DEFERRED; SE-024 MINOR backlog (không chặn).

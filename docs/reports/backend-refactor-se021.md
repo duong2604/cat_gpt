@@ -4,7 +4,7 @@ Tài liệu theo dõi **duy nhất** của chương trình (chỉ thị CTO "Aut
 
 Phạm vi: chỉ `apps/api`; giữ API contract và nghiệp vụ, trừ sửa bug đã duyệt; không viết unit test mới. TL tự review/merge PR đạt gate; thay đổi chính sách bảo mật phiên, schema, contract → CTO.
 
-Cập nhật: 21/11/2026 20:29 · `develop` @ `547b06f` — trạng thái hiện hành: **mục 11 + 12** · DONE 5/9 (F02, F04, F07, F08, F09)
+Cập nhật: 21/11/2026 22:07 · `develop` @ `86b9f3f` — trạng thái hiện hành: **mục 11 + 12 + 13** · DONE 5/9 (F02, F04, F07, F08, F09)
 
 Quy ước trạng thái: **Partial** = đã sửa một phần, còn phạm vi ghi ở cột Status; **Audited** = đã audit + xác minh, chưa refactor; **Not started** = chưa audit đủ. Không có flow nào **Done** ở thời điểm này.
 
@@ -416,3 +416,12 @@ TL sẽ kiểm độc lập trước khi merge: (1) đủ R1–R12 — mỗi quy
 | BLOCKER/MAJOR | Không có | — |
 
 **Tiến độ: DONE 5/9** (F02, F04, F07, F08, F09) · PARTIAL 4 (F01, F03, F05, F06) · BLOCKED 0. **MAJOR còn mở: 1** — KT-3 (F01, SE-005).
+
+## 13. F03 Chat — refactor cấu trúc SE-022, SE-F9, CTO verdict — 21/11/2026 22:07
+
+Chi tiết: [chat-module-structural-review.md](chat-module-structural-review.md).
+- **Merge:** #49 PR-C3a → `e0adb75`; #50 PR-B10 (**SE-F9 đã sửa**) → `2569caf`; #51 PR-C3b → `86b9f3f`. CI `develop` @ `86b9f3f` success.
+- **CTO:** SE-022 **STRUCTURAL ACCEPTED**; không mở thêm refactor cấu trúc Chat khi chưa có finding mới.
+- **F03: PARTIAL** — SE-F9 xong; hồi quy `f03-verify` 15/15; RAG runtime (Tạo lại khi insufficient, truy hồi lỗi) **12/12** trên `cat_gpt_loadtest` + collection Qdrant riêng. Còn mở **B10-M1 (MAJOR)** → SE-023 (thiết kế trước). B10-M2 MINOR → SE-024 backlog. SE-F10 DEFERRED.
+
+**Tiến độ: DONE 5/9** (F02, F04, F07, F08, F09) · PARTIAL 4 (F01, F03, F05, F06) · BLOCKED 0. **MAJOR còn mở: 2** — KT-3 (F01, SE-005), B10-M1 (F03, SE-023).
