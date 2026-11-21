@@ -37,11 +37,11 @@ BLOCKER: lỗi logic, bảo mật, dữ liệu, concurrency, regression. MAJOR: 
 ## Quyết định còn mở
 | # | Câu hỏi | Đề xuất mặc định | Chốt |
 |---|---|---|---|
-| Q1 | Quyền merge PR refactor (B) | Chờ CTO cho phép từng PR | Chờ CTO |
+| Q1 | Quyền merge PR refactor (B) | Chờ CTO cho phép từng PR | **CTO 21/11/2026: TL tự review/merge khi đạt gate** (chỉ chương trình SE-021, chỉ `apps/api`) |
 
 ## Kết quả review
 **A — TL 21/11/2026: Đạt** (AC1, AC2). 22 finding SE đối chiếu với 13 finding TL: xác nhận SE-F1 (BLOCKER, TL tự chạy probe), F2, F3, F4, F6, F7, F14, F15; hạ mức SE-F5, SE-F22 → MINOR; bác cách sửa "retry" của SE-F6. Bảng đầy đủ và phạm vi B: [daily 21/11 vòng 7](../reports/daily/2026-11-21.md#vòng-7--1114-se-020-done-đối-chiếu-audit-se-021-phạm-vi-giai-đoạn-b); finding TL: [vòng 6](../reports/daily/2026-11-21.md#vòng-6--1047-backend-independent-code-review--vòng-tl-đầu-tiên).
-**B — phạm vi TL duyệt:** PR-B1 (SE-F1+F2), PR-B2 (SE-F3/TL-F2 + SE-F4/TL-F3), PR-B4 (dọn không đổi hành vi). PR-B3 (TL-F1) và các mục đổi hành vi/thiết kế: chờ CTO. Merge mọi PR B: chờ CTO (Q1).
+**B — phạm vi TL duyệt:** PR-B1 (SE-F1+F2), PR-B2 (SE-F3/TL-F2 + SE-F4/TL-F3), PR-B4 (dọn không đổi hành vi). PR-B3 (TL-F1) và các mục đổi hành vi/thiết kế: chờ CTO. Merge PR B: CTO ủy quyền TL tự merge khi đạt gate (21/11/2026, chỉ thị "Autonomous Backend Review & Merge"). Đã merge #38 → `7433ce3`, #39 → `3e9abe7`, #40 → `310ee02`. Theo dõi flow: [backend-refactor-se021.md](../reports/backend-refactor-se021.md).
 
 ## Lịch sử review
 ### Checklist vòng 1 — giai đoạn A (audit, chỉ đọc)
@@ -186,6 +186,45 @@ Căn cứ: `origin/develop` @ `b7af2fb` (`apps/api/src` trùng hệt, đã kiể
 - TL-F1 (thu hồi khi secret lạ) vẫn còn — đúng phạm vi, thuộc PR-B3.
 **Dữ liệu thử của TL** — 2 tài khoản `tl-smoke-b2-*` (`6b011f91608199ab3abe4dc8`, `6b011fb7354c32526e414154`) `BLOCKED`; hội thoại thử đã xóa theo chủ sở hữu (riêng lần chạy develop: phiên bị thu hồi làm bước dọn trả `401` → TL mở khóa tạm tài khoản tạm, in danh sách hội thoại của nó, xóa `6b011fb8354c32526e414156`, khóa lại). Cùng lượt đó dọn hội thoại sót của SE-020 `6b01193245444726dd40d929` (tài khoản tạm `6b0118ed45444726dd40d924`) → `204`, khóa lại.
 **Trạng thái** — Chờ Review (chờ CTO cho merge).
+
+### Checklist vòng 4 — PR-B4 (chép từ mô tả [PR #40](https://github.com/duong2604/cat_gpt/pull/40), PR mở 21/11/2026 11:39)
+**Task** — SE-021 · PR-B4 (`refactor/api-cleanup`) · SHA đầu PR `a5cb975` · vòng 4
+**Kết quả** — dọn code, không đổi route/contract/hành vi nghiệp vụ.
+**Checklist**
+- [x] Giới hạn 20/phút vẫn hoạt động sau khi bỏ `sendLog`: lần gửi thứ 21 trong một phút → **429** (API thật, mock LLM).
+- [x] Upload TXT (qua `addJob`) → 201, READY; tóm tắt (đường `signal` đã đổi) → 202, READY.
+- [x] Upload DOCX hợp lệ (hằng DOCX chung) → READY; DOCX hỏng → **FAILED `DOCUMENT_UNREADABLE`** (ánh xạ không đổi).
+- [x] Log khi bóc tách thất bại: `WARN documentId=… bóc tách lỗi: Error: <thông điệp>` — không có nội dung tài liệu.
+- [x] Xóa tài liệu (qua `addJob`) → 204 cho cả ba tài liệu thử.
+- [x] Payload index idempotent: upload hợp lệ thành công trên collection/index đã tồn tại (không lỗi từ `createPayloadIndex`).
+- [x] Đối chiếu route/HTTP/mã lỗi trước–sau: không đổi route; 201/202/204 giữ nguyên; 429 giữ mã `TOO_MANY_REQUESTS`.
+- [x] `pnpm turbo run typecheck lint build --force` — 8/8, lint **0 cảnh báo** (đã sửa import thừa).
+- [x] `pnpm -C apps/api test` — 83/83 pass.
+- [ ] CI `build` tại SHA đầu PR — xem check của PR.
+- [x] Dữ liệu thử dọn theo ID đã ghi: 3 tài liệu đã xóa; hội thoại thử đã xóa (204); user thử đã khóa `BLOCKED`. Chạy với `LLM_PROVIDER=mock`; embedding dùng OpenAI như hiện có (upload hợp lệ).
+
+**Kiểm tra đã chạy:** API thật (mock LLM) với kịch bản 10 bước; `pnpm turbo run typecheck lint build --force`; `pnpm -C apps/api test`.
+**Simplicity First** — không abstraction mới; helper `addJob` và hằng chung chỉ gom code trùng; không dependency mới. Giới hạn: như mục "Lệch so với chỉ thị".
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+#### Review vòng 4 — PR-B4 và merge B1/B2/B4
+**Căn cứ merge:** chỉ thị CTO "Autonomous Backend Review & Merge" 21/11/2026 — TL tự review/merge PR SE-021 đạt gate.
+**PR-B4** — PR https://github.com/duong2604/cat_gpt/pull/40 · SHA đã review `a5cb975` · **APPROVED WITH CONDITIONS**
+- [x] Phạm vi — Đạt — 4 tệp `apps/api/src` (chat.service, document-processor, documents.service, vector-store.service); +47/−70.
+- [x] TL-F4 — Đạt — bỏ `assertRateLimit`/`sendLog`/`RATE_*`; guard vẫn chặn: 20 × `200` rồi `429 TOO_MANY_REQUESTS`. Thông điệp 429 SE nêu "đổi" thực tế không đổi: guard luôn chạy trước và chặn trước service với cùng ngưỡng, nên phản hồi cũ cũng là của guard.
+- [x] TL-F5/SE-F6 — Đạt — DOCX hỏng → `FAILED DOCUMENT_UNREADABLE` (mapping giữ); 1 dòng WARN có `documentId`. **MINOR** `document-processor.ts` (log mới): in nguyên `error.message` của parser (vd. "[xmldom error] element parse error: … attribute value no end"); parser có thể chèn mảnh dữ liệu → cắt ≤ 200 ký tự, một dòng → PR-B5.
+- [x] TL-F7 — Đạt một phần — `DOCX_MIME_TYPE` dùng chung; `addJob` cho upload/delete; `enqueueSummary` giữ nguyên vì gộp bước gỡ job cũ trong cùng ngân sách timeout — chấp nhận.
+- ~ TL-F8 — Chấp nhận — `LlmStreamOptions.signal` là bắt buộc (`llm.provider.ts:12`) nên vẫn truyền `new AbortController().signal`, có chú thích; bỏ biến thừa. Không đáng đổi interface.
+- [x] SE-F14 — Đạt — `createPayloadIndex` chạy mỗi lần `ensureCollection`; TXT READY trên collection đã có (idempotent). SE-F15 — Đạt — xóa `countByDocumentId` (không có caller trong `src`).
+- [x] Gate — typecheck/lint (0 cảnh báo)/build `--force`, test 83/83, CI SUCCESS tại `a5cb975`, CLEAN sau khi #38/#39 merge.
+- [x] Runtime (bản `develop` 3e9abe7 + #40 merge cục bộ, code giống hệt `310ee02` — `git diff` rỗng): giới hạn tốc độ, TXT READY, DOCX hỏng, tóm tắt READY, tải về khớp byte; dọn 2 tài liệu + 20 hội thoại theo ID; tài khoản tạm `6b0121cfb165510ff7bd34c8` `BLOCKED`.
+**Merge** (mỗi PR: head = SHA đã review, CI SUCCESS, MERGEABLE/CLEAN, `--match-head-commit`):
+- #38 `d1873f6` → `7433ce3` · #39 `711ccdc` → `3e9abe7` · #40 `a5cb975` → `310ee02`.
+- PR #39 có **giới hạn đã biết** (ân hạn 30 s một bước): tiêu chí "2 refresh song song không làm mất phiên" chỉ **đạt trong cửa sổ đua**, ghi **Partial** ở F01; phần còn lại thuộc PR-B3. Không phải hồi quy (develop cũ thu hồi ngay) nên không chặn merge.
+**Xác minh sau merge** (`develop` `3e9abe7`, rồi cây code tương đương `310ee02`): typecheck/lint/build, test 83/83; probe B1 (sống sau lỗi giữa chừng); race B2 (`200`+`409`, `STOPPED`, phiên còn sau 2 refresh); hồi quy 27/27 (auth, CRUD hội thoại, Dừng, tài liệu, RAG, `insufficientEvidence`, xóa → Qdrant 0). Dữ liệu thử dọn; tài khoản tạm `6b0121914ed23c5f5f8e287e`, `6b0121984ed23c5f5f8e2887` `BLOCKED`.
+**Còn mở:** PR-B5 (log tải về; cắt log parser), PR-B3 (phân tích trước). Bảng flow: [backend-refactor-se021.md](../reports/backend-refactor-se021.md).
+**Trạng thái** — Đang làm (B tiếp tục).
 
 ## Phản hồi UI
 Không áp dụng.

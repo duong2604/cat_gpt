@@ -2,6 +2,15 @@
 
 Theo mốc của [plan.md](../project/plan.md#2-mốc). Chi tiết từng ngày: [báo cáo ngày](daily/README.md). TL cập nhật cuối mỗi ngày làm việc và ngay khi phát hiện nguy cơ trễ mốc; mục mới nhất ở trên, giữ các mục cũ ([workflow mục 11](../project/workflow.md#11-theo-dõi-tiến-độ)).
 
+## Cập nhật 21/11/2026 11:48 (merge refactor backend #38–#40)
+
+Chi tiết: [21/11 vòng 10](daily/2026-11-21.md) · [bảng flow SE-021](backend-refactor-se021.md).
+
+| Mốc / việc | Tình trạng |
+|---|---|
+| Chất lượng backend | TL merge #38 (sập API khi tải về), #39 (race phiên/stream), #40 (dọn code) → `develop` `310ee02`, CI xanh, hồi quy 27/27. 0/9 flow Done, 6 Partial, 3 Audited. Còn BLOCKER TL-F1 (PR-B3) |
+| Nghiệm thu M1–M4 (CTO) | Chờ CTO. Máy demo: kéo `310ee02`, `pnpm install` |
+
 ## Cập nhật 21/11/2026 11:14 (SE-020 Done; review backend)
 
 Chi tiết: [21/11 vòng 6–7](daily/2026-11-21.md).
