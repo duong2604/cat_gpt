@@ -95,7 +95,7 @@ function measureEntryWithinBudget(entry: JSZip.JSZipObject, budget: { remaining:
     stream.on('data', (chunk: Buffer) => {
       budget.remaining -= chunk.length;
       if (budget.remaining < 0) {
-        fail(new DocumentTooLargeToProcessError('Các phần XML của DOCX giải nén vượt ngân sách'));
+        fail(new DocumentTooLargeToProcessError('Nội dung giải nén của DOCX vượt ngân sách'));
       }
     });
     stream.on('error', (error: Error) => fail(new DocumentUnreadableError(error.message)));

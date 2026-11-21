@@ -15,7 +15,12 @@ import {
   MinLength,
   validateSync,
 } from 'class-validator';
+import { Logger } from '@nestjs/common';
 import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH, PASSWORD_PATTERN } from '@cat-gpt/shared';
+
+/** Giá trị mẫu trong apps/api/.env.example: production từ chối đúng các giá trị này (R11, R12). */
+export const EXAMPLE_JWT_ACCESS_SECRET = 'change-me-to-a-long-random-string-at-least-32-chars';
+export const EXAMPLE_ADMIN_PASSWORD = 'Admin@123';
 
 export enum NodeEnv {
   Development = 'development',
@@ -23,9 +28,11 @@ export enum NodeEnv {
   Test = 'test',
 }
 
+/** Nguồn chính sách duy nhất (R1–R12): `demo` (mặc định phát triển), `staff` (thử nội bộ), `production` (triển khai thật). */
 export enum ReleaseMode {
   Demo = 'demo',
   Staff = 'staff',
+  Production = 'production',
 }
 
 export enum LlmProviderName {
@@ -93,9 +100,19 @@ export class EnvironmentVariables {
   @IsBoolean()
   SWAGGER_ENABLED?: boolean;
 
-  /** `demo` (bản 20/11, mặc định) hoặc `staff` (thử nội bộ, ẩn Chat và tài liệu chưa sẵn sàng). */
+  /**
+   * `demo` (bản 20/11, mặc định khi phát triển), `staff` (thử nội bộ, ẩn Chat và tài liệu chưa sẵn sàng),
+   * `production` (triển khai thật: bắt buộc NODE_ENV=production, OpenAI, cookie secure, secret không phải mẫu).
+   */
   @IsEnum(ReleaseMode)
   RELEASE_MODE: ReleaseMode = ReleaseMode.Demo;
+
+  /**
+   * Danh sách DNS (phân tách bằng dấu phẩy) thay cho DNS hệ thống. Để trống = không đổi DNS.
+   * Cần khi DNS hệ thống là loopback (127.0.0.1) và `mongodb+srv` lỗi ECONNREFUSED.
+   */
+  @IsString()
+  DNS_SERVERS = '';
 
   @IsString()
   UPLOAD_DIR = 'uploads';
@@ -265,8 +282,53 @@ export function validateEnv(config: Record<string, unknown>): EnvironmentVariabl
   if (validated.LLM_PROVIDER === LlmProviderName.OpenAi && !validated.OPENAI_API_KEY?.trim()) {
     lines.push('  - LLM_PROVIDER=openai cần OPENAI_API_KEY (đặt trong apps/api/.env, không commit)');
   }
+
+  // ---- Chính sách theo môi trường (CTO vòng 20, R1–R12). Development không đổi. ----
+  const warnings: string[] = [];
+  const isProd = validated.NODE_ENV === NodeEnv.Production;
+  const mode = validated.RELEASE_MODE;
+  const rawMode = config.RELEASE_MODE;
+  const mock = validated.LLM_PROVIDER === LlmProviderName.Mock;
+  if (isProd && (rawMode === undefined || rawMode === '')) {
+    lines.push('  - NODE_ENV=production cần khai báo RELEASE_MODE (demo | staff | production) — R2');
+  }
+  if (mode === ReleaseMode.Production && !isProd) {
+    lines.push('  - RELEASE_MODE=production cần NODE_ENV=production — R3');
+  }
+  if (isProd && mode === ReleaseMode.Demo && mock) {
+    lines.push('  - NODE_ENV=production + RELEASE_MODE=demo không dùng LLM_PROVIDER=mock (bản phát hành trả lời giả lập) — R8');
+  }
+  if (isProd && mode === ReleaseMode.Staff && mock) {
+    warnings.push('NODE_ENV=production + RELEASE_MODE=staff dùng LLM_PROVIDER=mock: không dùng dữ liệu thật với mock — R7');
+  }
+  // R11/R12 áp mọi RELEASE_MODE khi NODE_ENV=production (staff vẫn là môi trường thật).
+  if (isProd) {
+    if (validated.JWT_ACCESS_SECRET === EXAMPLE_JWT_ACCESS_SECRET) {
+      lines.push('  - JWT_ACCESS_SECRET đang là giá trị mẫu trong .env.example; đặt secret ngẫu nhiên — R11');
+    }
+    if (validated.ADMIN_PASSWORD === EXAMPLE_ADMIN_PASSWORD) {
+      lines.push('  - ADMIN_PASSWORD đang là giá trị mẫu; đặt mật khẩu khác — R12');
+    }
+  }
+  if (mode === ReleaseMode.Production) {
+    if (mock || !validated.OPENAI_API_KEY?.trim()) {
+      lines.push('  - RELEASE_MODE=production cần LLM_PROVIDER=openai và OPENAI_API_KEY — R4');
+    }
+    if (validated.COOKIE_SECURE !== true) {
+      lines.push('  - RELEASE_MODE=production cần COOKIE_SECURE=true (HTTPS, cookie secure) — R5');
+    }
+    if (rawMode === ReleaseMode.Production && String(config.SWAGGER_ENABLED) === 'true') {
+      warnings.push('SWAGGER_ENABLED=true khi production: tài liệu API đang bật (đã khai báo rõ) — R6');
+    }
+    if (config.TRUST_PROXY === undefined || config.TRUST_PROXY === 'loopback') {
+      warnings.push('TRUST_PROXY là mặc định loopback khi production: cần cấu hình proxy thật để lấy đúng IP cho giới hạn đăng nhập — R9');
+    }
+  }
+
   if (lines.length > 0) {
     throw new Error(`Cấu hình môi trường không hợp lệ:\n${lines.join('\n')}`);
   }
+  const logger = new Logger('EnvConfig');
+  for (const w of warnings) logger.warn(w);
   return validated;
 }

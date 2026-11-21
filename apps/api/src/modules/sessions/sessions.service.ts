@@ -122,7 +122,6 @@ export class SessionsService {
 
     // Xoay có điều kiện (CAS trên tokenHash): hai request đồng thời cùng một token thì chỉ một
     // bên thắng. Bên thua đọc lại và xét lại theo ân hạn, KHÔNG thu hồi phiên (lỗi đua).
-    const initial = first;
     for (let attempt = 1; ; attempt++) {
       const secret = generateSecret();
       const updated = await this.swapToken(session, secret, meta);
@@ -135,7 +134,7 @@ export class SessionsService {
         // Thua CAS rồi thấy token không còn là current/grace: 401, không thu hồi (lỗi đua).
         throw AppException.unauthorized(ErrorCode.AUTH_REFRESH_INVALID);
       }
-      if (kind === 'grace' && initial === 'current') {
+      if (kind === 'grace' && first === 'current') {
         // Thua CAS: bên thắng vừa xoay (presented = previous). Chỉ cấp access token cho cùng phiên:
         // KHÔNG xoay thêm, KHÔNG ghi DB (không kéo dài ân hạn), controller không đặt lại refresh cookie.
         return { session, refreshToken: null };

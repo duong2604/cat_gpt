@@ -1,4 +1,6 @@
 import dns from 'node:dns';
+import { readFileSync } from 'node:fs';
+import { parseEnv } from 'node:util';
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
@@ -9,21 +11,42 @@ import { AppModule } from './app.module.js';
 import { ACCESS_TOKEN_COOKIE, API_PREFIX } from './common/constants.js';
 import { appValidationPipe } from './common/pipes/app-validation.pipe.js';
 import { AppConfigService } from './config/app-config.service.js';
-import { LlmProviderName } from './config/env.validation.js';
+import { applyDnsServers, isSrvDnsError, isSystemDnsLoopback } from './config/dns.js';
 
-// Node trên Windows đôi khi đọc DNS hệ thống thành 127.0.0.1 → SRV lookup của mongodb+srv lỗi ECONNREFUSED.
-if (dns.getServers().every((s) => s.startsWith('127.') || s === '::1')) {
-  dns.setServers(['8.8.8.8', '1.1.1.1']);
-}
+// DNS_SERVERS đọc từ .env (không nạp toàn bộ .env vào process.env) rồi áp trước khi Nest kết nối MongoDB.
+const fileEnv = (() => {
+  try {
+    return parseEnv(readFileSync('.env', 'utf8'));
+  } catch {
+    return {} as Record<string, string>;
+  }
+})();
+const dnsServers = process.env.DNS_SERVERS ?? fileEnv.DNS_SERVERS ?? '';
+const mongoUri = process.env.MONGODB_URI ?? fileEnv.MONGODB_URI ?? '';
+applyDnsServers(dnsServers);
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  const config = app.get(AppConfigService);
   const logger = new Logger('Bootstrap');
-
-  if (config.isProduction && config.llm.provider === LlmProviderName.Mock) {
-    logger.warn('LLM_PROVIDER=mock khi NODE_ENV=production: API đang trả lời giả lập, không phải mô hình thật.');
+  logger.log(`DNS tiến trình trước khởi động: ${dns.getServers().join(',')} (DNS_SERVERS=${dnsServers.trim() || '<không đặt>'})`);
+  if (mongoUri.startsWith('mongodb+srv://') && isSystemDnsLoopback() && !dnsServers.trim()) {
+    logger.warn(
+      'DNS hệ thống là loopback (127.0.0.1) và MONGODB_URI dùng mongodb+srv: nếu kết nối MongoDB lỗi querySrv ECONNREFUSED, ' +
+        'đặt DNS_SERVERS=8.8.8.8,1.1.1.1 trong apps/api/.env rồi khởi động lại.',
+    );
   }
+  let app: NestExpressApplication;
+  try {
+    app = await NestFactory.create<NestExpressApplication>(AppModule);
+  } catch (error) {
+    if (isSrvDnsError(error) && isSystemDnsLoopback() && !dnsServers.trim()) {
+      logger.error(
+        'Không phân giải được mongodb+srv: DNS hệ thống là loopback (127.0.0.1). ' +
+          'Đặt DNS_SERVERS=8.8.8.8,1.1.1.1 trong apps/api/.env rồi khởi động lại.',
+      );
+    }
+    throw error;
+  }
+  const config = app.get(AppConfigService);
 
   app.set('trust proxy', config.trustProxy);
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'same-site' } }));
@@ -52,6 +75,7 @@ async function bootstrap() {
   }
 
   await app.listen(config.port);
+  logger.log(`DNS tiến trình sau khởi động: ${dns.getServers().join(',')}`);
   logger.log(`API đang chạy tại http://localhost:${config.port}/${API_PREFIX}`);
   if (config.swaggerEnabled) {
     logger.log(`Swagger: http://localhost:${config.port}/${API_PREFIX}/docs`);
