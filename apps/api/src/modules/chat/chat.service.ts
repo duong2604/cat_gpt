@@ -223,7 +223,8 @@ export class ChatService {
         }
       }
 
-      // Hội thoại bị xóa trong lúc đang stream → không lưu tin nhắn mồ côi.
+      // Hội thoại đã bị xóa trước lần kiểm tra này thì bỏ qua. Vẫn còn một khe hẹp giữa kiểm tra và
+      // ghi (xóa xen giữa có thể để lại tin mồ côi) — ghi nhận SE-F8, không đổi logic ở PR này.
       if (!(await this.conversations.exists(conversation._id))) return;
 
       // ERROR → không có trích dẫn (thiết kế mục 6.3 bước 5); STOPPED/TRUNCATED vẫn xác

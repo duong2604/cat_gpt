@@ -4,7 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import type { JobsOptions, Queue } from 'bullmq';
 import { isValidObjectId, Model, type QueryFilter, Types } from 'mongoose';
 import type { Readable } from 'node:stream';
-import { type DocumentDto, DocumentStatus, ErrorCode, type Paginated, SummaryStatus } from '@cat-gpt/shared';
+import { type DocumentDto, DocumentStatus, ErrorCode, type Paginated } from '@cat-gpt/shared';
 import { AppException } from '../../common/exceptions/app.exception.js';
 import { escapeRegex } from '../../common/utils/escape-regex.js';
 import { withTimeout } from '../../common/utils/with-timeout.js';
@@ -26,9 +26,6 @@ export interface SummarizeJobData {
   documentId: string;
 }
 
-/** Thiết kế mục 8: job tóm tắt thử tối đa 2 lượt. */
-const SUMMARY_JOB_ATTEMPTS = 2;
-
 export const DOCX_MIME_TYPE = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 
 /** Kiểm chữ ký theo đuôi tệp (thiết kế mục 5, không tin `Content-Type` client). */
@@ -43,15 +40,15 @@ async function detectMimeType(file: Express.Multer.File): Promise<string | null>
 }
 
 const DELETE_JOB_ATTEMPTS = 5;
-const JOB_BACKOFF_DELAY_MS = 5000;
-const FAILED_JOB_RETENTION_SECONDS = 7 * 24 * 3600;
+export const JOB_BACKOFF_DELAY_MS = 5000;
+export const FAILED_JOB_RETENTION_SECONDS = 7 * 24 * 3600;
 /**
  * ioredis mặc định xếp lệnh vào hàng đợi trong bộ nhớ khi mất kết nối thay vì báo lỗi
  * ngay (AC6/T9 cần `queue.add` thất bại nhanh khi Redis tắt). Giới hạn thời gian chờ
  * thay vì đổi cấu hình kết nối dùng chung với Worker (ponytail: timeout đơn giản hơn
  * và không ảnh hưởng hành vi đọc job của Worker).
  */
-const QUEUE_ADD_TIMEOUT_MS = 3000;
+export const QUEUE_ADD_TIMEOUT_MS = 3000;
 
 /** Nghiệp vụ + quyền + vòng đời tài liệu. Mọi truy vấn lọc theo `userId` người gọi (M3-2). */
 @Injectable()
@@ -175,90 +172,6 @@ export class DocumentsService {
 
   async getDto(userId: string, id: string): Promise<DocumentDto> {
     return toDocumentDto(await this.getOwnedOrThrow(userId, id));
-  }
-
-  /**
-   * Yêu cầu tóm tắt (SE-016). Đã có bản lưu → `accepted: false` (controller trả 200, không gọi LLM).
-   * Đang PENDING → `accepted: true` không xếp thêm job. Còn lại → đặt PENDING có điều kiện rồi
-   * xếp job `summarize-<id>`; nếu job cũ đã FAILED còn trong queue thì xóa để xếp lại.
-   */
-  async requestSummary(userId: string, id: string): Promise<{ document: DocumentDto; accepted: boolean }> {
-    const doc = await this.getOwnedOrThrow(userId, id);
-    if (doc.status !== DocumentStatus.READY) throw AppException.badRequest(ErrorCode.DOCUMENT_NOT_READY);
-    if (doc.summaryStatus === SummaryStatus.READY && doc.summary) {
-      return { document: toDocumentDto(doc), accepted: false };
-    }
-    if (doc.summaryStatus === SummaryStatus.PENDING) {
-      // Job còn sống thì không xếp thêm. Job đã mất (ví dụ bị phiên bản cũ bỏ qua) thì xếp lại:
-      // trạng thái PENDING trong Mongo không tự chứng minh job đang chạy.
-      if (await this.isSummaryJobAlive(id)) return { document: toDocumentDto(doc), accepted: true };
-      await this.enqueueSummary(id, SummaryStatus.PENDING);
-      const refreshed = await this.getOwnedOrThrow(userId, id);
-      return { document: toDocumentDto(refreshed), accepted: true };
-    }
-
-    const _id = new Types.ObjectId(id);
-    const claim = await this.documentModel
-      .updateOne(
-        {
-          _id,
-          deletedAt: null,
-          status: DocumentStatus.READY,
-          summaryStatus: { $ne: SummaryStatus.PENDING },
-        },
-        { $set: { summaryStatus: SummaryStatus.PENDING, summaryErrorCode: null } },
-      )
-      .exec();
-    if (claim.matchedCount === 0) {
-      // Yêu cầu đồng thời đã thắng, hoặc tài liệu vừa bị xóa.
-      const current = await this.getOwnedOrThrow(userId, id);
-      return { document: toDocumentDto(current), accepted: current.summaryStatus === SummaryStatus.PENDING };
-    }
-
-    await this.enqueueSummary(id, doc.summaryStatus ?? null);
-    const fresh = await this.getOwnedOrThrow(userId, id);
-    return { document: toDocumentDto(fresh), accepted: true };
-  }
-
-  /** Job tóm tắt còn trong queue và chưa FAILED. */
-  private async isSummaryJobAlive(id: string): Promise<boolean> {
-    const job = await this.queue.getJob(`summarize-${id}`);
-    if (!job) return false;
-    return !(await job.isFailed());
-  }
-
-  /**
-   * Xếp job `summarize-<id>`. Job FAILED cũ còn trong queue bị xóa để xếp lại (jobId trùng sẽ
-   * bị BullMQ bỏ qua). Lỗi xếp → trả `summaryStatus` về `revertTo` rồi báo 503.
-   */
-  private async enqueueSummary(id: string, revertTo: string | null): Promise<void> {
-    const jobId = `summarize-${id}`;
-    try {
-      await withTimeout(
-        (async () => {
-          const old = await this.queue.getJob(jobId);
-          if (old && (await old.isFailed())) await old.remove();
-          await this.queue.add(
-            'summarize',
-            { documentId: id } satisfies SummarizeJobData,
-            {
-              jobId,
-              attempts: SUMMARY_JOB_ATTEMPTS,
-              backoff: { type: 'exponential', delay: JOB_BACKOFF_DELAY_MS },
-              removeOnComplete: true,
-              removeOnFail: { age: FAILED_JOB_RETENTION_SECONDS },
-            },
-          );
-        })(),
-        QUEUE_ADD_TIMEOUT_MS,
-        `Hết thời gian chờ sau ${QUEUE_ADD_TIMEOUT_MS}ms`,
-      );
-    } catch {
-      await this.documentModel
-        .updateOne({ _id: new Types.ObjectId(id), deletedAt: null }, { $set: { summaryStatus: revertTo } })
-        .exec();
-      throw new AppException(ErrorCode.DOCUMENT_QUEUE_UNAVAILABLE, HttpStatus.SERVICE_UNAVAILABLE);
-    }
   }
 
   async download(userId: string, id: string): Promise<{ document: DocumentEntity; stream: Readable }> {

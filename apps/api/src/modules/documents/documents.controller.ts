@@ -31,6 +31,7 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import type { AuthUser } from '../../common/types/auth-user.js';
 import { DocumentsHiddenGuard } from './documents-hidden.guard.js';
 import { DocumentsService } from './documents.service.js';
+import { DocumentSummaryService } from './document-summary.service.js';
 import { DocumentPageResponse, DocumentResponse } from './dto/document.response.js';
 import { ListDocumentsQueryDto } from './dto/list-documents-query.dto.js';
 import { UploadSizeFilter } from './upload-size.filter.js';
@@ -66,7 +67,10 @@ function waitForFirstChunk(stream: Readable): Promise<void> {
 export class DocumentsController {
   private readonly logger = new Logger(DocumentsController.name);
 
-  constructor(private readonly documents: DocumentsService) {}
+  constructor(
+    private readonly documents: DocumentsService,
+    private readonly summary: DocumentSummaryService,
+  ) {}
 
   @Post()
   @UseFilters(UploadSizeFilter)
@@ -149,7 +153,7 @@ export class DocumentsController {
     @Param('id') id: string,
     @Res({ passthrough: true }) res: Response,
   ): Promise<DocumentDto> {
-    const { document, accepted } = await this.documents.requestSummary(user.userId, id);
+    const { document, accepted } = await this.summary.requestSummary(user.userId, id);
     res.status(accepted ? HttpStatus.ACCEPTED : HttpStatus.OK);
     return document;
   }
