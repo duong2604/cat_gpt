@@ -236,5 +236,17 @@ SE bàn giao (mô tả PR): (a) WARN `documentId=<id> tải về lỗi giữa ch
 - [x] MINOR B4 — Đạt — chuỗi 30 dòng có thẻ XML → 200 ký tự, không còn xuống dòng.
 - [x] Gate — typecheck/lint/build `--force`, test 83/83, CI SUCCESS, CLEAN. Sau merge: cây `apps` của `develop` `646fcb4` giống hệt `adac390` (`git diff` rỗng) → kết quả kiểm trên head áp dụng cho develop.
 
+### Checklist vòng 6 — PR-B6 ([PR #42](https://github.com/duong2604/cat_gpt/pull/42), PR mở 21/11/2026 12:00)
+SE bàn giao (mô tả PR): SE-F23 `LlmError` nhận `cause`; SE-F27 `ADMIN_PASSWORD` theo chính sách mạnh (`.env` hiện tại đạt, `abcdefgh` bị từ chối); SE-F25 cảnh báo khi production + mock; build/typecheck/lint 0 cảnh báo, test 83/83, CI SUCCESS.
+
+#### Review vòng 6 — PR-B6
+**PR** #42 · SHA đã review `113fef6` (base `646fcb4`) · **APPROVED** — merge `--match-head-commit` → `develop` @ `582865b` (cây `apps` giống hệt head).
+- [x] Phạm vi — 4 tệp `apps/api/src` (`env.validation.ts`, `main.ts`, `chat.service.ts`, `openai-llm.provider.ts`); không đổi route/mã/SSE.
+- [x] SE-F23 — probe TL: lỗi `TypeError` từ SDK → `LlmError` `code=network_error`, thông điệp không đổi, `cause.name = TypeError`; stack ghi log **không** chứa thông điệp gốc (không rò). Chat log thêm `cause=<tên>`.
+- [x] SE-F27 — probe TL gọi `validateEnv` bản build: `.env` hiện tại OK; **giá trị mẫu `.env.example` OK** (dev mới không bị chặn khởi động); `abcdefgh`, `12345678` bị từ chối "phải có cả chữ cái và chữ số"; `Abcdefg1` OK. `.env` máy demo đạt (kiểm 11:57, không in giá trị).
+- [x] SE-F25 — `config.isProduction` hết là code chết; cảnh báo một lần lúc khởi động, không chặn.
+- [x] Gate — typecheck/lint/build `--force`, test 83/83, CI SUCCESS, CLEAN.
+- [x] Sau merge — API `develop` `582865b` khởi động với `.env` thật (không cảnh báo); hồi quy **27/27**; tài khoản tạm `6b012632accf1493a116295b` `BLOCKED`, dữ liệu thử đã dọn theo ID.
+
 ## Phản hồi UI
 Không áp dụng.
