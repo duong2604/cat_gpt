@@ -301,18 +301,21 @@ export function validateEnv(config: Record<string, unknown>): EnvironmentVariabl
   if (isProd && mode === ReleaseMode.Staff && mock) {
     warnings.push('NODE_ENV=production + RELEASE_MODE=staff dùng LLM_PROVIDER=mock: không dùng dữ liệu thật với mock — R7');
   }
+  // R11/R12 áp mọi RELEASE_MODE khi NODE_ENV=production (staff vẫn là môi trường thật).
+  if (isProd) {
+    if (validated.JWT_ACCESS_SECRET === EXAMPLE_JWT_ACCESS_SECRET) {
+      lines.push('  - JWT_ACCESS_SECRET đang là giá trị mẫu trong .env.example; đặt secret ngẫu nhiên — R11');
+    }
+    if (validated.ADMIN_PASSWORD === EXAMPLE_ADMIN_PASSWORD) {
+      lines.push('  - ADMIN_PASSWORD đang là giá trị mẫu; đặt mật khẩu khác — R12');
+    }
+  }
   if (mode === ReleaseMode.Production) {
     if (mock || !validated.OPENAI_API_KEY?.trim()) {
       lines.push('  - RELEASE_MODE=production cần LLM_PROVIDER=openai và OPENAI_API_KEY — R4');
     }
     if (validated.COOKIE_SECURE !== true) {
       lines.push('  - RELEASE_MODE=production cần COOKIE_SECURE=true (HTTPS, cookie secure) — R5');
-    }
-    if (validated.JWT_ACCESS_SECRET === EXAMPLE_JWT_ACCESS_SECRET) {
-      lines.push('  - JWT_ACCESS_SECRET đang là giá trị mẫu trong .env.example; đặt secret ngẫu nhiên — R11');
-    }
-    if (validated.ADMIN_PASSWORD === EXAMPLE_ADMIN_PASSWORD) {
-      lines.push('  - ADMIN_PASSWORD đang là giá trị mẫu; đặt mật khẩu khác — R12');
     }
     if (rawMode === ReleaseMode.Production && String(config.SWAGGER_ENABLED) === 'true') {
       warnings.push('SWAGGER_ENABLED=true khi production: tài liệu API đang bật (đã khai báo rõ) — R6');
