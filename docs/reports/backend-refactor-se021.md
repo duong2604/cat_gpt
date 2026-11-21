@@ -435,7 +435,7 @@ Chi tiết: [chat-module-structural-review.md](chat-module-structural-review.md)
 
 ## 15. Đóng phiên 22/11 01:39
 - **F03 Chat:** cấu trúc CTO accepted (SE-022); SE-F9 (#50), B10-M1 (SE-023 #52), parser web (SE-027 #53), Native Streaming (SE-029 #54 → `29160c4`, CTO duyệt) đều merge; hồi quy 15/15 + RAG 14/14 + toàn API 27/27. **Đề nghị CTO nghiệm thu chức năng F03** (chưa có quyết định).
-- **F01 / KT-3 (SE-005): HOLD** — sự cố dữ liệu AC5 ([báo cáo](incident-se005-data-2026-11-22.md)); chờ CTO duyệt R0–R5.
+- **F01 / KT-3 (SE-005): BLOCKED** — sự cố dữ liệu AC5 ([báo cáo](incident-se005-data-2026-11-22.md)); chờ CTO duyệt R0–R5.
 - SE-030 CANCELLED (giữ unit test). Nhánh POC/test đã bundle (`D:\workspace\buggysoft\cat_gpt-archive\`) và xóa.
 
-**Tiến độ: DONE 5/9** (F02, F04, F07, F08, F09) · PARTIAL 4 (F01 — HOLD, F03 — chờ CTO nghiệm thu, F05, F06) · **MAJOR mở: 1** — KT-3 (SE-005).
+**Tiến độ: DONE 5/9** (F02, F04, F07, F08, F09) · PARTIAL 4 (F01 — BLOCKED, F03 — chờ CTO nghiệm thu, F05, F06) · **MAJOR mở: 1** — KT-3 (SE-005).

@@ -1,6 +1,6 @@
 # SE-005 — Kiểm chứng và sửa giới hạn đăng nhập/request khi nhiều tài khoản dùng chung IP
 
-Trạng thái: **Tạm dừng — CTO HOLD (22/11/2026)**: AC5 NOT PASS (sự cố dữ liệu — [báo cáo](../reports/incident-se005-data-2026-11-22.md)). Chờ CTO duyệt kế hoạch khôi phục R0–R5 → TL khôi phục → SE đo lại trên SHA cuối + kiểm 429 và thông báo tiếng Việt trên trình duyệt + hồi quy → TL review. Commit `86bd326` giữ local (nhánh `fix/shared-ip-throttling`, worktree `cat_gpt-se5`), chưa push/PR.
+Trạng thái: **BLOCKED — CTO HOLD (22/11/2026)**: AC5 NOT PASS (sự cố dữ liệu — [báo cáo](../reports/incident-se005-data-2026-11-22.md)). Chờ CTO duyệt kế hoạch khôi phục R0–R5 → TL khôi phục → SE đo lại trên SHA cuối + kiểm 429 và thông báo tiếng Việt trên trình duyệt + hồi quy → TL review. Commit `86bd326` giữ local (nhánh `fix/shared-ip-throttling`, worktree `cat_gpt-se5`), chưa push/PR.
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 1,5 ngày làm việc (0,5 script kiểm chứng; 1 sửa giới hạn + chạy lại)
 Phụ thuộc: làm sau [SE-003](SE-003-release-mode-navigation.md), **trước** [SE-006](SE-006-account-admin-rules.md) (khách hàng xếp lại 15/11/2026); **chặn thử nội bộ** ([R-3](../design/ui-release-standards.md#4-tiêu-chí-chuẩn-bị-cho-500-nhân-sự)). Không ảnh hưởng demo 20/11
 Hạn bàn giao review: Dự kiến 27/11/2026 (thứ Sáu) · Hạn hoàn tất: Dự kiến 30/11/2026 (thứ Hai) — chưa duyệt

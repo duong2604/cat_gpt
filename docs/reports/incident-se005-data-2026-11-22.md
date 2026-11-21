@@ -1,6 +1,6 @@
 # Báo cáo sự cố dữ liệu SE-005 (AC5) — 22/11/2026
 
-Người lập: TL · Trạng thái: **ĐANG XỬ LÝ — CTO ĐỒNG Ý KHÔI PHỤC VỀ NGUYÊN TẮC; CHỜ DUYỆT KẾ HOẠCH CHI TIẾT (mục 6)** · Môi trường: MongoDB Atlas, DB **`cat_gpt_loadtest`** (DB demo `cat_gpt` không bị ảnh hưởng — SE kiểm chỉ đọc: 0 tài khoản `loadtest+`)
+Người lập: TL · Trạng thái: **OPEN** — CTO đồng ý khôi phục về nguyên tắc; chờ duyệt kế hoạch chi tiết R0–R5 (mục 6). Cleanup bằng chứng: ACCEPTED (CTO 22/11) · Môi trường: MongoDB Atlas, DB **`cat_gpt_loadtest`** (DB demo `cat_gpt` không bị ảnh hưởng — SE kiểm chỉ đọc: 0 tài khoản `loadtest+`)
 
 Mọi kiểm tra trong báo cáo này là **chỉ đọc** (`find`/`countDocuments`/`aggregate` trên `cat_gpt_loadtest` và `local.oplog.rs`). Không có thao tác ghi nào lên DB sau sự cố.
 
