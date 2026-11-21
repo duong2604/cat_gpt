@@ -226,5 +226,15 @@ Căn cứ: `origin/develop` @ `b7af2fb` (`apps/api/src` trùng hệt, đã kiể
 **Còn mở:** PR-B5 (log tải về; cắt log parser), PR-B3 (phân tích trước). Bảng flow: [backend-refactor-se021.md](../reports/backend-refactor-se021.md).
 **Trạng thái** — Đang làm (B tiếp tục).
 
+### Checklist vòng 5 — PR-B5 ([PR #41](https://github.com/duong2604/cat_gpt/pull/41), PR mở 21/11/2026 11:51)
+SE bàn giao (mô tả PR): (a) WARN `documentId=<id> tải về lỗi giữa chừng: <name>: <message>` khi đã gửi dữ liệu — probe: có dòng WARN, health `200` sau đó; (b) log bóc tách một dòng ≤ 200 ký tự, mapping không đổi; build 6/6, lint 0 cảnh báo, test 83/83, CI SUCCESS.
+
+#### Review vòng 5 — PR-B5
+**PR** #41 · SHA đã review `adac390` (base `310ee02`) · **APPROVED** — merge `--match-head-commit` → `develop` @ `646fcb4`.
+- [x] Phạm vi — Đạt — `documents.controller.ts` (+Logger, log trong nhánh đã gửi dữ liệu), `document-processor.ts` (`replace(/\s+/g, ' ').slice(0, 200)`); không đổi route/mã/mapping.
+- [x] Điều kiện B1 — Đạt — probe TL: dòng `WARN [DocumentsController] documentId=mid tải về lỗi giữa chừng: Error: minio reset mid-stream`; các ca B1 khác giữ nguyên. Lỗi trước byte đầu không log trùng (filter ghi stack ở mức 500).
+- [x] MINOR B4 — Đạt — chuỗi 30 dòng có thẻ XML → 200 ký tự, không còn xuống dòng.
+- [x] Gate — typecheck/lint/build `--force`, test 83/83, CI SUCCESS, CLEAN. Sau merge: cây `apps` của `develop` `646fcb4` giống hệt `adac390` (`git diff` rỗng) → kết quả kiểm trên head áp dụng cho develop.
+
 ## Phản hồi UI
 Không áp dụng.
