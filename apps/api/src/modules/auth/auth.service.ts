@@ -6,7 +6,6 @@ import type { AccessTokenPayload } from '../../common/types/auth-user.js';
 import { DUMMY_PASSWORD_HASH, verifyPassword } from '../../common/utils/password-hash.js';
 import type { RequestMeta } from '../../common/utils/request-meta.js';
 import { SessionsService } from '../sessions/sessions.service.js';
-import { parseRefreshToken } from '../sessions/refresh-token.js';
 import type { User } from '../users/schemas/user.schema.js';
 import { UsersService } from '../users/users.service.js';
 import type { LoginDto } from './dto/login.dto.js';
@@ -74,10 +73,11 @@ export class AuthService {
     };
   }
 
-  /** Đăng xuất phiên hiện tại. Không ném lỗi nếu token không hợp lệ — vẫn xóa cookie. */
+  /**
+   * Đăng xuất phiên hiện tại. Chỉ thu hồi khi secret đã biết (SE-B3); secret lạ vẫn trả 204 và xóa cookie.
+   */
   async logout(refreshToken: string | undefined): Promise<void> {
-    const parsed = refreshToken ? parseRefreshToken(refreshToken) : null;
-    if (parsed) await this.sessions.revoke(parsed.sessionId);
+    if (refreshToken) await this.sessions.revokeWithSecret(refreshToken);
   }
 
   private signAccessToken(userId: string, sessionId: string): Promise<string> {

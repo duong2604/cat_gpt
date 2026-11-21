@@ -23,17 +23,37 @@ export interface IssuedSession {
 /** Số lần thử xoay token khi thua CAS (thường chỉ cần một lần thử lại). */
 const MAX_ROTATE_ATTEMPTS = 3;
 
-/**
- * Token đã trình thuộc đâu: bản hiện tại, bản vừa bị thay trong ân hạn, hay bản cũ (dùng lại).
- */
-function classifyPresented(session: Session, presentedHash: string): 'current' | 'grace' | 'reuse' {
+/** Số hash đã thay được giữ lại trong lịch sử phiên (SE-B3). */
+const HISTORY_MAX = 5;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** Token đã trình thuộc loại nào (SE-B3, bảng timeline đã duyệt). */
+export type PresentedKind =
+  | 'current' // hash hiện tại
+  | 'grace' // hash vừa bị thay, còn trong ân hạn 30 s
+  | 'history' // đã từng hợp lệ (lịch sử ≤ tuổi tối đa), ngoài ân hạn
+  | 'unknown'; // không khớp hash nào server biết
+
+/** Phân loại dùng chung cho xoay và đăng xuất — không nhân bản logic. */
+function classifyPresented(
+  session: Session,
+  presentedHash: string,
+  now: number,
+  historyMaxAgeMs: number,
+): PresentedKind {
   if (hashEquals(presentedHash, session.tokenHash)) return 'current';
-  const inGrace =
+  if (
     session.previousTokenHash !== null &&
     session.rotatedAt !== null &&
     hashEquals(presentedHash, session.previousTokenHash) &&
-    Date.now() - session.rotatedAt.getTime() <= REFRESH_REUSE_GRACE_MS;
-  return inGrace ? 'grace' : 'reuse';
+    now - session.rotatedAt.getTime() <= REFRESH_REUSE_GRACE_MS
+  ) {
+    return 'grace';
+  }
+  const inHistory = (session.history ?? []).some(
+    (entry) => now - entry.rotatedAt.getTime() <= historyMaxAgeMs && hashEquals(presentedHash, entry.hash),
+  );
+  return inHistory ? 'history' : 'unknown';
 }
 
 @Injectable()
@@ -80,9 +100,16 @@ export class SessionsService {
     const presentedHash = hashSecret(parsed.secret);
 
     let session = await this.findRotatable(parsed.sessionId);
-    if (classifyPresented(session, presentedHash) === 'reuse') {
+    const first = this.classify(session, presentedHash);
+    if (first === 'history') {
+      // Token đã từng hợp lệ nhưng ngoài ân hạn: dấu hiệu dùng lại → thu hồi (như trước).
       this.logger.warn(`Phát hiện refresh token bị dùng lại, thu hồi phiên ${parsed.sessionId}`);
       await this.revoke(parsed.sessionId);
+      throw AppException.unauthorized(ErrorCode.AUTH_REFRESH_INVALID);
+    }
+    if (first === 'unknown') {
+      // Secret lạ: 401 nhưng KHÔNG thu hồi (không ai biết sessionId có thể vô hiệu hóa phiên).
+      this.logger.warn(`Refresh token không khớp, giữ nguyên phiên ${parsed.sessionId}`);
       throw AppException.unauthorized(ErrorCode.AUTH_REFRESH_INVALID);
     }
 
@@ -95,10 +122,32 @@ export class SessionsService {
       if (attempt >= MAX_ROTATE_ATTEMPTS) throw AppException.unauthorized(ErrorCode.AUTH_REFRESH_INVALID);
 
       session = await this.findRotatable(parsed.sessionId);
-      if (classifyPresented(session, presentedHash) === 'reuse') {
+      const kind = this.classify(session, presentedHash);
+      if (kind === 'history' || kind === 'unknown') {
+        // Thua CAS rồi thấy token không còn là current/grace: 401, không thu hồi (lỗi đua).
         throw AppException.unauthorized(ErrorCode.AUTH_REFRESH_INVALID);
       }
     }
+  }
+
+  /**
+   * Đăng xuất: thu hồi phiên khi secret đã biết (current, grace hoặc lịch sử ≤ tuổi tối đa).
+   * Secret lạ → không thu hồi (controller vẫn xóa cookie và trả 204).
+   */
+  async revokeWithSecret(refreshToken: string): Promise<void> {
+    const parsed = parseRefreshToken(refreshToken);
+    if (!parsed) return;
+    const session = await this.sessionModel.findById(parsed.sessionId).lean<Session>().exec();
+    if (!session || session.revokedAt) return;
+    if (this.classify(session, hashSecret(parsed.secret)) === 'unknown') {
+      this.logger.warn(`Đăng xuất với refresh token không khớp, giữ nguyên phiên ${parsed.sessionId}`);
+      return;
+    }
+    await this.revoke(parsed.sessionId);
+  }
+
+  private classify(session: Session, presentedHash: string): PresentedKind {
+    return classifyPresented(session, presentedHash, Date.now(), this.config.auth.refreshTtlDays * DAY_MS);
   }
 
   /** Phiên còn dùng được để xoay token; không thì 401 (không thu hồi). */
@@ -126,6 +175,8 @@ export class SessionsService {
             ip: meta.ip,
             userAgent: meta.userAgent,
           },
+          // Cùng lệnh CAS: hash đang bị thay vào lịch sử, giữ tối đa HISTORY_MAX mục.
+          $push: { history: { $each: [{ hash: session.tokenHash, rotatedAt: now }], $slice: -HISTORY_MAX } },
         },
         { returnDocument: 'after' },
       )

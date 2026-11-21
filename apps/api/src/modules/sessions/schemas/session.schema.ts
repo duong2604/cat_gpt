@@ -20,6 +20,14 @@ export class Session {
   @Prop({ type: Date, default: null })
   rotatedAt: Date | null;
 
+  /**
+   * Lịch sử hash các refresh token đã bị thay (tối đa 5, mới nhất cuối). Chỉ để phân loại token
+   * đã từng hợp lệ khi đăng xuất/xoay; KHÔNG dùng để xoay token. Không đưa ra DTO nào.
+   * Phiên cũ không có trường này → coi như [].
+   */
+  @Prop({ type: [{ _id: false, hash: String, rotatedAt: Date }], default: [] })
+  history: { hash: string; rotatedAt: Date }[];
+
   @Prop({ type: String, default: null })
   userAgent: string | null;
 
