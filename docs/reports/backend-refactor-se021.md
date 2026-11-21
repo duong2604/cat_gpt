@@ -4,7 +4,7 @@ Tài liệu theo dõi **duy nhất** của chương trình (chỉ thị CTO "Aut
 
 Phạm vi: chỉ `apps/api`; giữ API contract và nghiệp vụ, trừ sửa bug đã duyệt; không viết unit test mới. TL tự review/merge PR đạt gate; thay đổi chính sách bảo mật phiên, schema, contract → CTO.
 
-Cập nhật: 21/11/2026 20:27 · `develop` @ `547b06f` — trạng thái hiện hành: **mục 11** · DONE 4/9 (F02, F04, F07, F08)
+Cập nhật: 21/11/2026 20:29 · `develop` @ `547b06f` — trạng thái hiện hành: **mục 11 + 12** · DONE 5/9 (F02, F04, F07, F08, F09)
 
 Quy ước trạng thái: **Partial** = đã sửa một phần, còn phạm vi ghi ở cột Status; **Audited** = đã audit + xác minh, chưa refactor; **Not started** = chưa audit đủ. Không có flow nào **Done** ở thời điểm này.
 
@@ -399,3 +399,20 @@ TL sẽ kiểm độc lập trước khi merge: (1) đủ R1–R12 — mỗi quy
 | **F08** | **DONE** | — | #42, #47 | — | — |
 | F09 Module structure | PARTIAL — đủ điều kiện sau PR-C2 | — | #43 | PR-C2 → review dependency graph, `ioredis`, runtime → final review | PR-C2 đang làm, ước ≤ 1 giờ |
 **DONE 4/9 · PARTIAL 5 · BLOCKED 0.** **MAJOR còn mở: 1** — KT-3 (F01, SE-005).
+
+## 12. PR-C2 hủy; F09 DONE; C2 đóng — 21/11/2026 20:29
+
+**Đính chính audit C2 (lỗi của TL):** mục 5.2 B12 ghi `ioredis` "khai báo nhưng không dùng → REMOVE". **Sai.** SE dừng PR-C2 với bằng chứng; TL kiểm độc lập: `bullmq@6.7.7` không có `ioredis` trong `dependencies`, chỉ có `peerDependencies.ioredis ">=5.0.0"` với `peerDependenciesMeta.ioredis.optional = true`, và `dist/{cjs,esm}/classes/redis-connection.js` gọi `require("ioredis")` → ứng dụng **bắt buộc** khai báo `ioredis`; gỡ đi thì pnpm không cài peer tùy chọn và hàng đợi BullMQ không kết nối được Redis. TL audit chỉ quét import trong `src`, không kiểm metadata peer. **B12 → KEEP FOR PRODUCTION**; PR-C2 hủy, không có thay đổi code (SE đã hoàn lại `package.json`/lockfile, không push).
+
+**C2 Code Cleanup — DONE:** B2 (production cấm mock) đã làm trong PR-B8 #47 (`547b06f`, quy tắc R4/R8); B12 hủy (phân loại lại); các mục KEEP giữ nguyên; B6 (`RELEASE_MODE` mặc định) đã có quyết định CTO và cài trong PR-B8.
+
+**F09 Module structure — TL final review: DONE** (`develop` `547b06f`, CI success run 44908492713)
+| Tiêu chí | Kết quả | Bằng chứng |
+|---|---|---|
+| Dependency graph | Đạt | `ioredis` là peer bắt buộc của bullmq (trên); `reflect-metadata`, `rxjs` là peer của NestJS; không còn dependency trực tiếp thừa đã xác định |
+| Build/lint/typecheck/runtime | Đạt | `547b06f`: typecheck/lint/build, test 83/83; hồi quy 27/27 (gồm upload → READY qua BullMQ/Redis, xóa, tóm tắt) |
+| Tổ chức module | Đạt | SE-F20 phần 1 (#43 `f173090`): lập lịch tóm tắt tách khỏi `DocumentsService`; không thêm abstraction thừa |
+| Findings | Đạt | B12 — bác bỏ (không phải lỗi). TL-F10 (coupling Chat ↔ Documents) — chấp nhận: quy mô hiện tại, tách thêm không có lợi ích rõ. SE-F19 (dữ liệu mock) — giữ: phục vụ phát triển offline. SE-F20 phần 2 (tách `ChatService`) — không làm (lý do ở vòng 7) |
+| BLOCKER/MAJOR | Không có | — |
+
+**Tiến độ: DONE 5/9** (F02, F04, F07, F08, F09) · PARTIAL 4 (F01, F03, F05, F06) · BLOCKED 0. **MAJOR còn mở: 1** — KT-3 (F01, SE-005).
