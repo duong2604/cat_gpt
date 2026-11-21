@@ -2,6 +2,16 @@
 
 Theo mốc của [plan.md](../project/plan.md#2-mốc). Chi tiết từng ngày: [báo cáo ngày](daily/README.md). TL cập nhật cuối mỗi ngày làm việc và ngay khi phát hiện nguy cơ trễ mốc; mục mới nhất ở trên, giữ các mục cũ ([workflow mục 11](../project/workflow.md#11-theo-dõi-tiến-độ)).
 
+## Cập nhật 21/11/2026 11:14 (SE-020 Done; review backend)
+
+Chi tiết: [21/11 vòng 6–7](daily/2026-11-21.md).
+
+| Mốc / việc | Tình trạng |
+|---|---|
+| Bảo mật phụ thuộc | **SE-020 Done** (PR #37 → `e040e08`): audit 26 → 5 (1 high, nhóm `minio` chờ CTO) |
+| Chất lượng backend | SE-021: audit SE (22) + TL (13) → **CHANGES REQUIRED**, 2 BLOCKER (sập API khi tải về lỗi; thu hồi phiên không kiểm secret). PR-B1/B2/B4 đã giao SE; B3 + merge chờ CTO |
+| Nghiệm thu M1–M4 (CTO) | Chờ CTO. Máy demo: kéo `develop` `e040e08` rồi `pnpm install` |
+
 ## Cập nhật 21/11/2026 10:36 (Security Audit vòng 2, SE-020)
 
 Chi tiết: [21/11 vòng 4](daily/2026-11-21.md#vòng-4--1031-phiên-tl-sáng-2111-baseline-security-audit-vòng-2-kế-hoạch).

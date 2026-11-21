@@ -1,10 +1,10 @@
 # SE-021 — Backend Codebase Audit & Refactoring (`apps/api`)
 
-Trạng thái: Sẵn sàng (giai đoạn A — audit). Giai đoạn B (refactor) mở theo từng PR sau khi TL duyệt phạm vi
+Trạng thái: Đang làm — giai đoạn B (A bàn giao 21/11/2026, `d6020f8`; TL duyệt phạm vi B 21/11/2026)
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: A 0,5 ngày; B theo phạm vi duyệt (mỗi PR ≤ 0,5 ngày)
 Phụ thuộc: làm **sau** khi bàn giao [SE-020](SE-020-dependency-security-patch-r2.md) (cùng phiên SE; không làm song song trên cùng nhánh). Không chặn bởi nghiệm thu M1–M4 ở giai đoạn A (chỉ đọc code)
 Hạn bàn giao review: A — 21/11/2026 trong ngày nếu kịp, không thì phiên sau · B — Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
-Ngày thực tế: bắt đầu — · bàn giao review — · hoàn tất —
+Ngày thực tế: bắt đầu 21/11/2026 · bàn giao review A 21/11/2026 · hoàn tất —
 Chốt: 21/11/2026 — chỉ thị CTO "TL Independent Backend Code Review": TL tạo task, giao SE audit độc lập, TL duyệt phạm vi refactor nhỏ **không đổi hành vi**; thay đổi kiến trúc lớn / API contract / schema DB / nghiệp vụ trình CTO; **không merge PR refactor khi CTO chưa cho phép**; không viết unit test mới
 SHA cơ sở: `origin/develop` @ `b7af2fb` (A); B: `origin/develop` mới nhất khi tạo nhánh
 PR: A — không có PR code (báo cáo ghi vào file này); B — <Senior Dev ghi từng PR>
@@ -40,7 +40,8 @@ BLOCKER: lỗi logic, bảo mật, dữ liệu, concurrency, regression. MAJOR: 
 | Q1 | Quyền merge PR refactor (B) | Chờ CTO cho phép từng PR | Chờ CTO |
 
 ## Kết quả review
-Chưa có. Review độc lập của TL: [báo cáo ngày 21/11](../reports/daily/2026-11-21.md) (vòng 6) và mục "TL independent findings" dưới đây.
+**A — TL 21/11/2026: Đạt** (AC1, AC2). 22 finding SE đối chiếu với 13 finding TL: xác nhận SE-F1 (BLOCKER, TL tự chạy probe), F2, F3, F4, F6, F7, F14, F15; hạ mức SE-F5, SE-F22 → MINOR; bác cách sửa "retry" của SE-F6. Bảng đầy đủ và phạm vi B: [daily 21/11 vòng 7](../reports/daily/2026-11-21.md#vòng-7--1114-se-020-done-đối-chiếu-audit-se-021-phạm-vi-giai-đoạn-b); finding TL: [vòng 6](../reports/daily/2026-11-21.md#vòng-6--1047-backend-independent-code-review--vòng-tl-đầu-tiên).
+**B — phạm vi TL duyệt:** PR-B1 (SE-F1+F2), PR-B2 (SE-F3/TL-F2 + SE-F4/TL-F3), PR-B4 (dọn không đổi hành vi). PR-B3 (TL-F1) và các mục đổi hành vi/thiết kế: chờ CTO. Merge mọi PR B: chờ CTO (Q1).
 
 ## Lịch sử review
 ### Checklist vòng 1 — giai đoạn A (audit, chỉ đọc)
