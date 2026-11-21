@@ -82,9 +82,8 @@ export async function isValidDocxSignature(buffer: Buffer): Promise<boolean> {
  * nghìn lần — "zip bomb" (TL phát hiện khi review 18/11/2026). Đo không được (lỗi
  * stream) thì coi là hỏng, đóng an toàn thay vì bỏ qua.
  */
-function assertEntryWithinSize(entry: JSZip.JSZipObject, maxBytes: number): Promise<void> {
+function measureEntryWithinBudget(entry: JSZip.JSZipObject, budget: { remaining: number }): Promise<void> {
   return new Promise((resolve, reject) => {
-    let total = 0;
     let settled = false;
     const stream = entry.nodeStream('nodebuffer') as Readable;
     const fail = (error: Error) => {
@@ -94,9 +93,9 @@ function assertEntryWithinSize(entry: JSZip.JSZipObject, maxBytes: number): Prom
       reject(error);
     };
     stream.on('data', (chunk: Buffer) => {
-      total += chunk.length;
-      if (total > maxBytes) {
-        fail(new DocumentTooLargeToProcessError(`word/document.xml giải nén vượt ${maxBytes} byte`));
+      budget.remaining -= chunk.length;
+      if (budget.remaining < 0) {
+        fail(new DocumentTooLargeToProcessError('Các phần XML của DOCX giải nén vượt ngân sách'));
       }
     });
     stream.on('error', (error: Error) => fail(new DocumentUnreadableError(error.message)));
@@ -109,19 +108,27 @@ function assertEntryWithinSize(entry: JSZip.JSZipObject, maxBytes: number): Prom
   });
 }
 
-/** Bóc tách DOCX bằng mammoth, sau khi xác nhận `word/document.xml` không phải zip bomb. */
-export async function extractDocx(buffer: Buffer, maxXmlBytes: number): Promise<ExtractedPage[]> {
+/**
+ * Bóc tách DOCX bằng mammoth, sau khi đo byte giải nén thật của MỌI entry không phải thư mục
+ * trong một ngân sách chung `maxBytes` (dừng ngay khi vượt). Không lọc theo tên/đuôi: mammoth
+ * tìm styles/numbering/footnotes… theo relationship target, nên tên tệp không đáng tin (F04-N1).
+ * Ngân sách do tầng gọi truyền vào = kích thước tệp tải lên tối đa + phần XML tối đa.
+ */
+export async function extractDocx(buffer: Buffer, maxBytes: number): Promise<ExtractedPage[]> {
   let zip: JSZip;
   try {
     zip = await JSZip.loadAsync(buffer);
   } catch (error) {
     throw new DocumentUnreadableError((error as Error).message);
   }
-  const entry = zip.file('word/document.xml');
-  if (!entry) {
+  if (!zip.file('word/document.xml')) {
     throw new DocumentUnreadableError('Không tìm thấy word/document.xml');
   }
-  await assertEntryWithinSize(entry, maxXmlBytes);
+  const budget = { remaining: maxBytes };
+  for (const entry of Object.values(zip.files)) {
+    if (entry.dir) continue;
+    await measureEntryWithinBudget(entry, budget);
+  }
   try {
     const result = await mammoth.extractRawText({ buffer });
     return [{ page: null, text: result.value }];
