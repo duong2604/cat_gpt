@@ -559,7 +559,7 @@ CTO duyệt (HEAD `018e941`, CI pass, không ngoài phạm vi). TL kiểm lại 
 ### 18.2 SE-030 — giải trình (CTO yêu cầu)
 **Nguồn gốc yêu cầu:** chủ dự án yêu cầu "SE xóa các file unit test khi làm xong" (22/11); TL hỏi lại phạm vi, chủ dự án chọn "xóa toàn bộ 8 file spec". TL đã ghi rõ việc này trái mục 1 chỉ thị Convention Review và tạo task ở trạng thái chờ — CTO chưa duyệt → **không thực hiện**.
 
-**Giá trị của từng tệp (98 ca `it`, CI chạy < 10 giây):**
+**Giá trị của từng tệp (83 ca `it` — khớp vitest 83/83; CI chạy < 10 giây):**
 | Tệp | Ca | Bảo vệ | Còn giá trị? |
 |---|---|---|---|
 | `chat/chat.service.spec.ts` | 17 | 4 trạng thái kết thúc (COMPLETED/TRUNCATED/STOPPED/ERROR), thứ tự `meta→delta→done`, Dừng/đóng tab, Tạo lại (SE-F9), validate `documentIds` (404/400), RAG insufficient/lỗi truy hồi | **Có** — đúng các luồng vừa refactor 4 lần trong 2 ngày; là lưới duy nhất chạy tự động |
