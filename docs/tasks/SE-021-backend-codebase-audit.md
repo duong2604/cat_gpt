@@ -248,5 +248,17 @@ SE bàn giao (mô tả PR): SE-F23 `LlmError` nhận `cause`; SE-F27 `ADMIN_PASS
 - [x] Gate — typecheck/lint/build `--force`, test 83/83, CI SUCCESS, CLEAN.
 - [x] Sau merge — API `develop` `582865b` khởi động với `.env` thật (không cảnh báo); hồi quy **27/27**; tài khoản tạm `6b012632accf1493a116295b` `BLOCKED`, dữ liệu thử đã dọn theo ID.
 
+### Checklist vòng 7 — PR-B7 ([PR #43](https://github.com/duong2604/cat_gpt/pull/43), PR mở 21/11/2026 12:09)
+SE bàn giao (mô tả PR): SE-F20 phần 1 — tách lập lịch tóm tắt sang `DocumentSummaryService` (chuyển nguyên văn); SE-F8 — sửa chú thích; API thật trước/sau giống hệt (202/200/400/404, xóa khi đang tóm tắt); build/lint 0 cảnh báo/test 83/83, CI SUCCESS.
+
+#### Review vòng 7 — PR-B7
+**PR** #43 · SHA đã review `e1c77c3` (base `582865b`) · **APPROVED** — merge → `develop` @ `f173090` (cây `apps` giống hệt head).
+- [x] Phạm vi/không đổi hành vi — 5 tệp; ba hàm chuyển nguyên văn (đối chiếu diff từng dòng); kiểm quyền sở hữu vẫn qua `DocumentsService.getOwnedOrThrow`; hằng job chỉ `export`, không nhân bản; không còn caller cũ (`grep requestSummary`).
+- [x] Hành vi — kịch bản TL (`b7-check.mjs`, 2 tài khoản tạm): chưa READY `400`; người khác `404`; lần đầu `202`; gọi lại khi đang chạy `202`; → `READY`; gọi lại `200` (bản lưu). Dọn tài liệu theo ID, 2 tài khoản `BLOCKED`.
+- [x] SE-F8 — chú thích mô tả đúng khe hẹp `exists` → ghi; logic không đổi.
+- [x] Gate — typecheck/lint/build `--force`, test 83/83, CI SUCCESS, CLEAN.
+- SUGGESTION (không chặn): `document-summary.ts` (prompt map-reduce) và `document-summary.service.ts` (lập lịch) tên gần nhau — chú thích đầu file đã phân biệt; đổi tên nếu sau này gây nhầm.
+- SE-F20 phần 2 (tách `ChatService`): TL **không yêu cầu** — sau B4 còn ~290 dòng, nhánh RAG đã nằm ở `RagService`; tách thêm không có lợi ích rõ (chỉ thị: không abstraction thừa).
+
 ## Phản hồi UI
 Không áp dụng.
