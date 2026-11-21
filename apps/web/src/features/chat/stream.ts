@@ -46,38 +46,41 @@ export async function streamChat(
 
 /**
  * Bộ phân tích SSE theo đặc tả (text/event-stream), đọc theo từng dòng:
- * - Dòng kết thúc bằng `\r\n`, `\n` hoặc `\r`. Phần dư cuối chunk được giữ lại; một `\r` cuối chunk
- *   chờ chunk sau để biết có `\n` theo sau không (CRLF bị cắt đôi vẫn đúng).
+ * - Dòng kết thúc bằng `\r\n`, `\n` hoặc `\r`. `\r` kết thúc dòng ngay (kể cả cuối chunk); cờ `afterCR`
+ *   nhớ rằng vừa gặp `\r`, để `\n` ngay sau (có thể nằm ở chunk sau) bị bỏ qua.
  * - Dòng trống kết thúc một event. Dòng bắt đầu bằng `:` là comment (heartbeat) và bị bỏ qua.
  * - Trường `data` (nhiều dòng nối bằng `\n`), `event` (tên). `id` và `retry` được đọc rồi bỏ.
  * - Event không có tên hoặc tên `message` → JSON.parse → onEvent. Tên `error` → onEvent lỗi chung.
  *   Tên khác → bỏ qua.
  */
 class SseParser {
-  private rest = "";
+  /** Phần dòng chưa kết thúc (có thể trải qua nhiều chunk). */
+  private pending = "";
+  /** Vừa gặp `\r`: nếu ký tự kế tiếp là `\n` thì bỏ qua (CRLF). */
+  private afterCR = false;
   private data: string[] = [];
   private eventName = "";
 
   constructor(private readonly onEvent: (event: ChatStreamEvent) => void) {}
 
   feed(chunk: string): void {
-    const text = this.rest + chunk;
-    this.rest = "";
     let lineStart = 0;
-    let i = 0;
-    while (i < text.length) {
-      const c = text[i];
-      if (c !== "\r" && c !== "\n") {
-        i++;
-        continue;
+    for (let i = 0; i < chunk.length; i++) {
+      const c = chunk[i];
+      if (this.afterCR) {
+        this.afterCR = false;
+        if (c === "\n") {
+          lineStart = i + 1;
+          continue;
+        }
       }
-      // "\r" ở cuối chunk: chưa biết có "\n" theo sau không → giữ lại chờ chunk sau.
-      if (c === "\r" && i + 1 === text.length) break;
-      this.line(text.slice(lineStart, i));
-      i += c === "\r" && text[i + 1] === "\n" ? 2 : 1;
-      lineStart = i;
+      if (c !== "\r" && c !== "\n") continue;
+      this.line(this.pending + chunk.slice(lineStart, i));
+      this.pending = "";
+      lineStart = i + 1;
+      this.afterCR = c === "\r";
     }
-    this.rest = text.slice(lineStart);
+    this.pending += chunk.slice(lineStart);
   }
 
   private line(line: string): void {
