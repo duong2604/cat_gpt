@@ -1,6 +1,6 @@
 # SE-029 — Migration Chat sang NestJS Native Streaming Responses
 
-Trạng thái: Sẵn sàng
+Trạng thái: Cần sửa — PR #54 vòng 1 (`af27bb7`): hành vi/contract đạt; dọn code không còn dùng + đặt tên (yêu cầu chủ dự án)
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 0,75 ngày
 Phụ thuộc: không. SE-005 (hạn 27/11) làm ngay sau — báo TL nếu ảnh hưởng hạn
 Hạn bàn giao review: 22/11/2026 · Hạn hoàn tất: theo CTO nghiệm thu
@@ -50,7 +50,23 @@ PR `refactor/api-chat-native-streaming` nhắm `develop`, mô tả 6.1 + trướ
 Chưa có.
 
 ## Lịch sử review
-Chưa có.
+### PR #54 — TL review vòng 1 (SHA `af27bb7`, base `11106c8`) — **Cần sửa** (22/11 00:43)
+| Tiêu chí | Kết quả | Bằng chứng TL |
+|---|---|---|
+| AC1 kiến trúc | Đạt | `sse-response.ts` (`toSseResponse`) là nơi duy nhất định khung SSE; controller trả `Response`, không `@Res`/`@Req`/`@Header`; `chat.service.ts` không import Express/`Response`/`ReadableStream`/rxjs (grep) |
+| AC2 200 + wire | Đạt | `wire-compare`: 200 `text/event-stream; charset=utf-8`, `data:` không `id:`, payload/khóa `done` giống `develop` |
+| AC3 lỗi trước stream JSON | **Đạt** | 404, 400, 400, 401, 409, 429 → `application/json` |
+| AC4 Chat/RAG | Đạt | `f03-verify` 15/15; `rag-runtime` 14/14 |
+| AC5 ngắt giữa stream | Đạt | `sse-disconnect` 5/5 |
+| AC6 ngắt sớm | Đạt | `sse-early-abort` 16 ca khóa nhả (5 lần 409 tạm thời, nhả trong 2,3 s), không tin trùng; `early-probe` 5–100 ms → `STOPPED` lưu sau ~0,7 s (LLM bị hủy — lỗi cũ của A hết) |
+| AC7 Stop/Regenerate/đồng thời | Đạt | trong `f03-verify` |
+| AC8 heartbeat | Đạt | Sửa tạm `dist` (300 ms, không commit, build lại): 5 `: ping`, 0 `id:` |
+| AC9 trình duyệt | Chưa chạy | Chạy ở vòng 2 trên SHA cuối |
+| AC10 hồi quy toàn API (NestJS 12.5.1) | Đạt | `se020-review` 27/27 (kịch bản đã sửa 2 kỳ vọng cũ — bản trước lưu `se020-review.before-sef9.mjs`; trên `develop` cũng 27/27) |
+| AC11 build/lint/test | Đạt (local) | 4/4, 0 cảnh báo, 83/83; CI đang chạy lúc review |
+| Code không còn dùng (yêu cầu chủ dự án 22/11) | **Không đạt** | `ConversationsService.lastMessage` không còn ai gọi (từ PR-B10); `ConversationDocument`, `MessageDocument` không dùng; export không cần (`buildLlmMessages`, `CitationSchema`, `CONVERSATIONS_PAGE_SIZE` chỉ dùng trong chính tệp) |
+| Đặt tên/định dạng | **Không đạt** | biến `plan` có kiểu `ChatTurn` (đổi `turn`); thụt lề khối `.finally` trong `sse-response.ts` |
+Yêu cầu vòng 2: xóa code không còn dùng ở trên (kể cả `lastMessage` trong bản giả của spec), bỏ `export` thừa, đổi `plan` → `turn`, sửa thụt lề, rà chú thích; diff vòng 2 không đổi hành vi.
 
 ## Phản hồi UI
 Không áp dụng.
