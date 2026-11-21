@@ -1,13 +1,13 @@
 # SE-020 — Vá phụ thuộc bảo mật vòng 2 (`undici`, `mongoose`, `axios`/`follow-redirects`, phân loại `shadcn`)
 
-Trạng thái: Đang làm
+Trạng thái: Done — TL review đạt, merge [PR #37](https://github.com/duong2604/cat_gpt/pull/37) → `develop` @ `e040e08` (21/11/2026)
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 0,5 ngày làm việc
 Phụ thuộc: [SE-018](SE-018-dependency-security-patch.md) Done (`6f2271d`) — đạt. Không chặn bởi nghiệm thu M1–M4 (không đổi code, không đổi hành vi). Làm **trước** SE-005
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
-Ngày thực tế: bắt đầu 21/11/2026 · bàn giao review — · hoàn tất —
+Ngày thực tế: bắt đầu 21/11/2026 · bàn giao review 21/11/2026 · hoàn tất 21/11/2026
 Chốt: 21/11/2026 — chỉ thị CTO "TL Onboarding 21/11 mục 3": TL được giao SE phần vá patch/minor an toàn, không đổi kiến trúc; phần cần major / chấp nhận rủi ro trình CTO (mục "Ngoài phạm vi" dưới)
 SHA cơ sở: `origin/develop` @ `b7af2fb`
-PR: https://github.com/duong2604/cat_gpt/pull/37 (SHA đầu PR `cf859cf`)
+PR: https://github.com/duong2604/cat_gpt/pull/37 (code `cf859cf`; head đã review `c94025a`; merge `e040e08`)
 
 ## Mục tiêu
 `pnpm audit --prod` trên `develop` @ `b7af2fb` còn **26 advisory (8 high, 17 moderate, 1 low)** sau SE-018. Đóng **21/26** (7/8 high) bằng nâng patch/minor và một override cấp patch, không đổi code, không nâng major. 5 advisory còn lại đi qua `minio` (chưa có bản sửa upstream) → chờ CTO quyết định, **không** làm trong task này.
@@ -65,7 +65,7 @@ PR: https://github.com/duong2604/cat_gpt/pull/37 (SHA đầu PR `cf859cf`)
 | Q2 | Lockfile churn khi dùng `pnpm add/update` | Sửa `package.json` trực tiếp, `mongoose` `~9.11.4`, chỉ đổi các gói trong danh sách | TL chốt 21/11/2026 10:40 |
 
 ## Kết quả review
-Chưa có.
+**TL 21/11/2026 11:12: Đạt, đã merge.** PR #37 · SHA đã review `c94025a` · `gh pr merge 37 --merge --match-head-commit c94025a…` → `develop` @ `e040e08`. AC1–AC7 đạt, gồm các mục SE để ngỏ ở AC3–AC5 (TL tự kiểm). Chi tiết: [Review vòng 1](#review-vòng-1). Ước lượng 0,5n — Đúng ước lượng.
 
 ## Lịch sử review
 ### Checklist vòng 1
@@ -88,6 +88,27 @@ Chưa có.
 **Dọn nhánh trước khi nhận task này** — không có nhánh SE nào để dọn ngoài `fix/dependency-security-patch` đã xóa trước đó; `develop` local @ `b7af2fb`; còn giữ: `docs/se-014-done` (nhánh tài liệu TL, không phải của SE).
 
 **Trạng thái** — Chờ Review (sau khi PR mở; còn AC3–AC5 chưa đủ, ghi rõ ở trên để TL quyết định).
+
+#### Review vòng 1
+**Task** — SE-020 · PR https://github.com/duong2604/cat_gpt/pull/37 · SHA đã review `c94025a` (code `cf859cf`) · vòng 1
+**Kết luận** — Đạt. CI `build` SUCCESS tại head, MERGEABLE/CLEAN, base `develop`. Merge `--match-head-commit` → `e040e08`.
+**Checklist** (TL kiểm độc lập ở worktree `cat_gpt-review` @ `c94025a`; API `dist` cổng 4100, `LLM_PROVIDER=mock`, `RELEASE_MODE=demo`; web `next start` cổng 3100 trỏ API 4100; không sửa `.env`)
+- [x] Phạm vi — Đạt — diff so với `b7af2fb`: `apps/api/package.json` (mongoose `~9.11.4`), `apps/web/package.json` (axios `^1.21.1`, `shadcn` → devDependencies), `pnpm-workspace.yaml` (override `undici@7: 7.30.2`), lockfile, hồ sơ, tracker. Khóa gói trong lockfile đổi **đúng 5 cặp** theo Q2; phần còn lại là hậu tố peer nhóm `eslint-import` và dịch chuyển `shadcn` trong importer — không đổi phiên bản gói nào.
+- [x] AC1 — Đạt — `pnpm audit --prod` tại head: 5 (1 high, 4 moderate) đúng `decode-uri-component` ×2 + `stream-json` ×3 qua `minio`; 0 advisory mới. `mongoose` 9.11.4, `axios` 1.21.1, `undici` của Qdrant client 7.30.2 (đọc từ `node_modules`).
+- [x] AC2 — Đạt — `pnpm install --frozen-lockfile` sạch. Cảnh báo peer `typescript@^5`: TL tái hiện trên `b7af2fb` bằng thay đổi trung tính (`minio` `>=8.0.7 <9`) → có từ trước, không do SE-020 (SE xác nhận lại cùng kết quả).
+- [x] AC3 — Đạt — kịch bản TL 27/27: admin/user đăng nhập, `/me`, refresh `204` + cookie xoay vòng, `/me/sessions`, **logout `204` → `/me` `401`, refresh `401`**, đăng nhập lại; **CRUD hội thoại**: tạo (stream `meta→delta→done`), danh sách, đổi tên `200`, tin nhắn lưu đủ, xóa `204` → `404`.
+- [x] AC4 — Đạt — upload TXT → READY, Qdrant 3 điểm; hỏi tài liệu `done`; xóa tài liệu → hỏi lại cùng hội thoại → **`insufficientEvidence: true`**; Qdrant về 0; tài liệu đã xóa `404`.
+- [x] AC5 — Đạt — `next build` web (Next 16.4.6) đạt; trình duyệt Chrome: đăng nhập; gửi tin → **nút Dừng** giữa stream → `POST /conversations/:id/stop` `204`, UI hiện "Stopped"; **tự làm mới token**: API chạy `ACCESS_TOKEN_TTL_SECONDS=60` (tối thiểu cho phép), chờ 66 s, mở Tài liệu → `GET /documents` `401` → `POST /auth/refresh` `204` → gửi lại `200`; console 0 lỗi.
+- [x] AC6 — Đạt — `pnpm turbo run typecheck lint build --force` 8/8; `pnpm -C apps/api test` 83/83; CI SUCCESS tại `c94025a`.
+- [x] AC7 dữ liệu thử của TL — Đạt có ghi chú — 2 user tạm `6b0118bd45444726dd40d914` (kịch bản API) và `6b0118ed45444726dd40d924` (UI) đều `BLOCKED` (chưa có API xóa user). Đã xóa theo ID: tài liệu `tl-smoke-se020.txt` (Qdrant 0), hội thoại `6b0118c845444726dd40d91e`, `6b01190945444726dd40d926` và hội thoại kịch bản CRUD. **Còn lại 1 hội thoại** `6b01193245444726dd40d929` của user tạm UI (tạo từ lần thử Dừng đầu tiên, ID chưa ghi kịp); TL thận trọng không xóa khi chưa xác nhận ID, sau đó tài khoản đã khóa nên không xóa được qua API. Không lộ ra ngoài (chỉ chủ sở hữu đọc được); dọn cùng công cụ xóa user (SE-006).
+
+**Ghi nhận (không chặn, không do SE-020):**
+- Bấm Dừng **trước** khi nhận sự kiện `meta` (≈ 400 ms sau khi gửi tin đầu tiên của hội thoại mới): request `POST /chat/stream` qua proxy Next ghi `503`, UI không gọi `/stop`, API vẫn sinh đủ và lưu câu trả lời `COMPLETED`; UI quay về màn "New chat" (hội thoại vẫn có ở thanh bên). Đường này dùng `fetch` và Next — SE-020 không đổi cả hai. Chưa kiểm trên `b7af2fb`; ghi vào backlog frontend.
+- Thư mục demo `D:\workspace\buggysoft\cat_gpt` cần `pnpm install` sau khi kéo `develop` mới (dependency đổi).
+
+**Kiểm tra đã chạy** — `pnpm install --frozen-lockfile`; `pnpm audit --prod`; `pnpm turbo run typecheck lint build --force`; `pnpm -C apps/api test`; kịch bản `se020-review.mjs` (ngoài repo) 27/27; Chrome trên `localhost:3100`.
+**Dọn nhánh sau merge** — nhánh remote `fix/dependency-security-patch-r2`: chờ TL xóa (lệnh xóa nhánh remote bị công cụ chặn ở phiên này — xem daily 21/11 vòng 4 mục F). Worktree `cat_gpt-review` (TL) giữ, detached.
+**Trạng thái** — Done.
 
 ## Phản hồi UI
 Không áp dụng (không đổi giao diện).

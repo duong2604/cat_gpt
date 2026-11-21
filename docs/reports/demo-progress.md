@@ -2,6 +2,44 @@
 
 Theo mốc của [plan.md](../project/plan.md#2-mốc). Chi tiết từng ngày: [báo cáo ngày](daily/README.md). TL cập nhật cuối mỗi ngày làm việc và ngay khi phát hiện nguy cơ trễ mốc; mục mới nhất ở trên, giữ các mục cũ ([workflow mục 11](../project/workflow.md#11-theo-dõi-tiến-độ)).
 
+## Cập nhật 21/11/2026 12:04 (refactor backend: 5 PR đã merge)
+
+Chi tiết: [21/11 vòng 14](daily/2026-11-21.md) · [bảng flow SE-021](backend-refactor-se021.md).
+
+| Mốc / việc | Tình trạng |
+|---|---|
+| Chất lượng backend | Merge #38–#42 → `develop` `582865b`, CI xanh, hồi quy 27/27 sau mỗi merge. 0/9 flow Done, 8 Partial, 1 Audited. Còn BLOCKER TL-F1 → chờ CTO quyết B3 (khuyến nghị B2a) |
+| Nghiệm thu M1–M4 (CTO) | Kỹ thuật đạt trên `582865b`; chờ CTO. Máy demo: kéo `develop`, `pnpm install` |
+
+## Cập nhật 21/11/2026 11:48 (merge refactor backend #38–#40)
+
+Chi tiết: [21/11 vòng 10](daily/2026-11-21.md) · [bảng flow SE-021](backend-refactor-se021.md).
+
+| Mốc / việc | Tình trạng |
+|---|---|
+| Chất lượng backend | TL merge #38 (sập API khi tải về), #39 (race phiên/stream), #40 (dọn code) → `develop` `310ee02`, CI xanh, hồi quy 27/27. 0/9 flow Done, 6 Partial, 3 Audited. Còn BLOCKER TL-F1 (PR-B3) |
+| Nghiệm thu M1–M4 (CTO) | Chờ CTO. Máy demo: kéo `310ee02`, `pnpm install` |
+
+## Cập nhật 21/11/2026 11:14 (SE-020 Done; review backend)
+
+Chi tiết: [21/11 vòng 6–7](daily/2026-11-21.md).
+
+| Mốc / việc | Tình trạng |
+|---|---|
+| Bảo mật phụ thuộc | **SE-020 Done** (PR #37 → `e040e08`): audit 26 → 5 (1 high, nhóm `minio` chờ CTO) |
+| Chất lượng backend | SE-021: audit SE (22) + TL (13) → **CHANGES REQUIRED**, 2 BLOCKER (sập API khi tải về lỗi; thu hồi phiên không kiểm secret). PR-B1/B2/B4 đã giao SE; B3 + merge chờ CTO |
+| Nghiệm thu M1–M4 (CTO) | Chờ CTO. Máy demo: kéo `develop` `e040e08` rồi `pnpm install` |
+
+## Cập nhật 21/11/2026 10:36 (Security Audit vòng 2, SE-020)
+
+Chi tiết: [21/11 vòng 4](daily/2026-11-21.md#vòng-4--1031-phiên-tl-sáng-2111-baseline-security-audit-vòng-2-kế-hoạch).
+
+| Mốc / việc | Tình trạng |
+|---|---|
+| Bảo mật phụ thuộc | Audit `b7af2fb`: 26 (8 high). **SE-020** Sẵn sàng, đã giao SE: mục tiêu 26 → 5 (1 high). 5 advisory qua `minio` chờ CTO |
+| Nghiệm thu M1–M4 (CTO) | Môi trường sẵn sàng trên `develop` @ `b7af2fb` (dependency đã cài, Docker healthy). Chờ CTO |
+| Module 4 | Không đổi: SE-017 Chờ Review (`-large` bị chặn); SE-019 Nháp |
+
 ## Cập nhật 21/11/2026 01:40 (SE-018 Done, kết thúc phiên TL)
 
 Chi tiết: [21/11 vòng 3](daily/2026-11-21.md).
