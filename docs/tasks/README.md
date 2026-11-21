@@ -2,7 +2,7 @@
 
 Mục lục task theo ID. Quy ước, phân công và cách nhận task: [workflow mục 3](../project/workflow.md#3-nơi-lưu-task), [mục 3.1](../project/workflow.md#31-phân-công-và-nhận-task); cột Tiến độ theo [mục 11](../project/workflow.md#11-theo-dõi-tiến-độ). TL cập nhật bảng mỗi khi tạo task, đổi trạng thái hoặc đổi hạn. Senior Dev cập nhật khi nhận task (`Đang làm`) và khi bàn giao (`Chờ Review`).
 
-Cập nhật: 21/11/2026 11:46 (merge PR #38, #39, #40 — SE-021 B).
+Cập nhật: 21/11/2026 12:37 (CTO CONDITIONAL GO; B3 ưu tiên; SE-005 tạm dừng).
 
 **Mở phiên mới:** prompt [Team Leader](../project/onboarding/team-leader.md) · [Senior Dev](../project/onboarding/senior-dev.md) (CTO xác nhận dùng được 15/11/2026). Báo cáo ngày: [daily/](../reports/daily/README.md).
 

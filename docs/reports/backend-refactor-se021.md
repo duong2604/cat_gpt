@@ -52,7 +52,8 @@ Ký hiệu: [x] có bằng chứng · [ ] chưa · ~ một phần (ghi lý do).
 | [#40](https://github.com/duong2604/cat_gpt/pull/40) PR-B4 | Dọn code không đổi hành vi | F03, F04, F05, F06, F07 | `a5cb975` | `310ee02` | APPROVED WITH CONDITIONS (cắt log parser → B5) |
 | [#41](https://github.com/duong2604/cat_gpt/pull/41) PR-B5 | Follow-up: log tải về lỗi; cắt thông điệp lỗi parser | F04, F05 | `adac390` | `646fcb4` | APPROVED |
 | [#43](https://github.com/duong2604/cat_gpt/pull/43) PR-B7 | Tách lập lịch tóm tắt (SE-F20 phần 1); sửa chú thích (SE-F8) | F03, F07, F09 | `e1c77c3` | `f173090` | APPROVED |
-| PR-B3 | Chính sách phiên (TL-F1 + ân hạn) | F01 | — | — | Phân tích xong ([tài liệu](../tasks/SE-021-b3-refresh-analysis.md)); TL khuyến nghị B2a; **chờ CTO** |
+| PR-B3 | Chính sách phiên (TL-F1) theo B2a | F01 | — | — | **CTO duyệt có điều kiện 21/11** (B2a: secret lạ 401 không thu hồi; ≤ 5 hash có hạn; không log hash; giữ CAS, logout). SE nộp bảng timeline 8 tình huống trước khi code |
+| PR-B8 | Cấu hình: SE-F24, SE-F26, DNS; audit timeout LLM/embedding | F08 | — | — | **CTO duyệt hướng 21/11**; giao SE sau B3 |
 | [#42](https://github.com/duong2604/cat_gpt/pull/42) PR-B6 | Giữ lỗi gốc LLM (SE-F23), chính sách mật khẩu admin seed (SE-F27), cảnh báo mock ở production (SE-F25) | F02, F08 | `113fef6` | `582865b` | APPROVED |
 
 ## 4. Findings còn lại cần CTO
