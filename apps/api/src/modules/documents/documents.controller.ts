@@ -24,6 +24,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import type { Response } from 'express';
+import type { Readable } from 'node:stream';
 import type { DocumentDto, Paginated } from '@cat-gpt/shared';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import type { AuthUser } from '../../common/types/auth-user.js';
@@ -35,6 +36,27 @@ import { UploadSizeFilter } from './upload-size.filter.js';
 
 /** Giới hạn cứng của multer; kiểm tra thật (DOCUMENT_MAX_SIZE_MB) nằm trong DocumentsService. */
 const UPLOAD_HARD_LIMIT_BYTES = 25 * 1024 * 1024;
+
+/**
+ * Chờ byte đầu tiên (hoặc kết thúc khi tệp rỗng). Lỗi trước byte đầu được ném ra để
+ * AllExceptionsFilter trả JSON như các lỗi khác — chưa gửi header nên còn kịp.
+ */
+function waitForFirstChunk(stream: Readable): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const settle = (error?: Error) => {
+      stream.off('readable', onReady);
+      stream.off('end', onReady);
+      stream.off('error', onError);
+      if (error) reject(error);
+      else resolve();
+    };
+    const onReady = () => settle();
+    const onError = (error: Error) => settle(error);
+    stream.on('readable', onReady);
+    stream.on('end', onReady);
+    stream.on('error', onError);
+  });
+}
 
 @ApiTags('Documents')
 @ApiCookieAuth()
@@ -88,11 +110,27 @@ export class DocumentsController {
     @Res() res: Response,
   ): Promise<void> {
     const { document, stream } = await this.documents.download(user.userId, id);
+
+    // Lỗi stream (MinIO đứt giữa chừng) không được để không có listener: thiếu listener thì
+    // Node làm sập cả tiến trình API. Trước khi sẵn sàng thì lỗi được ném ra cho filter;
+    // sau đó thì hủy kết nối tải về.
+    let streamError: Error | null = null;
+    let ready = false;
+    stream.on('error', (error: Error) => {
+      streamError = error;
+      if (ready) res.destroy(error);
+    });
+    await waitForFirstChunk(stream);
+    if (streamError) throw streamError;
+    ready = true;
+
     res.set({
       'Content-Type': document.mimeType,
       'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(document.name)}`,
       'Cache-Control': 'private, no-store',
     });
+    // Client ngắt giữa chừng thì hủy luôn stream MinIO (không để kết nối treo).
+    res.on('close', () => stream.destroy());
     stream.pipe(res);
   }
 
