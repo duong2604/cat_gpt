@@ -1,6 +1,6 @@
 # SE-022 — Refactor cấu trúc module Chat (module mẫu)
 
-Trạng thái: Đang làm — PR-C3a **merge** (#49 → `e0adb75`); PR-B10 merge (#50 → `2569caf`); **PR-C3b đang làm** từ `2569caf`
+Trạng thái: Chờ CTO nghiệm thu — `IMPLEMENTED — TL APPROVED — AWAITING CTO ACCEPTANCE` (#49 → `e0adb75`, #51 → `86b9f3f`; PR-B10 #50 → `2569caf`)
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 0,75 ngày (PR-C3a 0,25 + PR-C3b 0,5)
 Phụ thuộc: PR-C3a không phụ thuộc; PR-C3b sau PR-B10 (cùng vùng code). SE-005 tạm dừng ở điểm an toàn
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
@@ -66,6 +66,19 @@ Yêu cầu: sửa chú thích (không đổi code chạy), cập nhật cùng PR
 | typecheck/lint/build, test | Đạt | 4/4, 0 cảnh báo; 83/83 |
 | CI tại SHA đầu PR | Đạt | `build` pass tại `1e8b709` |
 | Merge | Đạt | `gh pr merge 49 --merge --match-head-commit 1e8b709…` → `e0adb75`; `1e8b709` là tổ tiên của `origin/develop` |
+
+### PR-C3b #51 — TL review vòng 1 (SHA `578e0cd`, base `2569caf`) — **Đạt, đã merge `86b9f3f`** (21/11 21:57)
+| Tiêu chí | Kết quả | Bằng chứng |
+|---|---|---|
+| AC1 cấu trúc | Đạt | `streamAnswer` 75 dòng điều phối `retrieveContext`/`generate`/`saveAnswer`; `buildLlmMessages` thuần cạnh `makeTitle`; không tệp mới. Khác thiết kế: `generate` nhận `key` để giữ log — chấp nhận |
+| AC2 không đổi contract | Đạt | Trường lưu giống hệt bản cũ (diff `model`/`citations`/`insufficientEvidence`); c3a-check 5/5; event SSE không đổi |
+| AC3 f03-verify | Đạt | 15/15 (thêm ca Tạo lại trong hội thoại RAG) |
+| AC4 race | Đạt | 200+409; Tạo lại + Dừng → câu cũ còn |
+| AC5 test hiện có | Đạt | 83/83, spec không đổi |
+| AC6 build/CI/phạm vi | Đạt | 4/4, 0 cảnh báo; CI pass tại `578e0cd`; diff chỉ `chat.service.ts` |
+| AC7 mô tả PR | Đạt | Trước/sau + khác biệt `key` ghi trong PR |
+| Chú thích | Đạt | Không còn tham chiếu PR/ngày/mã finding |
+| Chưa chạy runtime | — | Nhánh insufficient khi Tạo lại, truy hồi lỗi: không tạo được với mock; test đơn vị hiện có phủ |
 
 ## Phản hồi UI
 Không áp dụng.

@@ -1,9 +1,9 @@
 # Chat Module (F03) — Structural Review & Refactor
 
-Người lập: TL · Cơ sở: `origin/develop` @ `547b06f` (CI success) · Bắt đầu: 21/11/2026 21:3x
+Người lập: TL · Cơ sở: `origin/develop` @ `547b06f` (CI success) · Bắt đầu: 21/11/2026 21:30 · Kết thúc triển khai: 21:57 · `develop` @ `86b9f3f`
 Task triển khai: [SE-022](../tasks/SE-022-chat-module-structural-refactor.md) · Chỉ thị: CTO "Chat Module Structural Refactor" (P1)
 
-**Trạng thái hiện tại: PR-C3a merge (`e0adb75`), PR-B10/SE-F9 merge (`2569caf`); SE đang làm PR-C3b.** Không tự đánh dấu CTO ACCEPTED.
+**Trạng thái: `IMPLEMENTED — TL APPROVED — AWAITING CTO ACCEPTANCE`** (xem mục 8). Không tự đánh dấu CTO ACCEPTED.
 
 Ký hiệu: **[CODE]** đã kiểm chứng bằng code/lệnh · **[NHẬN ĐỊNH]** đánh giá kỹ thuật · **[ĐỀ XUẤT]**.
 
@@ -110,16 +110,92 @@ Lý do: không gộp cấu trúc với thay đổi hành vi (B10); không trì h
 | 21/11 21:42 | Gate 3 | PR-C3a #49 (`68333ca`) TL review vòng 1: hành vi/cấu trúc đạt (c3a-check 5/5, f03-verify 13/13, test 83/83, build/lint sạch); **Cần sửa** chú thích (JSDoc lặp 2 lần; chú thích `validateDocumentSelection` lỗi thời). Không merge |
 | 21/11 21:44 | Gate 3–4 | PR-C3a #49 vòng 2 (`1e8b709`, chỉ chú thích): đạt, CI pass → **merge `e0adb75`** |
 | 21/11 21:48 | Gate 3–4 | PR-B10 #50 (`583ef69`, SE-F9): TL đọc diff + web (`chat-stream-provider.tsx` ẩn câu cũ, `done` → `appendMessage`); chấp nhận "Dừng/lỗi → `done` mang câu cũ" (hình dạng event không đổi). Build/test 83/83; f03-verify **14/14** trên bản B10 **và** trên bản merge thử develop+B10 (thêm ca Tạo lại bị LLM lỗi). CI pass → **merge `2569caf`**. MINOR backlog: B10-M1 (xóa câu cũ lỗi sau khi lưu câu mới → 2 câu trả lời, Tạo lại sau đó 400), B10-M2 (UX: Tạo lại lỗi không có thông báo) |
+| 21/11 21:57 | Gate 3–4 | PR-C3b #51 (`578e0cd`): TL đọc toàn bộ, đối chiếu trường lưu và thứ tự với bản cũ (`verifyCitations` thuần, đổi thứ tự vô hại); build/test 83/83, f03 15/15 (thêm ca Tạo lại RAG), c3a-check 5/5, CI pass → **merge `86b9f3f`** |
 
-## 7. Quality gates (sẽ điền khi triển khai)
+## 7. Quality gates
 | Gate | PR-C3a | PR-C3b |
 |---|---|---|
-| Cấu trúc khớp thiết kế | Đạt | — |
-| Không đổi API contract (route, mã HTTP, mã lỗi, SSE event) | Đạt (c3a-check 5/5) | — |
-| `f03-verify` (13 ca; 14 ca sau B10) | Đạt 13/13 | — |
-| Race 2 stream (200+409), Dừng trong cửa sổ | Đạt | — |
-| Test hiện có (`chat.service.spec.ts` chỉ chỉnh mock theo constructor, không thêm test) | Đạt 83/83 | — |
-| typecheck/lint/build, CI | Đạt | — |
-| Merge SHA | `e0adb75` | — |
+| Cấu trúc khớp thiết kế | Đạt | Đạt (1 khác biệt nhỏ, mục 8.3) |
+| Không đổi API contract (route, mã HTTP, mã lỗi, SSE event) | Đạt (c3a-check 5/5) | Đạt (c3a-check 5/5, f03 15/15) |
+| `f03-verify` (13 ca; 15 ca sau B10 + ca RAG) | Đạt 13/13 | Đạt 15/15 |
+| Race 2 stream (200+409), Dừng trong cửa sổ | Đạt | Đạt |
+| Test hiện có (`chat.service.spec.ts` chỉ chỉnh mock theo constructor, không thêm test) | Đạt 83/83 | Đạt 83/83 (spec không đổi) |
+| typecheck/lint/build, CI | Đạt | Đạt (CI pass tại `578e0cd`) |
+| Merge SHA | `e0adb75` | `86b9f3f` |
 
-**CTO acceptance:** chưa — sau khi merge, trạng thái sẽ là `IMPLEMENTED — TL APPROVED — AWAITING CTO ACCEPTANCE`.
+PR-B10 (#50, SE-F9, thay đổi hành vi đã duyệt — không thuộc refactor): build/test 83/83, f03 14/14 trên bản B10 và trên bản merge thử, CI pass → `2569caf`.
+
+## 8. Bàn giao CTO (Gate 5)
+
+### 8.1 Cấu trúc thư mục trước/sau [CODE]
+Danh sách tệp **không đổi** (không thêm tệp/folder/service/interface). `git diff --stat 547b06f 86b9f3f -- apps/api`: 4 tệp — `chat.service.ts`, `chat.service.spec.ts` (chỉ phần dựng service), `documents.service.ts` (+21), `documents.module.ts` (+1 export).
+
+| `chat.service.ts` | Trước (`547b06f`) | Sau (`86b9f3f`) |
+|---|---|---|
+| Dòng | 306 | 336 (gồm hành vi B10 + JSDoc từng bước) |
+| `streamAnswer` | 126 dòng, 6 việc, lưu tin viết 2 lần | 75 dòng, chỉ điều phối |
+| Hàm private | `streamAnswer`, `validateDocumentSelection`, `assertRagNotHidden`, `assertRagNotHiddenRaw`, `reserveStream` | `streamAnswer`, `retrieveContext`, `generate`, `saveAnswer`, `validateDocumentSelection`, `assertDocumentsVisible`, `reserveStream` |
+| Hàm thuần cấp module | `makeTitle` | `makeTitle`, `buildLlmMessages` |
+| Phụ thuộc inject | `ConversationsService`, `LlmProvider`, `AppConfigService`, **`Model<DocumentEntity>`**, `RagService` | `ConversationsService`, `LlmProvider`, `AppConfigService`, **`DocumentsService`**, `RagService` |
+
+### 8.2 Responsibility matrix (sau) [CODE]
+| Thành phần | Trách nhiệm |
+|---|---|
+| `ChatController` / `ConversationsController` | HTTP mỏng: route, guard, gọi service; xóa hội thoại gọi `ChatService.abort` |
+| `ChatService.send` / `regenerate` / `stop` / `abort` | Use case + khóa stream `inFlight` (409, Dừng) |
+| `ChatService.streamAnswer` | Điều phối: mở SSE + `meta` → `retrieveContext` → (câu từ chối cố định, hoặc `buildLlmMessages` + `generate`) → xác minh trích dẫn → `saveAnswer`; lỗi ngoài dự kiến → event `error` |
+| `retrieveContext` | Truy hồi RAG; lỗi embed/Qdrant → `failed` (lưu ERROR, không ném) |
+| `generate` | Vòng stream LLM, gửi `delta`, xác định COMPLETED/TRUNCATED/STOPPED/ERROR, log tên lỗi gốc |
+| `saveAnswer` | Một nơi lưu câu trả lời: hội thoại còn → (Tạo lại Dừng/lỗi: `done` câu cũ) → `createMessage` → xóa câu cũ → `touch` → `done` |
+| `buildLlmMessages` | Hàm thuần: prompt hệ thống, prompt RAG, lịch sử |
+| `validateDocumentSelection` / `assertDocumentsVisible` | Ràng buộc của Chat: Tài liệu hiển thị, `RAG_MAX_DOCUMENTS`; uỷ quyền kiểm sở hữu/READY |
+| `DocumentsService.findReadyOwnedDocuments` | Quy tắc sở hữu tài liệu (404 thiếu/không thuộc/đã xóa, 400 chưa READY) — cùng module với `getOwnedOrThrow` |
+| `ConversationsService` | Truy cập hội thoại + tin nhắn, mọi truy vấn lọc `userId` (không đổi) |
+| `SseStream`, presenter, DTO, schema, guard | Không đổi |
+
+### 8.3 Thay đổi chính và lý do
+| Finding | Thay đổi | Lý do (lợi ích kiểm chứng được) |
+|---|---|---|
+| C-1 | Chat không còn inject model của module Documents | Quy tắc cô lập dữ liệu tài liệu ở một module; test Chat dùng `DocumentsService` thật thay vì tự dựng truy vấn |
+| C-2 | `streamAnswer` → 3 bước + 1 hàm thuần; lưu câu trả lời 1 nơi | Mỗi bước một trách nhiệm, debug theo bước; logic giữ/thay câu cũ của B10 trước nằm ở 2 nhánh, nay ở `saveAnswer` |
+| C-3 | 2 hàm `assertRagNotHidden*` → `assertDocumentsVisible` | Tên nói đúng ý nghĩa |
+| C-4 | Bỏ tham chiếu PR/ngày/mã finding trong chú thích | Chú thích mô tả hành vi, không lỗi thời |
+| Khác thiết kế (chấp nhận) | `generate` nhận thêm `key` (ID hội thoại) | Giữ nguyên nội dung log; không ảnh hưởng hành vi |
+
+**Không làm (có chủ đích):** không tách `ChatService` thành nhiều service — `inFlight` là trạng thái chung của gửi/Tạo lại/Dừng; tách phải chia sẻ qua DI, tăng rủi ro race đã sửa ở #39.
+
+### 8.4 Dependency graph trước/sau [CODE]
+```
+Trước: ChatService ─► ConversationsService, LlmProvider, AppConfigService, RagService
+                  └─► Model<DocumentEntity>   (đọc thẳng collection của module documents)
+Sau:   ChatService ─► ConversationsService, LlmProvider, AppConfigService, RagService
+                  └─► DocumentsService.findReadyOwnedDocuments   (API công khai của module documents)
+```
+Không vòng phụ thuộc mới. `RagService` vẫn đọc model `DocumentEntity` (ngoài phạm vi; PR-B12 / finding S2 của báo cáo cấu trúc tổng).
+
+### 8.5 PR và merge SHA
+| PR | Nội dung | SHA đã review | Merge | Vòng |
+|---|---|---|---|---|
+| #49 PR-C3a | C-1, C-3 | `1e8b709` | `e0adb75` | 2 (vòng 1: chú thích lặp/lỗi thời) |
+| #50 PR-B10 | SE-F9 (hành vi, đã duyệt) | `583ef69` | `2569caf` | 1 |
+| #51 PR-C3b | C-2, C-4 | `578e0cd` | `86b9f3f` | 1 |
+
+### 8.6 Regression và CI (TL tự chạy, DB `cat_gpt_loadtest`, LLM mock)
+- `f03-verify` 15/15 trên `578e0cd`: tạo/gửi/SSE, lưu, Dừng, Tạo lại, Tạo lại + Dừng (câu cũ còn), 2 stream song song 200+409, LLM lỗi, Tạo lại khi LLM lỗi (câu cũ còn), RAG (tạo, Tạo lại thay đúng 1 câu, `documentIds` người khác 404), phân quyền (7 thao tác người khác 404, ẩn danh 401).
+- `c3a-check` 5/5 trên `578e0cd`: 400 chưa READY, 404 người khác, 404 đã xóa, 400 vượt số lượng, 200 hợp lệ.
+- Build/typecheck/lint sạch, test 83/83 tại từng SHA; CI pass tại SHA đầu từng PR. CI `develop` @ `86b9f3f`: **success**.
+- **Chưa chạy runtime:** nhánh "không đủ căn cứ" khi Tạo lại và nhánh truy hồi lỗi (embedding mock không tạo ra; phải tắt Qdrant) — test đơn vị hiện có phủ (`insufficient`, `prepare lỗi`), đọc code khớp.
+
+### 8.7 Vấn đề còn tồn tại
+| ID | Mức | Mô tả | Hướng |
+|---|---|---|---|
+| B10-M1 | MINOR | Mongo lỗi đúng lúc xóa câu cũ sau khi lưu câu mới → 2 câu trả lời liên tiếp; Tạo lại sau đó 400 | Backlog (hành vi) |
+| B10-M2 | MINOR (UX) | Tạo lại bị lỗi LLM: câu cũ hiện lại, không thông báo | Backlog (web) |
+| C-6 | Ghi nhận | `inFlight` trong bộ nhớ một tiến trình | Khi chạy nhiều instance (SE-F21) |
+| C-7 | Ghi nhận | Tham số tìm kiếm `q` khác `search` của admin | Đổi là đổi API contract |
+| SE-F10 | DEFERRED | GET messages không phân trang | Theo CTO |
+
+### 8.8 TL final review verdict
+**ĐẠT.** Module Chat đạt mục tiêu chỉ thị: trách nhiệm từng hàm rõ, luồng stream đọc theo bước, coupling sang Documents qua API công khai, không abstraction thừa, không đổi API contract/schema/bảo mật; SE-F9 đã sửa — F03 không còn bị chặn chức năng.
+
+**CTO acceptance:** `IMPLEMENTED — TL APPROVED — AWAITING CTO ACCEPTANCE`. CTO kiểm trực tiếp: `apps/api/src/modules/chat/chat.service.ts` @ `86b9f3f`.
