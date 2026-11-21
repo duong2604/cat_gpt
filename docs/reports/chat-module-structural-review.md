@@ -3,7 +3,7 @@
 Người lập: TL · Cơ sở: `origin/develop` @ `547b06f` (CI success) · Bắt đầu: 21/11/2026 21:30 · Kết thúc triển khai: 21:57 · `develop` @ `86b9f3f`
 Task triển khai: [SE-022](../tasks/SE-022-chat-module-structural-refactor.md) · Chỉ thị: CTO "Chat Module Structural Refactor" (P1)
 
-**Trạng thái: SE-022 `CTO STRUCTURAL ACCEPTED` (21/11/2026) · F03 `PARTIAL` — chờ SE-023 (nhất quán dữ liệu Tạo lại).** Xem mục 9.
+**Trạng thái: SE-022 `CTO STRUCTURAL ACCEPTED` (21/11/2026) · F03 `PARTIAL` — chờ SE-023 (nhất quán dữ liệu Tạo lại).** Xem mục 9. Convention review (test, `guards/`, SSE): mục 10 — chờ CTO duyệt mục 10.6.
 
 Ký hiệu: **[CODE]** đã kiểm chứng bằng code/lệnh · **[NHẬN ĐỊNH]** đánh giá kỹ thuật · **[ĐỀ XUẤT]**.
 
@@ -226,3 +226,68 @@ Kịch bản TL `rag-runtime.mjs` (ngoài repo) trên `develop` `86b9f3f`, DB `c
 
 ### 9.3 Trạng thái F03
 **PARTIAL.** Đã đạt: cấu trúc (CTO accepted), SE-F9, hồi quy 15/15, RAG runtime 12/12. Còn mở: **SE-023 (B10-M1 MAJOR)**. F03 có thể đề nghị DONE khi SE-023 merge và TL failure injection đạt. SE-F10 DEFERRED; SE-024 MINOR backlog (không chặn).
+
+## 10. Convention Review (chỉ thị CTO "Chat Module Convention Review") — 21/11/2026 22:17
+
+Cơ sở: `origin/develop` @ `86b9f3f`; NestJS `@nestjs/common` / `@nestjs/core` **12.2.0**; Node **v24.18.0**. Không mở rộng ngoài 3 vấn đề.
+
+### 10.1 Unit test `chat.service.spec.ts`
+
+**Kết luận: test có từ SE-014 theo phạm vi đã duyệt; SE-022 không thêm test. Giữ nguyên.**
+
+| Câu hỏi | Trả lời | Bằng chứng [CODE] |
+|---|---|---|
+| Nguồn gốc | Tạo ở **SE-014 CP1** (`cce88f6`, 18/11/2026) — test hồi quy `ChatService` **bắt buộc trước khi sửa** `streamAnswer` cho RAG, vì trước đó Chat chưa có test | `git log --follow`: `cce88f6` → `9bff1c3` → `da52ef6` → `24622b6` → `6e9649b` (SE-014) → `68333ca` (SE-022). Task SE-014: dòng 27 ("chưa có unit test. CP1 phải viết test hồi quy trước khi sửa"), dòng 38 (CP1), dòng 60 (ước lượng); dòng 89 (5 test `validateDocumentSelection` theo yêu cầu TL) |
+| SE-022 có thêm test? | **Không.** Chỉ PR-C3a sửa spec: +11/−1 dòng trong hàm dựng `makeService` (constructor đổi từ `Model<DocumentEntity>` sang `DocumentsService`). PR-B10, PR-C3b không chạm spec | `git diff 547b06f 86b9f3f -- …/chat.service.spec.ts`: không có dòng `it(`/`describe(` thêm/bớt; số test 83 tại `547b06f` và 83 tại `86b9f3f` |
+| "Không viết test mới" ≠ "không có test" | Quy định "không viết unit test mới" (các chỉ thị SE-021/SE-022, 21/11) cấm **thêm** test trong chương trình refactor. Test đã có (8 tệp spec trong `apps/api/src`) là **lưới an toàn hồi quy** — được giữ, chạy ở mọi PR/CI, và được **bảo trì** khi chữ ký constructor đổi (sửa wiring ≠ test mới) | `find apps/api/src -name "*.spec.ts"`: 8 tệp (chat 1, documents 5, llm 1, rag 1) |
+
+### 10.2 Thư mục `guards/`
+
+**Kết luận: giữ nguyên (không chuyển). Convention hiện tại đã nhất quán trên toàn backend; chuyển riêng Chat sẽ tạo ra bất nhất.**
+
+Audit [CODE] (`apps/api/src`):
+| Vị trí | Cách tổ chức |
+|---|---|
+| `common/` (dùng chung) | **Thư mục theo loại** cho mọi thứ, kể cả khi chỉ 1 tệp: `guards/` (2), `filters/` (1), `pipes/` (1), `exceptions/` (1), `dto/` (1), `types/` (1), `decorators/`, `utils/`, `validation/` |
+| `modules/<feature>/` (11 module) | **Phẳng** cho tệp hành vi có hậu tố Nest; **chỉ `dto/` và `schemas/`** là thư mục con (kể cả 1 tệp: `admin-users/dto` 1, `sessions/schemas` 1, `users/schemas` 1) |
+| Guard theo feature (3) | Cả 3 phẳng: `chat/chat-hidden.guard.ts`, `chat/chat-throttler.guard.ts`, `documents/documents-hidden.guard.ts`. Tương tự filter feature `documents/upload-size.filter.ts` phẳng |
+
+Đánh giá [NHẬN ĐỊNH]:
+- Chuyển **chỉ** 2 guard Chat vào `chat/guards/` → Chat khác Documents (guard + filter vẫn phẳng) → **giảm** nhất quán.
+- Chuyển nhất quán → phải thêm `documents/guards/` (1 tệp) và, theo cùng lý lẽ, `documents/filters/` (1 tệp) — mở rộng sang module khác, sửa import ở `chat.controller.ts`, `chat.module.ts`, `chat.service.ts`, `conversations.controller.ts`, `documents.controller.ts`, `documents.module.ts`, `me.service.ts` (7 tệp), không thêm khả năng đọc: tên tệp đã mang hậu tố `.guard.ts`, module có ≤ 2 guard.
+- Thư mục theo loại có lợi khi một loại có nhiều tệp (như `common/`); ở feature, gom theo feature đã đủ.
+
+**Convention đề xuất (ghi thành quy ước, không đổi code):**
+1. `common/<loại>/` — thành phần dùng chung, thư mục theo loại.
+2. `modules/<feature>/` — tệp hành vi phẳng với hậu tố Nest (`*.module|controller|service|guard|filter|presenter|processor|provider.ts`, `sse-stream.ts`); thư mục con **chỉ** cho `dto/` và `schemas/`.
+3. Test `*.spec.ts` đặt cạnh tệp được test.
+4. Một feature có **≥ 3** tệp cùng loại (ngoài dto/schemas) → xem xét thư mục loại cho **riêng** feature đó, kèm lý do.
+
+### 10.3 SSE — `sse-stream.ts` so với NestJS `@Sse()`
+
+**Kết luận: giữ implementation tự viết.** Chuyển sang `@Sse()` **phá API contract** với web hiện tại và vẫn phải tự viết heartbeat. Một phát hiện cần sửa: chú thích lý do ở `chat.controller.ts:22-23` **sai** với NestJS 12.
+
+| Câu hỏi | Trả lời | Bằng chứng |
+|---|---|---|
+| Vì sao POST cần custom SSE? | Lý do ghi trong code — "`@Sse()` chỉ hỗ trợ GET" (`chat.controller.ts:23`) — **không còn đúng**: NestJS 12.2.0 `@Sse(path, { method })` nhận method bất kỳ. Lý do **thật** để giữ custom: (1) định dạng wire — xem dòng dưới; (2) heartbeat; (3) kiểm quyền/khóa stream rồi mới mở stream, lỗi trước đó trả JSON đúng mã (404/409/400) | `node_modules/@nestjs/common/decorators/http/sse.decorator.js`: `options[METHOD_METADATA] ?? RequestMethod.GET` |
+| Có cách dùng built-in mà giữ contract? | **Không, nếu không sửa web.** `@nestjs/core` `SseStream.writeMessage` tự gán `id` tăng dần cho mọi event không có `id` → mỗi khối thành `id: N\ndata: {...}\n\n`, và ghi thêm `\n` đầu stream. Parser web chỉ nhận khối **bắt đầu** bằng `data: ` → **bỏ qua mọi event**. Muốn dùng phải sửa parser web (thay đổi contract wire, cần CTO) | `@nestjs/core/router/sse-stream.js` `writeMessage` (`lastEventId++`, `id: …`), `commitHeaders` (`write('\n')`); `apps/web/src/features/chat/stream.ts:44` `if (raw.startsWith("data: "))` |
+| Disconnect / heartbeat / abort / cleanup đúng không? | **Đúng.** `close` → xóa heartbeat; chưa `end` thì gọi `onClientClose` → `controller.abort()` → vòng LLM dừng → lưu `STOPPED` → `finally` giải phóng `inFlight` → `sse.end()` (idempotent). Heartbeat 15 s bị xóa ở cả `close` và `end`; chỉ tạo sau `open()` | Code `sse-stream.ts:17-41`; runtime TL `sse-disconnect.mjs` **5/5**: 3 lần client cắt kết nối giữa chừng (không gọi Stop) → tin `STOPPED` đã lưu; gửi tiếp → `200 COMPLETED` (khóa đã nhả); API sống; log server không có ERROR/WARN. Unit test hiện có: "đóng tab/mất mạng … STOPPED" |
+| Rủi ro ghi sau khi socket đóng? | **Có ghi, nhưng vô hại.** Sau khi client ngắt, `writableEnded=false`, `destroyed=true` → `send()` vẫn gọi `write()` (vd `done` sau khi lưu `STOPPED`). Node v24: `write()` trả `false`, dữ liệu bị bỏ, **không** phát `error`, **không** exception. Có thể dùng `res.writable` cho chính xác, nhưng không có lợi ích kiểm chứng được → **không đổi** | Probe TL `sse-write-after-close.mjs` (Node v24.18.0): `close: writableEnded=false destroyed=true` → 3 lần `write` `ret=false`, 0 `error`, 0 uncaught |
+| Backpressure? | **Không cần ở quy mô hiện tại.** `write()` bỏ qua giá trị trả về → client đọc chậm thì Node đệm trong bộ nhớ. Lượng đệm bị chặn trên bởi **một** câu trả lời: `LLM_MAX_OUTPUT_TOKENS` mặc định 1000, tối đa 8192 (validation) → cỡ chục KB, tối đa vài trăm KB tính cả khung JSON mỗi `delta`; số stream bị chặn bởi 1 stream/hội thoại + 20/phút/người. Ngưỡng cần xử lý: nội dung không giới hạn (stream file/log). Phương án khi đó: chờ `drain` (hoặc dùng cơ chế `maxPendingDataLength` của NestJS) | `env.validation.ts:150-152` `@Max(8192) LLM_MAX_OUTPUT_TOKENS = 1000`; NestJS có `drain` + `maxPendingDataLength` 4M (`sse.decorator.js`, `sse-stream.js`) |
+| Tự làm thứ framework làm tốt hơn? | Một phần: NestJS 12 có `drain`, `maxPendingDataLength`, `@SseSignal()`, header chống cache đầy đủ hơn (`private, no-store, …`, `Pragma`, `Expires`). Nhưng **không** có heartbeat, ép `id` vào wire, và chuyển sang Observable buộc tách kiểm tra/khóa stream khỏi phần stream trong `ChatService`. Lợi ích chính (backpressure) không cần ở giới hạn hiện tại → chi phí > lợi ích | Như trên |
+
+### 10.4 Thay đổi
+| Thay đổi | Trạng thái | Lý do |
+|---|---|---|
+| Sửa chú thích `chat.controller.ts:22-23` thành lý do thật (định dạng wire/parser web, heartbeat, lỗi trước stream trả JSON) | **Giao SE** — [SE-025](../tasks/SE-025-chat-sse-comment.md), chỉ chú thích, TL review/merge | Chú thích sai sự thật ở module mẫu |
+| Chuyển guard vào `guards/` | **Không làm** | 10.2 |
+| Thay SSE bằng `@Sse()` | **Không làm** | 10.3 — phá contract web, không lợi ích kiểm chứng được |
+| Đổi `!writableEnded` → `writable` trong `send()` | **Không làm** | Vô hại trên Node v24 (probe) |
+| Xóa/thêm unit test | **Không làm** | 10.1 |
+
+### 10.5 Kết quả review và regression
+- Runtime TL trên `develop` `86b9f3f`, DB `cat_gpt_loadtest`: `sse-disconnect` **5/5**; probe ghi-sau-đóng (Node v24.18.0) như trên. Không có thay đổi code nào được merge trong mục này (SE-025 sẽ ghi kết quả khi merge).
+
+### 10.6 Cần CTO phê duyệt
+1. **Quy ước thư mục** (10.2): giữ guard/filter feature **phẳng** + ghi quy ước 4 điểm. Nếu CTO vẫn muốn `guards/`: TL đề nghị làm **đồng loạt** (chat 2 guard + documents 1 guard; filter `upload-size` có làm theo hay không cần CTO chốt), một PR không đổi hành vi, ~0,25 ngày.
+2. **SSE** (10.3): xác nhận giữ implementation tự viết. Nếu muốn dùng `@Sse()` về sau → là thay đổi contract wire (sửa parser web để chấp nhận dòng `id:`), cần duyệt riêng.
