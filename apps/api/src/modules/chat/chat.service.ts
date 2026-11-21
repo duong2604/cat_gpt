@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { DocumentStatus, ErrorCode, MessageRole, MessageStatus } from '@cat-gpt/shared';
@@ -20,9 +20,6 @@ import type { SseStream } from './sse-stream.js';
 /** Số tin nhắn gần nhất gửi kèm làm ngữ cảnh cho LLM. */
 const CONTEXT_MESSAGES = 20;
 const TITLE_LENGTH = 50;
-/** Giới hạn gửi tin nhắn / tạo lại câu trả lời: 20 lần mỗi phút cho mỗi người dùng. */
-const RATE_LIMIT = 20;
-const RATE_WINDOW_MS = 60_000;
 
 const LLM_ROLE: Record<MessageRole, LlmMessage['role']> = {
   [MessageRole.USER]: 'user',
@@ -49,8 +46,6 @@ export class ChatService {
   // ponytail: lưu trong bộ nhớ của một tiến trình API; chạy nhiều instance thì chuyển sang Redis.
   /** Hội thoại đang stream → bộ điều khiển hủy (dùng cho nút Dừng và chặn stream song song). */
   private readonly inFlight = new Map<string, AbortController>();
-  /** userId → các mốc thời gian gửi tin nhắn trong cửa sổ giới hạn. */
-  private readonly sendLog = new Map<string, number[]>();
 
   constructor(
     private readonly conversations: ConversationsService,
@@ -61,8 +56,6 @@ export class ChatService {
   ) {}
 
   async send(userId: string, dto: SendMessageDto, sse: SseStream): Promise<void> {
-    this.assertRateLimit(userId);
-
     let conversation: Conversation;
     if (dto.conversationId) {
       if (dto.documentIds) {
@@ -72,7 +65,6 @@ export class ChatService {
         );
       }
       conversation = await this.conversations.getOwnedOrThrow(userId, dto.conversationId);
-      this.assertNotStreaming(conversation);
       this.assertRagNotHidden(conversation);
     } else {
       const documentIds = dto.documentIds
@@ -81,34 +73,45 @@ export class ChatService {
       conversation = await this.conversations.create(userId, makeTitle(dto.content), documentIds);
     }
 
-    const userMessage = await this.conversations.createMessage({
-      conversationId: conversation._id,
-      userId: conversation.userId,
-      role: MessageRole.USER,
-      content: dto.content,
-    });
-    await this.conversations.touch(conversation._id);
+    // Đặt chỗ trước mọi await: hai POST đồng thời cùng hội thoại không thể cùng stream.
+    const key = conversation._id.toString();
+    const controller = this.reserveStream(key);
+    try {
+      const userMessage = await this.conversations.createMessage({
+        conversationId: conversation._id,
+        userId: conversation.userId,
+        role: MessageRole.USER,
+        content: dto.content,
+      });
+      await this.conversations.touch(conversation._id);
 
-    await this.streamAnswer(conversation, userMessage, sse);
+      await this.streamAnswer(conversation, userMessage, sse, controller);
+    } finally {
+      this.inFlight.delete(key);
+    }
   }
 
   /** Bỏ câu trả lời cuối của assistant (nếu có) rồi sinh lại cho tin nhắn cuối của người dùng. */
   async regenerate(userId: string, conversationId: string, sse: SseStream): Promise<void> {
-    this.assertRateLimit(userId);
     const conversation = await this.conversations.getOwnedOrThrow(userId, conversationId);
-    this.assertNotStreaming(conversation);
     this.assertRagNotHidden(conversation);
 
-    let last = await this.conversations.lastMessage(conversation._id);
-    if (last?.role === MessageRole.ASSISTANT) {
-      await this.conversations.deleteMessage(last._id);
-      last = await this.conversations.lastMessage(conversation._id);
-    }
-    if (last?.role !== MessageRole.USER) {
-      throw AppException.badRequest(ErrorCode.CHAT_NOTHING_TO_REGENERATE);
-    }
+    const key = conversation._id.toString();
+    const controller = this.reserveStream(key);
+    try {
+      let last = await this.conversations.lastMessage(conversation._id);
+      if (last?.role === MessageRole.ASSISTANT) {
+        await this.conversations.deleteMessage(last._id);
+        last = await this.conversations.lastMessage(conversation._id);
+      }
+      if (last?.role !== MessageRole.USER) {
+        throw AppException.badRequest(ErrorCode.CHAT_NOTHING_TO_REGENERATE);
+      }
 
-    await this.streamAnswer(conversation, null, sse);
+      await this.streamAnswer(conversation, null, sse, controller);
+    } finally {
+      this.inFlight.delete(key);
+    }
   }
 
   /** Dừng stream đang chạy của hội thoại. Phần đã sinh vẫn được lưu với trạng thái STOPPED. */
@@ -121,16 +124,23 @@ export class ChatService {
     this.inFlight.get(conversationId)?.abort();
   }
 
+  /** Chỗ stream của hội thoại (đã đăng ký trong `inFlight`); người gọi có trách nhiệm giải phóng. */
+  private reserveStream(key: string): AbortController {
+    if (this.inFlight.has(key)) throw AppException.conflict(ErrorCode.CHAT_STREAM_IN_PROGRESS);
+    const controller = new AbortController();
+    this.inFlight.set(key, controller);
+    return controller;
+  }
+
   private async streamAnswer(
     conversation: Conversation,
     userMessage: Message | null,
     sse: SseStream,
+    controller: AbortController,
   ): Promise<void> {
     const history = await this.conversations.recentMessages(conversation._id, CONTEXT_MESSAGES);
 
     const key = conversation._id.toString();
-    const controller = new AbortController();
-    this.inFlight.set(key, controller);
 
     try {
       // Đóng tab / mất mạng cũng được xử lý như bấm Dừng.
@@ -202,12 +212,19 @@ export class ChatService {
         } catch (error) {
           status = controller.signal.aborted ? MessageStatus.STOPPED : MessageStatus.ERROR;
           if (status === MessageStatus.ERROR) {
-            this.logger.error(`LLM lỗi ở hội thoại ${key}`, (error as Error).stack);
+            // Tên lỗi gốc (nếu có) để chẩn đoán; không ghi nội dung.
+            const cause = (error as { cause?: unknown }).cause;
+            const causeName = cause instanceof Error ? cause.name : 'unknown';
+            this.logger.error(
+              `LLM lỗi ở hội thoại ${key} cause=${causeName}`,
+              (error as Error).stack,
+            );
           }
         }
       }
 
-      // Hội thoại bị xóa trong lúc đang stream → không lưu tin nhắn mồ côi.
+      // Hội thoại đã bị xóa trước lần kiểm tra này thì bỏ qua. Vẫn còn một khe hẹp giữa kiểm tra và
+      // ghi (xóa xen giữa có thể để lại tin mồ côi) — ghi nhận SE-F8, không đổi logic ở PR này.
       if (!(await this.conversations.exists(conversation._id))) return;
 
       // ERROR → không có trích dẫn (thiết kế mục 6.3 bước 5); STOPPED/TRUNCATED vẫn xác
@@ -238,7 +255,6 @@ export class ChatService {
       this.logger.error(`Stream lỗi ở hội thoại ${key}`, (error as Error).stack);
       sse.send({ type: 'error', code: ErrorCode.INTERNAL_ERROR });
     } finally {
-      this.inFlight.delete(key);
       sse.end();
     }
   }
@@ -271,12 +287,6 @@ export class ChatService {
     return ids;
   }
 
-  private assertNotStreaming(conversation: Conversation): void {
-    if (this.inFlight.has(conversation._id.toString())) {
-      throw AppException.conflict(ErrorCode.CHAT_STREAM_IN_PROGRESS);
-    }
-  }
-
   /**
    * Hỏi tài liệu cần cả Chat bật (ChatHiddenGuard trên route) và Tài liệu hiển thị
    * (thiết kế mục 10) — ẩn như tài liệu không tồn tại, không phân biệt lý do. Kiểm cả khi
@@ -293,13 +303,4 @@ export class ChatService {
     }
   }
 
-  private assertRateLimit(userId: string): void {
-    const now = Date.now();
-    const recent = (this.sendLog.get(userId) ?? []).filter((t) => now - t < RATE_WINDOW_MS);
-    if (recent.length >= RATE_LIMIT) {
-      throw new AppException(ErrorCode.TOO_MANY_REQUESTS, HttpStatus.TOO_MANY_REQUESTS);
-    }
-    recent.push(now);
-    this.sendLog.set(userId, recent);
-  }
 }

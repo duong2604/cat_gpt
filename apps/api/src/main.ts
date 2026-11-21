@@ -9,6 +9,7 @@ import { AppModule } from './app.module.js';
 import { ACCESS_TOKEN_COOKIE, API_PREFIX } from './common/constants.js';
 import { appValidationPipe } from './common/pipes/app-validation.pipe.js';
 import { AppConfigService } from './config/app-config.service.js';
+import { LlmProviderName } from './config/env.validation.js';
 
 // Node trên Windows đôi khi đọc DNS hệ thống thành 127.0.0.1 → SRV lookup của mongodb+srv lỗi ECONNREFUSED.
 if (dns.getServers().every((s) => s.startsWith('127.') || s === '::1')) {
@@ -19,6 +20,10 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const config = app.get(AppConfigService);
   const logger = new Logger('Bootstrap');
+
+  if (config.isProduction && config.llm.provider === LlmProviderName.Mock) {
+    logger.warn('LLM_PROVIDER=mock khi NODE_ENV=production: API đang trả lời giả lập, không phải mô hình thật.');
+  }
 
   app.set('trust proxy', config.trustProxy);
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'same-site' } }));

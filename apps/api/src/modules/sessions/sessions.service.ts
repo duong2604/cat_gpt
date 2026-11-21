@@ -20,6 +20,22 @@ export interface IssuedSession {
   refreshToken: string;
 }
 
+/** Số lần thử xoay token khi thua CAS (thường chỉ cần một lần thử lại). */
+const MAX_ROTATE_ATTEMPTS = 3;
+
+/**
+ * Token đã trình thuộc đâu: bản hiện tại, bản vừa bị thay trong ân hạn, hay bản cũ (dùng lại).
+ */
+function classifyPresented(session: Session, presentedHash: string): 'current' | 'grace' | 'reuse' {
+  if (hashEquals(presentedHash, session.tokenHash)) return 'current';
+  const inGrace =
+    session.previousTokenHash !== null &&
+    session.rotatedAt !== null &&
+    hashEquals(presentedHash, session.previousTokenHash) &&
+    Date.now() - session.rotatedAt.getTime() <= REFRESH_REUSE_GRACE_MS;
+  return inGrace ? 'grace' : 'reuse';
+}
+
 @Injectable()
 export class SessionsService {
   private readonly logger = new Logger(SessionsService.name);
@@ -61,32 +77,45 @@ export class SessionsService {
   async rotate(refreshToken: string, meta: RequestMeta): Promise<IssuedSession> {
     const parsed = parseRefreshToken(refreshToken);
     if (!parsed) throw AppException.unauthorized(ErrorCode.AUTH_REFRESH_INVALID);
-
-    const session = await this.sessionModel.findById(parsed.sessionId).lean<Session>().exec();
-    if (!session || session.revokedAt || session.expiresAt <= new Date()) {
-      throw AppException.unauthorized(ErrorCode.AUTH_REFRESH_INVALID);
-    }
-
     const presentedHash = hashSecret(parsed.secret);
-    const matchesCurrent = hashEquals(presentedHash, session.tokenHash);
-    const matchesPreviousInGrace =
-      !matchesCurrent &&
-      session.previousTokenHash !== null &&
-      session.rotatedAt !== null &&
-      hashEquals(presentedHash, session.previousTokenHash) &&
-      Date.now() - session.rotatedAt.getTime() <= REFRESH_REUSE_GRACE_MS;
 
-    if (!matchesCurrent && !matchesPreviousInGrace) {
+    let session = await this.findRotatable(parsed.sessionId);
+    if (classifyPresented(session, presentedHash) === 'reuse') {
       this.logger.warn(`Phát hiện refresh token bị dùng lại, thu hồi phiên ${parsed.sessionId}`);
       await this.revoke(parsed.sessionId);
       throw AppException.unauthorized(ErrorCode.AUTH_REFRESH_INVALID);
     }
 
-    const secret = generateSecret();
+    // Xoay có điều kiện (CAS trên tokenHash): hai request đồng thời cùng một token thì chỉ một
+    // bên thắng. Bên thua đọc lại và xét lại theo ân hạn, KHÔNG thu hồi phiên (lỗi đua).
+    for (let attempt = 1; ; attempt++) {
+      const secret = generateSecret();
+      const updated = await this.swapToken(session, secret, meta);
+      if (updated) return { session: updated, refreshToken: buildRefreshToken(updated._id.toString(), secret) };
+      if (attempt >= MAX_ROTATE_ATTEMPTS) throw AppException.unauthorized(ErrorCode.AUTH_REFRESH_INVALID);
+
+      session = await this.findRotatable(parsed.sessionId);
+      if (classifyPresented(session, presentedHash) === 'reuse') {
+        throw AppException.unauthorized(ErrorCode.AUTH_REFRESH_INVALID);
+      }
+    }
+  }
+
+  /** Phiên còn dùng được để xoay token; không thì 401 (không thu hồi). */
+  private async findRotatable(sessionId: string): Promise<Session> {
+    const session = await this.sessionModel.findById(sessionId).lean<Session>().exec();
+    if (!session || session.revokedAt || session.expiresAt <= new Date()) {
+      throw AppException.unauthorized(ErrorCode.AUTH_REFRESH_INVALID);
+    }
+    return session;
+  }
+
+  /** Đổi sang tokenHash mới chỉ khi tokenHash trong DB vẫn bằng bản đã đọc (CAS). */
+  private swapToken(session: Session, secret: string, meta: RequestMeta): Promise<Session | null> {
     const now = new Date();
-    const updated = await this.sessionModel
+    return this.sessionModel
       .findOneAndUpdate(
-        { _id: session._id, revokedAt: null },
+        { _id: session._id, revokedAt: null, tokenHash: session.tokenHash },
         {
           $set: {
             tokenHash: hashSecret(secret),
@@ -102,9 +131,6 @@ export class SessionsService {
       )
       .lean<Session>()
       .exec();
-
-    if (!updated) throw AppException.unauthorized(ErrorCode.AUTH_REFRESH_INVALID);
-    return { session: updated, refreshToken: buildRefreshToken(updated._id.toString(), secret) };
   }
 
   /** Trả về phiên nếu còn hiệu lực — dùng khi xác thực mỗi request. */

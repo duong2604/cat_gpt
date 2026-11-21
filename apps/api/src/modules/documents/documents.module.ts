@@ -7,6 +7,7 @@ import { DocumentFilesService } from './document-files.service.js';
 import { DocumentProcessor } from './document-processor.js';
 import { DocumentsController } from './documents.controller.js';
 import { DocumentsService } from './documents.service.js';
+import { DocumentSummaryService } from './document-summary.service.js';
 import { DocumentsHiddenGuard } from './documents-hidden.guard.js';
 import { EmbeddingService } from './embedding.service.js';
 import { DocumentEntity, DocumentEntitySchema } from './schemas/document.schema.js';
@@ -29,6 +30,7 @@ import { VectorStoreService } from './vector-store.service.js';
   controllers: [DocumentsController],
   providers: [
     DocumentsService,
+    DocumentSummaryService,
     DocumentProcessor,
     DocumentsHiddenGuard,
     DocumentFilesService,
