@@ -99,7 +99,7 @@ Quy trình bắt buộc: SE inventory + **dry-run (chỉ đọc)** → TL đối
 ### 5.3. Trạng thái
 | Workstream | Trạng thái | PR | Ghi chú |
 |---|---|---|---|
-| C1 Data Cleanup | **Chưa bắt đầu** — TL lập danh sách; chờ SE inventory + dry-run (sau PR-B3) | — | Không xóa gì trước khi TL duyệt manifest |
+| C1 Data Cleanup | **IN REVIEW** — dry-run xong, TL duyệt manifest 15:54; chờ export + TL GO | — | 217 ID (A1 200, A2 10 + 1 TL bổ sung, A3 6); 2 UNVERIFIED giữ nguyên |
 | C2 Code Cleanup | **Chưa bắt đầu** — TL audit xong; B8/B9 nằm trong PR-B8; B2, B12 sẽ thành PR-C2 | — | PR riêng, không gộp với C1 |
 
 ## 6. Chính sách cấu hình theo môi trường (chỉ thị CTO vòng 20) — audit TL 12:5x, `develop` `4cd1784`
@@ -187,3 +187,14 @@ DoD (16 mục): D1 audit toàn phạm vi · D2 findings phân loại và xử l�
 | **F04-N1** | **BLOCKER** (bảo mật — DoS) | `text-extract.ts:120-126` | Chỉ `word/document.xml` được đo giải nén; `mammoth.extractRawText` đọc thêm `styles.xml`… không giới hạn. **Probe TL** (bản build `955be7c`): docx **101 KB** có `styles.xml` giải nén 100 MB → `extractDocx` thành công, RSS **167 → 470 MB** | User đã đăng nhập tải lên docx 25 MB (≈ 1000× nén) → hết bộ nhớ, **sập tiến trình API** (worker chạy chung) | Đo byte giải nén thật của mọi entry `.xml`/`.rels`, cộng dồn ≤ `DOCUMENT_MAX_DOCX_XML_MB`, trước khi gọi mammoth | PR-B9 |
 | F04-N2 | SUGGESTION | `sanitize-filename.ts:10-12` | Luôn đọc lại tên tệp latin1 → UTF-8 (đúng với multer 2.x hiện tại) | Nếu đổi cấu hình `defParamCharset` của multer/busboy sau này, tên tiếng Việt sẽ lỗi | Ghi chú phụ thuộc; không sửa | — |
 Đã kiểm đạt: tên tệp chỉ là siêu dữ liệu (khóa lưu trữ dùng ID, không có path traversal); `Content-Disposition` mã hóa `encodeURIComponent`; PDF giới hạn số trang trước khi bóc chữ; TXT kiểm UTF-8 + byte 0; kiểm chữ ký DOCX lúc upload chỉ đọc thư mục zip (không giải nén); upload > giới hạn → `400 FILE_TOO_LARGE`.
+
+### 5.4. C1 — duyệt manifest (TL, 15:54)
+Manifest SE (ngoài repo, sha256 `ca3d509390e8ca57e8a1049cc74d37c9e65acc1e81d160c90d62ca5dc329a4a6`, tạo bằng script chỉ đọc): 216/216 ID tìm thấy trong DB `cat_gpt`, 0 lệch email/nguồn.
+| Nhóm | Số ID | Phiên | Hội thoại | Tin nhắn | Tài liệu | Avatar / MinIO / Qdrant / BullMQ | TL đối chiếu |
+|---|---|---|---|---|---|---|---|
+| A1 `loadtest+` | 200 | 47 | 0 | 0 | 0 | 0 | 200/200 khớp danh sách SE ghi lúc tạo; tất cả `BLOCKED` |
+| A2 `tl-smoke-*` | 10 | 16 | 0 | 0 | 0 | 0 | Khớp đúng 10 ID mục 5.1 |
+| A2-11 (TL bổ sung) | 1 | ? | ? | ? | ? | ? | `6b01212557c88b5696a08b83` — tạo 04:42:13Z bởi kịch bản TL, 1 s sau khi API review TL khởi động (log 11:42:12); lần chạy bị ngắt nên chưa khóa/dọn. **Cần SE inventory trước khi xóa** |
+| A3 tài khoản thử SE | 6 | 15 | 19 | 38 | 0 | 0 | Mỗi ID có file nguồn ghi lúc tạo (TL kiểm nội dung + giờ ghi trước giờ mở PR) hoặc hồ sơ SE-018 |
+| UNVERIFIED | 2 | — | — | — | — | — | `b2-race-1795235391161`, `b7-1795237688343` (`@example.invalid`) — không có ID nguồn → **giữ nguyên** |
+Điều kiện thực hiện: export JSON (sha256) của mọi bản ghi sẽ xóa → TL kiểm số bản ghi export → **TL GO** → xóa theo `$in` đúng danh sách, thứ tự Qdrant → MinIO → BullMQ → messages → conversations → documents → sessions → users → đếm lại, kiểm mồ côi, health.
