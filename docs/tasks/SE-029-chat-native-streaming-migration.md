@@ -1,6 +1,6 @@
 # SE-029 — Migration Chat sang NestJS Native Streaming Responses
 
-Trạng thái: Cần sửa — PR #54 vòng 1 (`af27bb7`): hành vi/contract đạt; dọn code không còn dùng + đặt tên (yêu cầu chủ dự án)
+Trạng thái: Chờ Review — PR #54 (`018e941`) TL đạt AC1–AC11; **chờ CTO duyệt merge**
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 0,75 ngày
 Phụ thuộc: không. SE-005 (hạn 27/11) làm ngay sau — báo TL nếu ảnh hưởng hạn
 Hạn bàn giao review: 22/11/2026 · Hạn hoàn tất: theo CTO nghiệm thu
@@ -67,6 +67,16 @@ Chưa có.
 | Code không còn dùng (yêu cầu chủ dự án 22/11) | **Không đạt** | `ConversationsService.lastMessage` không còn ai gọi (từ PR-B10); `ConversationDocument`, `MessageDocument` không dùng; export không cần (`buildLlmMessages`, `CitationSchema`, `CONVERSATIONS_PAGE_SIZE` chỉ dùng trong chính tệp) |
 | Đặt tên/định dạng | **Không đạt** | biến `plan` có kiểu `ChatTurn` (đổi `turn`); thụt lề khối `.finally` trong `sse-response.ts` |
 Yêu cầu vòng 2: xóa code không còn dùng ở trên (kể cả `lastMessage` trong bản giả của spec), bỏ `export` thừa, đổi `plan` → `turn`, sửa thụt lề, rà chú thích; diff vòng 2 không đổi hành vi.
+
+### PR #54 — TL review vòng 2 (SHA `e116a02` + nit `018e941`) — **Đạt — CHỜ CTO DUYỆT MERGE** (22/11 00:52)
+| Tiêu chí | Kết quả | Bằng chứng TL |
+|---|---|---|
+| Code không còn dùng | Đạt | Xóa `ConversationsService.lastMessage` (+ bản giả trong spec), type `ConversationDocument`, `MessageDocument`, import `HydratedDocument`; bỏ `export` `buildLlmMessages`, `CitationSchema`, `CONVERSATIONS_PAGE_SIZE`. SE rà lại toàn module: các export/method còn lại đều có tham chiếu |
+| Đặt tên/định dạng | Đạt | `plan` (kiểu `ChatTurn`) → `turn`; thụt lề `.finally`; nit 2 dòng trống → `018e941` (diff chỉ khoảng trắng) |
+| Không đổi hành vi | Đạt | Diff vòng 2: 7 tệp +32/−45 trong `modules/chat`; spec chỉ đổi bản giả + tiêu đề 1 ca (không thêm/bớt `it`); `f03-verify` 15/15 và lỗi trước stream 404/400/400/401/409 `application/json` chạy lại trên `e116a02` |
+| AC9 trình duyệt (SHA `018e941`) | **Đạt** | Web dev → API kiểm thử: chat `COMPLETED`; Dừng → `STOPPED` + nhãn; Tạo lại cùng `id`; Tạo lại + Dừng → câu cũ giữ; LLM lỗi → `ERROR` + nhãn; tải lại trang giữa stream → `STOPPED` |
+| Build/lint/test, CI | Đạt | 4/4, 0 cảnh báo, 83/83; CI `build` pass tại `018e941`, `mergeStateStatus` CLEAN |
+**AC1–AC11 đạt toàn bộ.** Không merge — chờ CTO phê duyệt theo chỉ thị.
 
 ## Phản hồi UI
 Không áp dụng.

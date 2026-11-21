@@ -3,7 +3,7 @@
 Người lập: TL · Cơ sở: `origin/develop` @ `547b06f` (CI success) · Bắt đầu: 21/11/2026 21:30 · Kết thúc triển khai: 21:57 · `develop` @ `86b9f3f`
 Task triển khai: [SE-022](../tasks/SE-022-chat-module-structural-refactor.md) · Chỉ thị: CTO "Chat Module Structural Refactor" (P1)
 
-**Trạng thái: SE-022 `CTO STRUCTURAL ACCEPTED` (21/11/2026) · F03 `PARTIAL` — SE-023 đã merge (`83704bc`), TL đề nghị CTO nghiệm thu chức năng (mục 11).** Xem mục 9. Convention review (test, `guards/`, SSE): mục 10 — chờ CTO duyệt mục 10.6. **SSE: mục 12–15 — SE-027 merge `11106c8`; POC B, C xong; CTO chọn **C — Native Streaming** (mục 16); migration SE-029, merge sau CTO duyệt.**
+**Trạng thái: SE-022 `CTO STRUCTURAL ACCEPTED` (21/11/2026) · F03 `PARTIAL` — SE-023 đã merge (`83704bc`), TL đề nghị CTO nghiệm thu chức năng (mục 11).** Xem mục 9. Convention review (test, `guards/`, SSE): mục 10 — chờ CTO duyệt mục 10.6. **SSE: mục 12–15 — SE-027 merge `11106c8`; POC B, C xong; CTO chọn **C — Native Streaming** (mục 16); migration SE-029 PR #54 TL đạt AC1–AC11 — **chờ CTO duyệt merge** (mục 17).**
 
 Ký hiệu: **[CODE]** đã kiểm chứng bằng code/lệnh · **[NHẬN ĐỊNH]** đánh giá kỹ thuật · **[ĐỀ XUẤT]**.
 
@@ -513,3 +513,40 @@ CTO không giữ custom SSE transport (khuyến nghị A của TL ở 15.4 **kh�
 | `gone = () => req.socket.destroyed` (chi tiết Express trong controller); ngắt sớm để lại tin USER không câu trả lời | Bỏ; dựa vào NestJS gọi `cancel()` (kể cả trước chunk đầu) → abort → lưu `STOPPED` | Dùng cơ chế framework; ngắt sớm xử lý như bấm Dừng — giữ cặp USER/ASSISTANT, UI còn nút Tạo lại (trả lời câu hỏi mở ở 15.4b) |
 
 **Kiểm chứng sẽ chạy (AC1–AC11 trong SE-029):** toàn bộ bộ POC + Content-Type của từng lỗi trước stream + hồi quy toàn API. Kịch bản TL `se020-review` có 2 kỳ vọng cũ đã ghi nhận (15.1) — sửa riêng trong kịch bản (kỳ vọng SE-F9; đọc `QDRANT_COLLECTION` theo môi trường chạy), ghi lại trước/sau, không bỏ qua lỗi mới.
+
+## 17. SE-029 — Migration Native Streaming: kết quả TL, trình CTO duyệt merge — 22/11/2026 00:52
+
+**PR #54** `refactor/api-chat-native-streaming` → `develop`, SHA đầu **`018e941`** (CI pass, CLEAN). Commit: `9073940` nâng `@nestjs/core/common/testing` 12.2.0 → **12.5.1**; `af27bb7` chuyển transport; `e116a02` dọn code không dùng; `018e941` khoảng trắng. **Chưa merge.**
+
+### 17.1 Cấu trúc sau migration
+```
+ChatController (HTTP)  ──prepareSend/prepareRegenerate──► ChatService  (lỗi → JSON qua filter, application/json)
+                       ──toSseResponse(run, cancel)──────► sse-response.ts: Response(ReadableStream) — nơi duy nhất biết SSE
+                                                            start → ChatService.run(turn, emit) — nhả inFlight ở finally
+                                                            cancel (NestJS gọi khi client đi, kể cả trước chunk đầu) → ChatService.cancel(turn)
+```
+- Đã xóa: `sse-stream.ts` (lifecycle HTTP tự viết), `@Res()` Express ở controller, `ConversationsService.lastMessage`, 2 type `*Document`, 3 export thừa.
+- `ChatService` không import Express/`Response`/`ReadableStream`/rxjs. Wire giữ nguyên (`data: <json>\n\n`, không `id:`), event `meta`/`delta`/`done`/`error`, route POST, schema, lưu tin, Tạo lại (SE-F9, SE-023).
+
+### 17.2 Kiểm chứng (TL tự chạy, DB `cat_gpt_loadtest`, LLM mock, Qdrant collection riêng)
+| AC | Kết quả |
+|---|---|
+| AC1 kiến trúc | Đạt |
+| AC2 200 + wire như `develop` | Đạt |
+| AC3 lỗi trước stream 404/400/400/401/409/429 → **JSON + `application/json`** | **Đạt** (POC C sai — đã sửa bằng trả `Response`) |
+| AC4 Chat/RAG | `f03-verify` 15/15 · `rag-runtime` 14/14 |
+| AC5 ngắt giữa stream | 5/5 |
+| AC6 ngắt sớm | 16 ca khóa nhả, không tin trùng; hủy 5–100 ms → LLM bị hủy, lưu `STOPPED` ~0,7 s (**lỗi ngắt sớm của bản cũ đã hết**) |
+| AC7 Stop/Regenerate/đồng thời | Đạt |
+| AC8 heartbeat | 5 `: ping`, 0 `id:` (chu kỳ rút ngắn tạm trong `dist`, không commit) |
+| AC9 trình duyệt | Đạt (chat, Dừng, Tạo lại, Tạo lại + Dừng, LLM lỗi, tải lại trang) |
+| AC10 toàn API sau nâng NestJS | `se020-review` **27/27** (= `develop`) |
+| AC11 build/lint/test/CI | Đạt; 83/83; CI pass `018e941` |
+Kịch bản cũ có kỳ vọng lỗi thời đã ghi nhận và sửa riêng (15.1): `se020-review` — kỳ vọng "Tạo lại + Dừng → STOPPED" đổi theo SE-F9; đếm Qdrant theo collection của môi trường chạy. Bản trước giữ ở `se020-review.before-sef9.mjs`. Không có lỗi mới bị bỏ qua.
+
+### 17.3 Còn tồn / ghi nhận
+- Backpressure: framework có, producer chưa dùng `desiredSize` (như trước; mỗi câu trả lời ≤ 8192 token).
+- Hồi quy runtime phụ thuộc kịch bản ngoài repo của TL; sau **SE-030** (gỡ toàn bộ unit test — quyết định chủ dự án 22/11, thay mục 1 chỉ thị Convention Review) CI chỉ còn typecheck/lint/build.
+- Nhánh POC B/C giữ tới khi migration merge; xóa sau đó.
+
+**Trạng thái: IMPLEMENTED — TL APPROVED — AWAITING CTO APPROVAL TO MERGE.**

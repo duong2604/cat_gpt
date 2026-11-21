@@ -2,7 +2,7 @@
 
 Mục lục task theo ID. Quy ước, phân công và cách nhận task: [workflow mục 3](../project/workflow.md#3-nơi-lưu-task), [mục 3.1](../project/workflow.md#31-phân-công-và-nhận-task); cột Tiến độ theo [mục 11](../project/workflow.md#11-theo-dõi-tiến-độ). TL cập nhật bảng mỗi khi tạo task, đổi trạng thái hoặc đổi hạn. Senior Dev cập nhật khi nhận task (`Đang làm`) và khi bàn giao (`Chờ Review`).
 
-Cập nhật: 22/11/2026 00:43 (SE-029 Cần sửa vòng 1; tạo SE-030).
+Cập nhật: 22/11/2026 00:52 (SE-029 TL đạt — chờ CTO duyệt merge).
 
 **Mở phiên mới:** prompt [Team Leader](../project/onboarding/team-leader.md) · [Senior Dev](../project/onboarding/senior-dev.md) (CTO xác nhận dùng được 15/11/2026). Báo cáo ngày: [daily/](../reports/daily/README.md).
 
@@ -47,7 +47,7 @@ Cập nhật: 22/11/2026 00:43 (SE-029 Cần sửa vòng 1; tạo SE-030).
 | [SE-026](SE-026-chat-nest-sse-poc.md) | POC: Chat SSE dùng NestJS `@Sse()` (không merge) | Senior Dev | P1 | 22/11/2026 | Theo quyết định CTO | Chờ Review | POC B xong (`5ba11bd`): V1–V9 đạt; không đạt tiêu chí độ phức tạp — xem báo cáo mục 14. Không merge |
 | [SE-027](SE-027-web-sse-parser.md) | Parser SSE phía web theo chuẩn | Senior Dev | P1 | 22/11/2026 | 22/11/2026 | Done | PR #53 → `11106c8` (vòng 2; vòng 1 lỗi CR). Probe 23/23, trình duyệt A+B, không retry POST |
 | [SE-028](SE-028-chat-native-stream-poc.md) | POC C: Chat SSE bằng NestJS Native Streaming (không merge) | Senior Dev | P1 | 22/11/2026 | Theo quyết định CTO | Chờ Review | POC C xong (`45d9f79`): V1–V10 đạt như A, wire giữ; lệch Content-Type lỗi; độ phức tạp tăng — xem báo cáo mục 15. Không merge |
-| [SE-029](SE-029-chat-native-streaming-migration.md) | Migration Chat sang NestJS Native Streaming Responses | Senior Dev | P1 | 22/11/2026 | Theo CTO nghiệm thu | **Cần sửa** | PR #54 vòng 1: hành vi/contract đạt (AC1–AC8, AC10); dọn code không dùng + đặt tên. Merge chỉ sau CTO duyệt |
+| [SE-029](SE-029-chat-native-streaming-migration.md) | Migration Chat sang NestJS Native Streaming Responses | Senior Dev | P1 | 22/11/2026 | Theo CTO nghiệm thu | Chờ Review | PR #54 `018e941`: AC1–AC11 đạt (2 vòng). **Chờ CTO duyệt merge** |
 | [SE-030](SE-030-remove-unit-tests.md) | Gỡ toàn bộ unit test khỏi `apps/api` | Senior Dev | P2 | Sau SE-029 | Không đặt | **Sẵn sàng** (sau SE-029) | Quyết định chủ dự án 22/11 — thay mục 1 chỉ thị CTO Convention Review; TL báo CTO |
 
 **Thứ tự nhận task của Senior Dev (CTO duyệt 16–17/11/2026, phương án 1 SE — [plan mục 8](../project/plan.md#8-lộ-trình-module-34-cto-duyệt-16112026)):** ~~SE-010~~ (Done) → ~~SE-011~~ (Done) → ~~SE-012~~ (Done) → ~~SE-013~~ (Done) → ~~SE-014~~ (Done) → ~~SE-015~~ (Done) → ~~SE-016~~ (Done) → SE-017 (phần `-small` xong; `-large` chờ quyền API); Module 4 hết task SE trong phạm vi đã duyệt → ~~SE-018~~ (Done) → ~~SE-020~~ (Done) → ~~SE-021 A~~ (bàn giao) → **SE-021 B (PR-B1 → B2 → B4)** → SE-005 → SE-006 → SE-004 sau lát TXT hoặc ở phiên thứ hai khi mở. Module 4 (SE-014…SE-016) chỉ nhận khi dependency đạt (TL-008 kiến trúc đã duyệt 17/11; SE-014 cần thêm SE-011 merge + TL-008 AC4). **Thứ tự (CTO chốt 18/11/2026):** hoàn thành Module 3 trước (SE-011 → SE-012 → SE-013), rồi SE-014 → SE-015 / SE-016 → SE-017 theo gate; TL tự chuyển `Sẵn sàng` và giao khi gate đạt — [plan mục 8.3](../project/plan.md#83-module-4-phụ-thuộc-đường-găng-và-thứ-tự-cto-chốt-18112026). Hạn đã chốt của các task cũ giữ nguyên.
