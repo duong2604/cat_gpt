@@ -48,7 +48,11 @@ export class AuthController {
         req.cookies?.[REFRESH_TOKEN_COOKIE] as string | undefined,
         getRequestMeta(req),
       );
-      this.cookies.setAuthCookies(res, tokens.accessToken, tokens.refreshToken);
+      if (tokens.refreshToken) {
+        this.cookies.setAuthCookies(res, tokens.accessToken, tokens.refreshToken);
+      } else {
+        this.cookies.setAccessCookie(res, tokens.accessToken);
+      }
     } catch (error) {
       this.cookies.clearAuthCookies(res);
       throw error;

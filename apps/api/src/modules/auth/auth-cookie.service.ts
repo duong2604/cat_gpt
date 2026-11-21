@@ -45,6 +45,16 @@ export class AuthCookieService {
     });
   }
 
+  /** Chỉ cấp lại access token (không đổi refresh cookie) — nhánh thua CAS khi xoay đồng thời. */
+  setAccessCookie(res: Response, accessToken: string): void {
+    const { accessTtlSeconds } = this.config.auth;
+    res.cookie(ACCESS_TOKEN_COOKIE, accessToken, {
+      ...this.base(),
+      path: '/',
+      maxAge: accessTtlSeconds * 1000,
+    });
+  }
+
   clearAuthCookies(res: Response): void {
     res.clearCookie(ACCESS_TOKEN_COOKIE, { ...this.base(), path: '/' });
     res.clearCookie(REFRESH_TOKEN_COOKIE, { ...this.base(), path: REFRESH_COOKIE_PATH });

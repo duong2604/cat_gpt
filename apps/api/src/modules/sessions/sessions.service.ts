@@ -15,9 +15,16 @@ import {
 } from './refresh-token.js';
 import { Session } from './schemas/session.schema.js';
 
-export interface IssuedSession {
+/** Phiên mới khi đăng nhập: luôn có refresh token. */
+export interface NewSession {
   session: Session;
   refreshToken: string;
+}
+
+/** Kết quả xoay: refreshToken null khi chỉ cấp access token (nhánh thua CAS đồng thời). */
+export interface IssuedSession {
+  session: Session;
+  refreshToken: string | null;
 }
 
 /** Số lần thử xoay token khi thua CAS (thường chỉ cần một lần thử lại). */
@@ -70,7 +77,7 @@ export class SessionsService {
   }
 
   /** Tạo phiên mới khi đăng nhập. */
-  async create(userId: string, meta: RequestMeta): Promise<IssuedSession> {
+  async create(userId: string, meta: RequestMeta): Promise<NewSession> {
     const secret = generateSecret();
     const now = new Date();
     const session = await this.sessionModel.create({
@@ -115,6 +122,7 @@ export class SessionsService {
 
     // Xoay có điều kiện (CAS trên tokenHash): hai request đồng thời cùng một token thì chỉ một
     // bên thắng. Bên thua đọc lại và xét lại theo ân hạn, KHÔNG thu hồi phiên (lỗi đua).
+    const initial = first;
     for (let attempt = 1; ; attempt++) {
       const secret = generateSecret();
       const updated = await this.swapToken(session, secret, meta);
@@ -127,6 +135,12 @@ export class SessionsService {
         // Thua CAS rồi thấy token không còn là current/grace: 401, không thu hồi (lỗi đua).
         throw AppException.unauthorized(ErrorCode.AUTH_REFRESH_INVALID);
       }
+      if (kind === 'grace' && initial === 'current') {
+        // Thua CAS: bên thắng vừa xoay (presented = previous). Chỉ cấp access token cho cùng phiên:
+        // KHÔNG xoay thêm, KHÔNG ghi DB (không kéo dài ân hạn), controller không đặt lại refresh cookie.
+        return { session, refreshToken: null };
+      }
+      // Các trường hợp còn lại (đọc đầu đã là grace, vd thử lại sau mất phản hồi) xoay như cũ.
     }
   }
 

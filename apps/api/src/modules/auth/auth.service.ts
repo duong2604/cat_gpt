@@ -10,9 +10,16 @@ import type { User } from '../users/schemas/user.schema.js';
 import { UsersService } from '../users/users.service.js';
 import type { LoginDto } from './dto/login.dto.js';
 
-export interface AuthTokens {
+/** Kết quả đăng nhập: luôn có refresh token mới. */
+export interface LoginTokens {
   accessToken: string;
   refreshToken: string;
+}
+
+/** Kết quả refresh: refreshToken null khi chỉ cấp access token (xem SessionsService.rotate). */
+export interface AuthTokens {
+  accessToken: string;
+  refreshToken: string | null;
 }
 
 @Injectable()
@@ -23,7 +30,7 @@ export class AuthService {
     private readonly jwt: JwtService,
   ) {}
 
-  async login(dto: LoginDto, meta: RequestMeta): Promise<{ user: User; tokens: AuthTokens }> {
+  async login(dto: LoginDto, meta: RequestMeta): Promise<{ user: User; tokens: LoginTokens }> {
     const user = await this.users.findByEmailWithPassword(dto.email);
 
     // Luôn chạy bcrypt (kể cả khi không có user) để thời gian phản hồi như nhau.
@@ -67,6 +74,7 @@ export class AuthService {
       );
     }
 
+    // nextRefreshToken = null khi nhánh thua CAS: chỉ access token, refresh cookie giữ nguyên.
     return {
       accessToken: await this.signAccessToken(userId, session._id.toString()),
       refreshToken: nextRefreshToken,
