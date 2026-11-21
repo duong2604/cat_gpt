@@ -10,7 +10,7 @@ import { RAG_REFUSAL_TEXT } from '../rag/rag-prompt.js';
 import type { RagPlan } from '../rag/rag.service.js';
 import { RagService } from '../rag/rag.service.js';
 import { toConversationDto, toMessageDto } from './chat.presenter.js';
-import { ConversationsService } from './conversations.service.js';
+import { type CreateMessageInput, ConversationsService } from './conversations.service.js';
 import type { SendMessageDto } from './dto/chat.dto.js';
 import type { Conversation } from './schemas/conversation.schema.js';
 import type { Message } from './schemas/message.schema.js';
@@ -32,6 +32,20 @@ export function makeTitle(content: string): string {
   const cut = text.slice(0, TITLE_LENGTH);
   const lastSpace = cut.lastIndexOf(' ');
   return `${lastSpace > TITLE_LENGTH / 2 ? cut.slice(0, lastSpace) : cut}…`;
+}
+
+/**
+ * Ghép tin nhắn gửi LLM: prompt hệ thống, prompt RAG (nếu truy hồi sẵn sàng), rồi lịch sử.
+ */
+export function buildLlmMessages(systemPrompt: string, plan: RagPlan | null, history: Message[]): LlmMessage[] {
+  return [
+    { role: 'system', content: systemPrompt },
+    // Prompt RAG là tin system thứ hai, đặt sau.
+    ...(plan?.kind === 'ready' ? [{ role: 'system' as const, content: plan.systemPrompt }] : []),
+    ...history
+      .filter((m) => m.content.trim())
+      .map((m) => ({ role: LLM_ROLE[m.role], content: m.content })),
+  ];
 }
 
 /**
@@ -92,7 +106,7 @@ export class ChatService {
 
   /**
    * Sinh lại câu trả lời cuối cho tin nhắn cuối của người dùng. Câu trả lời cũ (nếu có) được giữ
-   * cho tới khi câu mới lưu thành công: Dừng hoặc lỗi giữa chừng thì câu cũ còn nguyên (SE-F9).
+   * cho tới khi câu mới lưu thành công: Dừng hoặc lỗi giữa chừng thì câu cũ còn nguyên.
    */
   async regenerate(userId: string, conversationId: string, sse: SseStream): Promise<void> {
     const conversation = await this.conversations.getOwnedOrThrow(userId, conversationId);
@@ -141,7 +155,7 @@ export class ChatService {
     userMessage: Message | null,
     sse: SseStream,
     controller: AbortController,
-    // Câu trả lời cũ đang được Tạo lại (không đưa vào ngữ cảnh; xóa sau khi câu mới lưu xong).
+    // Câu trả lời cũ đang được Tạo lại: không đưa vào ngữ cảnh, được thay khi câu mới lưu xong.
     replacing: Message | null,
   ): Promise<void> {
     const limit = replacing ? CONTEXT_MESSAGES + 1 : CONTEXT_MESSAGES;
@@ -160,120 +174,139 @@ export class ChatService {
         userMessage: userMessage ? toMessageDto(userMessage) : null,
       });
 
-      // Hỏi đáp tài liệu (thiết kế mục 3.1): hội thoại có documentIds thì truy hồi trước
-      // khi gọi LLM — câu hỏi mới nhất luôn là tin cuối trong history (vừa tạo ở send()/
-      // regenerate() trước khi gọi streamAnswer).
-      let plan: RagPlan | null = null;
-      let status: MessageStatus = MessageStatus.COMPLETED;
-      if (conversation.documentIds?.length) {
-        const question = history.at(-1)?.content ?? '';
-        try {
-          plan = await this.rag.prepare(conversation.userId.toString(), conversation.documentIds, question);
-        } catch (error) {
-          // Lỗi embed/Qdrant (thiết kế mục 6.1): lưu tin ERROR như lỗi LLM, không gọi LLM, Tạo lại được.
-          this.logger.error(`Truy hồi lỗi ở hội thoại ${key}`, (error as Error).stack);
-          status = MessageStatus.ERROR;
-        }
-      }
+      // Câu hỏi mới nhất luôn là tin cuối trong history (send() hoặc regenerate() đã đặt sẵn).
+      const { plan, failed } = await this.retrieveContext(conversation, history.at(-1)?.content ?? '');
 
       if (plan?.kind === 'insufficient') {
-        // Không gọi LLM (AC2: không có dòng log usage) — gửi thẳng câu từ chối cố định.
+        // Không gọi LLM (không có dòng log usage) — gửi thẳng câu từ chối cố định.
         sse.send({ type: 'delta', text: RAG_REFUSAL_TEXT });
-        if (!(await this.conversations.exists(conversation._id))) return;
-        const answer = await this.conversations.createMessage({
-          conversationId: conversation._id,
-          userId: conversation.userId,
-          role: MessageRole.ASSISTANT,
-          content: RAG_REFUSAL_TEXT,
-          status: MessageStatus.COMPLETED,
-          citations: [],
-          insufficientEvidence: true,
-        });
-        if (replacing) await this.conversations.deleteMessage(replacing._id);
-        await this.conversations.touch(conversation._id);
-        sse.send({ type: 'done', message: toMessageDto(answer) });
+        await this.saveAnswer(
+          conversation,
+          replacing,
+          { content: RAG_REFUSAL_TEXT, status: MessageStatus.COMPLETED, citations: [], insufficientEvidence: true },
+          sse,
+        );
         return;
       }
 
-      const messages: LlmMessage[] = [
-        { role: 'system', content: this.config.llm.systemPrompt },
-        // Prompt RAG là tin system thứ hai, đặt sau (ghi chú tích hợp TL 18/11/2026).
-        ...(plan?.kind === 'ready' ? [{ role: 'system' as const, content: plan.systemPrompt }] : []),
-        ...history
-          .filter((m) => m.content.trim())
-          .map((m) => ({ role: LLM_ROLE[m.role], content: m.content })),
-      ];
+      const messages = buildLlmMessages(this.config.llm.systemPrompt, plan, history);
+      // Truy hồi lỗi → lưu ERROR và không gọi LLM.
+      const { content, status } = failed
+        ? { content: '', status: MessageStatus.ERROR }
+        : await this.generate(messages, controller, sse, key);
 
-      let content = '';
-      let truncated = false;
-      const onFinish = (reason: LlmFinishReason) => {
-        truncated = reason === 'max_output_tokens';
-      };
-      // Truy hồi lỗi (status ERROR ở trên) → không gọi LLM.
-      if (status === MessageStatus.COMPLETED) {
-        try {
-          for await (const chunk of this.llm.stream(messages, { signal: controller.signal, onFinish })) {
-            content += chunk;
-            sse.send({ type: 'delta', text: chunk });
-            if (controller.signal.aborted) break;
-          }
-          if (controller.signal.aborted) status = MessageStatus.STOPPED;
-          else if (truncated) status = MessageStatus.TRUNCATED;
-        } catch (error) {
-          status = controller.signal.aborted ? MessageStatus.STOPPED : MessageStatus.ERROR;
-          if (status === MessageStatus.ERROR) {
-            // Tên lỗi gốc (nếu có) để chẩn đoán; không ghi nội dung.
-            const cause = (error as { cause?: unknown }).cause;
-            const causeName = cause instanceof Error ? cause.name : 'unknown';
-            this.logger.error(
-              `LLM lỗi ở hội thoại ${key} cause=${causeName}`,
-              (error as Error).stack,
-            );
-          }
-        }
-      }
-
-      // Hội thoại đã bị xóa trước lần kiểm tra này thì bỏ qua. Vẫn còn một khe hẹp giữa kiểm tra và
-      // ghi (xóa xen giữa có thể để lại tin mồ côi) — ghi nhận SE-F8, không đổi logic ở PR này.
-      if (!(await this.conversations.exists(conversation._id))) return;
-
-      // Tạo lại mà Dừng/lỗi: không lưu câu dở, câu cũ còn nguyên.
-      if (replacing && status !== MessageStatus.COMPLETED && status !== MessageStatus.TRUNCATED) {
-        sse.send({ type: 'done', message: toMessageDto(replacing) });
-        return;
-      }
-
-      // ERROR → không có trích dẫn (thiết kế mục 6.3 bước 5); STOPPED/TRUNCATED vẫn xác
-      // minh trên phần nội dung đã sinh được.
+      // ERROR → không có trích dẫn; STOPPED/TRUNCATED vẫn xác minh trên phần nội dung đã sinh được.
       const verified =
         plan?.kind === 'ready' && status !== MessageStatus.ERROR
           ? this.rag.verifyCitations(content, plan.sources)
           : undefined;
 
-      const answer = await this.conversations.createMessage({
-        conversationId: conversation._id,
-        userId: conversation.userId,
-        role: MessageRole.ASSISTANT,
-        content,
-        status,
-        model: this.llm.model,
-        ...(verified
-          ? {
-              citations: verified.citations.map((c) => ({ ...c, documentId: new Types.ObjectId(c.documentId) })),
-              insufficientEvidence: verified.insufficientEvidence,
-              ungrounded: verified.ungrounded,
-            }
-          : {}),
-      });
-      if (replacing) await this.conversations.deleteMessage(replacing._id);
-      await this.conversations.touch(conversation._id);
-      sse.send({ type: 'done', message: toMessageDto(answer) });
+      await this.saveAnswer(
+        conversation,
+        replacing,
+        {
+          content,
+          status,
+          model: this.llm.model,
+          ...(verified
+            ? {
+                citations: verified.citations.map((c) => ({ ...c, documentId: new Types.ObjectId(c.documentId) })),
+                insufficientEvidence: verified.insufficientEvidence,
+                ungrounded: verified.ungrounded,
+              }
+            : {}),
+        },
+        sse,
+      );
     } catch (error) {
       this.logger.error(`Stream lỗi ở hội thoại ${key}`, (error as Error).stack);
       sse.send({ type: 'error', code: ErrorCode.INTERNAL_ERROR });
     } finally {
       sse.end();
     }
+  }
+
+  /**
+   * Truy hồi RAG khi hội thoại có tài liệu. Lỗi embed/Qdrant không ném: trả `failed = true`
+   * để câu trả lời được lưu ERROR (có thể Tạo lại).
+   */
+  private async retrieveContext(
+    conversation: Conversation,
+    question: string,
+  ): Promise<{ plan: RagPlan | null; failed: boolean }> {
+    if (!conversation.documentIds?.length) return { plan: null, failed: false };
+    try {
+      const plan = await this.rag.prepare(conversation.userId.toString(), conversation.documentIds, question);
+      return { plan, failed: false };
+    } catch (error) {
+      this.logger.error(`Truy hồi lỗi ở hội thoại ${conversation._id.toString()}`, (error as Error).stack);
+      return { plan: null, failed: true };
+    }
+  }
+
+  /**
+   * Vòng stream LLM: gửi từng đoạn tới client và gom nội dung. Trạng thái kết thúc:
+   * COMPLETED, TRUNCATED (hết token), STOPPED (người dùng dừng / đóng kết nối) hoặc ERROR.
+   */
+  private async generate(
+    messages: LlmMessage[],
+    controller: AbortController,
+    sse: SseStream,
+    key: string,
+  ): Promise<{ content: string; status: MessageStatus }> {
+    let content = '';
+    let truncated = false;
+    let status: MessageStatus = MessageStatus.COMPLETED;
+    const onFinish = (reason: LlmFinishReason) => {
+      truncated = reason === 'max_output_tokens';
+    };
+    try {
+      for await (const chunk of this.llm.stream(messages, { signal: controller.signal, onFinish })) {
+        content += chunk;
+        sse.send({ type: 'delta', text: chunk });
+        if (controller.signal.aborted) break;
+      }
+      if (controller.signal.aborted) status = MessageStatus.STOPPED;
+      else if (truncated) status = MessageStatus.TRUNCATED;
+    } catch (error) {
+      status = controller.signal.aborted ? MessageStatus.STOPPED : MessageStatus.ERROR;
+      if (status === MessageStatus.ERROR) {
+        // Tên lỗi gốc (nếu có) để chẩn đoán; không ghi nội dung.
+        const cause = (error as { cause?: unknown }).cause;
+        const causeName = cause instanceof Error ? cause.name : 'unknown';
+        this.logger.error(`LLM lỗi ở hội thoại ${key} cause=${causeName}`, (error as Error).stack);
+      }
+    }
+    return { content, status };
+  }
+
+  /**
+   * Lưu câu trả lời rồi gửi `done`. Hội thoại đã bị xóa thì bỏ qua (không gửi `done`).
+   * Tạo lại mà Dừng/lỗi: không lưu câu dở, câu cũ còn nguyên và được gửi lại làm kết quả.
+   * Tạo lại thành công: lưu câu mới, xóa câu cũ, rồi cập nhật thời gian hội thoại.
+   */
+  private async saveAnswer(
+    conversation: Conversation,
+    replacing: Message | null,
+    fields: Omit<CreateMessageInput, 'conversationId' | 'userId' | 'role'>,
+    sse: SseStream,
+  ): Promise<void> {
+    if (!(await this.conversations.exists(conversation._id))) return;
+
+    if (replacing && fields.status !== MessageStatus.COMPLETED && fields.status !== MessageStatus.TRUNCATED) {
+      sse.send({ type: 'done', message: toMessageDto(replacing) });
+      return;
+    }
+
+    const answer = await this.conversations.createMessage({
+      conversationId: conversation._id,
+      userId: conversation.userId,
+      role: MessageRole.ASSISTANT,
+      ...fields,
+    });
+    if (replacing) await this.conversations.deleteMessage(replacing._id);
+    await this.conversations.touch(conversation._id);
+    sse.send({ type: 'done', message: toMessageDto(answer) });
   }
 
   /**
