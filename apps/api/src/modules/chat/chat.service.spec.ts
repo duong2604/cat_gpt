@@ -12,7 +12,7 @@ import { type LlmFinishReason, type LlmMessage, LlmProvider, type LlmStreamOptio
 import { RAG_REFUSAL_TEXT } from '../rag/rag-prompt.js';
 import type { RagService } from '../rag/rag.service.js';
 import { ChatService, makeTitle } from './chat.service.js';
-import type { CreateMessageInput } from './conversations.service.js';
+import type { AnswerFields, CreateMessageInput } from './conversations.service.js';
 import type { ConversationsService } from './conversations.service.js';
 import type { Conversation } from './schemas/conversation.schema.js';
 import type { Message } from './schemas/message.schema.js';
@@ -101,8 +101,21 @@ class FakeConversationsService {
     return list.length ? list[list.length - 1] : null;
   }
 
-  async deleteMessage(id: Types.ObjectId): Promise<void> {
-    this.messages.delete(id.toString());
+  async replaceAnswer(id: Types.ObjectId, conversationId: Types.ObjectId, fields: AnswerFields): Promise<boolean> {
+    const m = this.messages.get(id.toString());
+    if (!m || m.role !== MessageRole.ASSISTANT || m.conversationId.toString() !== conversationId.toString()) return false;
+    const next: Record<string, unknown> = {
+      ...m,
+      content: fields.content,
+      status: fields.status ?? MessageStatus.COMPLETED,
+      model: fields.model ?? null,
+    };
+    for (const key of ['citations', 'insufficientEvidence', 'ungrounded'] as const) {
+      if (fields[key] !== undefined) next[key] = fields[key];
+      else delete next[key];
+    }
+    this.messages.set(id.toString(), next as unknown as Message);
+    return true;
   }
 }
 

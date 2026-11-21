@@ -10,7 +10,7 @@ import { RAG_REFUSAL_TEXT } from '../rag/rag-prompt.js';
 import type { RagPlan } from '../rag/rag.service.js';
 import { RagService } from '../rag/rag.service.js';
 import { toConversationDto, toMessageDto } from './chat.presenter.js';
-import { type CreateMessageInput, ConversationsService } from './conversations.service.js';
+import { type AnswerFields, ConversationsService } from './conversations.service.js';
 import type { SendMessageDto } from './dto/chat.dto.js';
 import type { Conversation } from './schemas/conversation.schema.js';
 import type { Message } from './schemas/message.schema.js';
@@ -283,18 +283,35 @@ export class ChatService {
   /**
    * Lưu câu trả lời rồi gửi `done`. Hội thoại đã bị xóa thì bỏ qua (không gửi `done`).
    * Tạo lại mà Dừng/lỗi: không lưu câu dở, câu cũ còn nguyên và được gửi lại làm kết quả.
-   * Tạo lại thành công: lưu câu mới, xóa câu cũ, rồi cập nhật thời gian hội thoại.
+   * Tạo lại thành công: thay nội dung câu cũ tại chỗ bằng một lệnh ghi, rồi cập nhật thời gian hội thoại.
    */
   private async saveAnswer(
     conversation: Conversation,
     replacing: Message | null,
-    fields: Omit<CreateMessageInput, 'conversationId' | 'userId' | 'role'>,
+    fields: AnswerFields,
     sse: SseStream,
   ): Promise<void> {
     if (!(await this.conversations.exists(conversation._id))) return;
 
-    if (replacing && fields.status !== MessageStatus.COMPLETED && fields.status !== MessageStatus.TRUNCATED) {
-      sse.send({ type: 'done', message: toMessageDto(replacing) });
+    if (replacing) {
+      if (fields.status !== MessageStatus.COMPLETED && fields.status !== MessageStatus.TRUNCATED) {
+        sse.send({ type: 'done', message: toMessageDto(replacing) });
+        return;
+      }
+      // Tin đã bị xóa giữa chừng (matchedCount = 0) → như hội thoại đã xóa: không gửi `done`.
+      if (!(await this.conversations.replaceAnswer(replacing._id, conversation._id, fields))) return;
+      await this.conversations.touch(conversation._id);
+      // `done` dựng từ đúng những gì vừa ghi (id và createdAt của câu cũ giữ nguyên); không đọc lại.
+      const updated: Message = {
+        ...replacing,
+        content: fields.content,
+        status: fields.status ?? MessageStatus.COMPLETED,
+        model: fields.model ?? null,
+        citations: fields.citations,
+        insufficientEvidence: fields.insufficientEvidence,
+        ungrounded: fields.ungrounded,
+      };
+      sse.send({ type: 'done', message: toMessageDto(updated) });
       return;
     }
 
@@ -304,7 +321,6 @@ export class ChatService {
       role: MessageRole.ASSISTANT,
       ...fields,
     });
-    if (replacing) await this.conversations.deleteMessage(replacing._id);
     await this.conversations.touch(conversation._id);
     sse.send({ type: 'done', message: toMessageDto(answer) });
   }

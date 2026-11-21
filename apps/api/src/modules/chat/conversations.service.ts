@@ -28,6 +28,9 @@ export interface CreateMessageInput {
   ungrounded?: boolean;
 }
 
+/** Các trường ghi của câu trả lời (không gồm khóa và vai trò). */
+export type AnswerFields = Omit<CreateMessageInput, 'conversationId' | 'userId' | 'role'>;
+
 /** Cursor dạng `<lastMessageAt ms>_<id>`: ổn định kể cả khi nhiều hội thoại trùng thời điểm. */
 function encodeCursor(c: Conversation): string {
   return `${c.lastMessageAt.getTime()}_${c._id.toString()}`;
@@ -155,7 +158,27 @@ export class ConversationsService {
     return doc.toObject();
   }
 
-  async deleteMessage(id: Types.ObjectId): Promise<void> {
-    await this.messageModel.deleteOne({ _id: id }).exec();
+  /**
+   * Thay nội dung câu trả lời tại chỗ bằng MỘT lệnh ghi: câu cũ và câu mới không cùng tồn tại,
+   * kể cả khi tiến trình dừng giữa chừng. Trường tùy chọn không có trong `fields` được `$unset`;
+   * `model` không có thì ghi `null` (giống `createMessage`). `createdAt`, `userId`, `role` giữ nguyên.
+   * Trả `false` khi không còn tin assistant đó trong hội thoại.
+   */
+  async replaceAnswer(id: Types.ObjectId, conversationId: Types.ObjectId, fields: AnswerFields): Promise<boolean> {
+    const $set: Record<string, unknown> = {
+      content: fields.content,
+      status: fields.status ?? MessageStatus.COMPLETED,
+      model: fields.model ?? null,
+    };
+    const unset: Record<string, ''> = {};
+    for (const key of ['citations', 'insufficientEvidence', 'ungrounded'] as const) {
+      if (fields[key] !== undefined) $set[key] = fields[key];
+      else unset[key] = '';
+    }
+    const update = Object.keys(unset).length > 0 ? { $set, $unset: unset } : { $set };
+    const result = await this.messageModel
+      .updateOne({ _id: id, conversationId, role: MessageRole.ASSISTANT }, update)
+      .exec();
+    return result.matchedCount > 0;
   }
 }
