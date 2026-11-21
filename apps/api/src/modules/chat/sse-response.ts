@@ -32,11 +32,11 @@ export function toSseResponse(
       void run((event) => write(`data: ${JSON.stringify(event)}\n\n`))
         .catch(() => undefined)
         .finally(() => {
-        if (!closed) {
-          stop();
-          controller.close();
-        }
-      });
+          if (!closed) {
+            stop();
+            controller.close();
+          }
+        });
     },
     cancel() {
       stop();

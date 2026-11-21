@@ -96,10 +96,6 @@ class FakeConversationsService {
     return this.messagesFor(conversationId).slice(-limit);
   }
 
-  async lastMessage(conversationId: Types.ObjectId): Promise<Message | null> {
-    const list = this.messagesFor(conversationId);
-    return list.length ? list[list.length - 1] : null;
-  }
 
   async replaceAnswer(id: Types.ObjectId, conversationId: Types.ObjectId, fields: AnswerFields): Promise<boolean> {
     const m = this.messages.get(id.toString());
@@ -123,7 +119,7 @@ class FakeConversationsService {
 class RecordingSse {
   events: unknown[] = [];
   ended = false;
-  /** Gắn khi subscribe: mô phỏng người dùng đóng tab (hủy subscription). */
+  /** Gắn khi chạy lượt: mô phỏng người dùng đóng tab (gọi cancel). */
   onClientClose?: () => void;
 
   /** Mô phỏng người dùng đóng tab/mất mạng giữa chừng. */
@@ -132,7 +128,7 @@ class RecordingSse {
   }
 }
 
-/** Chạy pha trước stream (lỗi ném ra như JSON) rồi thu các `data` của producer. */
+/** Chạy pha trước stream (lỗi ném ra như JSON) rồi thu các event của lượt. */
 async function sendTo(service: ChatService, userId: string, dto: SendMessageDto, sse: RecordingSse): Promise<void> {
   const plan = await service.prepareSend(userId, dto);
   await runTurn(service, plan, sse);
@@ -316,7 +312,7 @@ describe('ChatService — hồi quy (trước khi thêm RagService, SE-014)', ()
       expect(saved[1].status).toBe(MessageStatus.STOPPED);
     });
 
-    it('đóng tab/mất mạng giữa chừng (hủy subscription) cũng tạo ra STOPPED đã lưu', async () => {
+    it('đóng tab/mất mạng giữa chừng (client ngắt) cũng tạo ra STOPPED đã lưu', async () => {
       const llm = new ScriptedLlmProvider(['Chunk1', 'Chunk2']);
       const { service, conversations } = makeService(llm);
       const sse = new RecordingSse();

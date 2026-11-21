@@ -36,7 +36,7 @@ export function makeTitle(content: string): string {
 /**
  * Ghép tin nhắn gửi LLM: prompt hệ thống, prompt RAG (nếu truy hồi sẵn sàng), rồi lịch sử.
  */
-export function buildLlmMessages(systemPrompt: string, plan: RagPlan | null, history: Message[]): LlmMessage[] {
+function buildLlmMessages(systemPrompt: string, plan: RagPlan | null, history: Message[]): LlmMessage[] {
   return [
     { role: 'system', content: systemPrompt },
     // Prompt RAG là tin system thứ hai, đặt sau.
@@ -104,19 +104,19 @@ export class ChatService {
     // Đặt chỗ trước mọi await: hai POST đồng thời cùng hội thoại không thể cùng stream.
     const key = conversation._id.toString();
     const controller = this.reserveStream(key);
-    const plan: ChatTurn = { conversation, userMessage: null, replacing: null, history: [], key, controller };
+    const turn: ChatTurn = { conversation, userMessage: null, replacing: null, history: [], key, controller };
     try {
-      plan.userMessage = await this.conversations.createMessage({
+      turn.userMessage = await this.conversations.createMessage({
         conversationId: conversation._id,
         userId: conversation.userId,
         role: MessageRole.USER,
         content: dto.content,
       });
       await this.conversations.touch(conversation._id);
-      plan.history = await this.loadHistory(conversation, null);
-      return plan;
+      turn.history = await this.loadHistory(conversation, null);
+      return turn;
     } catch (error) {
-      this.release(plan);
+      this.release(turn);
       throw error;
     }
   }
@@ -131,21 +131,21 @@ export class ChatService {
 
     const key = conversation._id.toString();
     const controller = this.reserveStream(key);
-    const plan: ChatTurn = { conversation, userMessage: null, replacing: null, history: [], key, controller };
+    const turn: ChatTurn = { conversation, userMessage: null, replacing: null, history: [], key, controller };
     try {
       const recent = await this.conversations.recentMessages(conversation._id, 2);
       let question = recent.at(-1);
       if (question?.role === MessageRole.ASSISTANT) {
-        plan.replacing = question;
+        turn.replacing = question;
         question = recent.at(-2);
       }
       if (question?.role !== MessageRole.USER) {
         throw AppException.badRequest(ErrorCode.CHAT_NOTHING_TO_REGENERATE);
       }
-      plan.history = await this.loadHistory(conversation, plan.replacing);
-      return plan;
+      turn.history = await this.loadHistory(conversation, turn.replacing);
+      return turn;
     } catch (error) {
-      this.release(plan);
+      this.release(turn);
       throw error;
     }
   }
@@ -154,17 +154,17 @@ export class ChatService {
    * Chạy phần stream của một lượt (sau `prepare*`), gửi từng event qua `emit`. Lỗi trong stream được
    * gửi như event `{type:'error'}`. Khóa inFlight được nhả trong `finally`, kể cả khi lượt bị hủy.
    */
-  async run(plan: ChatTurn, emit: (event: ChatStreamEvent) => void): Promise<void> {
+  async run(turn: ChatTurn, emit: (event: ChatStreamEvent) => void): Promise<void> {
     try {
-      await this.runStream(plan, emit);
+      await this.runStream(turn, emit);
     } finally {
-      this.release(plan);
+      this.release(turn);
     }
   }
 
   /** Client ngắt (NestJS gọi cancel): hủy LLM. Phần đã sinh được lưu STOPPED; khóa nhả trong `run`. */
-  cancel(plan: ChatTurn): void {
-    plan.controller.abort();
+  cancel(turn: ChatTurn): void {
+    turn.controller.abort();
   }
 
   /** Dừng stream đang chạy của hội thoại. Phần đã sinh vẫn được lưu với trạng thái STOPPED. */
@@ -186,8 +186,8 @@ export class ChatService {
   }
 
   /** Nhả khóa inFlight của lượt này (chỉ khi khóa vẫn là của lượt này). */
-  private release(plan: ChatTurn): void {
-    if (this.inFlight.get(plan.key) === plan.controller) this.inFlight.delete(plan.key);
+  private release(turn: ChatTurn): void {
+    if (this.inFlight.get(turn.key) === turn.controller) this.inFlight.delete(turn.key);
   }
 
   /** Lịch sử gửi LLM (không gồm câu đang được thay). */
@@ -198,8 +198,8 @@ export class ChatService {
       .slice(-CONTEXT_MESSAGES);
   }
 
-  private async runStream(plan: ChatTurn, emit: (event: ChatStreamEvent) => void): Promise<void> {
-    const { conversation, userMessage, replacing, history, key, controller } = plan;
+  private async runStream(turn: ChatTurn, emit: (event: ChatStreamEvent) => void): Promise<void> {
+    const { conversation, userMessage, replacing, history, key, controller } = turn;
     try {
       emit({
         type: 'meta',
