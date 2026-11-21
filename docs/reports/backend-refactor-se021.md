@@ -4,7 +4,7 @@ Tài liệu theo dõi **duy nhất** của chương trình (chỉ thị CTO "Aut
 
 Phạm vi: chỉ `apps/api`; giữ API contract và nghiệp vụ, trừ sửa bug đã duyệt; không viết unit test mới. TL tự review/merge PR đạt gate; thay đổi chính sách bảo mật phiên, schema, contract → CTO.
 
-Cập nhật: 21/11/2026 22:07 · `develop` @ `86b9f3f` — trạng thái hiện hành: **mục 11 + 12 + 13** · DONE 5/9 (F02, F04, F07, F08, F09)
+Cập nhật: 21/11/2026 22:27 · `develop` @ `83704bc` — trạng thái hiện hành: **mục 11 + 12 + 13 + 14** · DONE 5/9 (F02, F04, F07, F08, F09)
 
 Quy ước trạng thái: **Partial** = đã sửa một phần, còn phạm vi ghi ở cột Status; **Audited** = đã audit + xác minh, chưa refactor; **Not started** = chưa audit đủ. Không có flow nào **Done** ở thời điểm này.
 
@@ -425,3 +425,10 @@ Chi tiết: [chat-module-structural-review.md](chat-module-structural-review.md)
 - **F03: PARTIAL** — SE-F9 xong; hồi quy `f03-verify` 15/15; RAG runtime (Tạo lại khi insufficient, truy hồi lỗi) **12/12** trên `cat_gpt_loadtest` + collection Qdrant riêng. Còn mở **B10-M1 (MAJOR)** → SE-023 (thiết kế trước). B10-M2 MINOR → SE-024 backlog. SE-F10 DEFERRED.
 
 **Tiến độ: DONE 5/9** (F02, F04, F07, F08, F09) · PARTIAL 4 (F01, F03, F05, F06) · BLOCKED 0. **MAJOR còn mở: 2** — KT-3 (F01, SE-005), B10-M1 (F03, SE-023).
+
+## 14. B10-M1 đóng (SE-023) — 21/11/2026 22:27
+- PR #52 → `83704bc`: Tạo lại thay câu trả lời tại chỗ bằng **một** `updateOne` → không còn trạng thái 2 câu trả lời. TL failure injection 12/12 (3 điểm lỗi), phục hồi 3/3, hồi quy f03 15/15 + rag-runtime 14/14. CI `develop`: success.
+- **F03:** mọi điều kiện CTO đã có bằng chứng → **đề nghị CTO nghiệm thu** (TL không tự đánh DONE).
+- Convention review Chat (unit test, `guards/`, SSE): [báo cáo Chat mục 10](chat-module-structural-review.md) — chờ CTO duyệt 10.6.
+
+**Tiến độ: DONE 5/9** (F02, F04, F07, F08, F09) · PARTIAL 4 (F01, F03 — chờ CTO nghiệm thu, F05, F06) · BLOCKED 0. **MAJOR còn mở: 1** — KT-3 (F01, SE-005).

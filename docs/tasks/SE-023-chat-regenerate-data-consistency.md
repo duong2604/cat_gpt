@@ -1,6 +1,6 @@
 # SE-023 — Tạo lại: nhất quán dữ liệu khi thay câu trả lời (B10-M1)
 
-Trạng thái: Đang làm — thiết kế **TL duyệt phương án B** (21/11/2026); giai đoạn 2 (code) được phép
+Trạng thái: Done — PR #52 → `83704bc` (21/11/2026 22:27)
 Người phụ trách: Senior Dev · Ưu tiên: P1 (MAJOR — CTO nâng mức 21/11/2026) · Ước lượng: thiết kế 0,25 ngày; triển khai theo phương án được duyệt
 Phụ thuộc: không chặn. Không trì hoãn SE-005 quá hạn 27/11
 Hạn bàn giao review: thiết kế 22/11/2026 · Hạn hoàn tất: Không đặt — theo phương án được duyệt
@@ -100,7 +100,7 @@ Không đổi schema (`messages` giữ nguyên trường và chỉ mục); khôn
 Chọn **B**. Nếu TL muốn tránh thay đổi nội dung câu trả lời tại chỗ, chọn **A**. Sau khi duyệt, triển khai trong `fix/api-regenerate-consistency` từ develop mới nhất; SE-024 (B10-M2) không gộp.
 
 ## Kết quả review
-Chưa có.
+21/11/2026 22:27 — TL review PR #52 (`4a78d11`) đạt, merge `83704bc`. B10-M1 đóng.
 
 ## Lịch sử review
 ### Thiết kế giai đoạn 1 — TL review (commit `64db43c`) — **DUYỆT phương án B, có điều kiện** (21/11/2026)
@@ -128,6 +128,21 @@ Chưa có.
 **AC bổ sung:** `rag-runtime` 12/12 (kiểm `$unset model` ở câu từ chối thay câu thường) và thêm ca câu thường thay câu từ chối (`insufficientEvidence` phải mất).
 
 Trạng thái: giữ **Đang làm** — giai đoạn 2 (code) được phép.
+
+
+### PR #52 — TL review vòng 1 (SHA `4a78d11`, base `86b9f3f`) — **Đạt, đã merge `83704bc`**
+| Tiêu chí | Kết quả | Bằng chứng TL tự kiểm |
+|---|---|---|
+| Đúng thiết kế B + 6 điều kiện | Đạt | `replaceAnswer`: một `updateOne({_id, conversationId, role: ASSISTANT}, {$set, $unset})`, trả `matchedCount > 0`; `citations`/`insufficientEvidence`/`ungrounded` có → `$set`, không → `$unset`; không đụng `createdAt`/`userId`/`role`; `matchedCount = 0` → không `done`; `deleteMessage` đã gỡ (grep `apps/api/src`: 0); không retry |
+| Lệch: `model` thiếu → `$set null` (không `$unset`) | **Chấp nhận** | Schema `model` mặc định `null`; `createMessage` cũng lưu `null` cho câu từ chối → dữ liệu thay tại chỗ giống dữ liệu tạo mới |
+| `done` dựng từ tin cũ + trường vừa ghi | Chấp nhận | Không có ghi đồng thời vào tin này (khóa `inFlight`); f03/rag-runtime: `done.id` = tin cuối đã lưu |
+| Spec | Đạt | Chỉ thay `deleteMessage` → `replaceAnswer` trong bản giả `FakeConversationsService` (theo API service mới); 0 `it`/`describe` thêm; 83/83 |
+| AC1 failure injection (nhánh `test/se023-fault` `9293bad`, không merge) | **Đạt 12/12** | `se023-fault.mjs`, DB `cat_gpt_loadtest`, câu cũ `STOPPED`: (1) lỗi trước ghi → câu cũ nguyên vẹn, `lastMessageAt` không đổi; (2) sau ghi trước `touch` → câu mới `COMPLETED`, `lastMessageAt` chưa đổi; (3) sau `touch` trước `done` → câu mới, `lastMessageAt` đổi. Cả 3: client nhận `error`, **số tin không đổi, USER/ASSISTANT xen kẽ, cùng `id`** — không bao giờ 2 câu trả lời |
+| AC2 phục hồi | Đạt 3/3 | Bản thường (`4a78d11`): Tạo lại 3 hội thoại vừa bị tiêm lỗi → `done COMPLETED`, vẫn 1 câu trả lời. (Phương án C không làm — 0 dữ liệu hỏng) |
+| AC3 contract/schema | Đạt | Diff 3 tệp, không đổi schema/route/mã lỗi/SSE |
+| AC4 hồi quy | Đạt | `f03-verify` 15/15; `rag-runtime` 14/14 (setup 2, insufficient 5, **câu thường thay câu từ chối 2** — có `model`, mất `insufficientEvidence`, truy hồi lỗi 5) |
+| AC5 build/test/CI | Đạt | 4/4, 0 cảnh báo, 83/83; CI pass tại `4a78d11` |
+| Merge | Đạt | `gh pr merge 52 --merge --match-head-commit 4a78d11…` → **`83704bc`** (22:27); CI `develop` @ `83704bc`: success |
 
 ## Phản hồi UI
 Không áp dụng.

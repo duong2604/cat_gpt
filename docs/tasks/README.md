@@ -2,7 +2,7 @@
 
 Mục lục task theo ID. Quy ước, phân công và cách nhận task: [workflow mục 3](../project/workflow.md#3-nơi-lưu-task), [mục 3.1](../project/workflow.md#31-phân-công-và-nhận-task); cột Tiến độ theo [mục 11](../project/workflow.md#11-theo-dõi-tiến-độ). TL cập nhật bảng mỗi khi tạo task, đổi trạng thái hoặc đổi hạn. Senior Dev cập nhật khi nhận task (`Đang làm`) và khi bàn giao (`Chờ Review`).
 
-Cập nhật: 21/11/2026 22:17 (tạo SE-025).
+Cập nhật: 21/11/2026 22:27 (SE-023 Done).
 
 **Mở phiên mới:** prompt [Team Leader](../project/onboarding/team-leader.md) · [Senior Dev](../project/onboarding/senior-dev.md) (CTO xác nhận dùng được 15/11/2026). Báo cáo ngày: [daily/](../reports/daily/README.md).
 
@@ -41,7 +41,7 @@ Cập nhật: 21/11/2026 22:17 (tạo SE-025).
 | [SE-020](SE-020-dependency-security-patch-r2.md) | Vá phụ thuộc bảo mật vòng 2 (`undici`, `mongoose`, `axios`, phân loại `shadcn`) | Senior Dev | P1 | Không đặt — theo phụ thuộc | Không đặt — theo phụ thuộc | Done | Hoàn tất 21/11 — Đúng ước lượng (0,5n). Merge [PR #37](https://github.com/duong2604/cat_gpt/pull/37) → `e040e08` (head review `c94025a`). Audit 26 → 5 (8 → 1 high, còn nhóm `minio` chờ CTO); TL kiểm độc lập: gate 8/8, test 83/83, runtime 27/27, trình duyệt Dừng + tự làm mới token |
 | [SE-021](SE-021-backend-codebase-audit.md) | Backend Codebase Audit & Refactoring (`apps/api`) | Senior Dev | P1 | A: bàn giao 21/11 · B: theo phụ thuộc | Không đặt — theo phụ thuộc | **Đang làm** (B) | A xong (22 finding SE + 13 TL). B: đã merge #38 → `7433ce3`, #39 → `3e9abe7`, #40 → `310ee02` (TL tự merge theo ủy quyền CTO 21/11). Đang làm: PR-B5 follow-up; PR-B3 phân tích. Theo dõi: [bảng flow](../reports/backend-refactor-se021.md) |
 | [SE-022](SE-022-chat-module-structural-refactor.md) | Refactor cấu trúc module Chat (module mẫu) | Senior Dev | P1 | Không đặt — theo phụ thuộc | Không đặt — theo phụ thuộc | Done | Tạo 21/11 (chỉ thị CTO "Chat Module Structural Refactor"). TL Gate 1 xong: Option B có chọn lọc — PR-C3a (bỏ coupling Chat → model Documents), PR-C3b (chia `streamAnswer`, gộp lưu câu trả lời). Không tách service, không đổi hành vi. [Báo cáo](../reports/chat-module-structural-review.md) |
-| [SE-023](SE-023-chat-regenerate-data-consistency.md) | Tạo lại: nhất quán dữ liệu khi thay câu trả lời (B10-M1, MAJOR) | Senior Dev | P1 | 22/11/2026 (thiết kế) | Không đặt — theo phương án duyệt | **Sẵn sàng** | Tạo 21/11 theo CTO verdict SE-022. Giai đoạn 1 chỉ phân tích/thiết kế; TL duyệt trước khi code |
+| [SE-023](SE-023-chat-regenerate-data-consistency.md) | Tạo lại: nhất quán dữ liệu khi thay câu trả lời (B10-M1, MAJOR) | Senior Dev | P1 | 22/11/2026 (thiết kế) | Không đặt — theo phương án duyệt | Done | Thiết kế B (cập nhật tại chỗ) TL duyệt; PR #52 → `83704bc`; failure injection 12/12 |
 | [SE-024](SE-024-chat-regenerate-failure-notice.md) | Tạo lại thất bại: thông báo người dùng (B10-M2) | Senior Dev | P3 | Không đặt | Không đặt | Nháp | Backlog (MINOR); sau SE-023, không gộp PR |
 | [SE-025](SE-025-chat-sse-comment.md) | Sửa chú thích lý do dùng SSE tự viết (`chat.controller.ts`) | Senior Dev | P2 | 22/11/2026 | 22/11/2026 | **Sẵn sàng** | Tạo 21/11 theo CTO "Chat Module Convention Review" — chỉ chú thích |
 

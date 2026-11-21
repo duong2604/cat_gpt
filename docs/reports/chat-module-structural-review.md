@@ -3,7 +3,7 @@
 Người lập: TL · Cơ sở: `origin/develop` @ `547b06f` (CI success) · Bắt đầu: 21/11/2026 21:30 · Kết thúc triển khai: 21:57 · `develop` @ `86b9f3f`
 Task triển khai: [SE-022](../tasks/SE-022-chat-module-structural-refactor.md) · Chỉ thị: CTO "Chat Module Structural Refactor" (P1)
 
-**Trạng thái: SE-022 `CTO STRUCTURAL ACCEPTED` (21/11/2026) · F03 `PARTIAL` — chờ SE-023 (nhất quán dữ liệu Tạo lại).** Xem mục 9. Convention review (test, `guards/`, SSE): mục 10 — chờ CTO duyệt mục 10.6.
+**Trạng thái: SE-022 `CTO STRUCTURAL ACCEPTED` (21/11/2026) · F03 `PARTIAL` — SE-023 đã merge (`83704bc`), TL đề nghị CTO nghiệm thu chức năng (mục 11).** Xem mục 9. Convention review (test, `guards/`, SSE): mục 10 — chờ CTO duyệt mục 10.6.
 
 Ký hiệu: **[CODE]** đã kiểm chứng bằng code/lệnh · **[NHẬN ĐỊNH]** đánh giá kỹ thuật · **[ĐỀ XUẤT]**.
 
@@ -291,3 +291,22 @@ Audit [CODE] (`apps/api/src`):
 ### 10.6 Cần CTO phê duyệt
 1. **Quy ước thư mục** (10.2): giữ guard/filter feature **phẳng** + ghi quy ước 4 điểm. Nếu CTO vẫn muốn `guards/`: TL đề nghị làm **đồng loạt** (chat 2 guard + documents 1 guard; filter `upload-size` có làm theo hay không cần CTO chốt), một PR không đổi hành vi, ~0,25 ngày.
 2. **SSE** (10.3): xác nhận giữ implementation tự viết. Nếu muốn dùng `@Sse()` về sau → là thay đổi contract wire (sửa parser web để chấp nhận dòng `id:`), cần duyệt riêng.
+
+## 11. SE-023 (B10-M1 MAJOR) — đã sửa — 21/11/2026 22:27
+
+Thiết kế B (thay câu trả lời tại chỗ bằng một lệnh ghi) — TL duyệt; PR #52 (`4a78d11`) → **merge `83704bc`**. Chi tiết: [SE-023](../tasks/SE-023-chat-regenerate-data-consistency.md).
+
+| Tiêu chí | Kết quả | Bằng chứng TL tự kiểm |
+|---|---|---|
+| Đúng thiết kế B + 6 điều kiện | Đạt | `replaceAnswer`: một `updateOne({_id, conversationId, role: ASSISTANT}, {$set, $unset})`, trả `matchedCount > 0`; `citations`/`insufficientEvidence`/`ungrounded` có → `$set`, không → `$unset`; không đụng `createdAt`/`userId`/`role`; `matchedCount = 0` → không `done`; `deleteMessage` đã gỡ (grep `apps/api/src`: 0); không retry |
+| Lệch: `model` thiếu → `$set null` (không `$unset`) | **Chấp nhận** | Schema `model` mặc định `null`; `createMessage` cũng lưu `null` cho câu từ chối → dữ liệu thay tại chỗ giống dữ liệu tạo mới |
+| `done` dựng từ tin cũ + trường vừa ghi | Chấp nhận | Không có ghi đồng thời vào tin này (khóa `inFlight`); f03/rag-runtime: `done.id` = tin cuối đã lưu |
+| Spec | Đạt | Chỉ thay `deleteMessage` → `replaceAnswer` trong bản giả `FakeConversationsService` (theo API service mới); 0 `it`/`describe` thêm; 83/83 |
+| AC1 failure injection (nhánh `test/se023-fault` `9293bad`, không merge) | **Đạt 12/12** | `se023-fault.mjs`, DB `cat_gpt_loadtest`, câu cũ `STOPPED`: (1) lỗi trước ghi → câu cũ nguyên vẹn, `lastMessageAt` không đổi; (2) sau ghi trước `touch` → câu mới `COMPLETED`, `lastMessageAt` chưa đổi; (3) sau `touch` trước `done` → câu mới, `lastMessageAt` đổi. Cả 3: client nhận `error`, **số tin không đổi, USER/ASSISTANT xen kẽ, cùng `id`** — không bao giờ 2 câu trả lời |
+| AC2 phục hồi | Đạt 3/3 | Bản thường (`4a78d11`): Tạo lại 3 hội thoại vừa bị tiêm lỗi → `done COMPLETED`, vẫn 1 câu trả lời. (Phương án C không làm — 0 dữ liệu hỏng) |
+| AC3 contract/schema | Đạt | Diff 3 tệp, không đổi schema/route/mã lỗi/SSE |
+| AC4 hồi quy | Đạt | `f03-verify` 15/15; `rag-runtime` 14/14 (setup 2, insufficient 5, **câu thường thay câu từ chối 2** — có `model`, mất `insufficientEvidence`, truy hồi lỗi 5) |
+| AC5 build/test/CI | Đạt | 4/4, 0 cảnh báo, 83/83; CI pass tại `4a78d11` |
+| Merge | Đạt | `gh pr merge 52 --merge --match-head-commit 4a78d11…` → **`83704bc`** (22:27); CI `develop` @ `83704bc`: success |
+
+**F03 — đề nghị CTO nghiệm thu chức năng.** Tất cả điều kiện CTO nêu ở mục 9 đã có bằng chứng: B10-M1 đóng (failure injection 12/12 + phục hồi 3/3), RAG runtime đã kiểm (14/14). Còn lại không chặn: SE-024 (B10-M2, MINOR backlog), SE-025 (chú thích SSE), SE-F10 DEFERRED, quy ước thư mục chờ CTO (mục 10.6). TL **không** tự đánh dấu F03 DONE.
