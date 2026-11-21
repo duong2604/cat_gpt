@@ -260,5 +260,30 @@ SE bàn giao (mô tả PR): SE-F20 phần 1 — tách lập lịch tóm tắt sa
 - SUGGESTION (không chặn): `document-summary.ts` (prompt map-reduce) và `document-summary.service.ts` (lập lịch) tên gần nhau — chú thích đầu file đã phân biệt; đổi tên nếu sau này gây nhầm.
 - SE-F20 phần 2 (tách `ChatService`): TL **không yêu cầu** — sau B4 còn ~290 dòng, nhánh RAG đã nằm ở `RagService`; tách thêm không có lợi ích rõ (chỉ thị: không abstraction thừa).
 
+### Checklist vòng 8 — PR-B3 ([PR #45](https://github.com/duong2604/cat_gpt/pull/45), head cuối `bfbbb5a`)
+SE bàn giao (mô tả PR): B2a — lịch sử ≤ 5 hash có tuổi tối đa theo `refreshTtlDays`, `$push`/`$slice` trong cùng lệnh CAS; secret lạ → 401 không thu hồi; logout chỉ thu hồi khi secret đã biết; nhánh thua CAS chỉ cấp access token, không ghi DB, không đặt refresh cookie. SE kiểm trên DB `cat_gpt_loadtest`: gate 2 (hai thứ tự cookie jar, sau 31 s 204, không thu hồi), gate 1, 8 tình huống + X1/X2; hồi quy 27/28 (1 bước phụ thuộc câu trả lời mock ngẫu nhiên); test 83/83; CI SUCCESS.
+
+#### Review vòng 8 — PR-B3
+**PR** #45 · SHA đã review `bfbbb5a` (base `f173090`) · **APPROVED** — merge `--match-head-commit` → `develop` @ `73614c9` (cây `apps` giống hệt head). **TL-F1 (BLOCKER) đóng.**
+- [x] Phạm vi — 5 tệp `apps/api/src` (`auth.service`, `auth.controller`, `auth-cookie.service`, `session.schema`, `sessions.service`). Route, mã HTTP, mã lỗi không đổi; `history` không ra DTO (`listActiveForUser` liệt kê trường tường minh).
+- [x] Thiết kế — `classifyPresented` dùng chung cho xoay và logout; tuổi lịch sử từ cấu hình; cập nhật lịch sử nằm trong cùng lệnh CAS; log chỉ có `sessionId`, không token/hash.
+- [x] **Gate 2 (CTO) — TL tự kiểm trên DB `cat_gpt_loadtest`** (API `dist` cổng 4100, URI đổi tên DB qua biến môi trường tiến trình, `.env` không sửa; kịch bản `b3-gates.mjs` ngoài repo): hai tab refresh cùng token, **cả hai thứ tự phản hồi** → `204/204`; bên thua **không** đặt refresh cookie; jar giữ token bên thắng; sau **31 s** refresh bằng jar → `204`, `/me` → `200` (phiên không bị thu hồi).
+- [x] **Gate 1 (CTO)** — cùng token dùng 3 lần: `204` (current) → `204` (ân hạn, đúng 1 lần) → `401` + thu hồi (đã thành lịch sử); sau đó token mới của phiên → `401` (phiên đã thu hồi do phát hiện dùng lại). Lịch sử không bao giờ dùng để xoay; nhánh thua CAS không ghi DB → không kéo dài ân hạn.
+- [x] TL-F1 — secret lạ refresh ×3 → `401/401/401`, phiên vẫn refresh được (`204`); logout bằng secret lạ → `204`, phiên còn; logout bằng token hợp lệ → `204`, refresh sau đó `401`.
+- [x] Hồi quy — 27/27 trên cùng bản build và DB riêng. Gate — typecheck/lint/build `--force`, test 83/83, CI SUCCESS, CLEAN.
+- MINOR (không chặn): `sessions.service.ts` `const initial = first;` thừa — dùng thẳng `first` ở PR sau.
+- Rủi ro còn lại (báo CTO, không đổi ở PR này): ân hạn 30 s vẫn cho người có token vừa bị thay đổi lấy token mới **một lần** (dòng 6a bảng B3).
+- Dữ liệu thử của TL: 5 tài khoản `tl-b3-*`/regression trên DB `cat_gpt_loadtest` — `BLOCKED`; không đụng DB demo.
+
+### Checklist vòng 9 — PR-B9 ([PR #46](https://github.com/duong2604/cat_gpt/pull/46), head `3729d68`)
+SE bàn giao: đo byte giải nén thật của mọi entry `.xml`/`.rels` (trừ `word/media/*`) trong ngân sách chung `DOCUMENT_MAX_DOCX_XML_MB`; bom `styles.xml` 100 MB → `DOCUMENT_TOO_MANY_CHUNKS`, RSS đỉnh 157 MB; DOCX + ảnh 6 MB READY; DOCX hỏng UNREADABLE; test 83/83; CI SUCCESS.
+
+#### Review vòng 9 — PR-B9
+**PR** #46 · SHA đã review `3729d68` · **CẦN SỬA** (F04-N1 chưa đóng).
+- [ ] F04-N1 — **Chưa đạt**: bộ lọc theo tên tệp bị vượt vì mammoth tìm styles/numbering/footnotes theo **relationship target**, không theo đuôi tệp. Probe TL trên `dist` của `3729d68`: rels styles trỏ `styles.xml` → chặn (RSS 157 → 157 MB); trỏ `st` → `extractDocx` thành công, RSS **157 → 459 MB**; trỏ `media/image1.png` → thành công, RSS **157 → 459 MB**.
+- Yêu cầu sửa: đo **mọi** entry không phải thư mục vào một ngân sách = `DOCUMENT_MAX_SIZE_MB` + `DOCUMENT_MAX_DOCX_XML_MB` (ảnh thật gần như không nén thêm); kiểm lại 3 biến thể bom + DOCX có ảnh + DOCX hỏng.
+- [x] Phạm vi, mapping lỗi, không đổi API contract — đạt.
+**Trạng thái** — Cần sửa (PR #46).
+
 ## Phản hồi UI
 Không áp dụng.
