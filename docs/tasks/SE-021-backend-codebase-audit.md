@@ -153,5 +153,39 @@ Căn cứ: `origin/develop` @ `b7af2fb` (`apps/api/src` trùng hệt, đã kiể
 **Ghi chú kiểm chứng:** lần chạy probe đầu của TL trên head PR cũng sập do `dist` còn bản cũ; TL `grep` xác nhận `dist` có `waitForFirstChunk` sau khi build lại rồi chạy lại → kết quả trên. Lỗi MinIO thật bị ngắt giữa chừng chưa tái hiện (không ngắt container dùng chung).
 **Trạng thái** — Chờ Review (chờ CTO cho merge).
 
+### Checklist vòng 3 — PR-B2 (chép từ mô tả [PR #39](https://github.com/duong2604/cat_gpt/pull/39), PR mở 21/11/2026 11:32)
+**Task** — SE-021 · PR-B2 (`fix/api-session-stream-races`) · SHA đầu PR `711ccdc` · vòng 3
+**Kết quả** — hai đua (refresh và chat) đã sửa; xác nhận bằng so sánh với build develop (cùng code chat/session).
+**Checklist**
+- [x] AC-chat: hai `POST /chat/stream` song song cùng hội thoại → **1×200 + 1×409** (`CHAT_STREAM_IN_PROGRESS`), DB có đúng một cặp tin mới. **Trước sửa (develop)**: `200,200`, DB 6 tin (cặp bị lặp). Bằng chứng: kịch bản `b2-race` chạy trên cả hai build.
+- [x] AC-refresh (một phần đạt): hai `POST /auth/refresh` song song cùng token → **cả hai 204, phiên không bị thu hồi** (không có cảnh báo "dùng lại" trong pha đua), `GET /me` 200 với cookie của cả hai. Sau đó refresh bằng cookie vừa cấp → 204.
+- [ ] AC-refresh (phần "cả hai token dùng tiếp được"): **đạt có giới hạn**. Ân hạn của thiết kế chỉ cho phép một bước: sau cuộc đua, token "trước đó" còn dùng được đúng một lần xoay tiếp theo; nếu lần xoay khác đã xảy ra trước, token còn lại bị coi là dùng lại và thu hồi phiên. Hành vi này **giống hệt develop** (cùng kịch bản cho cùng kết quả ở bước thứ 5), nên không phải hồi quy; đổi thiết kế ân hạn là quyết định riêng (ghi nhận, không làm trong PR này).
+- [x] Đối chiếu route/HTTP/mã lỗi trước–sau: 409 `CHAT_STREAM_IN_PROGRESS` giữ nguyên; 401 `AUTH_REFRESH_INVALID` giữ nguyên; `/me`, `/auth/refresh` 204 giữ nguyên.
+- [x] `pnpm turbo run typecheck lint build --force` — 8/8 thành công (lint 0 lỗi).
+- [x] `pnpm -C apps/api test` — 83/83 pass.
+- [ ] CI `build` tại SHA đầu PR — xem check của PR.
+- [x] Dữ liệu thử dọn theo ID đã ghi: hội thoại thử `6b011e8652d96c6dc7cbcbab` đã xóa (204); user thử đã khóa `BLOCKED`. Không dùng tài khoản thật. Chạy với `LLM_PROVIDER=mock` (không gọi OpenAI).
+
+**Kiểm tra đã chạy:** API thật (mock LLM) trên build PR và build develop; kịch bản đồng thời chat và refresh; `pnpm turbo run typecheck lint build --force`; `pnpm -C apps/api test`.
+**Simplicity First** — đổi: một hàm `reserveStream`, một `classifyPresented`, `findRotatable`, `swapToken`; không abstraction, không dependency mới. Giới hạn: ân hạn một bước (đã ghi nhận ở trên).
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+**Trạng thái** — Chờ Review (TL).
+
+#### Review vòng 3 — PR-B2
+**Task** — SE-021 PR-B2 · PR https://github.com/duong2604/cat_gpt/pull/39 · SHA đã review `711ccdc` (base `e040e08`) · vòng 3
+**Kết luận** — **APPROVED WITH CONDITIONS**. **Không merge — chờ CTO.**
+**Checklist** (TL đọc diff + kịch bản riêng ngoài repo `b2-race.mjs`, chạy cùng kịch bản trên PR và trên `develop` `e040e08`; API `dist` cổng 4100, LLM mock)
+- [x] Phạm vi — Đạt — `chat/chat.service.ts`, `sessions/sessions.service.ts`; route, mã HTTP, mã lỗi không đổi (`409 CHAT_STREAM_IN_PROGRESS`, `401 AUTH_REFRESH_INVALID`).
+- [x] SE-F4/TL-F3 — Đạt — `reserveStream` đặt chỗ đồng bộ ngay sau `await` cuối (send: sau `getOwnedOrThrow`/`create`; regenerate: trước khi xóa câu trả lời cũ), giải phóng trong `finally` của `send`/`regenerate`; `409` ném trước `try` nên không giải phóng chỗ của request khác. 2 stream song song cùng hội thoại: **PR `200`+`409`, 4 tin** · develop `200`+`200`, 6 tin. Dừng gửi ngay sau `regenerate` (cửa sổ đặt chỗ): PR → `STOPPED` (trước đây là no-op).
+- [x] SE-F3/TL-F2 — Đạt trong phạm vi — CAS `tokenHash` trong `findOneAndUpdate`; bên thua đọc lại, ân hạn → xoay tiếp, ngoài ân hạn → `401` **không thu hồi**; tối đa 3 lần. 2 refresh song song cùng token: **PR `204`/`204`, mỗi token dùng được 1 lần trong ân hạn, phiên còn sống** · develop `204`/`204` rồi **phiên bị thu hồi** (`401` mọi bước sau).
+- [x] Gate — Đạt — `typecheck`/`lint`/`build` (`--force`) api; test 83/83; CI SUCCESS tại `711ccdc`; CLEAN.
+- Đọc hiểu — Đạt — `classifyPresented`/`findRotatable`/`swapToken` tách rõ; chú thích nói đúng hành vi.
+**Điều kiện / còn mở (không chặn PR này):**
+- MAJOR (chuyển sang **PR-B3, cần CTO**): ân hạn 30 s chỉ một bước. Nếu trình duyệt giữ refresh cookie của bên thắng (sau đó là `previousTokenHash`), lần refresh kế (~15 phút sau, ngoài ân hạn) bị coi là dùng lại → thu hồi phiên. Có cả trên develop (develop còn thu hồi ngay). Hướng đề xuất: nhánh ân hạn không xoay thêm (chỉ cấp access token, giữ refresh cookie), gộp với TL-F1.
+- TL-F1 (thu hồi khi secret lạ) vẫn còn — đúng phạm vi, thuộc PR-B3.
+**Dữ liệu thử của TL** — 2 tài khoản `tl-smoke-b2-*` (`6b011f91608199ab3abe4dc8`, `6b011fb7354c32526e414154`) `BLOCKED`; hội thoại thử đã xóa theo chủ sở hữu (riêng lần chạy develop: phiên bị thu hồi làm bước dọn trả `401` → TL mở khóa tạm tài khoản tạm, in danh sách hội thoại của nó, xóa `6b011fb8354c32526e414156`, khóa lại). Cùng lượt đó dọn hội thoại sót của SE-020 `6b01193245444726dd40d929` (tài khoản tạm `6b0118ed45444726dd40d924`) → `204`, khóa lại.
+**Trạng thái** — Chờ Review (chờ CTO cho merge).
+
 ## Phản hồi UI
 Không áp dụng.
