@@ -140,3 +140,42 @@ Vì R4–R8 cùng sửa `env.validation.ts` và `main.ts` với SE-F24, SE-F26 v
 **Điều chỉnh (TL duyệt, không làm yếu bảo mật):** ở nhánh **thua CAS** (lần đọc đầu thấy token là `current`, CAS thất bại, đọc lại thấy token = `previous` vừa được xoay) → **không xoay thêm**; chỉ cấp **access token** cho cùng phiên và **không đặt lại refresh cookie** → cookie trong trình duyệt là của bên thắng = `current`. Nhánh ân hạn thông thường (lần đọc đầu đã thấy `previous`, vd thử lại sau khi mất phản hồi) giữ như cũ.
 **Gate 1 (replay):** token chỉ được dùng ở nhánh ân hạn **một lần** (sau đó nó là lịch sử → dùng lại = thu hồi); token lịch sử không bao giờ dùng để xoay; nhánh thua CAS chỉ xảy ra trong lúc đua (mili giây), không kéo dài ân hạn.
 **Bằng chứng bắt buộc:** kịch bản thật mô phỏng cookie jar trình duyệt (Set-Cookie đến sau thắng), chạy cả hai thứ tự phản hồi; sau đó refresh ngoài ân hạn (đợi > 30 s) → phiên **không** bị thu hồi.
+
+## 7. Quản lý theo flow — Definition of Done (chỉ thị CTO "Flow-Based Quality Gate", áp dụng từ 21/11/2026)
+
+Từ mục này, **trạng thái flow** dùng thang của CTO: NOT STARTED · IN PROGRESS · IN REVIEW · PARTIAL · DONE · BLOCKED. Số PR **không** phải thước đo chất lượng. Mục 1–2 giữ làm lịch sử; trạng thái hiện hành ở bảng 7.1.
+
+DoD (16 mục): D1 audit toàn phạm vi · D2 findings phân loại và xử lý · D3 không còn BLOCKER/MAJOR mở · D4 đúng nghiệp vụ và API contract · D5 security/authorization đã review · D6 concurrency/error handling đã review · D7 dễ đọc, dễ debug · D8 trách nhiệm class/method rõ · D9 tổ chức file hợp lý · D10 không overengineering · D11 typecheck/lint/build · D12 regression liên quan · D13 TL independent review · D14 PR liên quan đã merge · D15 xác minh sau merge · D16 bằng chứng + SHA trong tracker.
+
+### 7.1. Bảng trạng thái flow (`develop` `4cd1784`, cập nhật 15:2x)
+| Flow | Scope | Findings còn mở | PR đã merge | TL review evidence | Regression evidence | DoD chưa đạt | Status | Next action |
+|---|---|---|---|---|---|---|---|---|
+| **F01** Auth & Sessions | login, refresh/xoay token, logout, phiên (`sessions`), JWT/strategy, cookie, giới hạn đăng nhập, `/me/sessions`, thu hồi khi khóa/đổi mật khẩu | **TL-F1 BLOCKER**; TL-F2/SE-F3 phần còn lại (2 tab) MAJOR; **F01-N1 MAJOR**; **F01-N2 MAJOR**; SE-F24 MAJOR; KT-3 MAJOR (SE-005); F01-N3 MINOR; F01-N4 SUGGESTION | 1 (#39) | Vòng 6 + 7.2 (toàn phạm vi) | 27/27 + race sau #39 | D2, D3, D14, D15 | **IN REVIEW** (PR-B3 #45 chờ TL review) | Review #45 → PR-B8 (SE-F24, F01-N1, F01-N2) → SE-005 → TL xác minh toàn F01 |
+| F02 Authorization, Roles, Ownership | guard/roles, admin users, `/me`, avatar | SE-F28, F29, F12/TL-F12, F13/TL-F9 (MINOR) | 1 (#42) | Vòng 6, 13 | 27/27 | D13 (chưa review toàn phạm vi theo DoD) | PARTIAL | TL review toàn phạm vi sau F01 |
+| F03 Chat | stream, Dừng, Tạo lại, lưu trữ | SE-F8 (MINOR), SE-F9, SE-F10 (cần CTO) | 3 | Vòng 3, 9 | race + 27/27 | D2 (chờ CTO SE-F9/F10) | PARTIAL | Chờ CTO SE-F9/F10 |
+| F04 Documents upload/download | upload, kiểm tra, MinIO, tải về | SE-F18 (SUGGESTION) | 3 | Vòng 2, 5 | probe B1, MinIO thật | D1 (`text-extract`, `sanitize-filename` chưa đọc) | PARTIAL | TL đọc phần còn lại |
+| F05 Processing/Delete/Cleanup | worker, xóa, dọn | SE-F22 (cần CTO) | 2 | Vòng 4, 5 | B4 runtime | D2 (CTO) | PARTIAL | Chờ CTO SE-F22 |
+| F06 RAG | embed, Qdrant, trích dẫn | SE-F16, F17 (CTO), TL-F11 | 1 | Vòng 4 | 27/27 | D2 (CTO) | PARTIAL | Chờ CTO |
+| F07 Summary/BullMQ | lập lịch, job, retry | SE-F5 timeout | 2 | Vòng 4, 7 | b7-check | D2 | PARTIAL | Audit timeout trong PR-B8 |
+| F08 Config/Logging/Exceptions | env, log, filter, DNS, Swagger | DNS (MAJOR), SE-F24, SE-F26, C2-B2, R1–R12 | 1 (#42) | Vòng 13, 21 | validateEnv probe | D2, D3 | IN PROGRESS | PR-B8 mở rộng |
+| F09 Module structure | tổ chức module, dependency | B12 `ioredis` (C2) | 1 (#43) | Vòng 7 | b7-check | D2 | PARTIAL | PR-C2 |
+
+**Done: 0/9. Gần Done nhất:** F02 (chỉ còn MINOR backlog + TL review toàn phạm vi). **Blocked:** không có flow bị chặn hoàn toàn; F03/F05/F06 phụ thuộc quyết định CTO.
+
+### 7.2. F01 — independent review toàn phạm vi (TL)
+Đã đọc: `auth.service.ts`, `auth.controller.ts`, `auth.module.ts`, `jwt.strategy.ts`, `auth-cookie.service.ts`, `dto/login.dto.ts`, `sessions.service.ts` (sau #39), `refresh-token.ts`, `schemas/session.schema.ts`, `common/utils/password-hash.ts`, `common/constants.ts`, `common/guards/jwt-auth.guard.ts`, `me.controller.ts` (phiên), `admin-users.service.ts` (khóa/đặt lại mật khẩu → thu hồi), `apps/api/.env.example` (giá trị mẫu).
+
+| ID | Mức | File:dòng | Bằng chứng | Ảnh hưởng | Sửa | Ở đâu |
+|---|---|---|---|---|---|---|
+| TL-F1 | BLOCKER | `auth.service.ts:78-81`; `sessions.service.ts` (`reuse` → `revoke`) | Vòng 6, phân tích B3 | Đăng xuất cưỡng bức bằng `sessionId` | B2a | PR-B3 |
+| TL-F2/SE-F3 (phần còn lại) | MAJOR | `sessions.service.ts` nhánh thua CAS | Mục 6.4 | Thu hồi nhầm khi trình duyệt giữ cookie bên thắng | Thua CAS không xoay thêm | PR-B3 |
+| **F01-N1** | **MAJOR** | `.env.example:12` `JWT_ACCESS_SECRET=change-me-to-a-long-random-string-at-least-32-chars` — ≥ 32 ký tự nên qua `@MinLength(32)` | Đọc file | Triển khai chép `.env.example` → secret ký JWT công khai trong repo; biết `sub` + `sid` là giả được access token (strategy chỉ kiểm phiên tồn tại) | `RELEASE_MODE=production` từ chối giá trị mẫu (R11) | PR-B8 |
+| **F01-N2** | **MAJOR** | `.env.example:32` `ADMIN_PASSWORD=Admin@123` (qua chính sách #42); `login.dto.ts:12` ví dụ Swagger cùng giá trị | Đọc file | Admin seed với mật khẩu công khai nếu không đổi | Production từ chối giá trị mẫu (R12); ví dụ Swagger đổi giá trị trung tính | PR-B8 |
+| SE-F24 | MAJOR | `env.validation.ts` `COOKIE_SECURE=false` | Vòng 13 | Cookie phiên qua HTTP | R5 | PR-B8 |
+| KT-3 | MAJOR | `auth.controller.ts` `@Throttle 5/phút/IP` | SE-005 AC1: 25/200 thành công, 175 `429` | Nhân viên cùng IP không đăng nhập được | Giới hạn theo email/IP-sai | SE-005 |
+| F01-N3 | MINOR | `auth.service.ts:42-44` | `touchLastLogin` rồi `getByIdOrThrow` = 2 truy vấn | Thêm 1 truy vấn mỗi lần đăng nhập | Gộp bằng `findOneAndUpdate` | Tùy chọn |
+| F01-N4 | SUGGESTION | `auth.service.ts:57-69` | Xoay token trước khi kiểm user bị khóa | Ghi DB thừa rồi thu hồi | Giữ (kết quả đúng) | — |
+
+Đã kiểm đạt: bcrypt 10 vòng + hash giả chống dò timing; JWT HS256 cố định thuật toán, hết hạn 900 s; mỗi request kiểm phiên + trạng thái khóa; cookie `httpOnly` + `sameSite=lax`, refresh chỉ gửi tới `/api/v1/auth`; `revokeOwn` lọc `userId`; khóa/đặt lại/đổi mật khẩu thu hồi phiên; phiên tự hết hạn bằng TTL index; chỉ 4 route `@Public`.
+
+**Điều kiện để F01 DONE:** (1) PR-B3 merge, qua gate replay + gate 2 tab có bằng chứng thực tế; (2) PR-B8 merge với R5, R11, R12; (3) SE-005 merge (KT-3); (4) TL xác minh sau merge toàn F01 (27/27 + 8 tình huống B3 + ma trận khởi động + kịch bản SE-005); (5) không còn BLOCKER/MAJOR mở.
