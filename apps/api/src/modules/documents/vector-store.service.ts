@@ -50,14 +50,6 @@ export class VectorStoreService {
       await this.client.createCollection(this.collection, {
         vectors: { size: vectorSize, distance: 'Cosine' },
       });
-      await this.client.createPayloadIndex(this.collection, {
-        field_name: 'userId',
-        field_schema: 'keyword',
-      });
-      await this.client.createPayloadIndex(this.collection, {
-        field_name: 'documentId',
-        field_schema: 'keyword',
-      });
       this.logger.log(`Đã tạo collection Qdrant "${this.collection}" (size=${vectorSize})`);
     } else {
       const info = await this.client.getCollection(this.collection);
@@ -70,6 +62,10 @@ export class VectorStoreService {
         );
       }
     }
+    // Index payload luôn được bảo đảm (idempotent): crash giữa chừng lúc tạo collection không còn
+    // để lại collection thiếu index mãi mãi (SE-F14).
+    await this.client.createPayloadIndex(this.collection, { field_name: 'userId', field_schema: 'keyword' });
+    await this.client.createPayloadIndex(this.collection, { field_name: 'documentId', field_schema: 'keyword' });
     this.ensured = true;
   }
 
@@ -138,16 +134,6 @@ export class VectorStoreService {
         ...(payload.page !== undefined ? { page: Number(payload.page) } : {}),
       };
     });
-  }
-
-  async countByDocumentId(documentId: string): Promise<number> {
-    const { exists } = await this.client.collectionExists(this.collection);
-    if (!exists) return 0;
-    const result = await this.client.count(this.collection, {
-      filter: { must: [{ key: 'documentId', match: { value: documentId } }] },
-      exact: true,
-    });
-    return result.count;
   }
 
   /** Mọi đoạn của một tài liệu, sắp theo `chunkIndex` (SE-016: tóm tắt toàn bộ nội dung). */

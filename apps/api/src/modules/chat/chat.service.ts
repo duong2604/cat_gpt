@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { DocumentStatus, ErrorCode, MessageRole, MessageStatus } from '@cat-gpt/shared';
@@ -20,9 +20,6 @@ import type { SseStream } from './sse-stream.js';
 /** Số tin nhắn gần nhất gửi kèm làm ngữ cảnh cho LLM. */
 const CONTEXT_MESSAGES = 20;
 const TITLE_LENGTH = 50;
-/** Giới hạn gửi tin nhắn / tạo lại câu trả lời: 20 lần mỗi phút cho mỗi người dùng. */
-const RATE_LIMIT = 20;
-const RATE_WINDOW_MS = 60_000;
 
 const LLM_ROLE: Record<MessageRole, LlmMessage['role']> = {
   [MessageRole.USER]: 'user',
@@ -49,8 +46,6 @@ export class ChatService {
   // ponytail: lưu trong bộ nhớ của một tiến trình API; chạy nhiều instance thì chuyển sang Redis.
   /** Hội thoại đang stream → bộ điều khiển hủy (dùng cho nút Dừng và chặn stream song song). */
   private readonly inFlight = new Map<string, AbortController>();
-  /** userId → các mốc thời gian gửi tin nhắn trong cửa sổ giới hạn. */
-  private readonly sendLog = new Map<string, number[]>();
 
   constructor(
     private readonly conversations: ConversationsService,
@@ -61,8 +56,6 @@ export class ChatService {
   ) {}
 
   async send(userId: string, dto: SendMessageDto, sse: SseStream): Promise<void> {
-    this.assertRateLimit(userId);
-
     let conversation: Conversation;
     if (dto.conversationId) {
       if (dto.documentIds) {
@@ -100,7 +93,6 @@ export class ChatService {
 
   /** Bỏ câu trả lời cuối của assistant (nếu có) rồi sinh lại cho tin nhắn cuối của người dùng. */
   async regenerate(userId: string, conversationId: string, sse: SseStream): Promise<void> {
-    this.assertRateLimit(userId);
     const conversation = await this.conversations.getOwnedOrThrow(userId, conversationId);
     this.assertRagNotHidden(conversation);
 
@@ -304,13 +296,4 @@ export class ChatService {
     }
   }
 
-  private assertRateLimit(userId: string): void {
-    const now = Date.now();
-    const recent = (this.sendLog.get(userId) ?? []).filter((t) => now - t < RATE_WINDOW_MS);
-    if (recent.length >= RATE_LIMIT) {
-      throw new AppException(ErrorCode.TOO_MANY_REQUESTS, HttpStatus.TOO_MANY_REQUESTS);
-    }
-    recent.push(now);
-    this.sendLog.set(userId, recent);
-  }
 }
