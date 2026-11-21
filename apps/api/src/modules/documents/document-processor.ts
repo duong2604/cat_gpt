@@ -8,7 +8,12 @@ import { AppConfigService } from '../../config/app-config.service.js';
 import { type LlmFinishReason, type LlmMessage, LlmProvider } from '../llm/llm.provider.js';
 import { chunkText } from './chunk-text.js';
 import { DocumentFilesService } from './document-files.service.js';
-import { type DeleteJobData, type ProcessJobData, type SummarizeJobData } from './documents.service.js';
+import {
+  DOCX_MIME_TYPE,
+  type DeleteJobData,
+  type ProcessJobData,
+  type SummarizeJobData,
+} from './documents.service.js';
 import { EmbeddingService } from './embedding.service.js';
 import { permanentErrorFor } from './permanent-error.js';
 import { DocumentEntity } from './schemas/document.schema.js';
@@ -23,7 +28,6 @@ import {
 } from './text-extract.js';
 import { VectorStoreService } from './vector-store.service.js';
 
-const DOCX_MIME_TYPE = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 
 /**
  * Worker BullMQ cho queue `documents` (thiết kế mục 6.3, 6.4). Chạy trong tiến trình API
@@ -109,11 +113,11 @@ export class DocumentProcessor extends WorkerHost {
     ];
     let out = '';
     let truncated = false;
-    const controller = new AbortController();
+    // Tóm tắt không có điểm hủy riêng; thời gian chờ do SDK OpenAI quản lý.
     const onFinish = (reason: LlmFinishReason) => {
       truncated = reason === 'max_output_tokens';
     };
-    for await (const chunk of this.llm.stream(messages, { signal: controller.signal, onFinish })) out += chunk;
+    for await (const chunk of this.llm.stream(messages, { signal: new AbortController().signal, onFinish })) out += chunk;
     // Chỉ ghi số liệu để chẩn đoán — không ghi nội dung tài liệu (thiết kế mục 7).
     if (truncated) {
       this.logger.warn(`documentId=${documentId} job=summarize bản con bị cắt do giới hạn đầu ra (${out.length} ký tự)`);
@@ -146,6 +150,9 @@ export class DocumentProcessor extends WorkerHost {
     try {
       pages = await this.extractPages(doc.mimeType, buffer);
     } catch (error) {
+      // Chỉ ghi tên và thông điệp lỗi để chẩn đoán — không ghi nội dung tài liệu (thiết kế mục 7).
+      const detail = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
+      this.logger.warn(`documentId=${documentId} bóc tách lỗi: ${detail}`);
       if (error instanceof DocumentTooLargeToProcessError) {
         return this.failPermanently(_id, ErrorCode.DOCUMENT_TOO_MANY_CHUNKS);
       }

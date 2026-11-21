@@ -1,7 +1,7 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { InjectModel } from '@nestjs/mongoose';
-import type { Queue } from 'bullmq';
+import type { JobsOptions, Queue } from 'bullmq';
 import { isValidObjectId, Model, type QueryFilter, Types } from 'mongoose';
 import type { Readable } from 'node:stream';
 import { type DocumentDto, DocumentStatus, ErrorCode, type Paginated, SummaryStatus } from '@cat-gpt/shared';
@@ -29,7 +29,7 @@ export interface SummarizeJobData {
 /** Thiết kế mục 8: job tóm tắt thử tối đa 2 lượt. */
 const SUMMARY_JOB_ATTEMPTS = 2;
 
-const DOCX_MIME_TYPE = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+export const DOCX_MIME_TYPE = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 
 /** Kiểm chữ ký theo đuôi tệp (thiết kế mục 5, không tin `Content-Type` client). */
 async function detectMimeType(file: Express.Multer.File): Promise<string | null> {
@@ -98,20 +98,16 @@ export class DocumentsService {
     }
 
     try {
-      await withTimeout(
-        this.queue.add(
-          'process',
-          { documentId: _id.toString() } satisfies ProcessJobData,
-          {
-            jobId: `process-${_id.toString()}`,
-            attempts: this.config.documents.jobAttempts,
-            backoff: { type: 'exponential', delay: JOB_BACKOFF_DELAY_MS },
-            removeOnComplete: true,
-            removeOnFail: { age: FAILED_JOB_RETENTION_SECONDS },
-          },
-        ),
-        QUEUE_ADD_TIMEOUT_MS,
-        `Hết thời gian chờ sau ${QUEUE_ADD_TIMEOUT_MS}ms`,
+      await this.addJob(
+        'process',
+        { documentId: _id.toString() } satisfies ProcessJobData,
+        {
+          jobId: `process-${_id.toString()}`,
+          attempts: this.config.documents.jobAttempts,
+          backoff: { type: 'exponential', delay: JOB_BACKOFF_DELAY_MS },
+          removeOnComplete: true,
+          removeOnFail: { age: FAILED_JOB_RETENTION_SECONDS },
+        },
       );
     } catch {
       await this.documentModel.deleteOne({ _id }).exec();
@@ -133,6 +129,15 @@ export class DocumentsService {
     } catch (error) {
       this.logger.warn(`Không xóa được object MinIO ${storageKey} khi hoàn tác: ${(error as Error).message}`);
     }
+  }
+
+  /** Xếp job có giới hạn thời gian chờ (Redis tắt thì ioredis xếp hàng trong bộ nhớ thay vì báo lỗi ngay). */
+  private addJob(name: string, data: object, opts: JobsOptions): Promise<unknown> {
+    return withTimeout(
+      this.queue.add(name, data, opts),
+      QUEUE_ADD_TIMEOUT_MS,
+      `Hết thời gian chờ sau ${QUEUE_ADD_TIMEOUT_MS}ms`,
+    );
   }
 
   async list(userId: string, query: ListDocumentsQueryDto): Promise<Paginated<DocumentDto>> {
@@ -274,20 +279,16 @@ export class DocumentsService {
     if (result.matchedCount === 0) throw AppException.notFound(ErrorCode.DOCUMENT_NOT_FOUND);
 
     try {
-      await withTimeout(
-        this.queue.add(
-          'delete',
-          { documentId: id } satisfies DeleteJobData,
-          {
-            jobId: `delete-${id}`,
-            attempts: DELETE_JOB_ATTEMPTS,
-            backoff: { type: 'exponential', delay: JOB_BACKOFF_DELAY_MS },
-            removeOnComplete: true,
-            removeOnFail: { age: FAILED_JOB_RETENTION_SECONDS },
-          },
-        ),
-        QUEUE_ADD_TIMEOUT_MS,
-        `Hết thời gian chờ sau ${QUEUE_ADD_TIMEOUT_MS}ms`,
+      await this.addJob(
+        'delete',
+        { documentId: id } satisfies DeleteJobData,
+        {
+          jobId: `delete-${id}`,
+          attempts: DELETE_JOB_ATTEMPTS,
+          backoff: { type: 'exponential', delay: JOB_BACKOFF_DELAY_MS },
+          removeOnComplete: true,
+          removeOnFail: { age: FAILED_JOB_RETENTION_SECONDS },
+        },
       );
     } catch (error) {
       // Tài liệu đã ẩn (deletedAt đã đặt) — vẫn trả 204, chỉ cảnh báo để dọn tay (thiết kế mục 6.4 bước 4).
