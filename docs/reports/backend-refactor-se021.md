@@ -99,7 +99,7 @@ Quy trình bắt buộc: SE inventory + **dry-run (chỉ đọc)** → TL đối
 ### 5.3. Trạng thái
 | Workstream | Trạng thái | PR | Ghi chú |
 |---|---|---|---|
-| C1 Data Cleanup | **IN PROGRESS** — export đã kiểm, **TL GO xóa** 15:57; dry-run xong, TL duyệt manifest 15:54; chờ export + TL GO | — | 217 ID (A1 200, A2 10 + 1 TL bổ sung, A3 6); 2 UNVERIFIED giữ nguyên |
+| C1 Data Cleanup | **BLOCKED — chờ chủ dự án xác nhận xóa trong phiên SE** (15:57); export đã kiểm, TL GO kỹ thuật 15:57; dry-run xong, TL duyệt manifest 15:54; chờ export + TL GO | — | 217 ID (A1 200, A2 10 + 1 TL bổ sung, A3 6); 2 UNVERIFIED giữ nguyên |
 | C2 Code Cleanup | **Chưa bắt đầu** — TL audit xong; B8/B9 nằm trong PR-B8; B2, B12 sẽ thành PR-C2 | — | PR riêng, không gộp với C1 |
 
 ## 6. Chính sách cấu hình theo môi trường (chỉ thị CTO vòng 20) — audit TL 12:5x, `develop` `4cd1784`
