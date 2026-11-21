@@ -3,7 +3,7 @@
 Người lập: TL · Cơ sở: `origin/develop` @ `547b06f` (CI success) · Bắt đầu: 21/11/2026 21:3x
 Task triển khai: [SE-022](../tasks/SE-022-chat-module-structural-refactor.md) · Chỉ thị: CTO "Chat Module Structural Refactor" (P1)
 
-**Trạng thái hiện tại: GATE 3 — PR-C3a #49 Cần sửa (chỉ chú thích); SE sửa rồi làm PR-B10.** Không tự đánh dấu CTO ACCEPTED.
+**Trạng thái hiện tại: PR-C3a merge (`e0adb75`), PR-B10/SE-F9 merge (`2569caf`); SE đang làm PR-C3b.** Không tự đánh dấu CTO ACCEPTED.
 
 Ký hiệu: **[CODE]** đã kiểm chứng bằng code/lệnh · **[NHẬN ĐỊNH]** đánh giá kỹ thuật · **[ĐỀ XUẤT]**.
 
@@ -108,16 +108,18 @@ Lý do: không gộp cấu trúc với thay đổi hành vi (B10); không trì h
 | 21/11 21:30 | Gate 1 | TL review độc lập + kiểm chứng 13/13; chọn Option B; tạo SE-022 |
 | 21/11 21:33 | Gate 2 (giao) | Chủ dự án/CTO yêu cầu ưu tiên module Chat → TL đổi thứ tự: **PR-C3a ngay** → PR-B10 → PR-C3b; SE-005 dừng ở điểm an toàn (giữ số liệu đo, chưa mở PR; hạn 27/11 vẫn kịp). Đã giao SE kèm kịch bản kiểm chứng |
 | 21/11 21:42 | Gate 3 | PR-C3a #49 (`68333ca`) TL review vòng 1: hành vi/cấu trúc đạt (c3a-check 5/5, f03-verify 13/13, test 83/83, build/lint sạch); **Cần sửa** chú thích (JSDoc lặp 2 lần; chú thích `validateDocumentSelection` lỗi thời). Không merge |
+| 21/11 21:44 | Gate 3–4 | PR-C3a #49 vòng 2 (`1e8b709`, chỉ chú thích): đạt, CI pass → **merge `e0adb75`** |
+| 21/11 21:48 | Gate 3–4 | PR-B10 #50 (`583ef69`, SE-F9): TL đọc diff + web (`chat-stream-provider.tsx` ẩn câu cũ, `done` → `appendMessage`); chấp nhận "Dừng/lỗi → `done` mang câu cũ" (hình dạng event không đổi). Build/test 83/83; f03-verify **14/14** trên bản B10 **và** trên bản merge thử develop+B10 (thêm ca Tạo lại bị LLM lỗi). CI pass → **merge `2569caf`**. MINOR backlog: B10-M1 (xóa câu cũ lỗi sau khi lưu câu mới → 2 câu trả lời, Tạo lại sau đó 400), B10-M2 (UX: Tạo lại lỗi không có thông báo) |
 
 ## 7. Quality gates (sẽ điền khi triển khai)
 | Gate | PR-C3a | PR-C3b |
 |---|---|---|
-| Cấu trúc khớp thiết kế | — | — |
-| Không đổi API contract (route, mã HTTP, mã lỗi, SSE event) | — | — |
-| `f03-verify` (13 ca; SE-F9 đổi kỳ vọng sau B10) | — | — |
-| Race 2 stream (200+409), Dừng trong cửa sổ | — | — |
-| Test hiện có (`chat.service.spec.ts` chỉ chỉnh mock theo constructor, không thêm test) | — | — |
-| typecheck/lint/build, CI | — | — |
-| Merge SHA | — | — |
+| Cấu trúc khớp thiết kế | Đạt | — |
+| Không đổi API contract (route, mã HTTP, mã lỗi, SSE event) | Đạt (c3a-check 5/5) | — |
+| `f03-verify` (13 ca; 14 ca sau B10) | Đạt 13/13 | — |
+| Race 2 stream (200+409), Dừng trong cửa sổ | Đạt | — |
+| Test hiện có (`chat.service.spec.ts` chỉ chỉnh mock theo constructor, không thêm test) | Đạt 83/83 | — |
+| typecheck/lint/build, CI | Đạt | — |
+| Merge SHA | `e0adb75` | — |
 
 **CTO acceptance:** chưa — sau khi merge, trạng thái sẽ là `IMPLEMENTED — TL APPROVED — AWAITING CTO ACCEPTANCE`.

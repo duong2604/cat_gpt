@@ -1,6 +1,6 @@
 # SE-022 — Refactor cấu trúc module Chat (module mẫu)
 
-Trạng thái: Sẵn sàng — **PR-C3a làm ngay** (ưu tiên của chủ dự án/CTO, giao 21:33); PR-C3b sau PR-B10
+Trạng thái: Đang làm — PR-C3a **merge** (#49 → `e0adb75`); PR-B10 merge (#50 → `2569caf`); **PR-C3b đang làm** từ `2569caf`
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 0,75 ngày (PR-C3a 0,25 + PR-C3b 0,5)
 Phụ thuộc: PR-C3a không phụ thuộc; PR-C3b sau PR-B10 (cùng vùng code). SE-005 tạm dừng ở điểm an toàn
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
@@ -57,6 +57,15 @@ Chưa có.
 | AC7 mô tả PR | Đạt | SE báo trước/sau trong PR |
 | Chất lượng chú thích | **Không đạt** | (1) JSDoc lặp nguyên văn 2 lần trên `assertDocumentsVisible`; (2) chú thích `validateDocumentSelection` vẫn mô tả truy vấn Mongo đã chuyển sang `DocumentsService` |
 Yêu cầu: sửa chú thích (không đổi code chạy), cập nhật cùng PR, checklist vòng 2.
+
+### PR-C3a #49 — TL review vòng 2 (SHA `1e8b709`) — **Đạt, đã merge `e0adb75`** (21/11 21:44)
+| Tiêu chí | Kết quả | Bằng chứng |
+|---|---|---|
+| Sửa chú thích | Đạt | `git diff 68333ca 1e8b709`: chỉ chú thích, 1 khối JSDoc, mô tả đúng việc của Chat; bỏ dòng trống cuối class |
+| Không đổi code chạy | Đạt | Diff không có dòng lệnh |
+| typecheck/lint/build, test | Đạt | 4/4, 0 cảnh báo; 83/83 |
+| CI tại SHA đầu PR | Đạt | `build` pass tại `1e8b709` |
+| Merge | Đạt | `gh pr merge 49 --merge --match-head-commit 1e8b709…` → `e0adb75`; `1e8b709` là tổ tiên của `origin/develop` |
 
 ## Phản hồi UI
 Không áp dụng.
