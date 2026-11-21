@@ -7,7 +7,7 @@ Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tấ
 Ngày thực tế: bắt đầu 21/11/2026 · bàn giao review — · hoàn tất —
 Chốt: 21/11/2026 — chỉ thị CTO "TL Onboarding 21/11 mục 3": TL được giao SE phần vá patch/minor an toàn, không đổi kiến trúc; phần cần major / chấp nhận rủi ro trình CTO (mục "Ngoài phạm vi" dưới)
 SHA cơ sở: `origin/develop` @ `b7af2fb`
-PR: <Senior Dev ghi khi bàn giao>
+PR: https://github.com/duong2604/cat_gpt/pull/37 (SHA đầu PR `cf859cf`)
 
 ## Mục tiêu
 `pnpm audit --prod` trên `develop` @ `b7af2fb` còn **26 advisory (8 high, 17 moderate, 1 low)** sau SE-018. Đóng **21/26** (7/8 high) bằng nâng patch/minor và một override cấp patch, không đổi code, không nâng major. 5 advisory còn lại đi qua `minio` (chưa có bản sửa upstream) → chờ CTO quyết định, **không** làm trong task này.
@@ -69,7 +69,7 @@ Chưa có.
 
 ## Lịch sử review
 ### Checklist vòng 1
-**Task** — SE-020 · PR <sẽ ghi sau khi mở> · SHA đầu PR `<sẽ ghi>` · vòng 1
+**Task** — SE-020 · PR [#37](https://github.com/duong2604/cat_gpt/pull/37) · SHA đầu PR `cf859cf` · vòng 1
 **Kết quả** — 4 thay đổi theo Output (`pnpm-workspace.yaml` override `undici@7: 7.30.2`; `apps/api` `mongoose ~9.11.4`; `apps/web` `axios ^1.21.1`, `shadcn` → devDependencies). Lockfile đổi theo Q2. Không đổi code, không major.
 **Checklist**
 - [x] AC1 audit — trước 26 (8 high, 17 moderate, 1 low) → sau **5** (1 high, 4 moderate): `decode-uri-component` GHSA-qr28-fpjm-wq7f (high), GHSA-vcc3-ghjq-m6fr; `stream-json` GHSA-528h-pc64-c93x, GHSA-hqr4-qq8f-hg3x, GHSA-mjw6-4jj6-33hc. Đã hết toàn bộ advisory `undici`, `mongoose`, `follow-redirects`, nhóm `shadcn`/hono/minimatch. **0 advisory mới**. Bằng chứng: JSON trước/sau (`$TMPDIR/se020-audit-before.json`, `se020-audit-final.json`, ngoài repo).
@@ -78,7 +78,7 @@ Chưa có.
 - [ ] AC3 hồi quy DB (API thật `127.0.0.1:4000`, DB dùng chung, nhánh này) — **đạt một phần**: 28/28 kịch bản: `/health` 200; `/me` không đăng nhập 401; admin đăng nhập 200; tạo user thử 201; user đăng nhập và `/me` 200; avatar hợp lệ 201, sai loại 400, > 5 MB 413; upload TXT/PDF/DOCX 201 → READY; DOCX hỏng 201; > 25 MB 400 `FILE_TOO_LARGE`; admin đọc tài liệu user 404; `/admin/users` admin 200, user 403; `/documents` không đăng nhập 401; chat thường stream 200 có dữ liệu; RAG 200 có `citation`, trả lời "12 ngày"; summary 202 → READY; `/me/features` 200. Phase 2: làm mới token `/auth/refresh` 204 (đúng thiết kế `HttpCode(NO_CONTENT)`, kịch bản kỳ vọng sai ở lần đầu, đã sửa), `/me` sau refresh 200; `POST /conversations/:id/stop` 204; `regenerate` stream 200 có dữ liệu; admin xóa tài liệu user 404. **Chưa kiểm**: đăng xuất (`/auth/logout`), CRUD hội thoại đầy đủ (chỉ đọc/xóa), quản trị đổi trạng thái user ngoài bước khóa dọn dữ liệu, `/admin/users` tạo/sửa đầy đủ.
 - [ ] AC4 Qdrant — **đạt một phần**: trước khi xóa, mỗi tài liệu TXT/PDF/DOCX có 1 vector theo `documentId` (collection `document_chunks`). Sau `DELETE` cả 4 tài liệu thử, đếm lại = **0** (poll 8 giây). Citation có trong RAG. **Chưa kiểm**: nhánh `insufficientEvidence` (chưa có kịch bản câu hỏi ngoài tài liệu được ghi nhận riêng).
 - [ ] AC5 web — **chưa đạt đủ**: `pnpm build` web 16.4.6 thành công (trong turbo build). `next start` cổng 3000: `/login` 200, rewrite `/api/v1/health` 200. Trình duyệt (Chrome, user thử): đăng nhập → Chat (tạo hội thoại, stream) → Tạo lại → trang Tài liệu tải bình thường; console **0 lỗi**. **Chưa kiểm**: nút Dừng trên giao diện (chỉ kiểm qua API), tự làm mới access token khi hết hạn (cần chờ TTL), kiểm tra ảnh sidebar/theme bằng ảnh chụp đối chiếu.
-- [x] AC6 gate — `pnpm turbo run typecheck lint build --force`: 8/8 task thành công (exit 0). `pnpm -C apps/api test`: 8 file, **83/83** pass. CI `build` tại SHA đầu PR: **chưa có** (chờ push).
+- [x] AC6 gate — `pnpm turbo run typecheck lint build --force`: 8/8 task thành công (exit 0). `pnpm -C apps/api test`: 8 file, **83/83** pass. CI `build` **SUCCESS** tại `cf859cf` (PR #37, `mergeStateStatus` CLEAN, base `develop`).
 - [x] AC7 dữ liệu thử — đã dọn theo ID đã ghi: 4 tài liệu (đã xóa, Qdrant 0); 3 hội thoại (`6b0116bb…e6c6`, `6b0116b8…e3c3`, `6b011731…e3cf`, mỗi hội thoại xác minh chủ sở hữu trước khi xóa, đều `204`); avatar (`200`); user thử `6b0116b2d17505482276e3b9` bị **khóa `BLOCKED`** (`200`) vì chưa có API xóa user — giống SE-018. Không dùng tài khoản thật; không đụng dữ liệu khác.
 - Không chạy `text-embedding-3-large`; không đụng SE-017, SE-019, `34b465d`, dữ liệu Atlas ngoài user thử; không đổi `D:\workspace\buggysoft\cat_gpt`.
 - Simplicity First: 4 thay đổi cấu hình, không code, không dependency mới; `mquery` là phụ thuộc của mongoose; giới hạn: 5 advisory `minio` còn lại (Q1).
