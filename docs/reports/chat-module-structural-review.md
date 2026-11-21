@@ -3,7 +3,7 @@
 Người lập: TL · Cơ sở: `origin/develop` @ `547b06f` (CI success) · Bắt đầu: 21/11/2026 21:30 · Kết thúc triển khai: 21:57 · `develop` @ `86b9f3f`
 Task triển khai: [SE-022](../tasks/SE-022-chat-module-structural-refactor.md) · Chỉ thị: CTO "Chat Module Structural Refactor" (P1)
 
-**Trạng thái: SE-022 `CTO STRUCTURAL ACCEPTED` (21/11/2026) · F03 `PARTIAL` — SE-023 đã merge (`83704bc`), TL đề nghị CTO nghiệm thu chức năng (mục 11).** Xem mục 9. Convention review (test, `guards/`, SSE): mục 10 — chờ CTO duyệt mục 10.6.
+**Trạng thái: SE-022 `CTO STRUCTURAL ACCEPTED` (21/11/2026) · F03 `PARTIAL` — SE-023 đã merge (`83704bc`), TL đề nghị CTO nghiệm thu chức năng (mục 11).** Xem mục 9. Convention review (test, `guards/`, SSE): mục 10 — chờ CTO duyệt mục 10.6. **SSE đánh giá lại: mục 12 — POC / EVALUATION — AWAITING CTO DECISION.**
 
 Ký hiệu: **[CODE]** đã kiểm chứng bằng code/lệnh · **[NHẬN ĐỊNH]** đánh giá kỹ thuật · **[ĐỀ XUẤT]**.
 
@@ -310,3 +310,61 @@ Thiết kế B (thay câu trả lời tại chỗ bằng một lệnh ghi) — T
 | Merge | Đạt | `gh pr merge 52 --merge --match-head-commit 4a78d11…` → **`83704bc`** (22:27); CI `develop` @ `83704bc`: success |
 
 **F03 — đề nghị CTO nghiệm thu chức năng.** Tất cả điều kiện CTO nêu ở mục 9 đã có bằng chứng: B10-M1 đóng (failure injection 12/12 + phục hồi 3/3), RAG runtime đã kiểm (14/14). Còn lại không chặn: SE-024 (B10-M2, MINOR backlog), SE-025 (chú thích SSE), SE-F10 DEFERRED, quy ước thư mục chờ CTO (mục 10.6). TL **không** tự đánh dấu F03 DONE.
+
+## 12. Đánh giá lại SSE: custom `SseStream` vs NestJS `@Sse()` (chỉ thị CTO "Evaluate NestJS Built-in SSE") — 21/11/2026 22:45
+
+**Trạng thái: POC / EVALUATION — AWAITING CTO DECISION.** POC: [SE-026](../tasks/SE-026-chat-nest-sse-poc.md) (nhánh riêng, không merge). Mục này **thay** phần kết luận SSE ở 10.3 (giữ nguyên bằng chứng cũ).
+
+### 12.1 Framework thực tế (NestJS `@nestjs/common`/`@nestjs/core` 12.2.0) [CODE + RUN22:45]
+Đọc mã: `decorators/http/sse.decorator.js`, `router/router-response-controller.js` (`sse()`), `router/sse-stream.js`. Chạy probe TL `nest-sse-wire.mjs` — app NestJS tối thiểu dùng đúng gói đã cài, route POST `@Sse`.
+
+| Hạng mục | Kết quả | Bằng chứng |
+|---|---|---|
+| POST | **Hỗ trợ**: `@Sse(path, { method })` (`METHOD_METADATA ?? GET`) | probe: `POST /stream → text/event-stream` |
+| Mã HTTP | POST mặc định **201** (hiện tại `200`) | probe: `→ 201` |
+| Observable | Handler trả `Observable` hoặc `Promise<Observable>`; mỗi giá trị là `MessageEvent {data,id,type,retry,comment}`; `data` object → `JSON.stringify` | `router-response-controller.js` `map(...)` |
+| Header | Ghi ở **macrotask sau** khi handler trả Observable; `Content-Type: text/event-stream`, `Cache-Control: private, no-cache, no-store, must-revalidate, max-age=0, no-transform`, `Pragma`, `Expires`, `X-Accel-Buffering: no`, `Connection: keep-alive` | probe headers |
+| Lỗi **trước** stream | Handler async ném lỗi trước khi trả Observable → exception filter → **JSON đúng mã** | probe: `POST /pre-error → 404 application/json` |
+| Lỗi **trong** stream | Observable `error` sau header → framework ghi `event: error\nid: N\ndata: Internal server error` + log | probe `mid-error` |
+| Disconnect | `close` → hủy đăng ký Observable (teardown chạy) + abort `@SseSignal()` | probe: `teardown called, signal.aborted=true` |
+| Disconnect trước subscribe | Client ngắt trong lúc handler async đang chạy → **producer không bao giờ được subscribe** ("Leave its producer unsubscribed") | `router-response-controller.js` nhánh `if (settled) return;` |
+| Heartbeat | **Không có sẵn**; tự `merge` `{ comment }` được | probe `disconnect`: `: ping` |
+| Backpressure | Có: `concatMap` chờ `drain`; vượt `maxPendingDataLength` (mặc định 4M ký tự) → cắt kết nối | `sse-stream.js` `writeMessage`; `DEFAULT_MAX_PENDING_DATA_LENGTH` |
+
+**Định dạng wire chính xác** (probe, không suy đoán):
+```
+\n                                   ← 1 byte đầu khi commit header
+id: 1\ndata: {"type":"meta"}\n\n     ← event có data: framework TỰ gán id tăng dần
+: ping\n\n                           ← { comment } : KHÔNG có id
+id: x\ndata: {"type":"done"}\n\n     ← id do handler đặt: vẫn có dòng id
+```
+→ **Không phải mọi dòng đều có `id:`** — comment thì không; **mọi event có `data`** thì có (tự gán hoặc do handler). Không có tùy chọn tắt.
+
+### 12.2 Vì sao web không xử lý event có `id:` [CODE]
+`apps/web/src/features/chat/stream.ts:41-45`: tách khối theo `\n\n`, rồi `if (raw.startsWith("data: ")) onEvent(JSON.parse(raw.slice(6)))`. Khối `id: 1\ndata: {...}` bắt đầu bằng `id:` → **bị bỏ qua**; khối đầu còn dính `\n` từ byte đầu. Parser hiện tại chỉ đúng với khối **một dòng `data:`** — không theo đặc tả SSE (một khối có thể có `id:`, `event:`, `retry:`, nhiều dòng `data:`). Sửa: duyệt từng dòng, gom dòng `data:` — khoảng 5 dòng, tương thích cả định dạng cũ lẫn mới. Ngoài web, repo **không** có client SSE nào khác (grep); script kiểm chứng của TL/SE dùng cùng kiểu parse → phải cập nhật.
+
+### 12.3 So sánh
+| Tiêu chí | A — giữ `SseStream` | B — `@Sse()` |
+|---|---|---|
+| Code bảo trì | `sse-stream.ts` 42 dòng (header, heartbeat, close, write) + 9 lời gọi trong `ChatService` | Xóa 42 dòng; thêm heartbeat (`merge`+`interval`, ~5 dòng), adapter Observable trong `ChatService`, xử lý giải phóng khóa khi ngắt trước subscribe; web parser +~5 dòng. **Ước lượng ròng gần như bằng nhau** — chờ số đo POC |
+| Độ phức tạp | Mệnh lệnh, tuần tự trong một hàm async; dễ đọc luồng | Phải tách "trước stream" (async handler) và "producer" (Observable); trạng thái khóa trải qua 2 pha |
+| Error handling | Trước `open()` → JSON qua filter; sau → `{type:'error',code}` | Như A nếu producer tự phát `{type:'error'}` và không `error()`; nếu để Observable lỗi → đổi định dạng (`event: error`, text) |
+| Cancellation/cleanup | `close` → `abort`; `finally` nhả khóa; đã kiểm runtime 5/5 | Teardown/`@SseSignal` chuẩn hóa; **rủi ro mới**: ngắt trước subscribe → không teardown → phải tự nhả khóa và quyết định số phận tin USER đã lưu |
+| Backpressure | Không có; đệm tối đa ≈ 1 câu trả lời (≤ 8192 token) | Có sẵn (`drain`, giới hạn 4M) — **lợi ích thật nhưng không cần ở giới hạn hiện tại** |
+| Mở rộng | Endpoint SSE mới phải dùng lại `SseStream` thủ công | Endpoint SSE mới khai báo bằng decorator, nhất quán với cách NestJS chuẩn; header chống cache đầy đủ hơn |
+| Contract | Giữ nguyên | **Đổi wire**: thêm `id:` + byte `\n` đầu; mã 201 nếu không đặt lại 200 → **bắt buộc sửa parser web**; payload JSON giữ được |
+
+### 12.4 Phương án
+- **A — giữ custom SSE.** Không đổi gì; đã kiểm runtime đúng (mục 10.3). Chi phí 0. Tồn tại: không backpressure (không cần ở quy mô này), một lớp tự viết thay vì tính năng framework.
+- **B — chuyển `@Sse()`.** Code diff dự kiến: `chat.controller.ts` (2 route → `@Sse` POST, `@HttpCode(200)` nếu có tác dụng, `@SseSignal`), `chat.service.ts` (tách pha trước stream / producer, nhả khóa khi ngắt sớm, heartbeat), xóa `sse-stream.ts`, `chat.service.spec.ts` (wiring), `apps/web/src/features/chat/stream.ts` (parser theo dòng). Không đổi schema/body/route/nghiệp vụ.
+  - **Ảnh hưởng frontend:** bắt buộc sửa parser (nhỏ, và tự nó là cải thiện tuân thủ đặc tả); deploy API và web **cùng lúc** (web cũ + API mới → mất toàn bộ event).
+  - **Rủi ro:** khóa `inFlight` kẹt khi ngắt trước subscribe; đổi wire; mã 201; tin USER đã lưu mà producer không chạy (hiện tại vẫn lưu `STOPPED`).
+
+### 12.5 Kết quả runtime
+- Framework probe (12.1): như trên.
+- POC: **chưa có** — giao SE-026; TL sẽ chạy V1–V8 (task SE-026) và cập nhật mục này.
+
+### 12.6 Khuyến nghị (tạm, chốt sau POC)
+**Chưa khuyến nghị B ở thời điểm này.** Lợi ích kiểm chứng được của B: header chuẩn hơn, backpressure có sẵn, bỏ một lớp tự viết, nhất quán NestJS. Chi phí kiểm chứng được: đổi wire (bắt buộc sửa web và deploy đồng bộ), thêm một rủi ro khóa mới, độ phức tạp tách 2 pha. TL sẽ khuyến nghị **B** nếu POC cho thấy: (1) khóa nhả đúng ở mọi đường ngắt (V3, V4), (2) contract giữ nguyên ngoài dòng `id:` (V6, mã 200), (3) hồi quy đủ (V1, V2, V5, V7), (4) diff ròng không làm `ChatService` khó đọc hơn. Ngược lại giữ **A**.
+
+**Độc lập với A/B (đề xuất):** sửa parser web theo đặc tả SSE (đọc từng dòng) — rủi ro thấp, giúp web chịu được proxy/gateway thêm trường SSE. Cần CTO duyệt vì chạm web.
