@@ -46,7 +46,7 @@
     "jszip": "3.10.2",
     "mammoth": "1.13.0",
     "minio": "^8.0.7",
-    "mongoose": "^9.11.3",
+    "mongoose": "~9.11.4",
     "openai": "^7.57.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
