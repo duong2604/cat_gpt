@@ -3,7 +3,7 @@
 Người lập: TL · Cơ sở: `origin/develop` @ `547b06f` (CI success) · Bắt đầu: 21/11/2026 21:30 · Kết thúc triển khai: 21:57 · `develop` @ `86b9f3f`
 Task triển khai: [SE-022](../tasks/SE-022-chat-module-structural-refactor.md) · Chỉ thị: CTO "Chat Module Structural Refactor" (P1)
 
-**Trạng thái: SE-022 `CTO STRUCTURAL ACCEPTED` (21/11/2026) · F03 `PARTIAL` — SE-023 đã merge (`83704bc`), TL đề nghị CTO nghiệm thu chức năng (mục 11).** Xem mục 9. Convention review (test, `guards/`, SSE): mục 10 — chờ CTO duyệt mục 10.6. **SSE: mục 12–15 — SE-027 merge `11106c8`; POC B, C xong; TL khuyến nghị KEEP CUSTOM SSE + sửa lỗi ngắt sớm — AWAITING CTO DECISION, chưa merge backend SSE.**
+**Trạng thái: SE-022 `CTO STRUCTURAL ACCEPTED` (21/11/2026) · F03 `PARTIAL` — SE-023 đã merge (`83704bc`), TL đề nghị CTO nghiệm thu chức năng (mục 11).** Xem mục 9. Convention review (test, `guards/`, SSE): mục 10 — chờ CTO duyệt mục 10.6. **SSE: mục 12–15 — SE-027 merge `11106c8`; POC B, C xong; CTO chọn **C — Native Streaming** (mục 16); migration SE-029, merge sau CTO duyệt.**
 
 Ký hiệu: **[CODE]** đã kiểm chứng bằng code/lệnh · **[NHẬN ĐỊNH]** đánh giá kỹ thuật · **[ĐỀ XUẤT]**.
 
@@ -499,3 +499,17 @@ Lý do (bằng chứng ở 15.1–15.3):
 
 **Đóng POC:** B và C — giữ nhánh làm bằng chứng, không merge; xóa nhánh khi CTO cho phép.
 **Chờ CTO quyết:** (a) chọn A + sửa lỗi ngắt sớm (khuyến nghị) / B / C; (b) hành vi khi client đi trước khi stream mở (nếu chọn A + sửa: lưu `STOPPED` như bấm Dừng).
+
+
+## 16. CTO quyết định: MIGRATE TO NESTJS NATIVE STREAMING RESPONSES (phương án C) — 22/11/2026 00:17
+
+CTO không giữ custom SSE transport (khuyến nghị A của TL ở 15.4 **không được chọn**); ưu tiên API streaming chính thức của NestJS. Task: [SE-029](../tasks/SE-029-chat-native-streaming-migration.md). **Merge chỉ sau khi CTO phê duyệt.** Giữ nhánh POC B/C tới khi migration xong.
+
+**Quyết định thiết kế của TL (dựa trên POC C, sửa 3 điểm):**
+| Vấn đề ở POC C | Thiết kế migration | Lý do |
+|---|---|---|
+| Lỗi trước stream trả `Content-Type: text/event-stream` (`@Header()` áp cả response lỗi) | Handler trả **web `Response`** mang header SSE; **bỏ `@Header`/`@HttpCode`** | Tài liệu NestJS (streaming-responses): handler POST trả `Response` được hỗ trợ, `Response` tự mang status/header; lỗi ném trước khi tạo `Response` đi qua exception filter → JSON `application/json` như mọi route |
+| `ReadableStream`, heartbeat, đóng khung SSE nằm trong `ChatService` | Hàm adapter `toSseResponse(run, onCancel)` trong `sse-response.ts`; `ChatService` chỉ có `prepare*`, `run(turn, emit)`, `cancel(turn)` | Tách trách nhiệm HTTP streaming khỏi nghiệp vụ; `ChatService` không biết Express/HTTP |
+| `gone = () => req.socket.destroyed` (chi tiết Express trong controller); ngắt sớm để lại tin USER không câu trả lời | Bỏ; dựa vào NestJS gọi `cancel()` (kể cả trước chunk đầu) → abort → lưu `STOPPED` | Dùng cơ chế framework; ngắt sớm xử lý như bấm Dừng — giữ cặp USER/ASSISTANT, UI còn nút Tạo lại (trả lời câu hỏi mở ở 15.4b) |
+
+**Kiểm chứng sẽ chạy (AC1–AC11 trong SE-029):** toàn bộ bộ POC + Content-Type của từng lỗi trước stream + hồi quy toàn API. Kịch bản TL `se020-review` có 2 kỳ vọng cũ đã ghi nhận (15.1) — sửa riêng trong kịch bản (kỳ vọng SE-F9; đọc `QDRANT_COLLECTION` theo môi trường chạy), ghi lại trước/sau, không bỏ qua lỗi mới.
