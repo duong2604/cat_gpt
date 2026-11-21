@@ -4,7 +4,7 @@ Tài liệu theo dõi **duy nhất** của chương trình (chỉ thị CTO "Aut
 
 Phạm vi: chỉ `apps/api`; giữ API contract và nghiệp vụ, trừ sửa bug đã duyệt; không viết unit test mới. TL tự review/merge PR đạt gate; thay đổi chính sách bảo mật phiên, schema, contract → CTO.
 
-Cập nhật: 21/11/2026 12:12 · `develop` @ `f173090`
+Cập nhật: 21/11/2026 19:47 · `develop` @ `fe06486` — trạng thái hiện hành: **mục 8**
 
 Quy ước trạng thái: **Partial** = đã sửa một phần, còn phạm vi ghi ở cột Status; **Audited** = đã audit + xác minh, chưa refactor; **Not started** = chưa audit đủ. Không có flow nào **Done** ở thời điểm này.
 
@@ -147,7 +147,7 @@ Từ mục này, **trạng thái flow** dùng thang của CTO: NOT STARTED · IN
 
 DoD (16 mục): D1 audit toàn phạm vi · D2 findings phân loại và xử lý · D3 không còn BLOCKER/MAJOR mở · D4 đúng nghiệp vụ và API contract · D5 security/authorization đã review · D6 concurrency/error handling đã review · D7 dễ đọc, dễ debug · D8 trách nhiệm class/method rõ · D9 tổ chức file hợp lý · D10 không overengineering · D11 typecheck/lint/build · D12 regression liên quan · D13 TL independent review · D14 PR liên quan đã merge · D15 xác minh sau merge · D16 bằng chứng + SHA trong tracker.
 
-### 7.1. Bảng trạng thái flow (`develop` `4cd1784`, cập nhật 15:2x)
+### 7.1. Bảng trạng thái flow (`develop` `4cd1784`, cập nhật 15:2x) — *đã được thay bằng mục 8*
 | Flow | Scope | Findings còn mở | PR đã merge | TL review evidence | Regression evidence | DoD chưa đạt | Status | Next action |
 |---|---|---|---|---|---|---|---|---|
 | **F01** Auth & Sessions | login, refresh/xoay token, logout, phiên (`sessions`), JWT/strategy, cookie, giới hạn đăng nhập, `/me/sessions`, thu hồi khi khóa/đổi mật khẩu | ~~TL-F1~~ (đóng #45); ~~TL-F2/SE-F3~~ (đóng #45, gate 2 đạt); **F01-N1 MAJOR**; **F01-N2 MAJOR**; SE-F24 MAJOR; KT-3 MAJOR (SE-005); F01-N3 MINOR; MINOR `initial` thừa | 2 (#39, #45) | Vòng 6, 7.2, review vòng 8 (gate 1/2 TL tự kiểm trên DB riêng) | 27/27 + gate 1/2 + TL-F1 (DB `cat_gpt_loadtest`) | D3 (4 MAJOR còn), D14, D15 | **IN PROGRESS** — không còn BLOCKER | PR-B8 (SE-F24, F01-N1, F01-N2) → SE-005 (KT-3) → TL xác minh toàn F01 |
@@ -222,3 +222,49 @@ Chủ dự án xác nhận trực tiếp trong phiên Senior Dev ("Xác nhận x
 | users | 217 | 217 |
 **SE xác minh:** users 238 → 21; còn lại theo 217 ID = 0 ở mọi collection; messages của 25 hội thoại đã xóa = 0 (không mồ côi); 2 UNVERIFIED còn; admin còn. ID không xóa được: không có.
 **TL xác minh độc lập** (API `develop` `fe06486` trên DB `cat_gpt`, chỉ đọc qua API quản trị, đăng xuất admin sau khi kiểm): `health` `200`; admin đăng nhập `200`; tổng users **21** (1 ADMIN, 20 USER) = 238 − 217; tìm theo `loadtest`, `tl-smoke`, `se018-regression`, `se020-regression`, `b1-e2e`, `b4-verify` → **0**; `b2-race` → 1 và `b7-` → 1 (đúng 2 UNVERIFIED được giữ). *Ghi chú trung thực:* lần kiểm đầu TL dùng sai tên tham số (`q` thay vì `search`) nên API trả `400` và kết quả 0 vô nghĩa; TL phát hiện và kiểm lại với `search`, kết quả trên là lần đúng. Số bản ghi phiên/hội thoại/tin nhắn mồ côi: theo kết quả SE (API quản trị không đọc được dữ liệu Chat của người khác — đúng thiết kế phân quyền).
+
+## 8. Trạng thái thực tế F01–F09 (kiểm tra theo yêu cầu CTO, 21/11/2026 19:4x)
+
+**`develop` @ `fe06486`** — CI `build` success ([run 44886404082](https://github.com/duong2604/cat_gpt/actions/runs/44886404082)). Không có PR mở. Bảng này **thay thế** bảng 7.1.
+
+**PR #45 (PR-B3)** — MERGED → `73614c9` (head đã review `bfbbb5a`, CI SUCCESS). TL review vòng 8: APPROVED; gate 1 (replay) và gate 2 (2 tab, cả hai thứ tự cookie jar, sau 31 s không thu hồi) TL tự kiểm trên DB `cat_gpt_loadtest`; hồi quy 27/27. Đóng TL-F1 (BLOCKER), TL-F2/SE-F3. Còn MINOR: `const initial = first;` thừa. Rủi ro còn lại: ân hạn 30 s cho đổi token vừa bị thay đúng một lần.
+**PR #46 (PR-B9)** — MERGED → `fe06486` (head đã review `bcbab5e`, CI SUCCESS). Vòng 1 `3729d68` **Cần sửa** (TL tái hiện vượt bằng tên tệp không `.xml`); vòng 2 APPROVED. Đóng F04-N1 (BLOCKER). Còn MINOR: thông điệp lỗi "Các phần XML…" chưa cập nhật.
+
+### 8.1. Bảng tổng kết
+| Flow | Audit toàn bộ | SE refactor xong | TL review độc lập toàn bộ | Findings còn mở (severity) | PR đã merge | Điều kiện còn thiếu để DONE | **Kết luận** |
+|---|---|---|---|---|---|---|---|
+| **F01** Auth & Sessions | Có (TL 7.2) | Chưa — PR-B8, SE-005 chưa xong | Có (7.2 + review vòng 8) | **MAJOR ×4**: F01-N1 (secret JWT mẫu), F01-N2 (mật khẩu admin mẫu), SE-F24 (cookie `secure`) → PR-B8 **chưa bắt đầu**; KT-3 (IP dùng chung bị chặn đăng nhập) → SE-005 **WIP chưa kiểm chứng**. MINOR: F01-N3, `initial` thừa | #39, #45 | PR-B8 + SE-005 merge; TL xác minh sau merge toàn F01 | **PARTIAL** |
+| F02 Authorization, Roles, Ownership | Có (TL + SE-F23…F30) | Một phần (#42) | Chưa đủ — TL chưa tự đọc `users.service.ts` toàn bộ, DTO admin, `admin-users.controller.ts` | MINOR: SE-F12/TL-F12, SE-F13/TL-F9, SE-F28, SE-F29 (chưa quyết định xử lý hay backlog) | #42 | TL review toàn phạm vi; chốt từng MINOR (sửa hoặc chấp nhận có ghi lý do); xác minh sau merge | **PARTIAL** |
+| F03 Chat | Có | Một phần (#39, #40, #43) | Có (từng PR) | MINOR: SE-F8 (khe hẹp tin mồ côi — chú thích đã sửa), SE-F9 (Tạo lại xóa câu cũ trước), SE-F10 (tin nhắn không phân trang — đổi contract) — **SE-F9/F10 chờ CTO quyết, chưa có chỉ đạo** | #39, #40, #43 | Quyết định CTO SE-F9/F10 → làm hoặc chấp nhận | **BLOCKED** (chờ CTO) |
+| F04 Documents upload/validation/download | Có (TL 7.3) | Có (#38, #40, #41, #46) | Có (7.3 + review vòng 9–10) | MINOR: thông điệp lỗi "Các phần XML…" (PR-B8). SUGGESTION: SE-F18, F04-N2 (chấp nhận, không sửa) | #38, #40, #41, #46 | **Chỉ còn** MINOR thông điệp (PR-B8) → kiểm lại → DONE. **Xác minh toàn flow sau merge đã đạt 18/18** (mục 8.2) | **PARTIAL** (gần DONE nhất) |
+| F05 Processing/Delete/Cleanup | Có | Một phần (#40) | Có (vòng 4–5) | MINOR: SE-F22 (không có reconcile khi job xóa thất bại) — **chờ CTO** | #40 | Quyết định CTO SE-F22 | **BLOCKED** (chờ CTO) |
+| F06 RAG | Có | Một phần (#40) | Có | SUGGESTION: SE-F16 (kiểm nội dung trích dẫn), SE-F17 (vị trí dữ liệu trong prompt) — **chờ CTO**; TL-F11 (tùy chọn) | #40 | Quyết định CTO SE-F16/F17 | **BLOCKED** (chờ CTO) |
+| F07 Summary/BullMQ | Có | Một phần (#40, #43) | Có | MINOR: SE-F5 (timeout LLM/embedding — audit trong PR-B8, **chưa bắt đầu**) | #40, #43 | PR-B8 (audit + đề xuất timeout) | **PARTIAL** |
+| F08 Config/Logging/Exceptions | Có | Một phần (#42) | Có (vòng 13, 21) | **MAJOR**: DNS ghi đè toàn tiến trình; SE-F24 (chung F01). MINOR: SE-F26 (Swagger). R1–R12 chưa cài | #42 | PR-B8 | **PARTIAL** |
+| F09 Module structure | Có | Một phần (#43) | Có | MINOR: B12 `ioredis` không dùng (PR-C2 **chưa bắt đầu**); TL-F10, SE-F19 chấp nhận | #43 | PR-C2 | **PARTIAL** |
+
+**DONE: 0/9 · PARTIAL: 6 (F01, F02, F04, F07, F08, F09) · BLOCKED: 3 (F03, F05, F06 — chờ quyết định CTO).** Không còn BLOCKER mở; còn **5 MAJOR** (4 ở F01, 1 ở F08 — SE-F24 tính chung).
+**Gần DONE nhất:** F04 (1 MINOR thông điệp). Kế tiếp: F02 (TL review toàn phạm vi + chốt MINOR).
+**Việc chặn nhiều flow nhất:** PR-B8 — giao từ 12:4x nhưng **chưa bắt đầu** lúc 19:4x (SE bận PR-B3, PR-B9, C1). TL đã yêu cầu SE xác nhận bắt đầu và ước lượng.
+
+### 8.2. F04 — xác minh toàn flow sau merge (TL, 19:4x)
+`develop` `fe06486`, API `dist` cổng 4100 trên DB `cat_gpt_loadtest` (không dùng DB demo), kịch bản `f04-verify.mjs` ngoài repo, 2 tài khoản tạm:
+| Ca | Kết quả |
+|---|---|
+| TXT, PDF text, PDF nhiều trang, DOCX hợp lệ | READY |
+| DOCX hỏng, PDF hỏng | FAILED `DOCUMENT_UNREADABLE` |
+| PDF scan | FAILED `DOCUMENT_NO_TEXT` |
+| DOCX bom (rels styles → `word/st` 100 MB) | FAILED `DOCUMENT_TOO_MANY_CHUNKS` |
+| Tên tệp tiếng Việt | Giữ nguyên |
+| > 25 MB / `.exe` / chữ ký PDF giả | `400 FILE_TOO_LARGE` / `400 FILE_INVALID_TYPE` / `400 FILE_INVALID_TYPE` |
+| Tải về TXT, PDF | `200`, khớp từng byte, `Cache-Control: private, no-store` |
+| Người khác tải / ẩn danh / admin đọc | `404` / `401` / `404` |
+| Health sau mọi ca | `200` |
+**18/18 PASS.** Dọn: 8 tài liệu xóa theo ID (`204`), 2 tài khoản tạm `BLOCKED` (trên DB `cat_gpt_loadtest`).
+
+### 8.3. Ngoài SE-021 (báo riêng, không tính vào tiến độ flow)
+| Hạng mục | Trạng thái thực tế |
+|---|---|
+| **C1 Data Cleanup** | **DONE** (phạm vi 217 ID đã duyệt) — xóa sau xác nhận trực tiếp của chủ dự án; TL xác minh: users 238 → 21, không còn tài khoản thử trong phạm vi, admin đăng nhập được, health 200 (mục 5.6). Còn 2 tài khoản UNVERIFIED giữ nguyên |
+| **C2 Code Cleanup** | **CHƯA BẮT ĐẦU** — B2 (production cấm mock) gộp vào PR-B8; B12 (`ioredis`) là PR-C2 riêng; cả hai chưa có PR |
+| **SE-005** | **Tạm dừng, chưa kiểm chứng** — nhánh local `fix/shared-ip-throttling`, commit WIP `0167803` (không push); AC1 tái hiện trên DB demo (25/200 thành công, 175 `429`), chưa chạy lại trên DB riêng; chưa build/PR. Hạn bàn giao dự kiến 27/11 |
