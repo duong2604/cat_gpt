@@ -151,7 +151,9 @@ export class DocumentProcessor extends WorkerHost {
       pages = await this.extractPages(doc.mimeType, buffer);
     } catch (error) {
       // Chỉ ghi tên và thông điệp lỗi để chẩn đoán — không ghi nội dung tài liệu (thiết kế mục 7).
-      const detail = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
+      const raw = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
+      // Một dòng, tối đa 200 ký tự: thông điệp parser có thể chứa mảnh dữ liệu tài liệu.
+      const detail = raw.replace(/\s+/g, ' ').slice(0, 200);
       this.logger.warn(`documentId=${documentId} bóc tách lỗi: ${detail}`);
       if (error instanceof DocumentTooLargeToProcessError) {
         return this.failPermanently(_id, ErrorCode.DOCUMENT_TOO_MANY_CHUNKS);
