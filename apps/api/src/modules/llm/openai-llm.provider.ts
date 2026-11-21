@@ -13,11 +13,13 @@ export type ResponsesClient = Pick<OpenAI, 'responses'>;
 
 /** Lỗi đã làm sạch: chỉ còn mã trạng thái / mã lỗi, không kèm nội dung hội thoại hay key. */
 export class LlmError extends Error {
+  /** `cause` giữ lỗi gốc cho log chẩn đoán; không đưa ra ngoài và không chứa nội dung hội thoại. */
   constructor(
     readonly status: number | undefined,
     readonly code: string,
+    options?: { cause?: unknown },
   ) {
-    super(`OpenAI error status=${status ?? '-'} code=${code}`);
+    super(`OpenAI error status=${status ?? '-'} code=${code}`, options);
     this.name = 'LlmError';
   }
 }
@@ -109,7 +111,7 @@ export class OpenAiLlmProvider extends LlmProvider {
       if (error instanceof APIError) {
         throw new LlmError(error.status, error.code ?? (error.type as string | undefined) ?? 'api_error');
       }
-      throw new LlmError(undefined, 'network_error');
+      throw new LlmError(undefined, 'network_error', { cause: error });
     }
   }
 }

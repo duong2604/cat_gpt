@@ -8,11 +8,14 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  Matches,
   Max,
+  MaxLength,
   Min,
   MinLength,
   validateSync,
 } from 'class-validator';
+import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH, PASSWORD_PATTERN } from '@cat-gpt/shared';
 
 export enum NodeEnv {
   Development = 'development',
@@ -100,8 +103,11 @@ export class EnvironmentVariables {
   @IsEmail()
   ADMIN_EMAIL: string;
 
+  /** Cùng chính sách với mật khẩu người dùng (IsStrongPassword): 8–64 ký tự, có cả chữ và số. */
   @IsString()
-  @MinLength(8)
+  @MinLength(PASSWORD_MIN_LENGTH, { message: `ADMIN_PASSWORD phải dài tối thiểu ${PASSWORD_MIN_LENGTH} ký tự` })
+  @MaxLength(PASSWORD_MAX_LENGTH, { message: `ADMIN_PASSWORD dài tối đa ${PASSWORD_MAX_LENGTH} ký tự` })
+  @Matches(PASSWORD_PATTERN, { message: 'ADMIN_PASSWORD phải có cả chữ cái và chữ số' })
   ADMIN_PASSWORD: string;
 
   @IsString()
