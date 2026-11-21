@@ -99,7 +99,7 @@ Quy trình bắt buộc: SE inventory + **dry-run (chỉ đọc)** → TL đối
 ### 5.3. Trạng thái
 | Workstream | Trạng thái | PR | Ghi chú |
 |---|---|---|---|
-| C1 Data Cleanup | **IN REVIEW** — dry-run xong, TL duyệt manifest 15:54; chờ export + TL GO | — | 217 ID (A1 200, A2 10 + 1 TL bổ sung, A3 6); 2 UNVERIFIED giữ nguyên |
+| C1 Data Cleanup | **IN PROGRESS** — export đã kiểm, **TL GO xóa** 15:57; dry-run xong, TL duyệt manifest 15:54; chờ export + TL GO | — | 217 ID (A1 200, A2 10 + 1 TL bổ sung, A3 6); 2 UNVERIFIED giữ nguyên |
 | C2 Code Cleanup | **Chưa bắt đầu** — TL audit xong; B8/B9 nằm trong PR-B8; B2, B12 sẽ thành PR-C2 | — | PR riêng, không gộp với C1 |
 
 ## 6. Chính sách cấu hình theo môi trường (chỉ thị CTO vòng 20) — audit TL 12:5x, `develop` `4cd1784`
@@ -198,3 +198,14 @@ Manifest SE (ngoài repo, sha256 `ca3d509390e8ca57e8a1049cc74d37c9e65acc1e81d160
 | A3 tài khoản thử SE | 6 | 15 | 19 | 38 | 0 | 0 | Mỗi ID có file nguồn ghi lúc tạo (TL kiểm nội dung + giờ ghi trước giờ mở PR) hoặc hồ sơ SE-018 |
 | UNVERIFIED | 2 | — | — | — | — | — | `b2-race-1795235391161`, `b7-1795237688343` (`@example.invalid`) — không có ID nguồn → **giữ nguyên** |
 Điều kiện thực hiện: export JSON (sha256) của mọi bản ghi sẽ xóa → TL kiểm số bản ghi export → **TL GO** → xóa theo `$in` đúng danh sách, thứ tự Qdrant → MinIO → BullMQ → messages → conversations → documents → sessions → users → đếm lại, kiểm mồ côi, health.
+
+### 5.5. C1 — kiểm export và GO (TL, 15:57)
+Manifest v2 sha256 `a7fef1f6164874e95d1a50f8761b86d50d0ffbf31f507b75acd88953a72d67bd` (217 ID: A1 200, A2 11, A3 6). Export ngoài repo, `INDEX.json` sha256 `cbf0a9fe1351a3963ab346a62c904711396c7c68ba9f2981a33a7a550ff73c90`.
+| Tệp export | Bản ghi | sha256 khớp INDEX | Kiểm phạm vi (TL) |
+|---|---|---|---|
+| users | 217 | Đạt | Đúng 217 ID manifest; 0 ADMIN; 0 UNVERIFIED |
+| sessions | 79 | Đạt | Mọi `userId` ∈ 217 ID |
+| conversations | 25 | Đạt | Mọi `userId` ∈ 217 ID |
+| messages | 50 | Đạt | Mọi bản ghi thuộc 25 hội thoại trên và `userId` ∈ 217 ID |
+| documents, MinIO, Qdrant, BullMQ | 0 | Đạt | — |
+**GO xóa** với số kỳ vọng cố định: messages 50 → conversations 25 → sessions 79 → users 217; lệch là dừng. Export giữ ngoài repo (có hash mật khẩu tài khoản thử) để khôi phục.
