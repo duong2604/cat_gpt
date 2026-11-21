@@ -4,7 +4,7 @@ Tài liệu theo dõi **duy nhất** của chương trình (chỉ thị CTO "Aut
 
 Phạm vi: chỉ `apps/api`; giữ API contract và nghiệp vụ, trừ sửa bug đã duyệt; không viết unit test mới. TL tự review/merge PR đạt gate; thay đổi chính sách bảo mật phiên, schema, contract → CTO.
 
-Cập nhật: 21/11/2026 11:59 · `develop` @ `646fcb4`
+Cập nhật: 21/11/2026 11:57 · `develop` @ `646fcb4`
 
 Quy ước trạng thái: **Partial** = đã sửa một phần, còn phạm vi ghi ở cột Status; **Audited** = đã audit + xác minh, chưa refactor; **Not started** = chưa audit đủ. Không có flow nào **Done** ở thời điểm này.
 
