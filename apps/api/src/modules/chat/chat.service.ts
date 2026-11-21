@@ -72,7 +72,6 @@ export class ChatService {
         );
       }
       conversation = await this.conversations.getOwnedOrThrow(userId, dto.conversationId);
-      this.assertNotStreaming(conversation);
       this.assertRagNotHidden(conversation);
     } else {
       const documentIds = dto.documentIds
@@ -81,34 +80,46 @@ export class ChatService {
       conversation = await this.conversations.create(userId, makeTitle(dto.content), documentIds);
     }
 
-    const userMessage = await this.conversations.createMessage({
-      conversationId: conversation._id,
-      userId: conversation.userId,
-      role: MessageRole.USER,
-      content: dto.content,
-    });
-    await this.conversations.touch(conversation._id);
+    // Đặt chỗ trước mọi await: hai POST đồng thời cùng hội thoại không thể cùng stream.
+    const key = conversation._id.toString();
+    const controller = this.reserveStream(key);
+    try {
+      const userMessage = await this.conversations.createMessage({
+        conversationId: conversation._id,
+        userId: conversation.userId,
+        role: MessageRole.USER,
+        content: dto.content,
+      });
+      await this.conversations.touch(conversation._id);
 
-    await this.streamAnswer(conversation, userMessage, sse);
+      await this.streamAnswer(conversation, userMessage, sse, controller);
+    } finally {
+      this.inFlight.delete(key);
+    }
   }
 
   /** Bỏ câu trả lời cuối của assistant (nếu có) rồi sinh lại cho tin nhắn cuối của người dùng. */
   async regenerate(userId: string, conversationId: string, sse: SseStream): Promise<void> {
     this.assertRateLimit(userId);
     const conversation = await this.conversations.getOwnedOrThrow(userId, conversationId);
-    this.assertNotStreaming(conversation);
     this.assertRagNotHidden(conversation);
 
-    let last = await this.conversations.lastMessage(conversation._id);
-    if (last?.role === MessageRole.ASSISTANT) {
-      await this.conversations.deleteMessage(last._id);
-      last = await this.conversations.lastMessage(conversation._id);
-    }
-    if (last?.role !== MessageRole.USER) {
-      throw AppException.badRequest(ErrorCode.CHAT_NOTHING_TO_REGENERATE);
-    }
+    const key = conversation._id.toString();
+    const controller = this.reserveStream(key);
+    try {
+      let last = await this.conversations.lastMessage(conversation._id);
+      if (last?.role === MessageRole.ASSISTANT) {
+        await this.conversations.deleteMessage(last._id);
+        last = await this.conversations.lastMessage(conversation._id);
+      }
+      if (last?.role !== MessageRole.USER) {
+        throw AppException.badRequest(ErrorCode.CHAT_NOTHING_TO_REGENERATE);
+      }
 
-    await this.streamAnswer(conversation, null, sse);
+      await this.streamAnswer(conversation, null, sse, controller);
+    } finally {
+      this.inFlight.delete(key);
+    }
   }
 
   /** Dừng stream đang chạy của hội thoại. Phần đã sinh vẫn được lưu với trạng thái STOPPED. */
@@ -121,16 +132,23 @@ export class ChatService {
     this.inFlight.get(conversationId)?.abort();
   }
 
+  /** Chỗ stream của hội thoại (đã đăng ký trong `inFlight`); người gọi có trách nhiệm giải phóng. */
+  private reserveStream(key: string): AbortController {
+    if (this.inFlight.has(key)) throw AppException.conflict(ErrorCode.CHAT_STREAM_IN_PROGRESS);
+    const controller = new AbortController();
+    this.inFlight.set(key, controller);
+    return controller;
+  }
+
   private async streamAnswer(
     conversation: Conversation,
     userMessage: Message | null,
     sse: SseStream,
+    controller: AbortController,
   ): Promise<void> {
     const history = await this.conversations.recentMessages(conversation._id, CONTEXT_MESSAGES);
 
     const key = conversation._id.toString();
-    const controller = new AbortController();
-    this.inFlight.set(key, controller);
 
     try {
       // Đóng tab / mất mạng cũng được xử lý như bấm Dừng.
@@ -238,7 +256,6 @@ export class ChatService {
       this.logger.error(`Stream lỗi ở hội thoại ${key}`, (error as Error).stack);
       sse.send({ type: 'error', code: ErrorCode.INTERNAL_ERROR });
     } finally {
-      this.inFlight.delete(key);
       sse.end();
     }
   }
@@ -269,12 +286,6 @@ export class ChatService {
       throw AppException.badRequest(ErrorCode.DOCUMENT_NOT_READY);
     }
     return ids;
-  }
-
-  private assertNotStreaming(conversation: Conversation): void {
-    if (this.inFlight.has(conversation._id.toString())) {
-      throw AppException.conflict(ErrorCode.CHAT_STREAM_IN_PROGRESS);
-    }
   }
 
   /**
