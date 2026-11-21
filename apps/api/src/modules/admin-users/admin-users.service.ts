@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import {
   type AdminUserDto,
   ErrorCode,
@@ -29,6 +29,8 @@ import type {
  */
 @Injectable()
 export class AdminUsersService {
+  private readonly logger = new Logger(AdminUsersService.name);
+
   constructor(
     private readonly users: UsersService,
     private readonly sessions: SessionsService,
@@ -63,7 +65,21 @@ export class AdminUsersService {
       if (target.role === UserRole.ADMIN) await this.assertNotLastActiveAdmin(target);
     }
 
-    return this.presenter.toAdminDto(await this.users.update(id, dto));
+    // Cập nhật TRƯỚC (lỗi trùng email/404/validate ném ra ngay, KHÔNG thu hồi phiên).
+    const updated = await this.users.update(id, dto);
+
+    // Đổi email thật (DTO đã trim + lower; so với email hiện tại): thu hồi mọi phiên SAU khi cập nhật thành công (CS-3).
+    if (dto.email !== undefined && dto.email !== target.email) {
+      try {
+        await this.sessions.revokeAllForUser(id);
+      } catch (error) {
+        // Không nuốt lỗi: email đã đổi nhưng phiên cũ chưa thu hồi → trả 5xx. Log chỉ có userId, không có email.
+        this.logger.error(`Đã đổi email nhưng thu hồi phiên thất bại (userId=${id})`, (error as Error).stack);
+        throw new AppException(ErrorCode.INTERNAL_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+    }
+
+    return this.presenter.toAdminDto(updated);
   }
 
   async setStatus(admin: AuthUser, id: string, status: UserStatus): Promise<AdminUserDto> {
