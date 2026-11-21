@@ -99,7 +99,7 @@ Quy trình bắt buộc: SE inventory + **dry-run (chỉ đọc)** → TL đối
 ### 5.3. Trạng thái
 | Workstream | Trạng thái | PR | Ghi chú |
 |---|---|---|---|
-| C1 Data Cleanup | **DONE** (phạm vi 217 ID đã duyệt) — xóa 18:xx sau xác nhận trực tiếp của chủ dự án; TL xác minh sau xóa 18:35 | — (thao tác dữ liệu, không có PR code) | 2 tài khoản UNVERIFIED giữ nguyên; export khôi phục ngoài repo |
+| C1 Data Cleanup | **DONE** (phạm vi 217 ID đã duyệt) — xóa sau xác nhận trực tiếp của chủ dự án; TL xác minh sau xóa 18:35 | — (thao tác dữ liệu, không có PR code) | 2 tài khoản UNVERIFIED giữ nguyên; export khôi phục ngoài repo |
 | C2 Code Cleanup | **Chưa bắt đầu** — TL audit xong; B8/B9 nằm trong PR-B8; B2, B12 sẽ thành PR-C2 | — | PR riêng, không gộp với C1 |
 
 ## 6. Chính sách cấu hình theo môi trường (chỉ thị CTO vòng 20) — audit TL 12:5x, `develop` `4cd1784`
