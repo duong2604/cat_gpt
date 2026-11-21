@@ -221,7 +221,9 @@ export class DocumentProcessor extends WorkerHost {
       return extractPdf(buffer, this.config.documents.maxPdfPages);
     }
     if (mimeType === DOCX_MIME_TYPE) {
-      return extractDocx(buffer, this.config.documents.maxDocxXmlBytes);
+      // Ngân sách giải nén tổng: tệp tải lên tối đa (ảnh không nén thêm) + phần XML tối đa.
+      const { maxSizeBytes, maxDocxXmlBytes } = this.config.documents;
+      return extractDocx(buffer, maxSizeBytes + maxDocxXmlBytes);
     }
     return [{ page: null, text: extractTxt(buffer) }];
   }

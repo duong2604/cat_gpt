@@ -109,19 +109,12 @@ function measureEntryWithinBudget(entry: JSZip.JSZipObject, budget: { remaining:
 }
 
 /**
- * Phần XML/rels mà mammoth có thể đọc (document, styles, numbering, footnotes, headers, rels…).
- * Không tính `word/media/*`: ảnh là dữ liệu nhị phân mà chế độ lấy văn bản thô không giải mã,
- * và tính vào sẽ chặn nhầm DOCX hợp lệ có ảnh lớn.
+ * Bóc tách DOCX bằng mammoth, sau khi đo byte giải nén thật của MỌI entry không phải thư mục
+ * trong một ngân sách chung `maxBytes` (dừng ngay khi vượt). Không lọc theo tên/đuôi: mammoth
+ * tìm styles/numbering/footnotes… theo relationship target, nên tên tệp không đáng tin (F04-N1).
+ * Ngân sách do tầng gọi truyền vào = kích thước tệp tải lên tối đa + phần XML tối đa.
  */
-function isXmlPart(name: string): boolean {
-  return (name.endsWith('.xml') || name.endsWith('.rels')) && !name.startsWith('word/media/');
-}
-
-/**
- * Bóc tách DOCX bằng mammoth, sau khi đo thật toàn bộ phần XML/rels (một ngân sách chung
- * `maxXmlBytes`, dừng ngay khi vượt) — chặn zip bomb ở styles.xml/numbering.xml… (F04-N1).
- */
-export async function extractDocx(buffer: Buffer, maxXmlBytes: number): Promise<ExtractedPage[]> {
+export async function extractDocx(buffer: Buffer, maxBytes: number): Promise<ExtractedPage[]> {
   let zip: JSZip;
   try {
     zip = await JSZip.loadAsync(buffer);
@@ -131,9 +124,9 @@ export async function extractDocx(buffer: Buffer, maxXmlBytes: number): Promise<
   if (!zip.file('word/document.xml')) {
     throw new DocumentUnreadableError('Không tìm thấy word/document.xml');
   }
-  const budget = { remaining: maxXmlBytes };
+  const budget = { remaining: maxBytes };
   for (const entry of Object.values(zip.files)) {
-    if (entry.dir || !isXmlPart(entry.name)) continue;
+    if (entry.dir) continue;
     await measureEntryWithinBudget(entry, budget);
   }
   try {
