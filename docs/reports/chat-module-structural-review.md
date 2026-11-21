@@ -3,7 +3,7 @@
 Người lập: TL · Cơ sở: `origin/develop` @ `547b06f` (CI success) · Bắt đầu: 21/11/2026 21:30 · Kết thúc triển khai: 21:57 · `develop` @ `86b9f3f`
 Task triển khai: [SE-022](../tasks/SE-022-chat-module-structural-refactor.md) · Chỉ thị: CTO "Chat Module Structural Refactor" (P1)
 
-**Trạng thái: SE-022 `CTO STRUCTURAL ACCEPTED` (21/11/2026) · F03 `PARTIAL` — SE-023 đã merge (`83704bc`), TL đề nghị CTO nghiệm thu chức năng (mục 11).** Xem mục 9. Convention review (test, `guards/`, SSE): mục 10 — chờ CTO duyệt mục 10.6. **SSE: mục 12–13 — SE-026 POC / EVALUATION (chưa được merge backend SSE); SE-027 parser web APPROVED.**
+**Trạng thái: SE-022 `CTO STRUCTURAL ACCEPTED` (21/11/2026) · F03 `PARTIAL` — SE-023 đã merge (`83704bc`), TL đề nghị CTO nghiệm thu chức năng (mục 11).** Xem mục 9. Convention review (test, `guards/`, SSE): mục 10 — chờ CTO duyệt mục 10.6. **SSE: mục 12–14 — SE-027 parser web merge `11106c8`; POC B xong; POC C (SE-028) đang làm — AWAITING CTO DECISION, chưa merge backend SSE.**
 
 Ký hiệu: **[CODE]** đã kiểm chứng bằng code/lệnh · **[NHẬN ĐỊNH]** đánh giá kỹ thuật · **[ĐỀ XUẤT]**.
 
@@ -382,3 +382,67 @@ id: x\ndata: {"type":"done"}\n\n     ← id do handler đặt: vẫn có dòng i
 | Quyết định A/B | TL báo cáo sau V1–V9 theo 6 tiêu chí CTO mục 4 | Chờ POC |
 
 Thứ tự: SE-026 → SE-027 (có thể song song, độc lập) → TL kiểm chứng + so sánh A/B → CTO quyết định → SE-005. SE-024, SE-025 hoãn.
+
+
+## 14. Kết quả POC B, SE-027 merge, đánh giá phương án C — 21/11/2026 23:37
+
+### 14.1 SE-027 — parser SSE web (APPROVED, độc lập) — **merge `11106c8`**
+PR #53: vòng 1 (`9f04bac`) **Cần sửa** — probe TL phát hiện dòng kết thúc chỉ bằng CR: event có CR cuối rơi đúng cuối chunk bị trễ, event cuối stream bị mất. Vòng 2 (`b365354`) sửa. Bằng chứng TL:
+| Hạng mục | Kết quả |
+|---|---|
+| Probe TL (tách đúng `class SseParser` từ PR, Node type-stripping): LF/CRLF/CR × định dạng cũ + NestJS × 1 chunk / cắt đôi mọi vị trí / 1 ký tự mỗi chunk; nhiều dòng `data`; `data:` không dấu cách; `event: error`; `event: message`; tên khác; comment; EOF dở; CRLF cắt giữa `\r`/`\n` | **23/23** |
+| Trình duyệt thật (web dev → API kiểm thử, DB `cat_gpt_loadtest`) với backend A (`develop`): chat, Dừng (nhãn Stopped, tin `STOPPED`), Tạo lại (cùng `id`) | Đạt |
+| Trình duyệt với backend B (POC): chat, Tạo lại, Dừng, Tạo lại + Dừng (câu cũ còn), LLM lỗi (nhãn lỗi, tin `ERROR`), tải lại trang giữa stream (`STOPPED`), RAG ("Ask document" → hội thoại có tài liệu, `COMPLETED`) | Đạt |
+| Mất kết nối (tắt API giữa stream): tab Network chỉ **1** POST `/chat/stream` — không tự gửi lại; UI báo lỗi, nút Retry do người dùng bấm | Đạt |
+| build/typecheck/lint api+web, CI tại `b365354` | Đạt |
+
+### 14.2 Kết quả POC B (SE-026, nhánh `poc/api-chat-nest-sse` `c95b20e`/`5ba11bd`, không merge)
+| # | Kiểm chứng (DB `cat_gpt_loadtest`) | A — `develop` | B — POC |
+|---|---|---|---|
+| V1 | `f03-verify` (chat, lưu, Stop, Regenerate, Regenerate+Stop, đồng thời, LLM lỗi, RAG, phân quyền) | 15/15 | **15/15** |
+| V2 | `rag-runtime` (insufficient, câu thường thay câu từ chối, truy hồi lỗi) | 14/14 | **14/14** |
+| V3 | Ngắt giữa stream ×3 → `STOPPED`, khóa nhả | 5/5 | **5/5** |
+| V4a | Hủy sớm 16 ca (send/regenerate, 0–35 ms) → khóa nhả, không tin trùng | 1 ca còn **409 sau 2,3 s** | **2/2, 0 lần 409** |
+| V4b | `early-probe`: hủy ở 5–10 ms (sau khi vào handler, trước khi mở stream) | **LLM vẫn sinh hết câu (`COMPLETED`, ~2,4 s), giữ khóa suốt thời gian đó** — `SseStream.open()` gắn `close` quá muộn | Không gọi LLM, khóa nhả ngay; **tin USER đã lưu, không có câu trả lời** |
+| V5 | Heartbeat | (15 s, code) | `: ping` **không** có `id:` (biến chỉ-POC 300 ms: 7 ping) |
+| V6 | Contract: 200, JSON lỗi 404/400/400/401/409, payload `meta→delta→done`, khóa `done.message`, LLM lỗi `done ERROR`, throttle 429 | — | **Giống hệt A**; khác wire: `id: N` mỗi event + `\n` đầu; `Content-Type` không có `; charset=utf-8`; `Cache-Control` chặt hơn |
+| V7 | Trình duyệt | Đạt | Đạt (14.1) |
+| V8 | build/lint/test | 83/83 | 83/83 (spec: wiring + 1 kỳ vọng "ngắt tab" đổi từ event `done` sang tin `STOPPED` đã lưu) |
+| V9 | Race/trùng | — | Không (V1, V4a) |
+
+**Đánh giá code B:** `ChatService` +~60 dòng, thêm `StreamPlan` (có cờ `started` thay đổi trạng thái), 3 điểm nhả khóa (`prepare*` catch, `finally` producer, listener `@SseSignal`), 7 toán tử rxjs (`share`, `merge`, `interval`, `takeUntil`, `ignoreElements`, `endWith`, `map`). Xóa `sse-stream.ts` (42 dòng). Diff +277/−163 trên 5 tệp.
+
+### 14.3 Phương án C — Native Streaming Responses: khả thi
+| Kiểm tra | Kết quả [CODE/npm] |
+|---|---|
+| Phiên bản đang cài | `@nestjs/core` **12.2.0**, `@nestjs/common` 12.2.0, `@nestjs/testing` 12.2.0, **`@nestjs/platform-express` 12.5.1** (bản này build với core 12.5.1); `package.json` khai `^12.0.1` → lockfile ghim 12.2.0 |
+| Yêu cầu tài liệu | `@nestjs/core` ≥ **12.4.0** (docs.nestjs.com/http/streaming-responses) |
+| Bản có trên npm | 12.4.0 (06/11), 12.4.2 (09/11), 12.5.0 (12/11), **12.5.1 (16/11)**, 12.6.0 (20/11) |
+| Peer dependency | `core`/`common`/`testing`/`platform-express` 12.5.1: peer `^12.0.0`; `bullmq` 12.0.2, `mongoose` 12.0.0, `swagger` 12.0.3, `config`, `jwt`, `passport`, `throttler` 6.7.1: đều chấp nhận `^12` |
+| Mức nâng cấp | Minor trong cùng major (12.2 → 12.5.1), **đồng bộ** với `platform-express` đã ở 12.5.1 → TL đánh giá **không phải nâng cấp đáng kể**; cô lập được trong nhánh POC (`package.json` + lockfile) |
+| POST + định dạng SSE hiện tại | Có: handler `@Post` trả `ReadableStream`; framework **không** tự định khung SSE — ghi nguyên chunk → giữ **đúng** wire hiện tại (`data: …\n\n`, không `id:`); `@HttpCode(200)`, `@Header('Content-Type', 'text/event-stream')` |
+| Lỗi trước chunk đầu | Header chờ chunk đầu; lỗi đi qua exception filter → JSON đúng mã |
+| Lỗi sau khi đã gửi header | NestJS log và **cắt kết nối đột ngột** → phải tự gửi `{type:'error'}` dạng dữ liệu (như A) |
+| Disconnect / cancellation | `ReadableStream.cancel()` chạy ngay khi client đi, "kể cả trước chunk đầu"; async generator chỉ dừng sau khi `await` đang chờ xong → **dùng ReadableStream** cho LLM |
+| Backpressure | Có, nếu producer tôn trọng `pull()`/`desiredSize`; producer đẩy bằng `enqueue` trong `start()` thì hàng đợi vẫn không giới hạn (như A, bị chặn bởi kích thước một câu trả lời) |
+| Heartbeat | **Không có sẵn** — tự `enqueue(': ping\n\n')` |
+| Chưa chắc (phải kiểm POC) | Client ngắt **trong lúc handler còn chạy pha trước stream** (trước khi trả `ReadableStream`): tài liệu không nói rõ NestJS có gọi `cancel()` hay không — cùng loại rủi ro với B |
+
+POC C: [SE-028](../tasks/SE-028-chat-native-stream-poc.md) — nhánh riêng, nâng `core`/`common`/`testing` lên **12.5.1** chỉ trên nhánh POC, ~0,5 ngày, sau SE-026, không làm trễ SE-005.
+
+### 14.4 So sánh A/B/C (theo tiêu chí CTO)
+| Tiêu chí | A — custom Express SSE | B — `@Sse()` | C — Native Streaming (dự kiến, chờ POC) |
+|---|---|---|---|
+| Correctness | Đúng mọi hồi quy; **lỗi đã kiểm chứng**: ngắt sớm (trước `open()`) → không hủy LLM, giữ khóa tới khi sinh xong | Đúng mọi hồi quy; ngắt sớm xử lý đúng; tin USER không có câu trả lời khi ngắt sớm | Chờ V1–V10 |
+| Maintainability | 1 lớp 42 dòng, luồng mệnh lệnh dễ đọc | Bỏ lớp tự viết nhưng `ChatService` thêm `StreamPlan`, cờ `started`, 7 toán tử rxjs | Dự kiến gần A: adapter `ReadableStream` nhỏ, không rxjs, vẫn tách pha trước stream như B |
+| Cancellation/cleanup | Chỉ sau `open()` | Framework: teardown + `@SseSignal` (cả trước subscribe) | Framework: `cancel()` (kể cả trước chunk đầu) |
+| Concurrency/`inFlight` | `finally`; lỗ hổng ngắt sớm | 3 điểm nhả, đã kiểm 16 ca | Chờ kiểm (V4) |
+| API compatibility | Gốc | Wire thêm `id:`/`\n` (web đã xử lý nhờ SE-027) | **Wire giống A** |
+| Complexity | Thấp | Cao nhất | Dự kiến trung bình |
+| Dependency risk | Không | Không (12.2.0 đã có) | Minor 12.2 → 12.5.1, phải hồi quy toàn API |
+
+### 14.5 Khuyến nghị (tạm)
+- **B: chưa khuyến nghị.** Đạt "không regression, không race/kẹt khóa, không phá contract", nhưng **không đạt** "ChatService không khó đọc hơn" và "tổng độ phức tạp không tăng" (tiêu chí CTO mục 4).
+- **A có lỗi thật** (V4b) cần sửa nếu giữ A: đăng ký `close` ngay khi vào handler, không đợi `open()` — sửa nhỏ, cùng phạm vi.
+- **Chờ POC C** trước khi chốt: nếu C đạt V1–V10, giữ wire A, và `ChatService` không phức tạp hơn A đáng kể → TL sẽ khuyến nghị **C**; nếu không → **A + sửa lỗi ngắt sớm**, đóng B/C.
+- **Tin USER khi ngắt trước stream** (B, có thể cả C): cần CTO chốt hành vi mong muốn — giữ tin USER không câu trả lời (người dùng phải gửi lại; UI chỉ có nút Tạo lại trên câu trả lời) hay lưu câu trả lời rỗng `STOPPED` như khi bấm Dừng.

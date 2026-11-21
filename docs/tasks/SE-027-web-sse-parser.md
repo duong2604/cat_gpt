@@ -1,6 +1,6 @@
 # SE-027 — Parser SSE phía web theo chuẩn (độc lập SE-026)
 
-Trạng thái: Sẵn sàng
+Trạng thái: Done — PR #53 → `11106c8` (21/11/2026 23:37)
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 0,25 ngày
 Phụ thuộc: không — **độc lập với SE-026**; TL được review/merge khi đạt hồi quy, không chờ SE-026
 Hạn bàn giao review: 22/11/2026 · Hạn hoàn tất: 22/11/2026
@@ -33,7 +33,7 @@ Không đụng UI/thành phần khác.
 | AC6 | Diff chỉ `apps/web/src/features/chat/stream.ts` | `git diff --stat` |
 
 ## Kết quả review
-Chưa có.
+Vòng 1 (`9f04bac`) Cần sửa — dòng kết thúc chỉ CR: event cuối mất. Vòng 2 (`b365354`) đạt, merge `11106c8`. Bằng chứng: [báo cáo Chat mục 14.1](../reports/chat-module-structural-review.md).
 
 ## Lịch sử review
 Chưa có.
