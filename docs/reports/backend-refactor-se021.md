@@ -4,7 +4,7 @@ Tài liệu theo dõi **duy nhất** của chương trình (chỉ thị CTO "Aut
 
 Phạm vi: chỉ `apps/api`; giữ API contract và nghiệp vụ, trừ sửa bug đã duyệt; không viết unit test mới. TL tự review/merge PR đạt gate; thay đổi chính sách bảo mật phiên, schema, contract → CTO.
 
-Cập nhật: 21/11/2026 19:54 · `develop` @ `fe06486` — trạng thái hiện hành: **mục 10** · DONE 1/9 (F04)
+Cập nhật: 21/11/2026 20:27 · `develop` @ `547b06f` — trạng thái hiện hành: **mục 11** · DONE 4/9 (F02, F04, F07, F08)
 
 Quy ước trạng thái: **Partial** = đã sửa một phần, còn phạm vi ghi ở cột Status; **Audited** = đã audit + xác minh, chưa refactor; **Not started** = chưa audit đủ. Không có flow nào **Done** ở thời điểm này.
 
@@ -364,3 +364,38 @@ TL sẽ kiểm độc lập trước khi merge: (1) đủ R1–R12 — mỗi quy
 | F09 Module structure | PARTIAL | — | #43 → `f173090` | Chưa — đủ điều kiện sau PR-C2 | PR-C2 → review dependency graph, xác nhận `ioredis` không dùng, build/lint/typecheck/runtime, final review | Sau PR-B13 |
 **DONE 1/9 (F04) · PARTIAL 8 · BLOCKED 0.** **MAJOR còn mở: 6** — F01-N1, F01-N2, SE-F24, DNS, KT-3, F02-N1.
 **Thứ tự (CTO):** PR-B8 → PR-B13 (F02-N1) → PR-C2 → SE-005 → PR-B10 → PR-B11 → PR-B12.
+
+## 11. Sau PR-B8 (#47) và PR-B13 (#48) — 21/11/2026 20:2x
+
+**`develop` @ `547b06f`**, CI success ([run 44908492713](https://github.com/duong2604/cat_gpt/actions/runs/44908492713)). Bảng 11.3 **thay thế** bảng 10.3. **Tiến độ: DONE 4/9** (F02, F04, F07, F08).
+
+### 11.1. PR đã merge trong vòng này
+| PR | Nội dung | Vòng review | SHA đã review | Merge SHA | Bằng chứng TL (độc lập) |
+|---|---|---|---|---|---|
+| [#48](https://github.com/duong2604/cat_gpt/pull/48) PR-B13 | F02-N1: thu hồi mọi phiên khi admin đổi email (CS-3, SE-006 AC4) | 1 — APPROVED | `412dd25` | `176b798` | Kịch bản `b13-check.mjs` 15/15 trên DB `cat_gpt_loadtest`: email trùng `409` → phiên còn; đổi `fullName` → phiên còn; cùng email khác hoa thường → phiên còn; đổi email → access cũ `401` (2 phiên), refresh cũ `401`, user khác không ảnh hưởng, email cũ `401` / mới `200`, vai trò USER không đổi, admin vẫn có quyền; **race** refresh ↔ đổi email cả hai thứ tự → sau cùng `/me` `401` và refresh `401`. Hồi quy 27/27 |
+| [#47](https://github.com/duong2604/cat_gpt/pull/47) PR-B8 | R1–R12, `DNS_SERVERS`, audit timeout, 2 MINOR | 1 — Cần sửa (R11/R12 không áp cho `staff`); 2 — APPROVED | `3449641` | `547b06f` | Ma trận `validateEnv` TL tự viết **18/18** (R11/R12 chặn cả `staff`/`demo` khi `NODE_ENV=production`; development cho phép); `.env` máy demo hợp lệ; DNS không đặt → giữ `127.0.0.1`, cảnh báo hướng dẫn, `querySrv ECONNREFUSED` đúng dự kiến; đặt `8.8.8.8,1.1.1.1` → áp đúng trước/sau, Nest khởi động; hồi quy 27/27 |
+**Xác minh sau merge trên `develop` `547b06f`** (gộp #47 + #48): typecheck/lint/build, test 83/83, hồi quy 27/27, `b13-check` 15/15, tóm tắt (`b7-check`) 400/404/202/202/READY/200.
+
+**Audit timeout LLM/embedding (PR-B8, không đổi code):** hiện tại client OpenAI `maxRetries: 1`, **không có timeout tường minh** → mặc định SDK 10 phút/lần gọi; Dừng chat hủy được qua `AbortController`; job tóm tắt và embedding trong worker **không có điểm hủy** ngoài timeout SDK. Đề xuất: chat 120 s/stream, embedding 60 s/lô, tóm tắt ≤ 300 s/lần gọi, giữ `maxRetries: 1`. Tác động: không có timeout → job treo chiếm worker tới 10 phút/lần thử; timeout chỉ cắt chờ, không tăng chi phí; hủy sớm có thể bỏ phần đã tính phí.
+
+### 11.2. Final review các flow đóng trong vòng này
+| Flow | Final verdict | Căn cứ | Findings resolved | Deferred / backlog (owner, lý do) |
+|---|---|---|---|---|
+| **F02** Authorization | **DONE** | Review toàn phạm vi (9.3); không còn BLOCKER/MAJOR; #42, #48 merge; race đổi email kiểm thật; sau merge 15/15 + 27/27 | SE-F27, **F02-N1** | SE-F12/TL-F12 MINOR → backlog (SE; ảnh mồ côi khi 2 upload đồng thời, không lộ dữ liệu) · SE-F13/TL-F9 MINOR → SE-006 (công cụ khôi phục admin) · SE-F28 MINOR → SE-005/SE-006 · SE-F29 MINOR → backlog (SE; người gọi đã kiểm tồn tại). Phần còn lại của CS-3 (hộp thoại UI, `audit_logs`) thuộc SE-006 — không phải finding refactor |
+| **F04** Documents | **DONE** (đóng ở 10.1) | MINOR câu chữ thông điệp lỗi đã sửa trong #47 → **không còn deferred** | + MINOR thông điệp (#47) | SE-F18, F04-N2 SUGGESTION — không làm |
+| **F07** Summary/BullMQ | **DONE** | Review vòng 4, 7; #40, #43 merge; tóm tắt sau merge 400/404/202/202/READY/200; audit timeout đã nộp (#47) | TL-F8 (chấp nhận), SE-F20 phần 1 | **SE-F5 (MINOR) — áp timeout DEFERRED**: phạm vi = đặt timeout tường minh theo đề xuất 11.1; rủi ro = job treo tối đa 10 phút/lần thử (đã có giới hạn của SDK); owner SE (PR-B14, sau PR-B12); mở lại khi CTO duyệt giá trị timeout hoặc quan sát job treo |
+| **F08** Config | **DONE** | Review vòng 13, 21; #42, #47 merge; ma trận 18/18; DNS hai trường hợp; `.env` demo hợp lệ | DNS (MAJOR), SE-F24 (MAJOR), SE-F26, SE-F23, SE-F25, F01-N1, F01-N2 (phần cấu hình), C2-B2 (production cấm mock) | — . **Điều kiện vận hành:** máy demo phải thêm `DNS_SERVERS=8.8.8.8,1.1.1.1` vào `apps/api/.env` (không thì không kết nối MongoDB) |
+
+### 11.3. Trạng thái flow
+| Flow | Status | MAJOR còn mở | PR → merge SHA | Next action | ETA |
+|---|---|---|---|---|---|
+| F01 Auth & Sessions | PARTIAL | **KT-3** (SE-005) | #39 → `3e9abe7`; #45 → `73614c9`; #47 → `547b06f` | SE-005 → final review F01 | SE-005 hạn bàn giao 27/11 |
+| **F02** | **DONE** | — | #42 → `582865b`; #48 → `176b798` | — | — |
+| F03 Chat | PARTIAL | — | #39, #40, #43 | PR-B10 (SE-F9) | Sau SE-005 |
+| **F04** | **DONE** | — | #38, #40, #41, #46, #47 | — | — |
+| F05 Processing/Delete | PARTIAL | — | #40, #41 | PR-B11 (thiết kế trước) | Sau PR-B10 |
+| F06 RAG | PARTIAL | — | #40 | PR-B12 | Sau PR-B11 |
+| **F07** | **DONE** | — | #40, #43, #47 | (PR-B14 áp timeout — deferred) | — |
+| **F08** | **DONE** | — | #42, #47 | — | — |
+| F09 Module structure | PARTIAL — đủ điều kiện sau PR-C2 | — | #43 | PR-C2 → review dependency graph, `ioredis`, runtime → final review | PR-C2 đang làm, ước ≤ 1 giờ |
+**DONE 4/9 · PARTIAL 5 · BLOCKED 0.** **MAJOR còn mở: 1** — KT-3 (F01, SE-005).
