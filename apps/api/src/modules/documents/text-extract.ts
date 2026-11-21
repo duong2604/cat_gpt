@@ -82,9 +82,8 @@ export async function isValidDocxSignature(buffer: Buffer): Promise<boolean> {
  * nghìn lần — "zip bomb" (TL phát hiện khi review 18/11/2026). Đo không được (lỗi
  * stream) thì coi là hỏng, đóng an toàn thay vì bỏ qua.
  */
-function assertEntryWithinSize(entry: JSZip.JSZipObject, maxBytes: number): Promise<void> {
+function measureEntryWithinBudget(entry: JSZip.JSZipObject, budget: { remaining: number }): Promise<void> {
   return new Promise((resolve, reject) => {
-    let total = 0;
     let settled = false;
     const stream = entry.nodeStream('nodebuffer') as Readable;
     const fail = (error: Error) => {
@@ -94,9 +93,9 @@ function assertEntryWithinSize(entry: JSZip.JSZipObject, maxBytes: number): Prom
       reject(error);
     };
     stream.on('data', (chunk: Buffer) => {
-      total += chunk.length;
-      if (total > maxBytes) {
-        fail(new DocumentTooLargeToProcessError(`word/document.xml giải nén vượt ${maxBytes} byte`));
+      budget.remaining -= chunk.length;
+      if (budget.remaining < 0) {
+        fail(new DocumentTooLargeToProcessError('Các phần XML của DOCX giải nén vượt ngân sách'));
       }
     });
     stream.on('error', (error: Error) => fail(new DocumentUnreadableError(error.message)));
@@ -109,7 +108,19 @@ function assertEntryWithinSize(entry: JSZip.JSZipObject, maxBytes: number): Prom
   });
 }
 
-/** Bóc tách DOCX bằng mammoth, sau khi xác nhận `word/document.xml` không phải zip bomb. */
+/**
+ * Phần XML/rels mà mammoth có thể đọc (document, styles, numbering, footnotes, headers, rels…).
+ * Không tính `word/media/*`: ảnh là dữ liệu nhị phân mà chế độ lấy văn bản thô không giải mã,
+ * và tính vào sẽ chặn nhầm DOCX hợp lệ có ảnh lớn.
+ */
+function isXmlPart(name: string): boolean {
+  return (name.endsWith('.xml') || name.endsWith('.rels')) && !name.startsWith('word/media/');
+}
+
+/**
+ * Bóc tách DOCX bằng mammoth, sau khi đo thật toàn bộ phần XML/rels (một ngân sách chung
+ * `maxXmlBytes`, dừng ngay khi vượt) — chặn zip bomb ở styles.xml/numbering.xml… (F04-N1).
+ */
 export async function extractDocx(buffer: Buffer, maxXmlBytes: number): Promise<ExtractedPage[]> {
   let zip: JSZip;
   try {
@@ -117,11 +128,14 @@ export async function extractDocx(buffer: Buffer, maxXmlBytes: number): Promise<
   } catch (error) {
     throw new DocumentUnreadableError((error as Error).message);
   }
-  const entry = zip.file('word/document.xml');
-  if (!entry) {
+  if (!zip.file('word/document.xml')) {
     throw new DocumentUnreadableError('Không tìm thấy word/document.xml');
   }
-  await assertEntryWithinSize(entry, maxXmlBytes);
+  const budget = { remaining: maxXmlBytes };
+  for (const entry of Object.values(zip.files)) {
+    if (entry.dir || !isXmlPart(entry.name)) continue;
+    await measureEntryWithinBudget(entry, budget);
+  }
   try {
     const result = await mammoth.extractRawText({ buffer });
     return [{ page: null, text: result.value }];
