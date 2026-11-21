@@ -45,7 +45,18 @@ Route, mã HTTP, mã lỗi, hình dạng event SSE (`meta`/`delta`/`done`/`error
 Chưa có.
 
 ## Lịch sử review
-Chưa có.
+### PR-C3a #49 — TL review vòng 1 (SHA `68333ca`, base `547b06f`) — **Cần sửa**
+| Tiêu chí | Kết quả | Bằng chứng |
+|---|---|---|
+| AC1 cấu trúc | Đạt | Diff 4 tệp; `findReadyOwnedDocuments` trong `DocumentsService`; `ChatService` bỏ `@InjectModel(DocumentEntity)`; một hàm `assertDocumentsVisible()`; không tệp/abstraction mới |
+| AC2 không đổi contract | Đạt | Kịch bản TL `c3a-check.mjs` (DB `cat_gpt_loadtest`) 5/5: chưa READY → `400 DOCUMENT_NOT_READY`; của người khác → `404`; đã xóa → `404`; 6 id → `400 VALIDATION_FAILED`; của mình READY → `200` |
+| AC3 f03-verify | Đạt | 13/13 |
+| AC4 race | Đạt | Nằm trong f03-verify (200+409; Dừng → `STOPPED`) |
+| AC5 test hiện có | Đạt | 83/83; spec chỉ đổi phần dựng `ChatService` (dùng `DocumentsService` thật với model giả) |
+| AC6 typecheck/lint/build | Đạt (local) | 4/4 task, lint 0 cảnh báo; CI chưa xong lúc review |
+| AC7 mô tả PR | Đạt | SE báo trước/sau trong PR |
+| Chất lượng chú thích | **Không đạt** | (1) JSDoc lặp nguyên văn 2 lần trên `assertDocumentsVisible`; (2) chú thích `validateDocumentSelection` vẫn mô tả truy vấn Mongo đã chuyển sang `DocumentsService` |
+Yêu cầu: sửa chú thích (không đổi code chạy), cập nhật cùng PR, checklist vòng 2.
 
 ## Phản hồi UI
 Không áp dụng.
