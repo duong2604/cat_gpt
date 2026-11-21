@@ -1,6 +1,6 @@
 # SE-023 — Tạo lại: nhất quán dữ liệu khi thay câu trả lời (B10-M1)
 
-Trạng thái: Sẵn sàng — **giai đoạn 1: phân tích + thiết kế** (chưa code; TL duyệt thiết kế trước)
+Trạng thái: Đang làm — giai đoạn 1: thiết kế đã bàn giao 21/11/2026, chờ TL duyệt (chưa code)
 Người phụ trách: Senior Dev · Ưu tiên: P1 (MAJOR — CTO nâng mức 21/11/2026) · Ước lượng: thiết kế 0,25 ngày; triển khai theo phương án được duyệt
 Phụ thuộc: không chặn. Không trì hoãn SE-005 quá hạn 27/11
 Hạn bàn giao review: thiết kế 22/11/2026 · Hạn hoàn tất: Không đặt — theo phương án được duyệt
@@ -41,7 +41,63 @@ Schema `messages`/`conversations`; API contract; chính sách bảo mật; `inFl
 | AC5 | typecheck/lint/build, test hiện có, CI | Lệnh + CI |
 
 ## Thiết kế
-Chưa có.
+
+### Bằng chứng môi trường (kiểm 21/11/2026, chỉ đọc + một giao dịch hủy)
+- Cụm Atlas `cat_gpt_loadtest`: `hello` có `setName` và 3 host (replica set), MongoDB 8.0.39.
+- Giao dịch hoạt động: `withTransaction` chèn 1 tài liệu rồi ném lỗi → tài liệu không còn (rollback đúng). Collection thử đã xóa.
+- Local dev: không có dịch vụ Mongo trong `docker-compose.yml`; mọi môi trường dùng Atlas (quyết định D-03). Không có môi trường nào chạy Mongo đơn lẻ.
+- Dữ liệu hiện có: 0 hội thoại có hai câu trả lời liên tiếp — `cat_gpt` (28 hội thoại, 58 tin) và `cat_gpt_loadtest` (433 hội thoại, 866 tin). Đếm chỉ đọc.
+- Web (`chat-stream-provider.tsx`): `regenerate` xóa câu trả lời cuối khỏi cache **trước** khi gửi yêu cầu; `done` → `appendMessage` bỏ qua tin có `id` đã tồn tại. Tức là khi `id` giữ nguyên, câu mới vẫn hiện vì cache đã bỏ câu cũ.
+- Chỉ mục `messages`: `{_id: 1}`, `{conversationId: 1, createdAt: 1}` (thứ tự hiển thị theo `createdAt`).
+
+### Vấn đề gốc
+`saveAnswer` (thành công khi Tạo lại) gồm ba lệnh ghi độc lập: `createMessage(câu mới)` → `deleteMessage(câu cũ)` → `touch`. Lỗi giữa `createMessage` và `deleteMessage` để lại hai câu trả lời liên tiếp. Hệ quả: `regenerate` lần sau tìm tin cuối là ASSISTANT, xóa một câu, rồi tin cuối vẫn là ASSISTANT → `400 CHAT_NOTHING_TO_REGENERATE` (vĩnh viễn, theo B10-M1); lịch sử gửi LLM có hai câu trả lời.
+
+### Phương án
+**A — Giao dịch MongoDB** bao `createMessage` + `deleteMessage` + `touch` trong một `session`.
+1. Nguyên tử: commit toàn bộ hoặc không gì. Người đọc không thấy trạng thái trung gian (đọc commit). Lỗi trước commit → câu cũ còn nguyên.
+2. Đồng thời: `inFlight` không đổi (trong tiến trình). Xóa hội thoại song song: `touch` không khớp → cần xử lý như `exists=false` (bỏ qua, không `done`). Hai tab: như hiện tại, `inFlight` chỉ chặn trong một tiến trình.
+3. Thử lại: `withTransaction` tự thử lại lỗi tạm thời và chạy lại callback; callback chỉ thao tác DB, không có tác dụng phụ bên ngoài. Id câu mới phải sinh **trước** callback để chạy lại không tạo trùng.
+4. Phục hồi: không cần khi lỗi trong giao dịch (rollback). Dữ liệu đã hỏng từ trước: hiện 0 bản ghi; nếu có thì cần bước phục hồi phía đọc (xem C).
+5. Hạ tầng: đáp ứng (replica set Atlas, giao dịch đã kiểm). Nhược: `ConversationsService` phải nhận `session` tùy chọn ở `createMessage`/`deleteMessage`/`touch` (thay đổi nội bộ, không đổi HTTP).
+6. Web: câu mới có `id` mới; web vẫn chạy như hiện tại. Không đổi.
+
+**B — Cập nhật tại chỗ câu trả lời cũ** (đề xuất): một lệnh `updateOne({_id: câuCũ, conversationId}, {$set: {content, status, model, citations, insufficientEvidence, ungrounded}, $unset: các trường không dùng})`, sau đó `touch` riêng.
+1. Nguyên tử theo tài liệu: một tài liệu hoặc là câu cũ hoặc là câu mới. **Không thể** có hai câu trả lời, nên không cần giao dịch; không có trạng thái trung gian.
+2. Đồng thời: như A. Xóa hội thoại song song → `matchedCount = 0` → coi như `exists=false`: không gửi `done`.
+3. Thử lại: `updateOne` với cùng nội dung là idempotent → có thể thử lại an toàn; `touch` lỗi chỉ làm sai `lastMessageAt`, không ảnh hưởng dữ liệu câu trả lời.
+4. Phục hồi: lỗi trước `updateOne` → câu cũ còn nguyên (SE-F9 giữ). Lỗi sau `updateOne` nhưng trước `touch` → câu mới đã lưu, chỉ thời gian hội thoại cũ; không cần phục hồi.
+5. Hạ tầng: không cần replica set; không cần giao dịch. Chỉ thêm một phương thức `replaceAnswer` trong `ConversationsService`.
+6. Web: **giữ nguyên `id`**. Cần kiểm: `regenerate` đã xóa câu cũ khỏi cache trước (đã đúng hiện tại), nên `done` mang cùng `id` vẫn được `appendMessage` thêm. Trường hợp Dừng/lỗi: `done` mang câu cũ (cùng `id`), vẫn được thêm lại như hiện tại. Hạn chế: tab khác đang giữ bản cũ trong cache thấy nội dung cũ đến khi tải lại (A có hạn chế tương tự — tab khác thấy cả hai câu đến khi tải lại).
+7. `createdAt`: giữ nguyên (thứ tự hiển thị không đổi vì câu cũ luôn là tin cuối khi Tạo lại).
+
+**C — Phục hồi phía đọc** (không ngăn lỗi mới; chỉ dùng cho dữ liệu hỏng cũ): trong `regenerate` và khi dựng lịch sử LLM, coi các tin ASSISTANT liên tiếp sau tin USER cuối là một, giữ tin mới nhất (`createdAt`, `_id`), xóa phần còn lại.
+- Ưu: không đụng ghi; tự phục hồi. Nhược: không ngăn lỗi tái diễn; lịch sử LLM cần khử trùng lặp ở `send()` nữa.
+
+**Kết hợp đề xuất:** B (ngăn lỗi tận gốc, không phụ thuộc hạ tầng). C không cần làm ngay vì dữ liệu hỏng hiện là 0; ghi là phương án dự phòng nếu bằng chứng sau này cho thấy có dữ liệu hỏng.
+
+So sánh nhanh:
+
+| Tiêu chí | A (giao dịch) | B (cập nhật tại chỗ) | C (đọc) |
+|---|---|---|---|
+| Hai câu trả lời có thể xảy ra | Không (rollback) | Không (một tài liệu) | Có, được dọn lúc đọc |
+| Phụ thuộc hạ tầng | Replica set (đã có) | Không | Không |
+| Đổi `id` câu trả lời | Có | Không | Không |
+| Thay đổi mã | `ConversationsService` (session) + `saveAnswer` | Một phương thức + `saveAnswer` | `regenerate`, lịch sử LLM |
+| Thử lại an toàn | Có (callback chạy lại) | Có (idempotent) | — |
+
+### Kiểm lỗi (TL failure-injection) — trên `cat_gpt_loadtest`
+- Điểm tiêm lỗi: một bản build thử (nhánh riêng, không merge) có biến `SE023_FAULT` (chỉ đọc khi `RELEASE_MODE` không phải `production`) ném lỗi tại: (1) trước ghi; (2) sau ghi câu mới, trước `touch`; (3) giữa `touch` và `done`.
+- Kỳ vọng với B: (1) câu cũ còn, Tạo lại lần sau hoạt động; (2) câu mới hiện, `lastMessageAt` cũ; (3) `done` không gửi, tải lại thấy câu mới.
+- Kỳ vọng với A: (1)(2) rollback về câu cũ; (3) như trên.
+- Ngắt Mongo thật: không làm được trên Atlas dùng chung; dùng điểm tiêm lỗi thay thế.
+- Dữ liệu hỏng để kiểm AC2: TL tạo bằng cách chèn trực tiếp một tin ASSISTANT thứ hai vào hội thoại thử (chỉ `cat_gpt_loadtest`); chỉ cần kiểm nếu chọn C.
+
+### Ràng buộc đã kiểm
+Không đổi schema (`messages` giữ nguyên trường và chỉ mục); không đổi route, mã lỗi, hình dạng SSE; `inFlight` giữ nguyên; SE-F9 giữ nguyên (Dừng/lỗi khi Tạo lại → câu cũ còn, `done` mang câu cũ).
+
+### Đề xuất cần TL duyệt
+Chọn **B**. Nếu TL muốn tránh thay đổi nội dung câu trả lời tại chỗ, chọn **A**. Sau khi duyệt, triển khai trong `fix/api-regenerate-consistency` từ develop mới nhất; SE-024 (B10-M2) không gộp.
 
 ## Kết quả review
 Chưa có.
