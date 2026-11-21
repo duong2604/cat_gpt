@@ -212,7 +212,13 @@ export class ChatService {
         } catch (error) {
           status = controller.signal.aborted ? MessageStatus.STOPPED : MessageStatus.ERROR;
           if (status === MessageStatus.ERROR) {
-            this.logger.error(`LLM lỗi ở hội thoại ${key}`, (error as Error).stack);
+            // Tên lỗi gốc (nếu có) để chẩn đoán; không ghi nội dung.
+            const cause = (error as { cause?: unknown }).cause;
+            const causeName = cause instanceof Error ? cause.name : 'unknown';
+            this.logger.error(
+              `LLM lỗi ở hội thoại ${key} cause=${causeName}`,
+              (error as Error).stack,
+            );
           }
         }
       }
