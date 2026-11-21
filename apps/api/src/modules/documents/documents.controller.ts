@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Logger,
   Param,
   Post,
   Query,
@@ -63,6 +64,8 @@ function waitForFirstChunk(stream: Readable): Promise<void> {
 @UseGuards(DocumentsHiddenGuard)
 @Controller('documents')
 export class DocumentsController {
+  private readonly logger = new Logger(DocumentsController.name);
+
   constructor(private readonly documents: DocumentsService) {}
 
   @Post()
@@ -118,7 +121,10 @@ export class DocumentsController {
     let ready = false;
     stream.on('error', (error: Error) => {
       streamError = error;
-      if (ready) res.destroy(error);
+      if (ready) {
+        this.logger.warn(`documentId=${id} tải về lỗi giữa chừng: ${error.name}: ${error.message}`);
+        res.destroy(error);
+      }
     });
     await waitForFirstChunk(stream);
     if (streamError) throw streamError;
