@@ -153,7 +153,7 @@ DoD (16 mục): D1 audit toàn phạm vi · D2 findings phân loại và xử l�
 | **F01** Auth & Sessions | login, refresh/xoay token, logout, phiên (`sessions`), JWT/strategy, cookie, giới hạn đăng nhập, `/me/sessions`, thu hồi khi khóa/đổi mật khẩu | **TL-F1 BLOCKER**; TL-F2/SE-F3 phần còn lại (2 tab) MAJOR; **F01-N1 MAJOR**; **F01-N2 MAJOR**; SE-F24 MAJOR; KT-3 MAJOR (SE-005); F01-N3 MINOR; F01-N4 SUGGESTION | 1 (#39) | Vòng 6 + 7.2 (toàn phạm vi) | 27/27 + race sau #39 | D2, D3, D14, D15 | **IN REVIEW** (PR-B3 #45 chờ TL review) | Review #45 → PR-B8 (SE-F24, F01-N1, F01-N2) → SE-005 → TL xác minh toàn F01 |
 | F02 Authorization, Roles, Ownership | guard/roles, admin users, `/me`, avatar | SE-F28, F29, F12/TL-F12, F13/TL-F9 (MINOR) | 1 (#42) | Vòng 6, 13 | 27/27 | D13 (chưa review toàn phạm vi theo DoD) | PARTIAL | TL review toàn phạm vi sau F01 |
 | F03 Chat | stream, Dừng, Tạo lại, lưu trữ | SE-F8 (MINOR), SE-F9, SE-F10 (cần CTO) | 3 | Vòng 3, 9 | race + 27/27 | D2 (chờ CTO SE-F9/F10) | PARTIAL | Chờ CTO SE-F9/F10 |
-| F04 Documents upload/download | upload, kiểm tra, MinIO, tải về | SE-F18 (SUGGESTION) | 3 | Vòng 2, 5 | probe B1, MinIO thật | D1 (`text-extract`, `sanitize-filename` chưa đọc) | PARTIAL | TL đọc phần còn lại |
+| F04 Documents upload/download | upload, kiểm tra, bóc tách, MinIO, tải về | **F04-N1 BLOCKER** (zip bomb ngoài `document.xml`); SE-F18 (SUGGESTION); F04-N2 (SUGGESTION) | 3 | Vòng 2, 5, 23 (đọc toàn phạm vi) | probe B1, MinIO thật; probe zip bomb | D2, D3, D14, D15 | **IN PROGRESS** | PR-B9 (sau PR-B3) |
 | F05 Processing/Delete/Cleanup | worker, xóa, dọn | SE-F22 (cần CTO) | 2 | Vòng 4, 5 | B4 runtime | D2 (CTO) | PARTIAL | Chờ CTO SE-F22 |
 | F06 RAG | embed, Qdrant, trích dẫn | SE-F16, F17 (CTO), TL-F11 | 1 | Vòng 4 | 27/27 | D2 (CTO) | PARTIAL | Chờ CTO |
 | F07 Summary/BullMQ | lập lịch, job, retry | SE-F5 timeout | 2 | Vòng 4, 7 | b7-check | D2 | PARTIAL | Audit timeout trong PR-B8 |
@@ -179,3 +179,11 @@ DoD (16 mục): D1 audit toàn phạm vi · D2 findings phân loại và xử l�
 Đã kiểm đạt: bcrypt 10 vòng + hash giả chống dò timing; JWT HS256 cố định thuật toán, hết hạn 900 s; mỗi request kiểm phiên + trạng thái khóa; cookie `httpOnly` + `sameSite=lax`, refresh chỉ gửi tới `/api/v1/auth`; `revokeOwn` lọc `userId`; khóa/đặt lại/đổi mật khẩu thu hồi phiên; phiên tự hết hạn bằng TTL index; chỉ 4 route `@Public`.
 
 **Điều kiện để F01 DONE:** (1) PR-B3 merge, qua gate replay + gate 2 tab có bằng chứng thực tế; (2) PR-B8 merge với R5, R11, R12; (3) SE-005 merge (KT-3); (4) TL xác minh sau merge toàn F01 (27/27 + 8 tình huống B3 + ma trận khởi động + kịch bản SE-005); (5) không còn BLOCKER/MAJOR mở.
+
+### 7.3. F04 — independent review phần còn lại (TL, 15:24)
+Đọc thêm: `text-extract.ts`, `sanitize-filename.ts`, `upload-size.filter.ts` → F04 đã đọc toàn phạm vi (D1).
+| ID | Mức | File:dòng | Bằng chứng | Ảnh hưởng | Sửa | Ở đâu |
+|---|---|---|---|---|---|---|
+| **F04-N1** | **BLOCKER** (bảo mật — DoS) | `text-extract.ts:120-126` | Chỉ `word/document.xml` được đo giải nén; `mammoth.extractRawText` đọc thêm `styles.xml`… không giới hạn. **Probe TL** (bản build `955be7c`): docx **101 KB** có `styles.xml` giải nén 100 MB → `extractDocx` thành công, RSS **167 → 470 MB** | User đã đăng nhập tải lên docx 25 MB (≈ 1000× nén) → hết bộ nhớ, **sập tiến trình API** (worker chạy chung) | Đo byte giải nén thật của mọi entry `.xml`/`.rels`, cộng dồn ≤ `DOCUMENT_MAX_DOCX_XML_MB`, trước khi gọi mammoth | PR-B9 |
+| F04-N2 | SUGGESTION | `sanitize-filename.ts:10-12` | Luôn đọc lại tên tệp latin1 → UTF-8 (đúng với multer 2.x hiện tại) | Nếu đổi cấu hình `defParamCharset` của multer/busboy sau này, tên tiếng Việt sẽ lỗi | Ghi chú phụ thuộc; không sửa | — |
+Đã kiểm đạt: tên tệp chỉ là siêu dữ liệu (khóa lưu trữ dùng ID, không có path traversal); `Content-Disposition` mã hóa `encodeURIComponent`; PDF giới hạn số trang trước khi bóc chữ; TXT kiểm UTF-8 + byte 0; kiểm chữ ký DOCX lúc upload chỉ đọc thư mục zip (không giải nén); upload > giới hạn → `400 FILE_TOO_LARGE`.
