@@ -58,3 +58,46 @@ Ký hiệu: [x] có bằng chứng · [ ] chưa · ~ một phần (ghi lý do).
 
 ## 4. Findings còn lại cần CTO
 SE-F7/TL-F6 (DNS), SE-F24 (bắt buộc cookie `secure` khi production — ảnh hưởng triển khai HTTP nội bộ), SE-F26 (Swagger mặc định), SE-F5 (giá trị timeout LLM/embedding), SE-F9 (Tạo lại xóa câu cũ trước), SE-F10 (phân trang tin nhắn — đổi contract), SE-F16 (kiểm nội dung trích dẫn), SE-F17 (vị trí dữ liệu trong prompt), SE-F22 (reconcile xóa), PR-B3 (khuyến nghị B2a — xem daily vòng 12).
+
+## 5. Dọn dữ liệu thử (C1) và code demo/fake (C2) — chỉ thị CTO 21/11/2026 "Backend Cleanup & Remove Demo/Fake Code"
+
+Audit của TL lập 12:4x trên `develop` `4cd1784`. Phân loại: REMOVE / REPLACE / KEEP FOR DEVELOPMENT / KEEP FOR PRODUCTION / NEEDS CTO DECISION. Không mặc định xóa mọi thứ có chữ mock/demo/test.
+
+### 5.1. C1 — Dữ liệu thử (DB `cat_gpt` dùng chung với máy demo; MinIO bucket `cat-gpt-dev`; Qdrant `document_chunks`; BullMQ prefix `cat-gpt`)
+| Nhóm | Đối tượng | Nguồn ID | Phân loại | Ghi chú |
+|---|---|---|---|---|
+| A1 | 200 tài khoản `loadtest+001…200@catgpt.local` (`BLOCKED`) | Danh sách SE ghi lúc tạo (`6b012909ae1c6f727b276001` … `6b012978ae1c6f727b2760c8`) | **REMOVE** (CTO cho phép) | Kèm phiên (`sessions`) của các ID này; đã kiểm 0 hội thoại/tài liệu ở 20 tài khoản gửi tin |
+| A2 | Tài khoản tạm `tl-smoke-*` của TL hôm nay (10): `6b0118bd45444726dd40d914`, `6b0118ed45444726dd40d924`, `6b011f91608199ab3abe4dc8`, `6b011fb7354c32526e414154`, `6b0121914ed23c5f5f8e287e`, `6b0121984ed23c5f5f8e2887`, `6b0121cfb165510ff7bd34c8`, `6b012632accf1493a116295b`, `6b012832103b87e23c2c2175`, `6b012833103b87e23c2c2177` | Hồ sơ SE-020/SE-021 + báo cáo ngày | **REMOVE** | Hội thoại/tài liệu đã xóa khi kiểm; còn tài khoản + phiên |
+| A3 | Tài khoản thử của SE: `6b008bd67101bbcc7c52cd6e` (SE-018), `6b0116b2d17505482276e3b9` (SE-020), `6b011ccf81272454c1e8fc05` (B1) + tài khoản thử của các PR B2–B7 | Hồ sơ task; SE bổ sung ID từ ghi chép của mình | **REMOVE** sau khi SE nộp ID có nguồn | ID không có nguồn ghi chép → giữ, báo TL |
+| A4 | Tài khoản/dữ liệu thử của các phiên trước 21/11 (vd `tl-smoke-*` cũ, tài khoản đánh giá RAG TL-009/SE-017) | Chưa rõ | **NEEDS CTO DECISION** nếu không có ghi chép ID | Dữ liệu đánh giá có thể là baseline — không xóa khi chưa xác minh |
+| A5 | Tài khoản admin và mọi người dùng không thuộc A1–A3 | — | **KEEP FOR PRODUCTION** | Không đụng |
+| A6 | Object MinIO, điểm Qdrant, job BullMQ gắn với tài liệu của A1–A3 | Dry-run theo `userId`/`documentId` của A1–A3 | **REMOVE** nếu còn sót | Không xóa toàn bucket/collection/queue; không wildcard |
+| A7 | Object MinIO / điểm Qdrant mồ côi không gắn được với A1–A3 (vd `documentId` không còn trong Mongo) | Dry-run | **NEEDS CTO DECISION** | Chỉ liệt kê, không xóa |
+| A8 | Ảnh đại diện (thư mục `uploads/avatars`) của A1–A3 | `avatarKey` của các ID | **REMOVE** | |
+
+Quy trình bắt buộc: SE inventory + **dry-run (chỉ đọc)** → TL đối chiếu, lưu **manifest** (ID + số lượng theo collection) và **bản export JSON** các bản ghi sẽ xóa (ngoài repo, phục vụ rollback bằng chèn lại) → SE xóa đúng ID đã duyệt → kiểm trước/sau, mồ côi, hệ thống còn chạy. Chạy trên DB demo nên **đây là thao tác dữ liệu thật đầu tiên trên DB demo** — TL duyệt từng manifest.
+
+### 5.2. C2 — Code demo/fake trong `apps/api`
+| # | Mục | File | Phân loại | Lý do / việc cần làm |
+|---|---|---|---|---|
+| B1 | `MockLlmProvider` + `mock-answers.ts` | `modules/llm/*` | **KEEP FOR DEVELOPMENT** | Kiểm thử offline, không tốn chi phí OpenAI; chỉ chạy khi `LLM_PROVIDER=mock` |
+| B2 | `LLM_PROVIDER` mặc định `mock`; production chỉ cảnh báo (#42) | `config/env.validation.ts:118`, `main.ts:24` | **REPLACE** | Production (`NODE_ENV=production`) với `mock` → **từ chối khởi động** (lỗi cấu hình rõ ràng); development giữ mặc định `mock`. Máy demo đang dùng `openai` (kiểm 11:57) → không ảnh hưởng |
+| B3 | Trigger `/error`, `/limit` trong mock | `mock-llm.provider.ts:8-10` | **KEEP FOR DEVELOPMENT** | Chỉ có hiệu lực trong mock; sau B2 không thể chạy ở production |
+| B4 | Không có fallback âm thầm sang mock khi OpenAI lỗi | `llm.module.ts:17-20` | **KEEP FOR PRODUCTION** | Đã đúng: lỗi OpenAI → `ERROR`, không đổi provider |
+| B5 | `ChatHiddenGuard` / `DocumentsHiddenGuard` (chế độ `staff`) | `chat-hidden.guard.ts`, `documents-hidden.guard.ts` | **KEEP FOR PRODUCTION** | Cờ phát hành đã duyệt (CS-6, SE-003) — không phải fake |
+| B6 | `RELEASE_MODE` mặc định `demo` | `env.validation.ts:98` | **NEEDS CTO DECISION** | Có giữ chế độ `demo` làm mặc định cho triển khai thật không (liên quan SE-F26 đã quyết) |
+| B7 | Admin seed từ biến môi trường | `users/admin-seed.service.ts` | **KEEP FOR PRODUCTION** | Khởi tạo admin đầu tiên; đã áp chính sách mật khẩu (#42) |
+| B8 | Override DNS mặc định | `main.ts:13-16` | **REPLACE** | Đã giao PR-B8 (biến `DNS_SERVERS` có kiểm soát) |
+| B9 | `COOKIE_SECURE` mặc định `false`, Swagger theo `demo` | `env.validation.ts`, `app-config.service.ts` | **REPLACE** | Đã giao PR-B8 (production bắt buộc `secure`, Swagger tắt) |
+| B10 | Credential hardcode | `src`, `scripts` | — | TL quét: **không có** |
+| B11 | Bypass xác thực | `@Public` | **KEEP** | Chỉ 4 route: `auth/login`, `auth/refresh`, `auth/logout`, `health` — đúng thiết kế |
+| B12 | Dependency `ioredis` khai báo nhưng không import trong `src` (chỉ có trong chú thích) | `apps/api/package.json:45` | **REMOVE** (sau khi SE xác minh BullMQ tự mang `ioredis`) | Kiểm build/test và hàng đợi sau khi gỡ |
+| B13 | `reflect-metadata`, `rxjs` không import trực tiếp | `package.json` | **KEEP FOR PRODUCTION** | Peer dependency bắt buộc của NestJS |
+| B14 | `scripts/rag-eval*.mjs`, `test/fixtures/*` | | **KEEP FOR DEVELOPMENT** | Công cụ đánh giá (SE-017) và dữ liệu kiểm thử hợp lệ |
+| B15 | `LocalStorageProvider` (ảnh đại diện trên đĩa) | `modules/storage/*` | **KEEP FOR PRODUCTION** | Quyết định thiết kế M3-5, không phải fake |
+
+### 5.3. Trạng thái
+| Workstream | Trạng thái | PR | Ghi chú |
+|---|---|---|---|
+| C1 Data Cleanup | **Chưa bắt đầu** — TL lập danh sách; chờ SE inventory + dry-run (sau PR-B3) | — | Không xóa gì trước khi TL duyệt manifest |
+| C2 Code Cleanup | **Chưa bắt đầu** — TL audit xong; B8/B9 nằm trong PR-B8; B2, B12 sẽ thành PR-C2 | — | PR riêng, không gộp với C1 |
