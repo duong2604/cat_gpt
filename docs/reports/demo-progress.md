@@ -2,6 +2,16 @@
 
 Theo mốc của [plan.md](../project/plan.md#2-mốc). Chi tiết từng ngày: [báo cáo ngày](daily/README.md). TL cập nhật cuối mỗi ngày làm việc và ngay khi phát hiện nguy cơ trễ mốc; mục mới nhất ở trên, giữ các mục cũ ([workflow mục 11](../project/workflow.md#11-theo-dõi-tiến-độ)).
 
+## Cập nhật 21/11/2026 10:36 (Security Audit vòng 2, SE-020)
+
+Chi tiết: [21/11 vòng 4](daily/2026-11-21.md#vòng-4--1031-phiên-tl-sáng-2111-baseline-security-audit-vòng-2-kế-hoạch).
+
+| Mốc / việc | Tình trạng |
+|---|---|
+| Bảo mật phụ thuộc | Audit `b7af2fb`: 26 (8 high). **SE-020** Sẵn sàng, đã giao SE: mục tiêu 26 → 5 (1 high). 5 advisory qua `minio` chờ CTO |
+| Nghiệm thu M1–M4 (CTO) | Môi trường sẵn sàng trên `develop` @ `b7af2fb` (dependency đã cài, Docker healthy). Chờ CTO |
+| Module 4 | Không đổi: SE-017 Chờ Review (`-large` bị chặn); SE-019 Nháp |
+
 ## Cập nhật 21/11/2026 01:40 (SE-018 Done, kết thúc phiên TL)
 
 Chi tiết: [21/11 vòng 3](daily/2026-11-21.md).
