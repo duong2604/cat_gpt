@@ -4,7 +4,7 @@ Tài liệu theo dõi **duy nhất** của chương trình (chỉ thị CTO "Aut
 
 Phạm vi: chỉ `apps/api`; giữ API contract và nghiệp vụ, trừ sửa bug đã duyệt; không viết unit test mới. TL tự review/merge PR đạt gate; thay đổi chính sách bảo mật phiên, schema, contract → CTO.
 
-Cập nhật: 21/11/2026 22:27 · `develop` @ `83704bc` — trạng thái hiện hành: **mục 11 + 12 + 13 + 14** · DONE 5/9 (F02, F04, F07, F08, F09)
+Cập nhật: 22/11/2026 01:39 · `develop` @ `29160c4` — trạng thái hiện hành: **mục 11–15** · DONE 5/9 (F02, F04, F07, F08, F09)
 
 Quy ước trạng thái: **Partial** = đã sửa một phần, còn phạm vi ghi ở cột Status; **Audited** = đã audit + xác minh, chưa refactor; **Not started** = chưa audit đủ. Không có flow nào **Done** ở thời điểm này.
 
@@ -432,3 +432,10 @@ Chi tiết: [chat-module-structural-review.md](chat-module-structural-review.md)
 - Convention review Chat (unit test, `guards/`, SSE): [báo cáo Chat mục 10](chat-module-structural-review.md) — chờ CTO duyệt 10.6.
 
 **Tiến độ: DONE 5/9** (F02, F04, F07, F08, F09) · PARTIAL 4 (F01, F03 — chờ CTO nghiệm thu, F05, F06) · BLOCKED 0. **MAJOR còn mở: 1** — KT-3 (F01, SE-005).
+
+## 15. Đóng phiên 22/11 01:39
+- **F03 Chat:** cấu trúc CTO accepted (SE-022); SE-F9 (#50), B10-M1 (SE-023 #52), parser web (SE-027 #53), Native Streaming (SE-029 #54 → `29160c4`, CTO duyệt) đều merge; hồi quy 15/15 + RAG 14/14 + toàn API 27/27. **Đề nghị CTO nghiệm thu chức năng F03** (chưa có quyết định).
+- **F01 / KT-3 (SE-005): HOLD** — sự cố dữ liệu AC5 ([báo cáo](incident-se005-data-2026-11-22.md)); chờ CTO duyệt R0–R5.
+- SE-030 CANCELLED (giữ unit test). Nhánh POC/test đã bundle (`D:\workspace\buggysoft\cat_gpt-archive\`) và xóa.
+
+**Tiến độ: DONE 5/9** (F02, F04, F07, F08, F09) · PARTIAL 4 (F01 — HOLD, F03 — chờ CTO nghiệm thu, F05, F06) · **MAJOR mở: 1** — KT-3 (SE-005).

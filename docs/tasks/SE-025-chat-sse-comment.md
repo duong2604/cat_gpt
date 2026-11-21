@@ -1,6 +1,6 @@
 # SE-025 — Sửa chú thích lý do dùng SSE tự viết (`chat.controller.ts`)
 
-Trạng thái: Sẵn sàng
+Trạng thái: Done (không còn cần) — 22/11/2026: SE-029 (`29160c4`) xóa `sse-stream.ts` và viết lại chú thích `ChatController` đúng cơ chế Native Streaming; không còn chú thích "`@Sse()` chỉ hỗ trợ GET".
 Người phụ trách: Senior Dev · Ưu tiên: P2 · Ước lượng: 0,1 ngày
 Phụ thuộc: không. Không chen trước SE-005 (hạn 27/11) nếu xung đột — làm khi rảnh giữa các bước đo
 Hạn bàn giao review: 22/11/2026 · Hạn hoàn tất: 22/11/2026
@@ -28,7 +28,7 @@ Mọi dòng lệnh; `sse-stream.ts`; tệp khác.
 | AC3 | typecheck/lint/build, test hiện có, CI | Lệnh + CI |
 
 ## Kết quả review
-Chưa có.
+22/11/2026 — Đóng: phạm vi đã được SE-029 bao trùm (kiểm `origin/develop` `29160c4`: `chat.controller.ts` dòng 21–24, `sse-stream.ts` không còn).
 
 ## Lịch sử review
 Chưa có.

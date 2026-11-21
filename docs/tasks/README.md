@@ -2,7 +2,7 @@
 
 Mục lục task theo ID. Quy ước, phân công và cách nhận task: [workflow mục 3](../project/workflow.md#3-nơi-lưu-task), [mục 3.1](../project/workflow.md#31-phân-công-và-nhận-task); cột Tiến độ theo [mục 11](../project/workflow.md#11-theo-dõi-tiến-độ). TL cập nhật bảng mỗi khi tạo task, đổi trạng thái hoặc đổi hạn. Senior Dev cập nhật khi nhận task (`Đang làm`) và khi bàn giao (`Chờ Review`).
 
-Cập nhật: 22/11/2026 01:29 (SE-030 đóng; SE-026/SE-028 đóng POC; dọn nhánh POC/test).
+Cập nhật: 22/11/2026 01:39 (đóng phiên: SE-025 đóng; SE-005 tạm dừng chờ CTO).
 
 **Mở phiên mới:** prompt [Team Leader](../project/onboarding/team-leader.md) · [Senior Dev](../project/onboarding/senior-dev.md) (CTO xác nhận dùng được 15/11/2026). Báo cáo ngày: [daily/](../reports/daily/README.md).
 
@@ -14,7 +14,7 @@ Cập nhật: 22/11/2026 01:29 (SE-030 đóng; SE-026/SE-028 đóng POC; dọn n
 | [TL-003](TL-003-access-ui-release-audit.md) | Dọn nhánh local, rà quyền và chuẩn UI/phát hành | TL | P1 | 15/11/2026 | Không đặt | Chờ Review | Rà soát 17/11: KT-1, KT-2 đã đóng trên `develop`; còn KT-3 (SE-005), CS-2/3/4 (SE-006). CTO 17/11: R1 đồng ý có điều kiện (CTO phê duyệt từng lần, audit log); Q1 chưa chốt (chờ số liệu SE-005); chờ khách hàng xác nhận vòng 3 |
 | [SE-002](SE-002-avatar-requires-login.md) | Ảnh đại diện chỉ chính chủ xem được | Senior Dev | P1 | 23/11/2026 | 24/11/2026 | Done | Hoàn tất 16/11 — Sớm (merge PR #3 → `develop` @ `1674425`, xác minh @ `d6832e0`) |
 | [SE-003](SE-003-release-mode-navigation.md) | Chế độ phát hành `demo`/`staff` và menu theo vai trò | Senior Dev | P1 | 25/11/2026 | 26/11/2026 | Done | Hoàn tất 17/11 — Sớm (4 vòng; merge PR #6 → `develop` @ `783a8a3`; CTO cho merge trước demo) |
-| [SE-005](SE-005-login-limit-shared-ip.md) | Kiểm chứng và sửa giới hạn đăng nhập/request khi nhiều tài khoản dùng chung IP | Senior Dev | P1 | Dự kiến 27/11/2026 | Dự kiến 30/11/2026 | **Sẵn sàng** | Chưa bắt đầu — làm sau SE-003, trước SE-006; mốc chưa duyệt |
+| [SE-005](SE-005-login-limit-shared-ip.md) | Kiểm chứng và sửa giới hạn đăng nhập/request khi nhiều tài khoản dùng chung IP | Senior Dev | P1 | Dự kiến 27/11/2026 | Dự kiến 30/11/2026 | **Tạm dừng** | CTO HOLD 22/11 — AC5 NOT PASS (sự cố dữ liệu); chờ duyệt R0–R5, khôi phục, đo lại. Commit `86bd326` local |
 | [SE-006](SE-006-account-admin-rules.md) | Quy tắc quản trị tài khoản: đặt lại mật khẩu, đổi email, trường hiển thị, công cụ khôi phục admin | Senior Dev | P1 | Dự kiến 02/12/2026 | Dự kiến 03/12/2026 | **Sẵn sàng** | Chưa bắt đầu — làm sau SE-005; mốc chưa duyệt; R1 chờ chốt (không chặn code) |
 | [SE-004](SE-004-ui-consistency.md) | Chỉnh giao diện nhất quán theo chuẩn UI | Senior Dev | P2 | Dự kiến 04/12/2026 | Dự kiến 07/12/2026 | **Sẵn sàng** | Chưa bắt đầu — làm sau SE-006; mốc chưa duyệt |
 | [SE-007](SE-007-openai-provider.md) | Tích hợp OpenAI cho Chat (Responses API, streaming) | Senior Dev | P1 | Chờ chốt | Chờ chốt | Done | Hoàn tất 16/11 — Sớm (merge PR #4 → `develop` @ `d6832e0`; khách hàng cho merge trước demo) |
@@ -43,7 +43,7 @@ Cập nhật: 22/11/2026 01:29 (SE-030 đóng; SE-026/SE-028 đóng POC; dọn n
 | [SE-022](SE-022-chat-module-structural-refactor.md) | Refactor cấu trúc module Chat (module mẫu) | Senior Dev | P1 | Không đặt — theo phụ thuộc | Không đặt — theo phụ thuộc | Done | Tạo 21/11 (chỉ thị CTO "Chat Module Structural Refactor"). TL Gate 1 xong: Option B có chọn lọc — PR-C3a (bỏ coupling Chat → model Documents), PR-C3b (chia `streamAnswer`, gộp lưu câu trả lời). Không tách service, không đổi hành vi. [Báo cáo](../reports/chat-module-structural-review.md) |
 | [SE-023](SE-023-chat-regenerate-data-consistency.md) | Tạo lại: nhất quán dữ liệu khi thay câu trả lời (B10-M1, MAJOR) | Senior Dev | P1 | 22/11/2026 (thiết kế) | Không đặt — theo phương án duyệt | Done | Thiết kế B (cập nhật tại chỗ) TL duyệt; PR #52 → `83704bc`; failure injection 12/12 |
 | [SE-024](SE-024-chat-regenerate-failure-notice.md) | Tạo lại thất bại: thông báo người dùng (B10-M2) | Senior Dev | P3 | Không đặt | Không đặt | Nháp | Backlog (MINOR); sau SE-023, không gộp PR |
-| [SE-025](SE-025-chat-sse-comment.md) | Sửa chú thích lý do dùng SSE tự viết (`chat.controller.ts`) | Senior Dev | P2 | 22/11/2026 | 22/11/2026 | **Sẵn sàng** | Tạo 21/11 theo CTO "Chat Module Convention Review" — chỉ chú thích |
+| [SE-025](SE-025-chat-sse-comment.md) | Sửa chú thích lý do dùng SSE tự viết (`chat.controller.ts`) | Senior Dev | P2 | 22/11/2026 | 22/11/2026 | Done | Không còn cần — SE-029 đã viết lại chú thích, xóa `sse-stream.ts` |
 | [SE-026](SE-026-chat-nest-sse-poc.md) | POC: Chat SSE dùng NestJS `@Sse()` (không merge) | Senior Dev | P1 | 22/11/2026 | Theo quyết định CTO | Done | POC đóng; CTO chọn C (SE-029). Nhánh lưu bundle rồi xóa |
 | [SE-027](SE-027-web-sse-parser.md) | Parser SSE phía web theo chuẩn | Senior Dev | P1 | 22/11/2026 | 22/11/2026 | Done | PR #53 → `11106c8` (vòng 2; vòng 1 lỗi CR). Probe 23/23, trình duyệt A+B, không retry POST |
 | [SE-028](SE-028-chat-native-stream-poc.md) | POC C: Chat SSE bằng NestJS Native Streaming (không merge) | Senior Dev | P1 | 22/11/2026 | Theo quyết định CTO | Done | POC đóng; triển khai ở SE-029. Nhánh lưu bundle rồi xóa |
