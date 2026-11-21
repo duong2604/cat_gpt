@@ -1,9 +1,12 @@
 import type { Model } from 'mongoose';
+import type { Queue } from 'bullmq';
 import { Types } from 'mongoose';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ErrorCode, MessageRole, MessageStatus } from '@cat-gpt/shared';
 import type { AppConfigService } from '../../config/app-config.service.js';
 import { ReleaseMode } from '../../config/env.validation.js';
+import type { DocumentFilesService } from '../documents/document-files.service.js';
+import { DocumentsService } from '../documents/documents.service.js';
 import type { DocumentEntity } from '../documents/schemas/document.schema.js';
 import { type LlmFinishReason, type LlmMessage, LlmProvider, type LlmStreamOptions } from '../llm/llm.provider.js';
 import { RAG_REFUSAL_TEXT } from '../rag/rag-prompt.js';
@@ -173,11 +176,18 @@ function makeService(
   // bao giờ được gọi tới — stub rỗng để lộ ngay lỗi gọi nhầm thay vì âm thầm bỏ qua.
   rag: RagService = {} as unknown as RagService,
 ) {
+  // DocumentsService thật, chỉ thay Model bằng bản trong bộ nhớ (kiểm 404/400 đúng code thật).
+  const documents = new DocumentsService(
+    documentModel,
+    {} as unknown as Queue,
+    {} as unknown as DocumentFilesService,
+    {} as unknown as AppConfigService,
+  );
   const service = new ChatService(
     conversations as unknown as ConversationsService,
     llm,
     config,
-    documentModel,
+    documents,
     rag,
   );
   return { service, conversations };
