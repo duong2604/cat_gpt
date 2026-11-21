@@ -118,5 +118,40 @@ Căn cứ: `origin/develop` @ `b7af2fb` (`apps/api/src` trùng hệt, đã kiể
 
 **Trạng thái** — giai đoạn A bàn giao TL review. Chưa có PR refactor. Giai đoạn B chờ TL duyệt phạm vi và CTO cho phép từng PR (Q1).
 
+### Checklist vòng 2 — PR-B1 (chép từ mô tả [PR #38](https://github.com/duong2604/cat_gpt/pull/38), PR mở 21/11/2026 11:24)
+**Task** — SE-021 · PR-B1 (`fix/api-download-stream`) · SHA đầu PR `d1873f6` · vòng 2
+**Kết quả** — SE-F1 (BLOCKER) + SE-F2 (MAJOR) theo TL-F-chỉ-định: lỗi MinIO không còn làm sập tiến trình; client ngắt không rò kết nối.
+**Checklist**
+- [x] AC-a lỗi MinIO giữa chừng → API vẫn sống — **Đạt, mức controller**: probe dùng controller `download` từ `dist`, stream giả phát 4 KB rồi `destroy(error)`. Trước sửa: tiến trình thoát mã 1 (`Unhandled 'error'`). Sau sửa: phản hồi bị cắt đúng (header đã gửi), `GET /health` 200 sau đó. **Chưa kiểm** với MinIO thật bị ngắt giữa chừng (không ngắt container dùng chung).
+- [x] AC-a lỗi trước byte đầu → JSON lỗi qua filter — **Đạt, mức controller**: trước sửa sập; sau sửa `download` ném lỗi, probe nhận 500 (filter thật sẽ trả `INTERNAL_ERROR` chuẩn; chưa kiểm qua filter thật vì probe không chạy Nest).
+- [x] AC-b client hủy giữa chừng → không rò — **Đạt**: probe `abort`: trước `stream.destroyed=false`, sau `true`. API thật: client hủy sau byte đầu, `health` 200.
+- [x] AC-c tải bình thường không đổi (so byte) — **Đạt**: API thật (MinIO thật, TXT 358 889 byte): tải về 200, header `Content-Type`/`Cache-Control: private, no-store` đúng, **bytes == bytes upload**. Probe: 150 000 byte khớp từng byte. Ghi chú: `Content-Type` là `text/plain; charset=utf-8` (Express tự thêm charset từ `res.set`, không đổi so với trước).
+- [x] Đối chiếu route/HTTP/mã lỗi — `GET /documents/:id/download`: 200 (chủ sở hữu), 404 (admin / người khác), 401 (chưa đăng nhập) — **giống trước sửa**.
+- [x] `pnpm turbo run typecheck lint build --force` — 8/8 thành công.
+- [x] `pnpm -C apps/api test` — 83/83 pass.
+- [ ] CI `build` tại SHA đầu PR — xem check của PR.
+- [x] Dữ liệu thử dọn theo ID đã ghi: tài liệu `6b011cd081272454c1e8fc07` đã xóa (204), Qdrant 0 điểm; user thử `6b011ccf81272454c1e8fc05` đã khóa `BLOCKED`. Không dùng tài khoản thật.
+
+**Kiểm tra đã chạy:** probe controller (`midstream`, `beforebyte`, `normal`, `abort`) trước/sau; API thật: upload → READY → tải về (so byte) → hủy giữa chừng → health → 404/401 → dọn theo ID; `pnpm turbo run typecheck lint build --force`; `pnpm -C apps/api test`.
+**Simplicity First** — đổi: một hàm nhỏ `waitForFirstChunk` + hai listener; không abstraction, không dependency. Giới hạn: lỗi giữa chừng cắt kết nối (không có thông báo lỗi JSON vì header đã gửi); chưa kiểm với MinIO thật bị ngắt giữa chừng.
+**Trạng thái** — Chờ Review (TL).
+**Trạng thái** — Chờ Review (TL).
+
+#### Review vòng 2 — PR-B1
+**Task** — SE-021 PR-B1 · PR https://github.com/duong2604/cat_gpt/pull/38 · SHA đã review `d1873f6` (base `e040e08`) · vòng 2
+**Kết luận** — **APPROVED WITH CONDITIONS** (review đạt; điều kiện không chặn). **Không merge — chờ CTO cho phép** (chỉ thị CTO; Q1).
+**Checklist** (TL đọc diff + probe riêng ngoài repo `b1-probe.mjs`: gọi `DocumentsController.download` đã build với `http.ServerResponse` thật)
+- [x] Phạm vi — Đạt — chỉ `apps/api/src/modules/documents/documents.controller.ts` (+38 dòng); không đổi route, header thành công, mã HTTP, mã lỗi.
+- [x] SE-F1 — Đạt — baseline `e040e08`: probe **sập** (`Unhandled 'error' event`, exit 1). PR: lỗi giữa chừng → chỉ cắt kết nối đó, tiến trình sống, request kế tiếp `200`; lỗi trước byte đầu → hàm ném lỗi, probe trả `500` JSON (ứng dụng thật đi qua `AllExceptionsFilter`).
+- [x] SE-F2 — Đạt — client hủy sau 2000 byte → stream nguồn `destroyed = true`.
+- [x] Không hồi quy — Đạt — tải bình thường `200`, đủ 5000/5000 byte, `Content-Type` giữ nguyên; SE đối chiếu byte với MinIO thật (358 889 byte) và 200/404/401 trước–sau.
+- [x] Gate — Đạt — `typecheck`/`lint`/`build` (`--force`) api; `pnpm -C apps/api test` 83/83; CI `build` SUCCESS tại `d1873f6`; `mergeStateStatus` CLEAN.
+- Đọc hiểu — Đạt — một hàm nhỏ `waitForFirstChunk` có chú thích; luồng "trước/sau byte đầu" giải thích được trong vài phút.
+**Điều kiện (không chặn, gộp vào PR-B4):**
+- MINOR `documents.controller.ts` (listener `error` mới): lỗi MinIO giữa chừng **không được log** → thêm `Logger.warn` với `documentId` + `error.message` (không nội dung).
+- SUGGESTION: sau `waitForFirstChunk` có thể dùng `stream.pipeline(stream, res, cb)` thay `on('error')` + `on('close')` + `pipe` — tùy chọn.
+**Ghi chú kiểm chứng:** lần chạy probe đầu của TL trên head PR cũng sập do `dist` còn bản cũ; TL `grep` xác nhận `dist` có `waitForFirstChunk` sau khi build lại rồi chạy lại → kết quả trên. Lỗi MinIO thật bị ngắt giữa chừng chưa tái hiện (không ngắt container dùng chung).
+**Trạng thái** — Chờ Review (chờ CTO cho merge).
+
 ## Phản hồi UI
 Không áp dụng.
