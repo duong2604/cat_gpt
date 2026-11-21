@@ -85,13 +85,16 @@ export class ChatService {
       });
       await this.conversations.touch(conversation._id);
 
-      await this.streamAnswer(conversation, userMessage, sse, controller);
+      await this.streamAnswer(conversation, userMessage, sse, controller, null);
     } finally {
       this.inFlight.delete(key);
     }
   }
 
-  /** Bỏ câu trả lời cuối của assistant (nếu có) rồi sinh lại cho tin nhắn cuối của người dùng. */
+  /**
+   * Sinh lại câu trả lời cuối cho tin nhắn cuối của người dùng. Câu trả lời cũ (nếu có) được giữ
+   * cho tới khi câu mới lưu thành công: Dừng hoặc lỗi giữa chừng thì câu cũ còn nguyên (SE-F9).
+   */
   async regenerate(userId: string, conversationId: string, sse: SseStream): Promise<void> {
     const conversation = await this.conversations.getOwnedOrThrow(userId, conversationId);
     this.assertRagNotHidden(conversation);
@@ -99,16 +102,18 @@ export class ChatService {
     const key = conversation._id.toString();
     const controller = this.reserveStream(key);
     try {
-      let last = await this.conversations.lastMessage(conversation._id);
-      if (last?.role === MessageRole.ASSISTANT) {
-        await this.conversations.deleteMessage(last._id);
-        last = await this.conversations.lastMessage(conversation._id);
+      const recent = await this.conversations.recentMessages(conversation._id, 2);
+      let replacing: Message | null = null;
+      let question = recent.at(-1);
+      if (question?.role === MessageRole.ASSISTANT) {
+        replacing = question;
+        question = recent.at(-2);
       }
-      if (last?.role !== MessageRole.USER) {
+      if (question?.role !== MessageRole.USER) {
         throw AppException.badRequest(ErrorCode.CHAT_NOTHING_TO_REGENERATE);
       }
 
-      await this.streamAnswer(conversation, null, sse, controller);
+      await this.streamAnswer(conversation, null, sse, controller, replacing);
     } finally {
       this.inFlight.delete(key);
     }
@@ -137,8 +142,13 @@ export class ChatService {
     userMessage: Message | null,
     sse: SseStream,
     controller: AbortController,
+    // Câu trả lời cũ đang được Tạo lại (không đưa vào ngữ cảnh; xóa sau khi câu mới lưu xong).
+    replacing: Message | null,
   ): Promise<void> {
-    const history = await this.conversations.recentMessages(conversation._id, CONTEXT_MESSAGES);
+    const limit = replacing ? CONTEXT_MESSAGES + 1 : CONTEXT_MESSAGES;
+    const history = (await this.conversations.recentMessages(conversation._id, limit))
+      .filter((m) => m._id.toString() !== replacing?._id.toString())
+      .slice(-CONTEXT_MESSAGES);
 
     const key = conversation._id.toString();
 
@@ -180,6 +190,7 @@ export class ChatService {
           citations: [],
           insufficientEvidence: true,
         });
+        if (replacing) await this.conversations.deleteMessage(replacing._id);
         await this.conversations.touch(conversation._id);
         sse.send({ type: 'done', message: toMessageDto(answer) });
         return;
@@ -227,6 +238,12 @@ export class ChatService {
       // ghi (xóa xen giữa có thể để lại tin mồ côi) — ghi nhận SE-F8, không đổi logic ở PR này.
       if (!(await this.conversations.exists(conversation._id))) return;
 
+      // Tạo lại mà Dừng/lỗi: không lưu câu dở, câu cũ còn nguyên.
+      if (replacing && status !== MessageStatus.COMPLETED && status !== MessageStatus.TRUNCATED) {
+        sse.send({ type: 'done', message: toMessageDto(replacing) });
+        return;
+      }
+
       // ERROR → không có trích dẫn (thiết kế mục 6.3 bước 5); STOPPED/TRUNCATED vẫn xác
       // minh trên phần nội dung đã sinh được.
       const verified =
@@ -249,6 +266,7 @@ export class ChatService {
             }
           : {}),
       });
+      if (replacing) await this.conversations.deleteMessage(replacing._id);
       await this.conversations.touch(conversation._id);
       sse.send({ type: 'done', message: toMessageDto(answer) });
     } catch (error) {
