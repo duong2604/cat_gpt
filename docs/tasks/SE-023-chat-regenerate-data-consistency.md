@@ -1,6 +1,6 @@
 # SE-023 — Tạo lại: nhất quán dữ liệu khi thay câu trả lời (B10-M1)
 
-Trạng thái: Đang làm — giai đoạn 1: thiết kế đã bàn giao 21/11/2026, chờ TL duyệt (chưa code)
+Trạng thái: Đang làm — thiết kế **TL duyệt phương án B** (21/11/2026); giai đoạn 2 (code) được phép
 Người phụ trách: Senior Dev · Ưu tiên: P1 (MAJOR — CTO nâng mức 21/11/2026) · Ước lượng: thiết kế 0,25 ngày; triển khai theo phương án được duyệt
 Phụ thuộc: không chặn. Không trì hoãn SE-005 quá hạn 27/11
 Hạn bàn giao review: thiết kế 22/11/2026 · Hạn hoàn tất: Không đặt — theo phương án được duyệt
@@ -103,7 +103,31 @@ Chọn **B**. Nếu TL muốn tránh thay đổi nội dung câu trả lời t�
 Chưa có.
 
 ## Lịch sử review
-Chưa có.
+### Thiết kế giai đoạn 1 — TL review (commit `64db43c`) — **DUYỆT phương án B, có điều kiện** (21/11/2026)
+| Tiêu chí | Kết quả | Bằng chứng TL tự kiểm |
+|---|---|---|
+| ≥1 phương án an toàn, đủ 4 khía cạnh (atomicity, concurrency, retry, recovery) | Đạt | A/B/C, bảng so sánh; B loại bỏ trạng thái 2 câu trả lời vì chỉ ghi một tài liệu |
+| Hạ tầng có bằng chứng | Đạt | SE: replica set 3 host, MongoDB 8.0.39, giao dịch rollback đúng; B không phụ thuộc |
+| Tác động web khi giữ `id` | Đạt | `apps/web/src/features/chat/hooks.ts:56-63` `appendMessage` bỏ qua `id` đã có; `chat-stream-provider.tsx` `regenerate` xóa câu cũ khỏi cache **trước** → `done` cùng `id` vẫn được thêm |
+| `createdAt` | Đạt (chấp nhận giữ) | `message.schema.ts:32` `timestamps: { createdAt: true }` (Mongoose quản lý); UI chat không hiển thị `createdAt` (grep `components/*.tsx`); thứ tự không đổi vì câu bị thay luôn là tin cuối |
+| Dữ liệu hỏng hiện có | Đạt | SE đếm chỉ đọc: 0/28 (`cat_gpt`), 0/433 (`cat_gpt_loadtest`) → C không làm |
+| Không đổi schema/contract/SE-F9 | Đạt | Thiết kế không thêm trường/chỉ mục; route, mã lỗi, SSE giữ |
+
+**Quyết định:** chọn **B**. Không làm A (đổi `id`, phải truyền `session` qua `ConversationsService` mà không thêm bảo đảm so với B). Không làm C (0 bản ghi hỏng; B không còn tạo ra trạng thái này) — mở lại nếu có bằng chứng dữ liệu hỏng.
+
+**Điều kiện triển khai (PR `fix/api-regenerate-consistency` từ `develop` mới nhất):**
+1. `ConversationsService.replaceAnswer(id, conversationId, fields)` — **một** `updateOne({ _id, conversationId, role: ASSISTANT }, { $set, $unset })`; trả `matchedCount > 0`.
+2. `$set` `content`, `status`; các trường tùy chọn (`model`, `citations`, `insufficientEvidence`, `ungrounded`) — có trong câu mới thì `$set`, **không có thì `$unset`** (vd câu từ chối không có `model`; câu thường thay câu từ chối phải bỏ `insufficientEvidence`). Viết tường minh, không dựng động từ object bất kỳ.
+3. Không đụng `createdAt`, `userId`, `role`.
+4. `saveAnswer`: có `replacing` + COMPLETED/TRUNCATED → `replaceAnswer`; `matchedCount = 0` (hội thoại/câu bị xóa song song) → không gửi `done`, giống `exists=false`. `done` mang tin đã cập nhật (đọc lại hoặc dựng từ `replacing` + `fields` — chọn một, ghi lý do trong PR). Không có `replacing` → `createMessage` như cũ. Bỏ `deleteMessage` nếu không còn ai dùng.
+5. **Không** thêm vòng thử lại (YAGNI); lỗi ghi → event `error` như hiện tại, câu cũ còn.
+6. Không gộp SE-024; không refactor ngoài phạm vi.
+
+**Failure injection:** nhánh thử riêng (vd `test/se023-fault`, **không mở PR, không merge**), biến `SE023_FAULT` chỉ ở bản thử đó; điểm (1) trước `replaceAnswer`, (2) sau `replaceAnswer` trước `touch`, (3) sau `touch` trước `done`. TL tự chạy trên `cat_gpt_loadtest`. Kỳ vọng như thiết kế mục "Kỳ vọng với B".
+
+**AC bổ sung:** `rag-runtime` 12/12 (kiểm `$unset model` ở câu từ chối thay câu thường) và thêm ca câu thường thay câu từ chối (`insufficientEvidence` phải mất).
+
+Trạng thái: giữ **Đang làm** — giai đoạn 2 (code) được phép.
 
 ## Phản hồi UI
 Không áp dụng.
