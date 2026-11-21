@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Types } from 'mongoose';
-import { ErrorCode, MessageRole, MessageStatus } from '@cat-gpt/shared';
+import { type ChatStreamEvent, ErrorCode, MessageRole, MessageStatus } from '@cat-gpt/shared';
 import { AppException } from '../../common/exceptions/app.exception.js';
 import { AppConfigService } from '../../config/app-config.service.js';
 import { isDocumentsHidden } from '../documents/documents-hidden.guard.js';
@@ -14,7 +14,6 @@ import { type AnswerFields, ConversationsService } from './conversations.service
 import type { SendMessageDto } from './dto/chat.dto.js';
 import type { Conversation } from './schemas/conversation.schema.js';
 import type { Message } from './schemas/message.schema.js';
-import type { SseStream } from './sse-stream.js';
 
 /** Số tin nhắn gần nhất gửi kèm làm ngữ cảnh cho LLM. */
 const CONTEXT_MESSAGES = 20;
@@ -49,7 +48,22 @@ export function buildLlmMessages(systemPrompt: string, plan: RagPlan | null, his
 }
 
 /**
- * Gửi tin nhắn và stream câu trả lời của LLM qua SSE.
+ * Kết quả pha trước stream (kiểm quyền, đặt khóa inFlight, lưu tin USER): đã thành công thì
+ * lỗi từ đây trở đi trả về JSON; lượt được chạy bằng run() khi stream bắt đầu.
+ */
+export interface ChatTurn {
+  conversation: Conversation;
+  userMessage: Message | null;
+  /** Câu trả lời cũ đang được Tạo lại (null nếu không phải Tạo lại). */
+  replacing: Message | null;
+  /** Lịch sử gửi LLM, đã bỏ câu cũ đang được thay. */
+  history: Message[];
+  key: string;
+  controller: AbortController;
+}
+
+/**
+ * Gửi tin nhắn và stream câu trả lời của LLM qua SSE (xem `sse-response.ts`).
  * Câu trả lời được gom trong bộ nhớ và lưu một lần khi kết thúc (hoàn tất / dừng / lỗi).
  */
 @Injectable()
@@ -68,7 +82,8 @@ export class ChatService {
     private readonly rag: RagService,
   ) {}
 
-  async send(userId: string, dto: SendMessageDto, sse: SseStream): Promise<void> {
+  /** Pha trước stream của gửi tin: lỗi ném ra sẽ thành JSON (400/404/409…). */
+  async prepareSend(userId: string, dto: SendMessageDto): Promise<ChatTurn> {
     let conversation: Conversation;
     if (dto.conversationId) {
       if (dto.documentIds) {
@@ -89,18 +104,20 @@ export class ChatService {
     // Đặt chỗ trước mọi await: hai POST đồng thời cùng hội thoại không thể cùng stream.
     const key = conversation._id.toString();
     const controller = this.reserveStream(key);
+    const plan: ChatTurn = { conversation, userMessage: null, replacing: null, history: [], key, controller };
     try {
-      const userMessage = await this.conversations.createMessage({
+      plan.userMessage = await this.conversations.createMessage({
         conversationId: conversation._id,
         userId: conversation.userId,
         role: MessageRole.USER,
         content: dto.content,
       });
       await this.conversations.touch(conversation._id);
-
-      await this.streamAnswer(conversation, userMessage, sse, controller, null);
-    } finally {
-      this.inFlight.delete(key);
+      plan.history = await this.loadHistory(conversation, null);
+      return plan;
+    } catch (error) {
+      this.release(plan);
+      throw error;
     }
   }
 
@@ -108,28 +125,46 @@ export class ChatService {
    * Sinh lại câu trả lời cuối cho tin nhắn cuối của người dùng. Câu trả lời cũ (nếu có) được giữ
    * cho tới khi câu mới lưu thành công: Dừng hoặc lỗi giữa chừng thì câu cũ còn nguyên.
    */
-  async regenerate(userId: string, conversationId: string, sse: SseStream): Promise<void> {
+  async prepareRegenerate(userId: string, conversationId: string): Promise<ChatTurn> {
     const conversation = await this.conversations.getOwnedOrThrow(userId, conversationId);
     if (conversation.documentIds?.length) this.assertDocumentsVisible();
 
     const key = conversation._id.toString();
     const controller = this.reserveStream(key);
+    const plan: ChatTurn = { conversation, userMessage: null, replacing: null, history: [], key, controller };
     try {
       const recent = await this.conversations.recentMessages(conversation._id, 2);
-      let replacing: Message | null = null;
       let question = recent.at(-1);
       if (question?.role === MessageRole.ASSISTANT) {
-        replacing = question;
+        plan.replacing = question;
         question = recent.at(-2);
       }
       if (question?.role !== MessageRole.USER) {
         throw AppException.badRequest(ErrorCode.CHAT_NOTHING_TO_REGENERATE);
       }
-
-      await this.streamAnswer(conversation, null, sse, controller, replacing);
-    } finally {
-      this.inFlight.delete(key);
+      plan.history = await this.loadHistory(conversation, plan.replacing);
+      return plan;
+    } catch (error) {
+      this.release(plan);
+      throw error;
     }
+  }
+
+  /**
+   * Chạy phần stream của một lượt (sau `prepare*`), gửi từng event qua `emit`. Lỗi trong stream được
+   * gửi như event `{type:'error'}`. Khóa inFlight được nhả trong `finally`, kể cả khi lượt bị hủy.
+   */
+  async run(plan: ChatTurn, emit: (event: ChatStreamEvent) => void): Promise<void> {
+    try {
+      await this.runStream(plan, emit);
+    } finally {
+      this.release(plan);
+    }
+  }
+
+  /** Client ngắt (NestJS gọi cancel): hủy LLM. Phần đã sinh được lưu STOPPED; khóa nhả trong `run`. */
+  cancel(plan: ChatTurn): void {
+    plan.controller.abort();
   }
 
   /** Dừng stream đang chạy của hội thoại. Phần đã sinh vẫn được lưu với trạng thái STOPPED. */
@@ -142,7 +177,7 @@ export class ChatService {
     this.inFlight.get(conversationId)?.abort();
   }
 
-  /** Chỗ stream của hội thoại (đã đăng ký trong `inFlight`); người gọi có trách nhiệm giải phóng. */
+  /** Chỗ stream của hội thoại (đã đăng ký trong `inFlight`); `release` nhả lại. */
   private reserveStream(key: string): AbortController {
     if (this.inFlight.has(key)) throw AppException.conflict(ErrorCode.CHAT_STREAM_IN_PROGRESS);
     const controller = new AbortController();
@@ -150,55 +185,53 @@ export class ChatService {
     return controller;
   }
 
-  private async streamAnswer(
-    conversation: Conversation,
-    userMessage: Message | null,
-    sse: SseStream,
-    controller: AbortController,
-    // Câu trả lời cũ đang được Tạo lại: không đưa vào ngữ cảnh, được thay khi câu mới lưu xong.
-    replacing: Message | null,
-  ): Promise<void> {
+  /** Nhả khóa inFlight của lượt này (chỉ khi khóa vẫn là của lượt này). */
+  private release(plan: ChatTurn): void {
+    if (this.inFlight.get(plan.key) === plan.controller) this.inFlight.delete(plan.key);
+  }
+
+  /** Lịch sử gửi LLM (không gồm câu đang được thay). */
+  private async loadHistory(conversation: Conversation, replacing: Message | null): Promise<Message[]> {
     const limit = replacing ? CONTEXT_MESSAGES + 1 : CONTEXT_MESSAGES;
-    const history = (await this.conversations.recentMessages(conversation._id, limit))
+    return (await this.conversations.recentMessages(conversation._id, limit))
       .filter((m) => m._id.toString() !== replacing?._id.toString())
       .slice(-CONTEXT_MESSAGES);
+  }
 
-    const key = conversation._id.toString();
-
+  private async runStream(plan: ChatTurn, emit: (event: ChatStreamEvent) => void): Promise<void> {
+    const { conversation, userMessage, replacing, history, key, controller } = plan;
     try {
-      // Đóng tab / mất mạng cũng được xử lý như bấm Dừng.
-      sse.open(() => controller.abort());
-      sse.send({
+      emit({
         type: 'meta',
         conversation: toConversationDto(conversation),
         userMessage: userMessage ? toMessageDto(userMessage) : null,
       });
 
       // Câu hỏi mới nhất luôn là tin cuối trong history (send() hoặc regenerate() đã đặt sẵn).
-      const { plan, failed } = await this.retrieveContext(conversation, history.at(-1)?.content ?? '');
+      const { plan: ragPlan, failed } = await this.retrieveContext(conversation, history.at(-1)?.content ?? '');
 
-      if (plan?.kind === 'insufficient') {
+      if (ragPlan?.kind === 'insufficient') {
         // Không gọi LLM (không có dòng log usage) — gửi thẳng câu từ chối cố định.
-        sse.send({ type: 'delta', text: RAG_REFUSAL_TEXT });
+        emit({ type: 'delta', text: RAG_REFUSAL_TEXT });
         await this.saveAnswer(
           conversation,
           replacing,
           { content: RAG_REFUSAL_TEXT, status: MessageStatus.COMPLETED, citations: [], insufficientEvidence: true },
-          sse,
+          emit,
         );
         return;
       }
 
-      const messages = buildLlmMessages(this.config.llm.systemPrompt, plan, history);
+      const messages = buildLlmMessages(this.config.llm.systemPrompt, ragPlan, history);
       // Truy hồi lỗi → lưu ERROR và không gọi LLM.
       const { content, status } = failed
         ? { content: '', status: MessageStatus.ERROR }
-        : await this.generate(messages, controller, sse, key);
+        : await this.generate(messages, controller, emit, key);
 
       // ERROR → không có trích dẫn; STOPPED/TRUNCATED vẫn xác minh trên phần nội dung đã sinh được.
       const verified =
-        plan?.kind === 'ready' && status !== MessageStatus.ERROR
-          ? this.rag.verifyCitations(content, plan.sources)
+        ragPlan?.kind === 'ready' && status !== MessageStatus.ERROR
+          ? this.rag.verifyCitations(content, ragPlan.sources)
           : undefined;
 
       await this.saveAnswer(
@@ -216,13 +249,11 @@ export class ChatService {
               }
             : {}),
         },
-        sse,
+        emit,
       );
     } catch (error) {
       this.logger.error(`Stream lỗi ở hội thoại ${key}`, (error as Error).stack);
-      sse.send({ type: 'error', code: ErrorCode.INTERNAL_ERROR });
-    } finally {
-      sse.end();
+      emit({ type: 'error', code: ErrorCode.INTERNAL_ERROR });
     }
   }
 
@@ -251,7 +282,7 @@ export class ChatService {
   private async generate(
     messages: LlmMessage[],
     controller: AbortController,
-    sse: SseStream,
+    emit: (event: ChatStreamEvent) => void,
     key: string,
   ): Promise<{ content: string; status: MessageStatus }> {
     let content = '';
@@ -263,7 +294,7 @@ export class ChatService {
     try {
       for await (const chunk of this.llm.stream(messages, { signal: controller.signal, onFinish })) {
         content += chunk;
-        sse.send({ type: 'delta', text: chunk });
+        emit({ type: 'delta', text: chunk });
         if (controller.signal.aborted) break;
       }
       if (controller.signal.aborted) status = MessageStatus.STOPPED;
@@ -289,13 +320,13 @@ export class ChatService {
     conversation: Conversation,
     replacing: Message | null,
     fields: AnswerFields,
-    sse: SseStream,
+    emit: (event: ChatStreamEvent) => void,
   ): Promise<void> {
     if (!(await this.conversations.exists(conversation._id))) return;
 
     if (replacing) {
       if (fields.status !== MessageStatus.COMPLETED && fields.status !== MessageStatus.TRUNCATED) {
-        sse.send({ type: 'done', message: toMessageDto(replacing) });
+        emit({ type: 'done', message: toMessageDto(replacing) });
         return;
       }
       // Tin đã bị xóa giữa chừng (matchedCount = 0) → như hội thoại đã xóa: không gửi `done`.
@@ -311,7 +342,7 @@ export class ChatService {
         insufficientEvidence: fields.insufficientEvidence,
         ungrounded: fields.ungrounded,
       };
-      sse.send({ type: 'done', message: toMessageDto(updated) });
+      emit({ type: 'done', message: toMessageDto(updated) });
       return;
     }
 
@@ -322,7 +353,7 @@ export class ChatService {
       ...fields,
     });
     await this.conversations.touch(conversation._id);
-    sse.send({ type: 'done', message: toMessageDto(answer) });
+    emit({ type: 'done', message: toMessageDto(answer) });
   }
 
   /**

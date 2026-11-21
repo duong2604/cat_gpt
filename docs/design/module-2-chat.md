@@ -114,7 +114,7 @@ Luồng xử lý `POST /chat/stream`:
 7. LLM lỗi giữa chừng: lưu phần đã có với trạng thái `ERROR`, gửi `event: error`.
 
 Ghi chú triển khai:
-- Dùng `@Res()` của Express và tự set header (`Content-Type: text/event-stream`, `Cache-Control: no-cache, no-transform`, `X-Accel-Buffering: no` cho Nginx sau này) rồi `flushHeaders()`. Không dùng `@Sse()` của NestJS vì decorator này hướng tới GET + Observable và khó xử lý lỗi trước khi mở stream.
+- Trả về `Response` có `ReadableStream` (NestJS Native Streaming Responses) qua hàm thuần `toSseResponse` (`modules/chat/sse-response.ts`): header `Content-Type: text/event-stream; charset=utf-8`, `Cache-Control: no-cache, no-transform`, `X-Accel-Buffering: no`; mỗi event là khối `data: <json>`, heartbeat `: ping` mỗi 15 s. Pha trước stream (kiểm quyền, lưu tin USER) chạy trước khi tạo `Response` nên lỗi vẫn trả JSON qua bộ lọc lỗi. Client ngắt → NestJS gọi `cancel` → hủy LLM, câu trả lời lưu `STOPPED`, khóa inFlight nhả khi lượt kết thúc.
 - Access token chỉ được kiểm tra lúc mở stream. Stream đang chạy không bị cắt khi token hết hạn giữa chừng, và như vậy là chấp nhận được.
 
 ### 4.5. Đầu chờ LLM
