@@ -4,7 +4,7 @@ Tài liệu theo dõi **duy nhất** của chương trình (chỉ thị CTO "Aut
 
 Phạm vi: chỉ `apps/api`; giữ API contract và nghiệp vụ, trừ sửa bug đã duyệt; không viết unit test mới. TL tự review/merge PR đạt gate; thay đổi chính sách bảo mật phiên, schema, contract → CTO.
 
-Cập nhật: 21/11/2026 19:55 · `develop` @ `fe06486` — trạng thái hiện hành: **mục 9**
+Cập nhật: 21/11/2026 19:58 · `develop` @ `fe06486` — trạng thái hiện hành: **mục 10** · DONE 1/9 (F04)
 
 Quy ước trạng thái: **Partial** = đã sửa một phần, còn phạm vi ghi ở cột Status; **Audited** = đã audit + xác minh, chưa refactor; **Not started** = chưa audit đủ. Không có flow nào **Done** ở thời điểm này.
 
@@ -324,3 +324,43 @@ Thứ tự chung (CTO review vòng 31): **PR-B8 → PR-C2 → SE-005** (hạn 27
 
 ### 9.7. Tiêu chí review PR-B8 (CTO vòng 31)
 TL sẽ kiểm độc lập trước khi merge: (1) đủ R1–R12 — mỗi quy tắc một ca fail/pass bằng `validateEnv` trên bản build; (2) production fail-closed, local/demo vẫn khởi động (kiểm `.env` máy demo); (3) `DNS_SERVERS` không đặt → **không** đổi DNS tiến trình (kiểm `dns.getServers()` trước/sau khởi động); đặt → dùng đúng giá trị; (4) báo cáo timeout LLM/embedding: giá trị hiện tại, đề xuất, cancellation, tác động; (5) đóng 2 MINOR (`initial` thừa; thông điệp "Các phần XML…"); (6) đọc diff, hồi quy, CI.
+
+## 10. F04 DONE; F02-N1 MUST FIX (chỉ thị CTO "F02-N1 Security Fix & Flow Closure") — 21/11/2026 19:5x
+
+**`develop` @ `fe06486`**, CI success ([run 44886404082](https://github.com/duong2604/cat_gpt/actions/runs/44886404082)). Bảng 10.3 **thay thế** bảng 9.2. **Tiến độ: DONE 1/9.**
+
+### 10.1. F04 — TL final review: **DONE**
+| Tiêu chí (CTO mục 2 + Risk-Based DoD) | Kết quả | Bằng chứng |
+|---|---|---|
+| Toàn bộ phạm vi đã audit | Đạt | TL 7.3 (`text-extract`, `sanitize-filename`, `upload-size.filter`) + review vòng 2, 5 |
+| PR liên quan đã merge | Đạt | #38 → `7433ce3`; #40 → `310ee02`; #41 → `646fcb4`; #46 → `fe06486` |
+| DOCX zip bomb đã xử lý | Đạt | F04-N1 đóng (#46 vòng 2); 3 biến thể bom bị chặn; xác minh lại trong 18/18 |
+| Regression 18/18 | Đạt | Mục 8.2 — trên chính `fe06486` (= `develop` hiện tại; code `documents` không đổi sau xác minh) |
+| Không còn BLOCKER/MAJOR | Đạt | SE-F1, SE-F2, F04-N1 đã đóng |
+| MINOR không sai contract/bảo mật/nghiệp vụ | Đạt | Thông điệp nội bộ "Các phần XML của DOCX…" chỉ nằm trong log/exception nội bộ; client nhận mã `DOCUMENT_TOO_MANY_CHUNKS` không đổi |
+| CI xanh | Đạt | run 44886404082 tại `fe06486` |
+**Deferred:** MINOR thông điệp lỗi (`text-extract.ts`, `measureEntryWithinBudget`) — **owner SE, follow-up PR-B8**. SUGGESTION SE-F18, F04-N2 — không làm (lý do ở 7.3).
+**TL final review verdict: DONE** (TL, `fe06486`, 19:5x).
+
+### 10.2. F02-N1 — đối chiếu CS-3 và tách PR
+- **CS-3** ([access-control](../design/access-control.md#4-chính-sách-đã-chốt), khách hàng chốt 15/11/2026): admin được đổi email nhân viên, có xác nhận, kiểm trùng, nhật ký; **đổi email → thu hồi mọi phiên** của nhân viên — request kế tiếp `401`, đăng nhập lại bằng email mới.
+- **SE-006** gồm CS-2 (chặn đặt lại mật khẩu admin), CS-3 (hộp thoại UI, kiểm trùng, thu hồi phiên, nhật ký `audit_logs`), CS-4 (bỏ SĐT ở màn quản trị), công cụ khôi phục admin — phạm vi lớn (2,5 ngày).
+- **Tách PR-B13** = chỉ **SE-006 AC4** (backend thu hồi phiên khi email đổi). Không làm hộp thoại UI (frontend), `audit_logs`, CS-2, CS-4, công cụ khôi phục — giữ trong SE-006.
+- **Thiết kế TL duyệt:** cập nhật email trước → chỉ khi thành công **và** email thật sự đổi (sau chuẩn hóa) mới `revokeAllForUser`; cập nhật lỗi → không thu hồi; revoke lỗi → log + 5xx, không nuốt lỗi.
+- **Phân tích race (TL):** (a) refresh song song: `swapToken` CAS có `revokedAt: null` → nếu thu hồi trước, CAS thua, đọc lại thấy đã thu hồi → `401`; nếu xoay xong trước, thu hồi ngay sau đó vô hiệu phiên và access token mới bị `JwtStrategy.findActive` chặn ở request kế tiếp; (b) request đã xác thực trước thời điểm thu hồi được chạy hết — giới hạn chấp nhận, ghi rõ; (c) đăng nhập bằng email mới chen giữa update và revoke sẽ bị thu hồi theo (khe vài ms) — chấp nhận, người dùng đăng nhập lại. TL sẽ kiểm (a) bằng kịch bản thật khi review.
+- **AC (CTO):** đổi email thành công → phiên cũ bị thu hồi; access token cũ `401`; refresh token cũ `401`, không cấp phiên mới; user khác không ảnh hưởng; đổi email thất bại không thu hồi; quyền admin/ownership không đổi; bằng chứng trên DB riêng `cat_gpt_loadtest`.
+
+### 10.3. Trạng thái flow
+| Flow | Status | MAJOR còn mở | PR → merge SHA | TL final review | Next action | ETA |
+|---|---|---|---|---|---|---|
+| F01 Auth & Sessions | PARTIAL | F01-N1, F01-N2, SE-F24 (PR-B8); KT-3 (SE-005) | #39 → `3e9abe7`; #45 → `73614c9` | Chưa | PR-B8, SE-005 | PR-B8: 2–3 giờ từ ~19:48; SE-005: hạn 27/11 |
+| F02 Authorization | PARTIAL | **F02-N1** (PR-B13) | #42 → `582865b` | Chưa (review toàn phạm vi xong 9.3) | PR-B13 | Sau PR-B8; ước lượng 0,25 ngày |
+| F03 Chat | PARTIAL | — | #39, #40, #43 | Chưa | PR-B10 (SE-F9) | Sau SE-005 |
+| **F04 Documents** | **DONE** | — | #38 → `7433ce3`; #40 → `310ee02`; #41 → `646fcb4`; #46 → `fe06486` | **DONE** (10.1) | MINOR thông điệp trong PR-B8 | — |
+| F05 Processing/Delete | PARTIAL | — | #40, #41 | Chưa | PR-B11 (SE-F22, thiết kế trước) | Sau PR-B10 |
+| F06 RAG | PARTIAL | — | #40 | Chưa | PR-B12 (SE-F16/F17) | Sau PR-B11 |
+| F07 Summary/BullMQ | PARTIAL | — | #40, #43 | Chưa | PR-B8 (audit timeout) | Cùng PR-B8 |
+| F08 Config | PARTIAL | DNS, SE-F24 (PR-B8) | #42 → `582865b` | Chưa | PR-B8 | Cùng PR-B8 |
+| F09 Module structure | PARTIAL | — | #43 → `f173090` | Chưa — đủ điều kiện sau PR-C2 | PR-C2 → review dependency graph, xác nhận `ioredis` không dùng, build/lint/typecheck/runtime, final review | Sau PR-B13 |
+**DONE 1/9 (F04) · PARTIAL 8 · BLOCKED 0.** **MAJOR còn mở: 6** — F01-N1, F01-N2, SE-F24, DNS, KT-3, F02-N1.
+**Thứ tự (CTO):** PR-B8 → PR-B13 (F02-N1) → PR-C2 → SE-005 → PR-B10 → PR-B11 → PR-B12.
