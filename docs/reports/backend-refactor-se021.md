@@ -4,7 +4,7 @@ Tài liệu theo dõi **duy nhất** của chương trình (chỉ thị CTO "Aut
 
 Phạm vi: chỉ `apps/api`; giữ API contract và nghiệp vụ, trừ sửa bug đã duyệt; không viết unit test mới. TL tự review/merge PR đạt gate; thay đổi chính sách bảo mật phiên, schema, contract → CTO.
 
-Cập nhật: 21/11/2026 19:47 · `develop` @ `fe06486` — trạng thái hiện hành: **mục 8**
+Cập nhật: 21/11/2026 19:55 · `develop` @ `fe06486` — trạng thái hiện hành: **mục 9**
 
 Quy ước trạng thái: **Partial** = đã sửa một phần, còn phạm vi ghi ở cột Status; **Audited** = đã audit + xác minh, chưa refactor; **Not started** = chưa audit đủ. Không có flow nào **Done** ở thời điểm này.
 
@@ -268,3 +268,59 @@ Chủ dự án xác nhận trực tiếp trong phiên Senior Dev ("Xác nhận x
 | **C1 Data Cleanup** | **DONE** (phạm vi 217 ID đã duyệt) — xóa sau xác nhận trực tiếp của chủ dự án; TL xác minh: users 238 → 21, không còn tài khoản thử trong phạm vi, admin đăng nhập được, health 200 (mục 5.6). Còn 2 tài khoản UNVERIFIED giữ nguyên |
 | **C2 Code Cleanup** | **CHƯA BẮT ĐẦU** — B2 (production cấm mock) gộp vào PR-B8; B12 (`ioredis`) là PR-C2 riêng; cả hai chưa có PR |
 | **SE-005** | **Tạm dừng, chưa kiểm chứng** — nhánh local `fix/shared-ip-throttling`, commit WIP `0167803` (không push); AC1 tái hiện trên DB demo (25/200 thành công, 175 `429`), chưa chạy lại trên DB riêng; chưa build/PR. Hạn bàn giao dự kiến 27/11 |
+
+## 9. Đóng flow theo quyết định CTO (chỉ thị "Flow Closure & Blocker Resolution" + review vòng 31) — 21/11/2026 19:5x
+
+**`develop` @ `fe06486`**, CI success (run 44886404082). Bảng 9.2 **thay thế** mục 8.1. Tiến độ đo bằng **số flow DONE**: **0/9**.
+
+### 9.1. Risk-Based DoD (CTO điều chỉnh)
+- BLOCKER/MAJOR: phải xử lý hoặc có ngoại lệ CTO rõ ràng.
+- MINOR: TL được đưa backlog nếu có lý do, owner, không ảnh hưởng nghiêm trọng.
+- SUGGESTION: không bắt buộc.
+- DEFERRED: ghi phạm vi, rủi ro, owner, điều kiện mở lại.
+- **Ghi chú mâu thuẫn chỉ thị (TL theo bản mới nhất):** chỉ thị "Flow Closure" cho đóng F04 ngay nếu chỉ còn MINOR; review vòng 31 (ban hành sau) yêu cầu final review F04 **sau PR-B8**. TL làm theo review vòng 31: F04 giữ PARTIAL, đủ điều kiện DONE ngay sau PR-B8.
+
+### 9.2. Trạng thái từng flow
+| Flow | Status | DoD còn thiếu | Findings resolved | Findings deferred / backlog (owner) | Evidence | PR → merge SHA | TL final review verdict | Next action |
+|---|---|---|---|---|---|---|---|---|
+| **F01** Auth & Sessions | **PARTIAL** | D3 (MAJOR mở), D14, D15 | TL-F1 (BLOCKER), TL-F2/SE-F3 | F01-N3 MINOR → backlog (SE, lý do: thêm 1 truy vấn/lần đăng nhập, không ảnh hưởng đúng sai); F01-N4 SUGGESTION — không làm; **residual risk ân hạn 30 s** — CTO chấp nhận tạm (9.4) | Review vòng 6, 7.2, 8; gate 1/2 trên DB riêng; 27/27 | #39 → `3e9abe7`; #45 → `73614c9` | Chưa final — **còn MAJOR**: F01-N1, F01-N2, SE-F24 (PR-B8); KT-3 (SE-005) | PR-B8 → SE-005 → final review |
+| F02 Authorization, Roles, Ownership | **PARTIAL** | D3 (MAJOR mở) | SE-F27 (#42) | SE-F12/TL-F12 MINOR → backlog (SE; file ảnh mồ côi khi 2 upload đồng thời, không lộ dữ liệu); SE-F13/TL-F9 MINOR → SE-006 (công cụ khôi phục admin); SE-F28 MINOR → SE-005/SE-006 (giới hạn thử sai đổi mật khẩu); SE-F29 MINOR → backlog (SE; người gọi đã kiểm tồn tại) | **TL review toàn phạm vi xong 19:5x** (thêm `admin-users.controller.ts`, DTO admin, `users.service.ts` toàn bộ) | #42 → `582865b` | Chưa final — **MAJOR mới F02-N1** (9.3) | SE-006 (CS-3) hoặc ngoại lệ CTO |
+| F03 Chat | **PARTIAL** (bỏ trạng thái chờ CTO) | D2 (SE-F9 chưa làm) | SE-F4/TL-F3, TL-F4/SE-F11, SE-F8 (chú thích) | **SE-F10 DEFERRED** (9.5); SE-F8 phần logic khe hẹp MINOR → backlog (SE) | Review vòng 3, 9; race + 27/27 | #39 → `3e9abe7`; #40 → `310ee02`; #43 → `f173090` | Chưa final | **Follow-up PR-B10 (SE-F9)** |
+| **F04** Documents | **PARTIAL — đủ điều kiện DONE sau PR-B8** | D2: 1 MINOR (thông điệp lỗi) đang trong PR-B8 | SE-F1, SE-F2, F04-N1 (BLOCKER), TL-F7, log tải về | SE-F18, F04-N2 SUGGESTION — không làm | Review vòng 2, 5, 9, 10; **xác minh toàn flow 18/18** trên `fe06486` (8.2); CI xanh | #38 → `7433ce3`; #40 → `310ee02`; #41 → `646fcb4`; #46 → `fe06486` | Không còn BLOCKER/MAJOR; MINOR không sai contract/hành vi. **Final review ngay sau PR-B8** | PR-B8 merge → final review → DONE |
+| F05 Processing/Delete | **PARTIAL** (bỏ chờ CTO) | D2 (SE-F22 chưa làm) | TL-F5/SE-F6 (log), TL-F7 | — | Review vòng 4, 5 | #40 → `310ee02`; #41 → `646fcb4` | Chưa final | **Follow-up PR-B11 (SE-F22)** — thiết kế trước, TL duyệt rồi mới code |
+| F06 RAG | **PARTIAL** (bỏ chờ CTO) | D2 (SE-F16, SE-F17 chưa làm) | SE-F14, SE-F15 | TL-F11 SUGGESTION — không làm | Review vòng 4 | #40 → `310ee02` | Chưa final | **Follow-up PR-B12 (SE-F16/F17)** — phân tích + bằng chứng trước/sau |
+| F07 Summary/BullMQ | **PARTIAL** | D2 (SE-F5 audit) | SE-F20 phần 1, TL-F8 (chấp nhận) | — | Review vòng 4, 7; b7-check | #40 → `310ee02`; #43 → `f173090` | Chưa final | PR-B8 (audit timeout) |
+| F08 Config | **PARTIAL** | D3 (MAJOR DNS, SE-F24) | SE-F23, SE-F25, SE-F27 | — | Review vòng 13, 21 | #42 → `582865b` | Chưa final | PR-B8 |
+| F09 Module structure | **PARTIAL — đủ điều kiện DONE sau PR-C2** | D2: MINOR B12 `ioredis` (PR-C2) | SE-F20 phần 1, TL-F7 | TL-F10, SE-F19 — chấp nhận (không abstraction thừa; dữ liệu mock của chế độ phát triển); SE-F20 phần 2 — không làm | Review vòng 7 | #43 → `f173090` | Không còn BLOCKER/MAJOR | PR-C2 → final review → DONE |
+
+**DONE 0/9 · PARTIAL 9 · BLOCKED 0.**
+**Đủ điều kiện DONE sớm:** F04 (sau PR-B8), F09 (sau PR-C2).
+**MAJOR còn mở (6):** F01-N1, F01-N2, SE-F24 (F01/F08), DNS (F08) → PR-B8; KT-3 (F01) → SE-005; **F02-N1** (F02) → SE-006.
+
+### 9.3. F02 — TL independent review toàn phạm vi (19:5x)
+Đọc thêm: `admin-users.controller.ts` (`@Roles(ADMIN)` cấp class; 6 route), `dto/admin-users.dto.ts` (`CreateUserDto` dùng `IsStrongPassword`, `role` `@IsEnum`; `UpdateUserDto` có `email`, `fullName`, `role`, `phone`, `department` — **không** có `status`), `users.service.ts` toàn bộ (`update` `$set` + `runValidators`, map lỗi trùng email; `list` tìm theo regex đã escape).
+| ID | Mức | File:dòng | Bằng chứng | Ảnh hưởng | Xử lý |
+|---|---|---|---|---|---|
+| **F02-N1** | **MAJOR** | `admin-users.service.ts` `update` (đổi email qua `UpdateUserDto.email`) | Không gọi `revokeAllForUser` khi email đổi; quy tắc **CS-3** (khách hàng duyệt 15/11: thu hồi mọi phiên khi đổi email) chưa cài | Admin đổi email (vd tài khoản bị chiếm) nhưng phiên cũ vẫn dùng được tới khi hết hạn | Thuộc **SE-006** (task Sẵn sàng, đã duyệt) — không mở rộng PR-B8; hoặc CTO cấp ngoại lệ |
+Đã kiểm đạt: không leo quyền qua `PATCH /me`; admin không tự hạ quyền/khóa mình; khóa/đặt lại mật khẩu thu hồi mọi phiên; ID không hợp lệ → `404`.
+
+### 9.4. Security risk register
+| ID | Rủi ro | Trạng thái | Quyết định | Điều kiện mở lại |
+|---|---|---|---|---|
+| SR-1 | Ân hạn 30 s sau xoay refresh token: người giữ token vừa bị thay đổi được lấy token mới **một lần** | **Chấp nhận tạm** (CTO 21/11/2026) | Không mở rộng ân hạn hay số lần dùng lại; không coi là cơ chế chống đánh cắp token hoàn chỉnh | Có bằng chứng khai thác; đổi mô hình triển khai; yêu cầu bảo mật mới |
+
+### 9.5. Deferred
+| ID | Phạm vi | Rủi ro | Owner | Điều kiện mở lại |
+|---|---|---|---|---|
+| SE-F10 | `GET /conversations/:id/messages` trả toàn bộ tin nhắn, không phân trang | Hội thoại rất dài → phản hồi lớn, tốn bộ nhớ; hiện chưa quan sát vượt ngưỡng | TL (technical debt) | Có hội thoại > 500 tin hoặc phản hồi > 1 MB trong thực tế; hoặc frontend cần phân trang và CTO duyệt đổi API contract |
+
+### 9.6. Follow-up task (không mở rộng PR-B8)
+| PR | Flow | Nội dung (theo quyết định CTO) | Điều kiện bắt buộc | Thứ tự |
+|---|---|---|---|---|
+| PR-B10 | F03 | SE-F9: Tạo lại giữ câu trả lời cũ tới khi câu mới hoàn tất; lỗi/Dừng → câu cũ còn nguyên | Review thứ tự tin nhắn, Dừng, SSE; không đổi API contract | Sau SE-005 |
+| PR-B11 | F05 | SE-F22: retry/reconcile cho dọn dẹp thất bại | **Thiết kế trước** (TL duyệt): idempotent, giới hạn retry, log, chỉ xóa theo ID đã đánh dấu, xử lý khi hết lượt; không đổi HTTP contract | Sau PR-B10 |
+| PR-B12 | F06 | SE-F16 kiểm chứng trích dẫn (phạm vi hẹp); SE-F17 review cấu trúc prompt | Bằng chứng trước/sau trên baseline TL-009 (không đổi baseline); không thêm LLM verifier tốn chi phí/độ trễ; chi phí mới hoặc thay đổi lớn → báo CTO | Sau PR-B11 |
+Thứ tự chung (CTO review vòng 31): **PR-B8 → PR-C2 → SE-005** (hạn 27/11) → PR-B10 → PR-B11 → PR-B12. Lý do đặt B10–B12 sau SE-005: CTO giữ nguyên kế hoạch B8 → C2 → SE-005; B10–B12 không có BLOCKER/MAJOR.
+
+### 9.7. Tiêu chí review PR-B8 (CTO vòng 31)
+TL sẽ kiểm độc lập trước khi merge: (1) đủ R1–R12 — mỗi quy tắc một ca fail/pass bằng `validateEnv` trên bản build; (2) production fail-closed, local/demo vẫn khởi động (kiểm `.env` máy demo); (3) `DNS_SERVERS` không đặt → **không** đổi DNS tiến trình (kiểm `dns.getServers()` trước/sau khởi động); đặt → dùng đúng giá trị; (4) báo cáo timeout LLM/embedding: giá trị hiện tại, đề xuất, cancellation, tác động; (5) đóng 2 MINOR (`initial` thừa; thông điệp "Các phần XML…"); (6) đọc diff, hồi quy, CI.
