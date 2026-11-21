@@ -145,7 +145,6 @@ export class ConversationsService {
     return rows.reverse();
   }
 
-
   async createMessage(input: CreateMessageInput): Promise<Message> {
     const doc = await this.messageModel.create(input);
     return doc.toObject();
