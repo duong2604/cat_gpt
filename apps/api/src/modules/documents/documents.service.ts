@@ -170,6 +170,27 @@ export class DocumentsService {
     return doc;
   }
 
+  /**
+   * Kiểm tài liệu khi tạo hội thoại hỏi đáp (thiết kế mục 5): một truy vấn Mongo
+   * `{ _id ∈ ids, userId, deletedAt: null }` — thiếu bất kỳ id nào (không có / đã xóa /
+   * của người khác, không phân biệt) → `404`; có tài liệu chưa `READY` → `400`.
+   * Truy hồi lúc trả lời tự lọc lại (tài liệu có thể bị xóa sau khi tạo hội thoại).
+   */
+  async findReadyOwnedDocuments(userId: string, ids: string[]): Promise<Types.ObjectId[]> {
+    const objectIds = ids.map((id) => new Types.ObjectId(id));
+    const found = await this.documentModel
+      .find({ _id: { $in: objectIds }, userId: new Types.ObjectId(userId), deletedAt: null })
+      .lean<DocumentEntity[]>()
+      .exec();
+    if (found.length !== objectIds.length) {
+      throw AppException.notFound(ErrorCode.DOCUMENT_NOT_FOUND);
+    }
+    if (found.some((d) => d.status !== DocumentStatus.READY)) {
+      throw AppException.badRequest(ErrorCode.DOCUMENT_NOT_READY);
+    }
+    return objectIds;
+  }
+
   async getDto(userId: string, id: string): Promise<DocumentDto> {
     return toDocumentDto(await this.getOwnedOrThrow(userId, id));
   }

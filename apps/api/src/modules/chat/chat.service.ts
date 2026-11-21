@@ -1,11 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
-import { DocumentStatus, ErrorCode, MessageRole, MessageStatus } from '@cat-gpt/shared';
+import { Types } from 'mongoose';
+import { ErrorCode, MessageRole, MessageStatus } from '@cat-gpt/shared';
 import { AppException } from '../../common/exceptions/app.exception.js';
 import { AppConfigService } from '../../config/app-config.service.js';
 import { isDocumentsHidden } from '../documents/documents-hidden.guard.js';
-import { DocumentEntity } from '../documents/schemas/document.schema.js';
+import { DocumentsService } from '../documents/documents.service.js';
 import { type LlmFinishReason, type LlmMessage, LlmProvider } from '../llm/llm.provider.js';
 import { RAG_REFUSAL_TEXT } from '../rag/rag-prompt.js';
 import type { RagPlan } from '../rag/rag.service.js';
@@ -51,7 +50,7 @@ export class ChatService {
     private readonly conversations: ConversationsService,
     private readonly llm: LlmProvider,
     private readonly config: AppConfigService,
-    @InjectModel(DocumentEntity.name) private readonly documents: Model<DocumentEntity>,
+    private readonly documents: DocumentsService,
     private readonly rag: RagService,
   ) {}
 
@@ -65,7 +64,7 @@ export class ChatService {
         );
       }
       conversation = await this.conversations.getOwnedOrThrow(userId, dto.conversationId);
-      this.assertRagNotHidden(conversation);
+      if (conversation.documentIds?.length) this.assertDocumentsVisible();
     } else {
       const documentIds = dto.documentIds
         ? await this.validateDocumentSelection(userId, dto.documentIds)
@@ -94,7 +93,7 @@ export class ChatService {
   /** Bỏ câu trả lời cuối của assistant (nếu có) rồi sinh lại cho tin nhắn cuối của người dùng. */
   async regenerate(userId: string, conversationId: string, sse: SseStream): Promise<void> {
     const conversation = await this.conversations.getOwnedOrThrow(userId, conversationId);
-    this.assertRagNotHidden(conversation);
+    if (conversation.documentIds?.length) this.assertDocumentsVisible();
 
     const key = conversation._id.toString();
     const controller = this.reserveStream(key);
@@ -266,25 +265,14 @@ export class ChatService {
    * `RagService.prepare()` tự lọc lại lúc trả lời (tài liệu có thể bị xóa sau khi tạo).
    */
   private async validateDocumentSelection(userId: string, documentIds: string[]): Promise<Types.ObjectId[]> {
-    this.assertRagNotHiddenRaw();
+    this.assertDocumentsVisible();
     if (documentIds.length > this.config.rag.maxDocuments) {
       throw AppException.badRequest(
         ErrorCode.VALIDATION_FAILED,
         `Tối đa ${this.config.rag.maxDocuments} tài liệu mỗi hội thoại`,
       );
     }
-    const ids = documentIds.map((id) => new Types.ObjectId(id));
-    const found = await this.documents
-      .find({ _id: { $in: ids }, userId: new Types.ObjectId(userId), deletedAt: null })
-      .lean<DocumentEntity[]>()
-      .exec();
-    if (found.length !== ids.length) {
-      throw AppException.notFound(ErrorCode.DOCUMENT_NOT_FOUND);
-    }
-    if (found.some((d) => d.status !== DocumentStatus.READY)) {
-      throw AppException.badRequest(ErrorCode.DOCUMENT_NOT_READY);
-    }
-    return ids;
+    return this.documents.findReadyOwnedDocuments(userId, documentIds);
   }
 
   /**
@@ -293,11 +281,13 @@ export class ChatService {
    * tiếp tục một hội thoại đã có từ trước (không chỉ lúc tạo): bản `staff` có thể được bật
    * sau khi hội thoại đã tồn tại từ bản `demo`.
    */
-  private assertRagNotHidden(conversation: Conversation): void {
-    if (conversation.documentIds?.length) this.assertRagNotHiddenRaw();
-  }
-
-  private assertRagNotHiddenRaw(): void {
+  /**
+   * Hỏi tài liệu cần cả Chat bật (ChatHiddenGuard trên route) và Tài liệu hiển thị
+   * (thiết kế mục 10) — ẩn như tài liệu không tồn tại, không phân biệt lý do. Kiểm cả khi
+   * tiếp tục một hội thoại đã có từ trước (không chỉ lúc tạo): bản `staff` có thể được bật
+   * sau khi hội thoại đã tồn tại từ bản `demo`.
+   */
+  private assertDocumentsVisible(): void {
     if (isDocumentsHidden(this.config)) {
       throw AppException.notFound(ErrorCode.DOCUMENT_NOT_FOUND);
     }
