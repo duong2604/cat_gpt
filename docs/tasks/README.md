@@ -2,7 +2,7 @@
 
 Mục lục task theo ID. Quy ước, phân công và cách nhận task: [workflow mục 3](../project/workflow.md#3-nơi-lưu-task), [mục 3.1](../project/workflow.md#31-phân-công-và-nhận-task); cột Tiến độ theo [mục 11](../project/workflow.md#11-theo-dõi-tiến-độ). TL cập nhật bảng mỗi khi tạo task, đổi trạng thái hoặc đổi hạn. Senior Dev cập nhật khi nhận task (`Đang làm`) và khi bàn giao (`Chờ Review`).
 
-Cập nhật: 21/11/2026 22:45 (tạo SE-026 POC).
+Cập nhật: 21/11/2026 22:55 (tạo SE-027; SE-026 thêm điều kiện CTO).
 
 **Mở phiên mới:** prompt [Team Leader](../project/onboarding/team-leader.md) · [Senior Dev](../project/onboarding/senior-dev.md) (CTO xác nhận dùng được 15/11/2026). Báo cáo ngày: [daily/](../reports/daily/README.md).
 
@@ -45,6 +45,7 @@ Cập nhật: 21/11/2026 22:45 (tạo SE-026 POC).
 | [SE-024](SE-024-chat-regenerate-failure-notice.md) | Tạo lại thất bại: thông báo người dùng (B10-M2) | Senior Dev | P3 | Không đặt | Không đặt | Nháp | Backlog (MINOR); sau SE-023, không gộp PR |
 | [SE-025](SE-025-chat-sse-comment.md) | Sửa chú thích lý do dùng SSE tự viết (`chat.controller.ts`) | Senior Dev | P2 | 22/11/2026 | 22/11/2026 | **Sẵn sàng** | Tạo 21/11 theo CTO "Chat Module Convention Review" — chỉ chú thích |
 | [SE-026](SE-026-chat-nest-sse-poc.md) | POC: Chat SSE dùng NestJS `@Sse()` (không merge) | Senior Dev | P1 | 22/11/2026 | Theo quyết định CTO | **Sẵn sàng** | Tạo 21/11 theo CTO "Evaluate NestJS Built-in SSE". POC / EVALUATION — AWAITING CTO DECISION |
+| [SE-027](SE-027-web-sse-parser.md) | Parser SSE phía web theo chuẩn | Senior Dev | P1 | 22/11/2026 | 22/11/2026 | **Sẵn sàng** | Tạo 21/11 theo CTO "SSE Architecture Final Evaluation" mục 2 (APPROVED). Độc lập SE-026; TL được merge khi đạt hồi quy |
 
 **Thứ tự nhận task của Senior Dev (CTO duyệt 16–17/11/2026, phương án 1 SE — [plan mục 8](../project/plan.md#8-lộ-trình-module-34-cto-duyệt-16112026)):** ~~SE-010~~ (Done) → ~~SE-011~~ (Done) → ~~SE-012~~ (Done) → ~~SE-013~~ (Done) → ~~SE-014~~ (Done) → ~~SE-015~~ (Done) → ~~SE-016~~ (Done) → SE-017 (phần `-small` xong; `-large` chờ quyền API); Module 4 hết task SE trong phạm vi đã duyệt → ~~SE-018~~ (Done) → ~~SE-020~~ (Done) → ~~SE-021 A~~ (bàn giao) → **SE-021 B (PR-B1 → B2 → B4)** → SE-005 → SE-006 → SE-004 sau lát TXT hoặc ở phiên thứ hai khi mở. Module 4 (SE-014…SE-016) chỉ nhận khi dependency đạt (TL-008 kiến trúc đã duyệt 17/11; SE-014 cần thêm SE-011 merge + TL-008 AC4). **Thứ tự (CTO chốt 18/11/2026):** hoàn thành Module 3 trước (SE-011 → SE-012 → SE-013), rồi SE-014 → SE-015 / SE-016 → SE-017 theo gate; TL tự chuyển `Sẵn sàng` và giao khi gate đạt — [plan mục 8.3](../project/plan.md#83-module-4-phụ-thuộc-đường-găng-và-thứ-tự-cto-chốt-18112026). Hạn đã chốt của các task cũ giữ nguyên.
 

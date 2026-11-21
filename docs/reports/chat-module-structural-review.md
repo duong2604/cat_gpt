@@ -3,7 +3,7 @@
 Người lập: TL · Cơ sở: `origin/develop` @ `547b06f` (CI success) · Bắt đầu: 21/11/2026 21:30 · Kết thúc triển khai: 21:57 · `develop` @ `86b9f3f`
 Task triển khai: [SE-022](../tasks/SE-022-chat-module-structural-refactor.md) · Chỉ thị: CTO "Chat Module Structural Refactor" (P1)
 
-**Trạng thái: SE-022 `CTO STRUCTURAL ACCEPTED` (21/11/2026) · F03 `PARTIAL` — SE-023 đã merge (`83704bc`), TL đề nghị CTO nghiệm thu chức năng (mục 11).** Xem mục 9. Convention review (test, `guards/`, SSE): mục 10 — chờ CTO duyệt mục 10.6. **SSE đánh giá lại: mục 12 — POC / EVALUATION — AWAITING CTO DECISION.**
+**Trạng thái: SE-022 `CTO STRUCTURAL ACCEPTED` (21/11/2026) · F03 `PARTIAL` — SE-023 đã merge (`83704bc`), TL đề nghị CTO nghiệm thu chức năng (mục 11).** Xem mục 9. Convention review (test, `guards/`, SSE): mục 10 — chờ CTO duyệt mục 10.6. **SSE: mục 12–13 — SE-026 POC / EVALUATION (chưa được merge backend SSE); SE-027 parser web APPROVED.**
 
 Ký hiệu: **[CODE]** đã kiểm chứng bằng code/lệnh · **[NHẬN ĐỊNH]** đánh giá kỹ thuật · **[ĐỀ XUẤT]**.
 
@@ -368,3 +368,17 @@ id: x\ndata: {"type":"done"}\n\n     ← id do handler đặt: vẫn có dòng i
 **Chưa khuyến nghị B ở thời điểm này.** Lợi ích kiểm chứng được của B: header chuẩn hơn, backpressure có sẵn, bỏ một lớp tự viết, nhất quán NestJS. Chi phí kiểm chứng được: đổi wire (bắt buộc sửa web và deploy đồng bộ), thêm một rủi ro khóa mới, độ phức tạp tách 2 pha. TL sẽ khuyến nghị **B** nếu POC cho thấy: (1) khóa nhả đúng ở mọi đường ngắt (V3, V4), (2) contract giữ nguyên ngoài dòng `id:` (V6, mã 200), (3) hồi quy đủ (V1, V2, V5, V7), (4) diff ròng không làm `ChatService` khó đọc hơn. Ngược lại giữ **A**.
 
 **Độc lập với A/B (đề xuất):** sửa parser web theo đặc tả SSE (đọc từng dòng) — rủi ro thấp, giúp web chịu được proxy/gateway thêm trường SSE. Cần CTO duyệt vì chạm web.
+
+## 13. CTO "SSE Architecture Final Evaluation" — APPROVED WITH CONDITIONS — 21/11/2026 22:55
+
+**Nguyên tắc CTO:** POST + SSE hợp lệ; `id:` là tùy chọn của giao thức — NestJS tự sinh thì **được phép**, không bắt buộc loại bỏ; không dùng `Last-Event-ID`, không thêm id vào JSON, không reconnect/resume; ưu tiên `@Sse()` chỉ khi có lợi ích thực tế và không tăng độ phức tạp/rủi ro; frontend phải parse đúng chuẩn SSE.
+
+**Đính chính TL:** mục 10.3 và 12.3 coi việc NestJS thêm `id:` là "phá contract". Theo nguyên tắc CTO, chỗ hỏng nằm ở **parser web không theo chuẩn**, không phải ở `id:` — contract nghiệp vụ là các event `meta`/`delta`/`done`/`error` trong `data`. Rủi ro đổi wire được xử lý bằng SE-027.
+
+| Việc | Task | Trạng thái |
+|---|---|---|
+| Parser SSE web theo chuẩn (`data`/`id`/`event`, nhiều dòng `data`, CRLF/LF/CR, chunk, comment; không retry POST; giữ `ChatStreamEvent`) | [SE-027](../tasks/SE-027-web-sse-parser.md) — PR riêng, TL review/merge khi đạt hồi quy + trình duyệt thật | Sẵn sàng |
+| POC `@Sse()` với điều kiện CTO (200, event giữ, heartbeat, nhả `inFlight` mọi đường, không race/trùng) | [SE-026](../tasks/SE-026-chat-nest-sse-poc.md) — nhánh riêng, **không merge** trước CTO | Sẵn sàng (SE chưa đẩy nhánh lúc 22:55) |
+| Quyết định A/B | TL báo cáo sau V1–V9 theo 6 tiêu chí CTO mục 4 | Chờ POC |
+
+Thứ tự: SE-026 → SE-027 (có thể song song, độc lập) → TL kiểm chứng + so sánh A/B → CTO quyết định → SE-005. SE-024, SE-025 hoãn.

@@ -4,7 +4,7 @@ Trạng thái: Sẵn sàng — **POC / EVALUATION — AWAITING CTO DECISION**
 Người phụ trách: Senior Dev · Ưu tiên: P1 (chỉ thị CTO "Evaluate NestJS Built-in SSE") · Ước lượng: 0,5 ngày
 Phụ thuộc: không. SE-005 (hạn 27/11) tiếp tục sau POC — báo TL nếu ảnh hưởng hạn
 Hạn bàn giao review: 22/11/2026 · Hạn hoàn tất: theo quyết định CTO
-Chốt: 21/11/2026 — chỉ thị CTO "Evaluate NestJS Built-in SSE"; đánh giá TL: [báo cáo Chat mục 12](../reports/chat-module-structural-review.md)
+Chốt: 21/11/2026 — chỉ thị CTO "Evaluate NestJS Built-in SSE"; **CTO "SSE Architecture Final Evaluation" (APPROVED WITH CONDITIONS)**; đánh giá TL: [báo cáo Chat mục 12–13](../reports/chat-module-structural-review.md)
 SHA cơ sở: `origin/develop` @ `83704bc`
 
 ## Ràng buộc (CTO)
@@ -16,6 +16,12 @@ Nhánh riêng `poc/api-chat-nest-sse` (worktree riêng), **push nhánh, KHÔNG m
 - Mọi event có `data` được gán `id: N` (tự tăng); `{ comment: 'ping' }` → `: ping` **không** có `id`. Đầu stream có thêm `\n`.
 - Observable `error` sau khi đã gửi header → `event: error\ndata: Internal server error` (khác `{type:'error',code}` hiện tại).
 - Client ngắt → framework hủy đăng ký (teardown chạy) + `@SseSignal()` abort. Không có heartbeat sẵn.
+
+## Điều kiện bổ sung (CTO "SSE Architecture Final Evaluation")
+- `id:` do NestJS tự sinh **được phép**; **không** loại bỏ, **không** thêm id vào payload JSON, **không** dùng `Last-Event-ID`, **không** reconnect/resume.
+- Giữ `POST /chat/stream`, `POST /conversations/:id/regenerate`, **HTTP 200**, request body, event `meta`/`delta`/`done`/`error`; giữ auth, phân quyền, throttling.
+- Heartbeat + cleanup; hủy LLM khi disconnect hoặc Stop; nhả `inFlight` ở **mọi** đường, đặc biệt disconnect trước khi Observable subscribe; không race, không tin nhắn trùng.
+- Web của POC: dùng parser của SE-027 (rebase lên `develop` khi SE-027 merge) — không tự viết parser riêng trong POC.
 
 ## Việc POC
 1. **Controller:** `@Sse('chat/stream', { method: RequestMethod.POST })` và `@Sse('conversations/:id/regenerate', …)`; giữ guard, `@ApiProduces`; **giữ mã 200** (kiểm `@HttpCode(HttpStatus.OK)` có tác dụng với `@Sse`; nếu không, ghi rõ và đề xuất). Handler `async` trả `Observable<MessageEvent>`. `stop` không đổi.
@@ -37,7 +43,8 @@ Diff (`git diff --stat` + toàn văn), số dòng thêm/bớt mỗi tệp; cách
 | V4 | Ngắt **trước khi subscribe** → khóa nhả | kịch bản mới của TL (ngắt ngay sau khi gửi request) |
 | V5 | Heartbeat có trên wire, không có `id` | `curl -N` với chu kỳ rút ngắn |
 | V6 | Contract: mã 200, `Content-Type`, payload JSON từng event giống hệt; lỗi trước stream JSON (400/404/409/429) | So sánh wire `develop` vs POC |
-| V7 | Web: chat, Dừng, Tạo lại chạy trong trình duyệt với parser mới | Web dev trỏ API POC |
+| V7 | Web (parser SE-027): chat, Dừng, Tạo lại, RAG chạy trong trình duyệt thật | Web dev trỏ API POC |
+| V9 | Không có tin nhắn trùng / race: 2 request đồng thời, Stop trong cửa sổ khởi động, Tạo lại + Dừng | `f03-verify` + race |
 | V8 | typecheck/lint/build, test hiện có | Lệnh |
 
 ## Kết quả review
