@@ -3,7 +3,7 @@
 Người lập: TL · Cơ sở: `origin/develop` @ `547b06f` (CI success) · Bắt đầu: 21/11/2026 21:3x
 Task triển khai: [SE-022](../tasks/SE-022-chat-module-structural-refactor.md) · Chỉ thị: CTO "Chat Module Structural Refactor" (P1)
 
-**Trạng thái hiện tại: GATE 1 — TL DESIGN REVIEW XONG; chờ SE triển khai (sau PR-B10).** Không tự đánh dấu CTO ACCEPTED.
+**Trạng thái hiện tại: GATE 2 — SE đang triển khai PR-C3a.** Không tự đánh dấu CTO ACCEPTED.
 
 Ký hiệu: **[CODE]** đã kiểm chứng bằng code/lệnh · **[NHẬN ĐỊNH]** đánh giá kỹ thuật · **[ĐỀ XUẤT]**.
 
@@ -105,7 +105,8 @@ Lý do: không gộp cấu trúc với thay đổi hành vi (B10); không trì h
 ## 6. Lịch sử
 | Thời điểm | Gate | Nội dung |
 |---|---|---|
-| 21/11 21:3x | Gate 1 | TL review độc lập + kiểm chứng 13/13; chọn Option B; tạo SE-022 |
+| 21/11 21:30 | Gate 1 | TL review độc lập + kiểm chứng 13/13; chọn Option B; tạo SE-022 |
+| 21/11 21:33 | Gate 2 (giao) | Chủ dự án/CTO yêu cầu ưu tiên module Chat → TL đổi thứ tự: **PR-C3a ngay** → PR-B10 → PR-C3b; SE-005 dừng ở điểm an toàn (giữ số liệu đo, chưa mở PR; hạn 27/11 vẫn kịp). Đã giao SE kèm kịch bản kiểm chứng |
 
 ## 7. Quality gates (sẽ điền khi triển khai)
 | Gate | PR-C3a | PR-C3b |

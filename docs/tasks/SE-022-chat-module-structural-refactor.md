@@ -1,8 +1,8 @@
 # SE-022 — Refactor cấu trúc module Chat (module mẫu)
 
-Trạng thái: Sẵn sàng (bắt đầu **sau PR-B10**)
+Trạng thái: Sẵn sàng — **PR-C3a làm ngay** (ưu tiên của chủ dự án/CTO, giao 21:33); PR-C3b sau PR-B10
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 0,75 ngày (PR-C3a 0,25 + PR-C3b 0,5)
-Phụ thuộc: SE-005 (đang làm, không trì hoãn) → PR-B10 (SE-F9, thay đổi hành vi Tạo lại) → SE-022
+Phụ thuộc: PR-C3a không phụ thuộc; PR-C3b sau PR-B10 (cùng vùng code). SE-005 tạm dừng ở điểm an toàn
 Hạn bàn giao review: Không đặt — theo phụ thuộc · Hạn hoàn tất: Không đặt — theo phụ thuộc
 Chốt: 21/11/2026 — chỉ thị CTO "Chat Module Structural Refactor" (TL thiết kế, SE triển khai, TL review/merge PR không đổi hành vi)
 SHA cơ sở: `origin/develop` mới nhất khi tạo nhánh (sau PR-B10)
