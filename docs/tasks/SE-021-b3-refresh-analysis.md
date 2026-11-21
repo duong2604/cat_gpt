@@ -124,3 +124,18 @@ Ghi chú về K4/K5: `sessionId` không phải bí mật tuyệt đối. Nơi l�
 
 - Đã kiểm: đọc code tại `310ee02` (các dòng nêu trên); mô phỏng logic K1–K5 khớp với nhánh tương ứng.
 - Chưa kiểm: chạy API thật cho K2–K5 (sẽ làm sau khi có quyết định); kiểm tra nhiều instance (lưu trạng thái đua không liên quan đến Redis); hành vi trình duyệt thật khi response bị mất.
+
+## 9. Review của TL (21/11/2026 11:55)
+
+**Kết luận:** phân tích **Đạt** về sự kiện (logic, file:dòng, K1–K5, T1–T11 khớp với code `310ee02` TL đã đọc ở vòng 6 và B2). **Không đồng ý** xếp A1 và A3 vào nhóm "TL duyệt được": cả hai đổi chính sách thu hồi hoặc độ tin cậy phiên → theo chỉ thị CTO mục 3, phải **trình CTO trước khi code**.
+
+| Mục | Ý kiến TL | Lý do / bằng chứng |
+|---|---|---|
+| A1 (logout chỉ thu hồi khi current/grace) | **Cần CTO** | Làm yếu khả năng ngăn chặn trong ca token bị đánh cắp: kẻ tấn công xoay token → token của nạn nhân thành "cũ" > 30 s → nạn nhân bấm Đăng xuất **không còn thu hồi** phiên (hiện tại thì có, vì thu hồi theo `sessionId`). Phân tích mục 5 chỉ nêu "phiên mồ côi", chưa nêu ca này. |
+| A3 (ân hạn chỉ cấp access token) | **Cần CTO**; TL không khuyến nghị nếu đứng riêng | SE bỏ sót: **làm hỏng K1/T3**. Response xoay bị mất, client thử lại trong 30 s → chỉ nhận access token, cookie vẫn là token cũ (`previous`) → lần refresh sau ~15 phút ngoài ân hạn → `reuse` → **thu hồi phiên**. Hiện tại K1 được cấp token mới. Lợi ích (chặn chuỗi refresh của kẻ replay trong 30 s) nhỏ: kẻ có token còn hiệu lực vốn đã dùng được nó. |
+| A2 (thống nhất `reuse` khi thua CAS) | Hoãn | Đúng hướng (a), nhưng quy tắc cuối phụ thuộc B2; làm sau khi CTO chốt B2. |
+| B1 (kéo dài ân hạn / lưu token để trả lại) | Không khuyến nghị | Tăng cửa sổ replay hoặc lưu dữ liệu nhạy cảm; K2 (mất response > 30 s) hiếm, chấp nhận là rủi ro còn lại. |
+| B2 (lịch sử hash) | **Khuyến nghị — phương án a** | Lưu N = 5 hash gần nhất (chỉ SHA-256, không secret) kèm thời điểm. Quy tắc: khớp current → xoay; khớp previous trong 30 s → ân hạn như hiện tại; khớp hash cũ hơn hoặc previous ngoài ân hạn → **dùng lại thật → thu hồi**; secret **chưa từng thấy** → `401`, **không thu hồi**. Logout: thu hồi khi khớp current hoặc bất kỳ hash trong lịch sử; secret lạ → chỉ xóa cookie. Chặn K4/K5/T7/T8 mà **không** làm yếu ngăn chặn (A1 không còn đánh đổi trong N lần xoay). Đổi schema `sessions` (thêm mảng giới hạn 5 phần tử) → CTO. |
+| B4 (bỏ `sessionId` khỏi log) | Không khuyến nghị | Log nội bộ cần `sessionId` để điều tra; khi B2 xong, biết `sessionId` không còn đủ để thu hồi phiên. |
+
+**Trạng thái PR-B3:** chưa code; chờ CTO (mục 7 + bảng trên). SE chuyển sang audit F08/F02.
