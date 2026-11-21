@@ -99,7 +99,7 @@ Quy trình bắt buộc: SE inventory + **dry-run (chỉ đọc)** → TL đối
 ### 5.3. Trạng thái
 | Workstream | Trạng thái | PR | Ghi chú |
 |---|---|---|---|
-| C1 Data Cleanup | **BLOCKED — chờ chủ dự án xác nhận xóa trong phiên SE** (15:57); export đã kiểm, TL GO kỹ thuật 15:57; dry-run xong, TL duyệt manifest 15:54; chờ export + TL GO | — | 217 ID (A1 200, A2 10 + 1 TL bổ sung, A3 6); 2 UNVERIFIED giữ nguyên |
+| C1 Data Cleanup | **DONE** (phạm vi 217 ID đã duyệt) — xóa 18:xx sau xác nhận trực tiếp của chủ dự án; TL xác minh sau xóa 18:35 | — (thao tác dữ liệu, không có PR code) | 2 tài khoản UNVERIFIED giữ nguyên; export khôi phục ngoài repo |
 | C2 Code Cleanup | **Chưa bắt đầu** — TL audit xong; B8/B9 nằm trong PR-B8; B2, B12 sẽ thành PR-C2 | — | PR riêng, không gộp với C1 |
 
 ## 6. Chính sách cấu hình theo môi trường (chỉ thị CTO vòng 20) — audit TL 12:5x, `develop` `4cd1784`
@@ -209,3 +209,16 @@ Manifest v2 sha256 `a7fef1f6164874e95d1a50f8761b86d50d0ffbf31f507b75acd88953a72d
 | messages | 50 | Đạt | Mọi bản ghi thuộc 25 hội thoại trên và `userId` ∈ 217 ID |
 | documents, MinIO, Qdrant, BullMQ | 0 | Đạt | — |
 **GO xóa** với số kỳ vọng cố định: messages 50 → conversations 25 → sessions 79 → users 217; lệch là dừng. Export giữ ngoài repo (có hash mật khẩu tài khoản thử) để khôi phục.
+
+### 5.6. C1 — kết quả xóa và xác minh (SE thực hiện sau xác nhận của chủ dự án; TL xác minh 18:35)
+Chủ dự án xác nhận trực tiếp trong phiên Senior Dev ("Xác nhận xóa theo manifest v2"). SE kiểm lại sha256 export trước khi xóa, rồi xóa theo `{_id: {$in: [...]}}` đúng danh sách:
+| Bước | Kỳ vọng | Đã xóa |
+|---|---|---|
+| Qdrant / MinIO / BullMQ | 0 | 0 (không có gì) |
+| messages | 50 | 50 |
+| conversations | 25 | 25 |
+| documents | 0 | 0 |
+| sessions | 79 | 79 |
+| users | 217 | 217 |
+**SE xác minh:** users 238 → 21; còn lại theo 217 ID = 0 ở mọi collection; messages của 25 hội thoại đã xóa = 0 (không mồ côi); 2 UNVERIFIED còn; admin còn. ID không xóa được: không có.
+**TL xác minh độc lập** (API `develop` `fe06486` trên DB `cat_gpt`, chỉ đọc qua API quản trị, đăng xuất admin sau khi kiểm): `health` `200`; admin đăng nhập `200`; tổng users **21** (1 ADMIN, 20 USER) = 238 − 217; tìm theo `loadtest`, `tl-smoke`, `se018-regression`, `se020-regression`, `b1-e2e`, `b4-verify` → **0**; `b2-race` → 1 và `b7-` → 1 (đúng 2 UNVERIFIED được giữ). *Ghi chú trung thực:* lần kiểm đầu TL dùng sai tên tham số (`q` thay vì `search`) nên API trả `400` và kết quả 0 vô nghĩa; TL phát hiện và kiểm lại với `search`, kết quả trên là lần đúng. Số bản ghi phiên/hội thoại/tin nhắn mồ côi: theo kết quả SE (API quản trị không đọc được dữ liệu Chat của người khác — đúng thiết kế phân quyền).
