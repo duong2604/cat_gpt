@@ -1,6 +1,6 @@
 # SE-028 — POC phương án C: Chat SSE bằng NestJS Native Streaming Responses (không merge)
 
-Trạng thái: Sẵn sàng — **POC / EVALUATION — AWAITING CTO DECISION**
+Trạng thái: Done (POC đóng) — 22/11/2026 01:29: CTO chọn phương án C, triển khai ở SE-029 (`29160c4`). Nhánh `poc/api-chat-native-stream` (`75d06eb`, `45d9f79`) lưu vào bundle `D:\workspace\buggysoft\cat_gpt-archive\poc-and-test-branches-2026-11-22.bundle` rồi xóa (CTO duyệt)
 Người phụ trách: Senior Dev · Ưu tiên: P1 · Ước lượng: 0,5 ngày
 Phụ thuộc: sau SE-026 (dùng lại phần tách pha trước stream của POC B). **Không trì hoãn SE-005 quá hạn 27/11** — báo TL nếu vượt 0,5 ngày
 Hạn bàn giao review: 22/11/2026 · Hạn hoàn tất: theo quyết định CTO

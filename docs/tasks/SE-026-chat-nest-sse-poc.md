@@ -1,6 +1,6 @@
 # SE-026 — POC: Chat SSE dùng NestJS `@Sse()` (không merge)
 
-Trạng thái: Sẵn sàng — **POC / EVALUATION — AWAITING CTO DECISION**
+Trạng thái: Done (POC đóng) — 22/11/2026 01:29: CTO chọn phương án C, migration SE-029 merge `29160c4`. Nhánh `poc/api-chat-nest-sse` (`5ba11bd`) lưu vào bundle `D:\workspace\buggysoft\cat_gpt-archive\poc-and-test-branches-2026-11-22.bundle` rồi xóa (CTO duyệt)
 Người phụ trách: Senior Dev · Ưu tiên: P1 (chỉ thị CTO "Evaluate NestJS Built-in SSE") · Ước lượng: 0,5 ngày
 Phụ thuộc: không. SE-005 (hạn 27/11) tiếp tục sau POC — báo TL nếu ảnh hưởng hạn
 Hạn bàn giao review: 22/11/2026 · Hạn hoàn tất: theo quyết định CTO

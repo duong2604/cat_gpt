@@ -1,6 +1,6 @@
 # Báo cáo sự cố dữ liệu SE-005 (AC5) — 22/11/2026
 
-Người lập: TL · Trạng thái: **ĐANG XỬ LÝ — CHỜ CTO DUYỆT PHƯƠNG ÁN** · Môi trường: MongoDB Atlas, DB **`cat_gpt_loadtest`** (DB demo `cat_gpt` không bị ảnh hưởng — SE kiểm chỉ đọc: 0 tài khoản `loadtest+`)
+Người lập: TL · Trạng thái: **ĐANG XỬ LÝ — CTO ĐỒNG Ý KHÔI PHỤC VỀ NGUYÊN TẮC; CHỜ DUYỆT KẾ HOẠCH CHI TIẾT (mục 6)** · Môi trường: MongoDB Atlas, DB **`cat_gpt_loadtest`** (DB demo `cat_gpt` không bị ảnh hưởng — SE kiểm chỉ đọc: 0 tài khoản `loadtest+`)
 
 Mọi kiểm tra trong báo cáo này là **chỉ đọc** (`find`/`countDocuments`/`aggregate` trên `cat_gpt_loadtest` và `local.oplog.rs`). Không có thao tác ghi nào lên DB sau sự cố.
 
@@ -58,3 +58,24 @@ Mọi kiểm tra trong báo cáo này là **chỉ đọc** (`find`/`countDocumen
 4. TL review mọi kịch bản có thao tác ghi dữ liệu trước khi chạy (như review PR).
 5. Trước mỗi đợt đo tải: chụp số lượng (`count`) theo collection và xuất chỉ đọc danh sách ID dữ liệu thử; ghi vào task.
 6. Không dùng cổng 4000 (cổng demo) cho API kiểm thử — tránh nhầm môi trường.
+
+
+## 6. Kế hoạch chi tiết R0–R5 (trình CTO duyệt — CHƯA THỰC HIỆN BƯỚC GHI NÀO) — 22/11/2026 01:30
+
+CTO (22/11) đồng ý khôi phục về nguyên tắc; cho phép làm ngay bước chỉ đọc. **Đã làm (chỉ đọc):** R0 (manifest) và R1 (dry-run). **Chờ duyệt:** RB, R2, R3, R4, R5.
+
+Thư mục bằng chứng/manifest: `D:\workspace\buggysoft\cat_gpt-incident-se005\` — kiểm toàn vẹn bằng `sha256sum -c SHA256SUMS` (14 tệp OK). DB duy nhất bị tác động: **`cat_gpt_loadtest`** (cụm Atlas dùng chung URI với demo — chỉ đổi tên DB). Người thực hiện đề xuất: **TL**; SE không chạm dữ liệu.
+
+| Bước | Mục tiêu | DB · collection | Thao tác | Số lượng · danh sách ID | Backup / rollback | Điều kiện hoàn thành |
+|---|---|---|---|---|---|---|
+| **R0** ✅ đã làm | Chốt phạm vi bằng danh sách ID | `cat_gpt_loadtest`: `users`, `conversations`, `messages`; `local.oplog.rs` | **Đọc** | 200 tài khoản loadtest (`r0-accounts-loadtest.json`); 2 tài khoản thử khác (`r0-accounts-other.json`: `brute+ac3` `6b01a93ba72efa1c2b4eb586`, `native+se029` `6b01d398b60ed57b7522f2ef`); 710 hội thoại (`r0-conversations.json`); 1.420 tin nhắn (`r0-messages.json`); phân bổ theo tài khoản (`r0-per-user.json`: 20 tài khoản `loadtest+010, +020, …, +200` — 18 × 35 + 2 × 40 = 710) | Không cần (không ghi) | Manifest + SHA-256 trong `SHA256SUMS` |
+| **R1** ✅ đã làm | Dry-run: dựng lại tài liệu gốc và kiểm điều kiện an toàn | như R0 | **Đọc** (`writes: 0`) | Dựng 710 hội thoại = bản insert + 1.420 update `lastMessageAt` theo thứ tự oplog; 1.420 tin nhắn = bản insert (0 update) | Không cần | **Đạt** (`r1-dryrun-result.json`): 0 `_id` trùng trong `conversations`/`messages`; 100% chủ sở hữu thuộc 200 tài khoản loadtest; mọi tin nhắn thuộc 710 hội thoại; mỗi hội thoại đúng 2 tin (710 USER + 710 ASSISTANT, đều `COMPLETED`); 0 hội thoại thiếu `lastMessageAt`; 0 diff không áp được. Tài liệu dựng sẵn: `r2-restore-documents.ejson` (SHA `535d1ab6…`) |
+| **RB** | Ảnh chụp trước khi ghi (để rollback) | `users` (202 tài khoản trong R0), `conversations`/`messages` của 200 tài khoản loadtest | **Đọc** → tệp `rb-before.ejson` | 202 bản ghi `users` (chỉ `_id`, `email`, `status`, `updatedAt`); hội thoại/tin nhắn loadtest hiện = 0 | Là bản backup của R2–R5 | Tệp + SHA-256; số bản ghi khớp R0 |
+| **R2** | Khôi phục nguyên bản 710 hội thoại + 1.420 tin nhắn | `cat_gpt_loadtest.conversations`, `.messages` | **Ghi**: `insertMany` (ordered, không upsert) đúng tài liệu trong `r2-restore-documents.ejson`; **không** sinh dữ liệu mới | 710 + 1.420, đúng ID trong `r0-conversations.json`/`r0-messages.json` | Rollback: `deleteMany({_id ∈ danh sách R0})` — chỉ đúng các ID vừa chèn (hiện không tồn tại → không đụng dữ liệu khác). Kiểm trước khi ghi: chạy lại R1 ngay trước R2, phải vẫn 0 trùng | `countDocuments({_id ∈ R0})` = 710 / 1.420; đối chiếu hash nội dung từng tài liệu với `r2-restore-documents.ejson` |
+| **R3** | Mở khóa 200 tài khoản loadtest | `cat_gpt_loadtest.users` | **Ghi**: qua API admin `PATCH /admin/users/:id/status {ACTIVE}` (giữ audit/nghiệp vụ như thao tác admin thật) | 200 ID trong `r0-accounts-loadtest.json` | Rollback: `PATCH … {BLOCKED}` cho đúng 200 ID (theo `rb-before.ejson`) | 200/200 `ACTIVE`; 1 tài khoản bất kỳ đăng nhập được |
+| **R4** | Đối chiếu sau khôi phục | như R2–R3 | **Đọc** | Số hội thoại từng tài khoản = `r0-per-user.json`; 1.420 tin; qua API: 1 tài khoản (vd `loadtest+050`, 40 hội thoại) `GET /conversations` + `GET /conversations/:id/messages` | — | Báo cáo đối chiếu ghi vào mục 7; lệch bất kỳ → dừng, báo CTO, cân nhắc rollback |
+| **R5** | Xử lý 2 tài khoản thử ngoài loadtest | `cat_gpt_loadtest.users` | `brute+ac3`: **không đổi** (giữ `BLOCKED` — tài khoản thử AC3). `native+se029`: **Ghi** `PATCH … {BLOCKED}` (như mọi tài khoản thử sau khi xong) | 1 ID (`6b01d398b60ed57b7522f2ef`) | Rollback: `PATCH … {ACTIVE}` | `native+se029` = `BLOCKED` |
+
+**Không làm:** tạo hội thoại/tin nhắn mới, đổi nội dung, xóa bất kỳ bản ghi nào ngoài rollback đã nêu, chạm DB demo `cat_gpt`, chạm 123 hội thoại đã xóa không thuộc sự cố.
+**Thứ tự đề xuất:** RB → R1 (chạy lại) → R2 → R3 → R4 → R5; mỗi bước ghi kết quả thực tế + đối chiếu vào báo cáo này.
+**Sau khôi phục (điều kiện CTO mục B):** SE đo lại SE-005 trên SHA cuối, kiểm HTTP 429 + thông báo tiếng Việt trên trình duyệt, chạy hồi quy liên quan; AC5 **giữ NOT PASS** (không hợp thức hóa thao tác xóa trước đó).

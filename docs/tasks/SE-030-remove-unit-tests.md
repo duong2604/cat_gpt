@@ -1,6 +1,6 @@
 # SE-030 — Gỡ toàn bộ unit test khỏi `apps/api`
 
-Trạng thái: **TẠM DỪNG — CTO NOT APPROVED (22/11/2026)**; chờ CTO duyệt riêng sau giải trình TL ([báo cáo Chat mục 18](../reports/chat-module-structural-review.md))
+Trạng thái: **Đóng — CANCELLED (CTO 22/11/2026)**: CTO quyết định duy trì automated regression coverage — giữ nguyên unit test, không xóa test để đơn giản hóa CI, giữ các bước kiểm tra hiện hành. Không có thay đổi code.
 Người phụ trách: Senior Dev · Ưu tiên: P2 · Ước lượng: 0,25 ngày
 Phụ thuộc: SE-029 merge (cùng `package.json`/lockfile)
 Hạn bàn giao review: theo SE-029 · Hạn hoàn tất: không đặt
@@ -26,7 +26,7 @@ Không đổi mã nguồn chạy, không đụng `apps/web`, `packages/shared`.
 | AC4 | Diff chỉ trong phạm vi trên | `git diff --stat` |
 
 ## Kết quả review
-Chưa có.
+22/11/2026 — CTO CANCELLED. Lý do: duy trì automated regression coverage. Giải trình TL: [báo cáo Chat mục 18.2](../reports/chat-module-structural-review.md).
 
 ## Lịch sử review
 Chưa có.
