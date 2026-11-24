@@ -1,6 +1,6 @@
 # TL-004 — Bộ tài liệu nguồn cho báo cáo đồ án (Markdown)
 
-Trạng thái: Chờ Review — vòng 5 bàn giao 17/11/2026 (chế độ phát hành, thiết kế Module 3–4, ảnh Chat OpenAI ≥ 1280 px); còn ảnh đại diện (B13 phần còn lại). Vòng 3 **khách hàng duyệt** 15/11/2026 tại `da66569`
+Trạng thái: Chờ Review — **24/11/2026: bộ nguồn bàn giao cho workflow báo cáo TH (Thesis Roadmap V1.1, Project Owner) — TL dừng mở rộng bộ nguồn; chưa nghiệm thu** — [bản ghi bàn giao](#bàn-giao-sang-thesis-roadmap-v11-24112026). Vòng 5 bàn giao 17/11/2026 (chế độ phát hành, thiết kế Module 3–4, ảnh Chat OpenAI ≥ 1280 px); còn ảnh đại diện (B13 phần còn lại). Vòng 3 **khách hàng duyệt** 15/11/2026 tại `da66569`
 Người phụ trách: TL · Ưu tiên: P1 · Ước lượng: 3,5 ngày làm việc, chia 4 mốc (bảng dưới)
 Phụ thuộc: [SE-008](SE-008-thesis-implementation-evidence.md) (`03-implementation.md` + bảng bằng chứng); cập nhật trạng thái Module 1–2 sau khi tích hợp PR #3 (SE-002) và PR #4 (SE-007)
 Hạn bàn giao review: **19/11/2026** (vòng 2, bộ nguồn trước demo) · cập nhật theo `develop` sau tích hợp: **25/11/2026** (CTO, 15/11/2026) · Hạn hoàn tất: Chờ chốt
@@ -65,6 +65,8 @@ Một bộ Markdown chính xác, truy vết được, đủ để một AI khác
 - Vòng 4 (16/11/2026, sớm so với 25/11 — PR #3/#4 tích hợp sớm theo yêu cầu khách hàng): bộ Markdown cập nhật theo `develop` @ `d6832e0` — [Checklist vòng 4](#checklist-vòng-4). Chờ khách hàng + CTO; B13 còn mở. TL-005 dùng SHA nguồn mới nếu khách hàng đồng ý.
 - (Kế hoạch ban đầu) Vòng 3 (19/11): sau review SE-008 — [kế hoạch](#kế-hoạch-vòng-2) (đánh số lại: review SE-008 thành vòng 3, cập nhật sau tích hợp thành vòng 4).
 - Vòng 5 (17/11/2026): thêm chế độ `demo`/`staff` (PR #6 → `783a8a3`), dẫn thiết kế Module 3–4, chụp lại ảnh Chat OpenAI trên `develop` (B13 phần Chat) — [Checklist vòng 5](#checklist-vòng-5). Chờ khách hàng + CTO.
+
+- **Bàn giao 24/11/2026** (Project Owner, Thesis Roadmap V1.1): bộ nguồn tại `c34410b` chuyển cho workflow TH, kiểm chứng ở TH-002; TL dừng mở rộng; **chưa nghiệm thu** — [bản ghi bàn giao](#bàn-giao-sang-thesis-roadmap-v11-24112026).
 
 ## Lịch sử review
 ### Checklist vòng 1
@@ -199,6 +201,51 @@ Checklist vòng 1–3 giữ nguyên ở trên.
 - [x] Ảnh không chứa khóa API hay tài khoản thật — PASS — chỉ hiện `admin@catgpt.local` (tài khoản seed mặc định đã có trong repo)
 
 **Trạng thái và bước tiếp theo** — Chờ Review (khách hàng + CTO). TL-005: nếu khách hàng mở phiên Word, đề xuất dùng SHA của vòng 5.
+
+## Bàn giao sang Thesis Roadmap V1.1 (24/11/2026)
+**Quyết định** — Project Owner Directive "CAT_GPT — Thesis Workflow Handover V1.1" (24/11/2026): toàn bộ việc thiết lập, soạn thảo, hoàn thiện báo cáo Word chuyển sang workflow TH (TH-001…TH-024, khu vực `docs/thesis-report/` do Thesis Agent tạo ở TH-001). `docs/thesis/` giữ nguyên làm bộ nguồn kỹ thuật; kiểm chứng ở **TH-002**. TL tiếp tục quản lý phát triển phần mềm, điều phối SE và cung cấp minh chứng kỹ thuật khi workflow TH yêu cầu. Bản ghi này không phải audit mới.
+
+**Trạng thái** — TL-004: giữ `Chờ Review` (workflow không có trạng thái bàn giao; Project Owner chưa nghiệm thu kết quả); TL dừng các vòng soạn thảo/mở rộng bộ nguồn. [TL-005](TL-005-thesis-word-draft.md): `Đóng — CANCELLED (Superseded by Thesis Roadmap V1.1)`, không còn được thực thi.
+
+**Phiên bản nguồn bàn giao**
+| Mốc | SHA | Ghi chú |
+|---|---|---|
+| Bàn giao | `origin/develop` @ `c34410b` (24/11/2026) | Nội dung `docs/thesis/` tại SHA này là bộ nguồn bàn giao (30 file theo dõi) |
+| Thay đổi cuối vào `docs/thesis/` | `af27bb7` (SE-029, 22/11) | Sửa 2 dòng `03-implementation.md` (Chat stream bằng `ReadableStream`); không qua vòng TL-004 |
+| Vòng TL cuối | `4ed96a9` (vòng 5, 17/11) | Cơ sở `f4e1516`, code `783a8a3` |
+| Vòng khách hàng đã duyệt | `da66569` (vòng 3, 15/11) | Nguồn cố định của TL-005 (đã hủy) |
+
+**Danh sách nguồn trong `docs/thesis/`**
+- Văn bản: `README.md` (điểm vào, trạng thái module, G1–G9, B1–B13), `01-outline-and-sources.md` (đề tài, phạm vi, bố cục 4 chương, tài liệu tham khảo R1–R35, quy định Q1–Q15), `02-requirements-and-design.md` (yêu cầu, phân quyền, kiến trúc, dữ liệu, luồng, danh mục sơ đồ mục 9), `03-implementation.md` (SE-008), `04-validation-and-results.md` (kiểm thử, danh mục hình, hạn chế, hướng phát triển), `evidence/test-cases.md` (TC-M1-01…12, TC-M2-01…11).
+- Nguồn ngoài chép lại: `sources/README.md`, `sources/de-cuong-datn.md`, `sources/quy-dinh-trinh-bay-datn.md`. Bản gốc (`.docx` đề cương, PDF quy định) chỉ ở `sources/originals/` của worktree TL, bị `.gitignore` chặn — không có trên GitHub.
+- Sơ đồ (`diagrams/`): có file Mermaid D1 kiến trúc tổng thể, D2 ERD, D3 tuần tự đăng nhập, D4 tuần tự gửi tin nhắn, D9 cấu trúc module. **Chưa có:** D5 dừng giữa chừng, D6 trạng thái tin nhắn, D7–D8 use case (cần công cụ UML), D10 kiến trúc dự kiến Module 3–4; D11 Docker là hướng phát triển. Chưa xuất ảnh sơ đồ nào.
+- Ảnh (`images/`, 15 file): dùng được — `m1-01`…`m1-06`, `m2-01`…`m2-03` (`develop`, 1536 px), `m2-04-openai-stream.jpg`, `m2-05-openai-truncated.jpg`, `m2-06-stopped.jpg` (`develop` @ `783a8a3`, 1536 px); ảnh tạm chụp trên PR #3 — `m1-07-avatar-admin-pr3.png` (768 px), `m1-08-avatar-mobile-pr3.png` (238 × 432); ảnh cũ PR #4 — `m2-04-openai-stream-pr4.png` (không dùng, tiêu đề lỗi mã hóa), `m2-05-openai-truncated-pr4.png` (đã có bản thay).
+
+**Đã xác minh (trong các vòng TL-004, tại SHA của vòng đó)** — Module 1 và Module 2 (Chat, streaming SSE, Dừng/Tạo lại) đã tích hợp; SE-002 (ảnh đại diện chính chủ) và SE-007 (OpenAI, giới hạn 1.000 token, `TRUNCATED`) tích hợp @ `1674425`, `d6832e0`; chế độ `demo`/`staff` @ `783a8a3`; 23 ca kiểm thử có mã; ảnh không chứa khóa API hay tài khoản thật; liên kết 0 gãy (vòng 5).
+
+**Chưa xác minh — TH-002 cần kiểm chứng**
+1. Bộ nguồn mô tả code tới `783a8a3`. Từ `4ed96a9` tới `c34410b` có 60 commit đổi `apps/`; `develop` nay có module `documents`, `rag`, `storage`, trong khi bộ nguồn (README mục 3, `02` mục 8, checklist vòng 5) vẫn ghi Module 3–4 "chưa có code" → **đã lệch**.
+2. Đánh giá RAG (TL-009, `docs/evaluation/rag-dataset/`) và unit test hiện có trên `develop` chưa được đưa vào bộ nguồn (README G7 còn ghi Module 1–2 chưa có unit test).
+3. Thay đổi SE-029 trong `03` chưa được TL review như một vòng bộ nguồn.
+4. B13: ảnh đại diện (H1-07, H1-08) chưa chụp lại trên `develop`; ảnh mobile 375 px BLOCKED.
+5. Tài liệu tham khảo ngoài: trang OpenAI trả `403` cho truy cập tự động; chưa đọc lại nội dung từng trang.
+
+**Quyết định nghiệp vụ còn mở**
+- Đề cương: baseline `5250026_BuiVanDuong_LT_CNTT1_K29.1_Decuong DATN.docx`, phê duyệt của giảng viên **PENDING_CONFIRMATION** (D4; B1/T1 — ô ký để trống). Không coi là đã duyệt.
+- B2–B7 do sinh viên cung cấp (lời cảm ơn, năm trên bìa, khảo sát S1–S5, sơ đồ bằng phần mềm thiết kế).
+- Q12: CTO chấp nhận Mermaid `.mmd` + ảnh xuất cho **bản nháp** (17/11); chờ GVHD nếu cần công cụ khác.
+- Thiết kế Module 4 ghi "chờ duyệt" trong bộ nguồn — trạng thái hiện tại cần đối chiếu (TH-002).
+- Số liệu tải (G6/B11): SE-005 đang BLOCKED (CTO HOLD 22/11, sự cố dữ liệu) — chưa có số liệu, không viết số.
+
+**Chức năng mock hoặc chưa hoàn thành đã biết** — `MockLlmProvider` (câu trả lời văn bản mẫu) vẫn là một chế độ của Chat; Module 3–4 trong bộ nguồn chỉ là thiết kế + giao diện minh họa (dữ liệu giả ở nhánh `preview/module-2-4-demo`); Module 5, Docker/Nginx, đánh giá tải là hướng phát triển.
+
+**Giới hạn của bộ nguồn** — Markdown, ảnh chụp tại các SHA cố định; không thay cho `origin/develop`; một số nhận định chỉ đúng tại SHA vòng đó; không chứa nội dung sinh viên phải tự viết.
+
+**Outline cũ** — Bố cục 4 chương (CTO chốt 15/11/2026, mục T2 ở trên; [01 mục 5](../thesis/01-outline-and-sources.md#5-đề-xuất-bố-cục-chương)) giữ làm tài liệu lịch sử và tham khảo. Outline mới do Project Owner duyệt thay thế về **định hướng soạn thảo** (D3); không mở rộng phạm vi phát triển phần mềm.
+
+**Word nháp** — Không có. Đã kiểm 24/11/2026: không có `D:\workspace\buggysoft\cat_gpt-thesis-private\` (Output TL-005), không có `D:\workspace\CAT_GPT_Thesis\`, không có nhánh `docs/thesis-word` (local, remote) hay worktree `cat_gpt-word`, không có tiến trình Microsoft Word; ngoài 2 fixture kiểm thử của `apps/api` không có `.docx` nào trong các worktree. File Word chính thức của workflow mới `D:\workspace\CAT_GPT_Thesis\CAT_GPT_DATN.docx` thuộc **TH-003**, chưa tạo.
+
+**Xác nhận chuyển giao** — Trách nhiệm viết Word đã chuyển sang workflow TH; workflow TL không còn luồng dựng Word nào.
 
 ## Phản hồi UI
 Không áp dụng (tài liệu).
