@@ -1,6 +1,6 @@
 # TL-005 — Dựng bản Word nháp báo cáo đồ án từ bộ nguồn đã duyệt
 
-Trạng thái: Sẵn sàng
+Trạng thái: **Đóng — CANCELLED (Project Owner 24/11/2026)** — Superseded by Thesis Roadmap V1.1: trách nhiệm dựng Word chuyển sang workflow TH (TH-003 và các task soạn thảo sau). **Không còn được phép thực thi**: không giao, không mở phiên Word theo task này, không dùng prompt cuối file. Chưa thực hiện tiêu chí W1–W12 nào; không có Word nháp. Đặc tả dưới đây giữ làm lịch sử — [bản ghi bàn giao](TL-004-thesis-source-pack.md#bàn-giao-sang-thesis-roadmap-v11-24112026).
 Người phụ trách: TL · Thực hiện: **phiên AI viết Word riêng** (prompt ở cuối file), TL review · Ưu tiên: P1 · Ước lượng: 2 ngày làm việc (nháp) + 0,5 ngày (cập nhật 25/11)
 Phụ thuộc: [TL-004](TL-004-thesis-source-pack.md) vòng 3 đã duyệt (khách hàng, 15/11/2026). Cập nhật 25/11 phụ thuộc tích hợp PR #3 → PR #4 (23–24/11) và TL-004 vòng 4
 Hạn bàn giao review: bản nháp — Chờ chốt (đề xuất 18/11/2026); bản cập nhật — **25/11/2026** (khách hàng, 15/11/2026) · Hạn hoàn tất: Chờ chốt
@@ -103,6 +103,7 @@ Xuất ảnh: Mermaid CLI (`@mermaid-js/mermaid-cli`) cần cài gói và trình
 ## Kết quả review
 Chưa có.
 - **Rà soát TL 17/11/2026** ([báo cáo](../reports/daily/2026-11-17.md#vòng-2--0045)): chưa bắt đầu — BLOCKED (chờ khách hàng mở phiên AI viết Word; chốt T1, T2; hạn bản nháp còn `Chờ chốt`). Bộ nguồn đã có vòng 4–5 trên `develop` (TL-004) — đề xuất dùng SHA vòng 5 thay `da66569` khi khách hàng đồng ý. Hạn bản cập nhật 25/11/2026 (đã chốt) giữ nguyên.
+- **24/11/2026 — Đóng (CANCELLED), Superseded by Thesis Roadmap V1.1** (Project Owner Directive "Thesis Workflow Handover V1.1", D2). Trạng thái trước: `Sẵn sàng` (thực tế BLOCKED, chưa bắt đầu). Kiểm tra trước khi đóng: không có phiên/agent đang thực thi (không nhánh `docs/thesis-word` local hoặc remote, không worktree `cat_gpt-word`, không tiến trình Microsoft Word); không tồn tại thư mục Output `cat_gpt-thesis-private\` hay file `.docx`/PDF nháp → không có dữ liệu cần bảo toàn. Tiêu chí W1–W12: **không đạt, không thực hiện** — không phải hoàn thành. Hạn 25/11/2026 hủy theo task. Thay thế: TH-003 (file chính thức `D:\workspace\CAT_GPT_Thesis\CAT_GPT_DATN.docx`, chưa tạo) và các task soạn thảo TH.
 
 ## Lịch sử review
 Chưa có. Bàn giao bản nháp: `### Checklist vòng 1` (W1–W12, kèm SHA nguồn `da66569`, đường dẫn `.docx`/PDF, danh sách `CẦN BỔ SUNG`), trạng thái `Chờ Review`. Cập nhật 25/11: `### Checklist vòng 2` với SHA nguồn mới (TL-004 vòng 4), ảnh đã thay.
@@ -111,6 +112,8 @@ Chưa có. Bàn giao bản nháp: `### Checklist vòng 1` (W1–W12, kèm SHA ng
 Không áp dụng (tài liệu).
 
 ## Prompt cho phiên AI viết Word
+> **VÔ HIỆU (24/11/2026)** — TL-005 đã đóng, Superseded by Thesis Roadmap V1.1. Không dùng prompt này; giữ làm lịch sử.
+
 ```
 Bạn dựng bản Word nháp báo cáo đồ án CAT GPT theo docs/tasks/TL-005-thesis-word-draft.md. Làm trong một worktree riêng (không dùng D:\workspace\buggysoft\cat_gpt hay cat_gpt-tl):
   git fetch origin; git -C D:\workspace\buggysoft\cat_gpt-tl worktree add ..\cat_gpt-word -b docs/thesis-word origin/develop
