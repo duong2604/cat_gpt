@@ -1,0 +1,33 @@
+@startuml D10-seq-hoi-dap-rag
+!include _style.iuml
+skinparam defaultFontSize 16
+autonumber
+actor "Người dùng" as U
+participant "Giao diện\nweb" as W
+participant "Dịch vụ\nhội thoại" as CS
+participant "Dịch vụ\nRAG" as R
+database "Qdrant" as Q
+participant "Dịch vụ AI\n(OpenAI)" as AI
+database "MongoDB" as DB
+
+U -> W : Đặt câu hỏi trên\ncác tài liệu đã chọn
+W -> CS : POST /chat/stream
+CS -> R : Chuẩn bị ngữ cảnh
+R -> DB : Lọc tài liệu hợp lệ\ncủa người dùng
+alt Không còn tài liệu hợp lệ
+  R --> CS : Không đủ căn cứ
+else Có tài liệu
+  R -> AI : Sinh embedding câu hỏi
+  R -> Q : Tìm top-5 đoạn\n(lọc userId, documentId)
+  Q --> R : Đoạn + điểm cosine
+  R --> CS : Prompt có các đoạn [1..5]
+  CS -> AI : Sinh câu trả lời (stream)
+  AI --> CS : Từng đoạn văn bản
+  CS --> W : Sự kiện delta (SSE)
+  CS -> R : Xác minh trích dẫn [n]
+  R --> CS : Danh sách trích dẫn, cờ
+end
+CS -> DB : Lưu câu trả lời và trích dẫn
+CS --> W : Sự kiện done
+W --> U : Câu trả lời kèm nhãn nguồn
+@enduml

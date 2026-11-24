@@ -1,0 +1,33 @@
+@startuml D11-act-tom-tat
+!include _style.iuml
+!pragma useVerticalIf on
+
+|Người dùng|
+start
+:Chọn "Tóm tắt" ở tài liệu READY;
+|API|
+if (Đã có bản tóm tắt lưu sẵn?) then (có)
+  :Trả bản tóm tắt đã lưu\n(không gọi LLM);
+  stop
+else (chưa)
+endif
+:Đặt summaryStatus = PENDING;
+:Đưa job "summarize" vào BullMQ;
+|Worker|
+:Đọc toàn bộ đoạn của tài liệu từ Qdrant\n(theo thứ tự chunkIndex);
+:Gộp các đoạn liên tiếp thành nhóm\n≤ 12.000 ký tự;
+if (Chỉ có một nhóm?) then (có)
+  :LLM tóm tắt nhóm đó;
+else (nhiều nhóm)
+  :Map: LLM tóm tắt từng nhóm\n(100–150 từ);
+  :Reduce: LLM gộp các bản tóm tắt\nthành một bản (150–200 từ);
+endif
+if (Tài liệu còn tồn tại?) then (có)
+  :Lưu summary, summaryModel,\nsummarizedAt; READY;
+else (đã bị xóa)
+  :Bỏ kết quả;
+endif
+|Người dùng|
+:Xem bản tóm tắt trong hộp thoại;
+stop
+@enduml

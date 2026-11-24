@@ -1,0 +1,91 @@
+@startuml D17-mo-hinh-collection
+!include _style.iuml
+hide circle
+hide methods
+skinparam classAttributeFontSize 13
+
+class "User (users)" as User {
+  _id : ObjectId
+  email : string <<unique>>
+  passwordHash : string
+  fullName : string
+  phone, department : string?
+  avatarKey : string?
+  role : ADMIN | USER
+  status : ACTIVE | BLOCKED
+  lastLoginAt : Date?
+  createdBy : ObjectId?
+}
+
+class "Session (sessions)" as Session {
+  _id : ObjectId
+  userId : ObjectId
+  tokenHash : string
+  previousTokenHash, rotatedAt
+  history : {hash, rotatedAt}[]
+  userAgent, ip : string?
+  lastUsedAt : Date
+  expiresAt : Date <<TTL>>
+  revokedAt : Date?
+}
+
+class "Conversation (conversations)" as Conv {
+  _id : ObjectId
+  userId : ObjectId
+  title : string
+  lastMessageAt : Date
+  documentIds : ObjectId[]?
+}
+
+class "Message (messages)" as Msg {
+  _id : ObjectId
+  conversationId : ObjectId
+  userId : ObjectId
+  role : USER | ASSISTANT
+  content : string
+  status : COMPLETED | STOPPED |\nERROR | TRUNCATED
+  model : string?
+  citations : Citation[]?
+  insufficientEvidence, ungrounded : bool?
+}
+
+class "Citation (nhúng)" as Cit {
+  n : number
+  documentId : ObjectId
+  documentName : string
+  chunkIndex : number
+  page : number?
+  quote : string (≤ 300)
+}
+
+class "DocumentEntity (documents)" as Doc {
+  _id : ObjectId
+  userId : ObjectId
+  name, mimeType : string
+  size : number
+  storageKey : string
+  status : PENDING | PROCESSING |\nREADY | FAILED
+  errorCode : string?
+  chunkCount : number?
+  deletedAt : Date?
+  summary, summaryStatus,\nsummaryModel, summarizedAt
+}
+
+class "Điểm vector (Qdrant:\ndocument_chunks)" as Pt {
+  id
+  vector : float[1536]
+  payload.userId
+  payload.documentId
+  payload.chunkIndex
+  payload.page?
+  payload.text
+}
+
+User "1" -- "0..*" Session
+User "1" -- "0..*" Conv
+Conv "1" -- "0..*" Msg
+Msg *-- "0..*" Cit
+User "1" -- "0..*" Doc
+Conv "0..*" -- "0..5" Doc : phạm vi hỏi đáp
+Doc "1" -- "0..*" Pt : các đoạn
+@enduml

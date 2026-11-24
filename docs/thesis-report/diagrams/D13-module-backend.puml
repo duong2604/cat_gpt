@@ -1,0 +1,39 @@
+@startuml D13-module-backend
+!include _style.iuml
+skinparam defaultFontSize 16
+top to bottom direction
+
+package "Máy chủ ứng dụng NestJS" {
+  package "Module nghiệp vụ" {
+    [Auth] as AUTH
+    [Me] as ME
+    [AdminUsers] as ADM
+    [Chat] as CHAT
+    [Documents] as DOCS
+    [Rag] as RAG
+  }
+  package "Module nền tảng" {
+    [Users] as USR
+    [Sessions] as SES
+    [Storage] as STO
+    [Llm\n(Mock / OpenAI)] as LLM
+  }
+  [Thành phần dùng chung:\nguard, pipe, bộ lọc lỗi, cấu hình] as COM
+}
+package "packages/shared" {
+  [Enum, mã lỗi, kiểu dữ liệu] as SH
+}
+
+AUTH --> USR
+AUTH --> SES
+ME --> USR
+ME --> SES
+ME --> STO
+ADM --> USR
+ADM --> SES
+CHAT --> LLM
+CHAT --> RAG
+DOCS --> LLM
+RAG --> DOCS
+COM ..> SH
+@enduml

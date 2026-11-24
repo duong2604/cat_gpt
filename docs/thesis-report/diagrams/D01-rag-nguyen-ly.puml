@@ -1,0 +1,32 @@
+@startuml D01-rag-nguyen-ly
+!include _style.iuml
+top to bottom direction
+
+rectangle "Pha lập chỉ mục (offline)" as P1 {
+  rectangle "Tài liệu nguồn" as Doc
+  rectangle "Trích xuất văn bản" as Ext
+  rectangle "Chia đoạn (chunking)" as Chunk
+  rectangle "Mô hình embedding" as Emb1
+  database "CSDL vector" as VDB
+}
+
+rectangle "Pha truy hồi và sinh (online)" as P2 {
+  actor "Người dùng" as U
+  rectangle "Mô hình embedding" as Emb2
+  rectangle "Tìm kiếm k láng giềng\ngần nhất" as Search
+  rectangle "Ghép ngữ cảnh\nvào prompt" as Prompt
+  rectangle "Mô hình ngôn ngữ lớn" as LLM
+}
+
+Doc --> Ext
+Ext --> Chunk
+Chunk --> Emb1
+Emb1 --> VDB : vector + nội dung đoạn
+
+U --> Emb2 : câu hỏi
+Emb2 --> Search : vector câu hỏi
+VDB --> Search
+Search --> Prompt : k đoạn liên quan
+Prompt --> LLM
+LLM --> U : câu trả lời\n(kèm nguồn)
+@enduml

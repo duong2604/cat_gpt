@@ -1,0 +1,31 @@
+@startuml D02-uc-tong-quat
+!include _style.iuml
+left to right direction
+
+actor "Nhân viên" as NV
+actor "Quản trị viên" as QT
+actor "Dịch vụ AI\n(LLM, embedding)" as AI
+NV <|-- QT
+
+rectangle "Hệ thống CAT_GPT" {
+  usecase "Xác thực và quản lý\ntài khoản cá nhân" as G1
+  usecase "Quản trị tài khoản\nvà phân quyền" as G2
+  usecase "Trò chuyện với trợ lý AI" as G3
+  usecase "Quản lý cuộc hội thoại" as G4
+  usecase "Quản lý tài liệu" as G5
+  usecase "Hỏi đáp dựa trên tài liệu" as G6
+  usecase "Tóm tắt tài liệu" as G7
+}
+
+NV -- G1
+NV -- G3
+NV -- G4
+NV -- G5
+NV -- G6
+NV -- G7
+QT -- G2
+G3 -- AI
+G5 -- AI
+G6 -- AI
+G7 -- AI
+@enduml
