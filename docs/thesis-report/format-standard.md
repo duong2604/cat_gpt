@@ -35,7 +35,7 @@ Phân biệt hai loại:
 |---|---|---|
 | Trích dẫn | IEEE dạng số [1], [2], … theo thứ tự xuất hiện; danh mục TLTK định dạng IEEE. **Không phải quy định bắt buộc của trường** (bản chép PDF không quy định kiểu trích dẫn) | [DEC-010](decisions.md#quyết-định-đã-phê-duyệt) |
 | Mục lục, danh mục | Sinh tự động bằng field Word (TOC, Table of Figures); caption dùng tính năng Caption có số chương | DEC-005, DEC-006 |
-| Sơ đồ | Tự xây dựng bằng PlantUML / Mermaid / draw.io; lưu file nguồn chỉnh sửa được + ảnh xuất rõ nét | [PROP-001](decisions.md#đề-xuất-chưa-phê-duyệt) |
+| Sơ đồ | Tự xây dựng; file nguồn chỉnh sửa được lưu `docs/thesis-report/diagrams/`, ảnh xuất rõ nét lưu local. Công cụ chính thức chốt trước TH-009 ([OPEN-007](decisions.md#vấn-đề-còn-mở)); ứng viên: PlantUML / Mermaid / draw.io | [DEC-018](decisions.md#quyết-định-đã-phê-duyệt) |
 | Ảnh giao diện | Chụp từ hệ thống thật tại Report Baseline; không chứa khóa API, mật khẩu, dữ liệu cá nhân thật; không tạo ảnh giả cho chức năng chưa xong | Chỉ thị V1.0 mục 13 |
 | Mã nguồn trong bài | Chỉ trích đoạn ngắn khi cần minh họa; định dạng chốt ở TH-003 | [OPEN-004](decisions.md#vấn-đề-còn-mở) |
 | Thuật ngữ | Thuật ngữ tiếng Anh phổ biến giữ nguyên, lần đầu kèm giải thích tiếng Việt | — |

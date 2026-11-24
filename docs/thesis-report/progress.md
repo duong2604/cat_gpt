@@ -2,7 +2,7 @@
 
 Bảng trạng thái **chính thức** của 24 task; phải khớp dòng "Trạng thái" trong từng file task. Trạng thái hợp lệ và quyền chuyển: [workflow mục 2](workflow.md#2-review-gate).
 
-Cập nhật: 24/11/2026 — TH-001 bàn giao lần 1.
+Cập nhật: 24/11/2026 — TH-001 bàn giao vòng 2 (sau CHANGES_REQUESTED vòng 1).
 
 | Tổng | APPROVED | READY_FOR_REVIEW | IN_PROGRESS | CHANGES_REQUESTED | BLOCKED | TODO |
 |---|---|---|---|---|---|---|
@@ -10,7 +10,7 @@ Cập nhật: 24/11/2026 — TH-001 bàn giao lần 1.
 
 | ID | Nhiệm vụ | Giai đoạn | Trang | Trạng thái | PR | Ghi chú |
 |---|---|---|---|---|---|---|
-| [TH-001](tasks/TH-001.md) | Khởi tạo kế hoạch và workflow | 1 | — | READY_FOR_REVIEW | Xem [review-log](review-log.md) | Bàn giao lần 1 |
+| [TH-001](tasks/TH-001.md) | Khởi tạo kế hoạch và workflow | 1 | — | READY_FOR_REVIEW | [#57](https://github.com/duong2604/cat_gpt/pull/57) | Vòng 2 — sửa theo review vòng 1 |
 | [TH-002](tasks/TH-002.md) | Audit mã nguồn và tài liệu dự án | 1 | — | TODO | | |
 | [TH-003](tasks/TH-003.md) | Thiết lập môi trường Microsoft Word | 1 | — | TODO | | |
 | [TH-004](tasks/TH-004.md) | Phần đầu và Mở đầu | 1 | 9 | TODO | | |

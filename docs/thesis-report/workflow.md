@@ -27,13 +27,13 @@ TODO → IN_PROGRESS → READY_FOR_REVIEW → APPROVED
 | `TODO → IN_PROGRESS` | Thesis Agent | Có chỉ thị thực thi rõ ràng của Project Owner cho đúng task; task trước `APPROVED` (trừ khi Project Owner quyết định khác) |
 | `IN_PROGRESS → READY_FOR_REVIEW` | Thesis Agent | Đã làm đủ công việc, tự kiểm theo tiêu chí nghiệm thu, ghi báo cáo thực hiện, mở PR |
 | `IN_PROGRESS → BLOCKED` | Thesis Agent | Gặp điều kiện dừng; ghi lý do và điều cần để gỡ |
-| `READY_FOR_REVIEW → CHANGES_REQUESTED / APPROVED` | **Chỉ Project Owner** (có thể dựa trên review của Advisor) | Ghi trong [review-log.md](review-log.md) và mục review của task |
+| `READY_FOR_REVIEW → CHANGES_REQUESTED / APPROVED` | **Quyết định: chỉ Project Owner** (có thể dựa trên review của Advisor). **Ghi nhận**: Thesis Agent, sau khi nhận chỉ thị rõ ràng của Project Owner | Đồng bộ cùng lúc ở file task (mục 1 và mục 14), [progress.md](progress.md), [review-log.md](review-log.md), trích nguồn chỉ thị |
 
 Quy tắc:
+- Chỉ Project Owner có quyền quyết định `APPROVED`. Thesis Agent không tự phê duyệt, không tự merge; chỉ ghi nhận trạng thái `APPROVED` khi đã nhận chỉ thị phê duyệt rõ ràng.
 - Phê duyệt kế hoạch ≠ phê duyệt kết quả. Commit, push hay merge PR ≠ nghiệm thu.
-- Không tự chuyển `APPROVED`; chỉ ghi `APPROVED` khi Project Owner xác nhận rõ ràng.
-- Không tự bắt đầu task tiếp theo; không tự sinh chỉ thị cho task sau rồi thực hiện.
-- Trạng thái ở [progress.md](progress.md) phải khớp file task; lệch thì sửa ngay trong phạm vi được phép và báo cáo.
+- Phê duyệt một task không phải quyền bắt đầu task tiếp theo; không tự sinh chỉ thị cho task sau rồi thực hiện.
+- Trạng thái ở file task, [progress.md](progress.md) và [review-log.md](review-log.md) phải khớp nhau; lệch thì sửa ngay trong phạm vi được phép và báo cáo.
 
 ## 3. Thực hiện một task
 
@@ -75,16 +75,20 @@ Bắt buộc cho mọi task sửa file Word chính thức `D:\workspace\CAT_GPT_
 
 **Trong khi sửa**
 - Chỉ sửa trong phạm vi task; sửa tại chỗ qua COM Automation, không tái tạo toàn bộ file, không sinh lại từ Markdown.
+- Không thay thế toàn bộ đoạn hoặc section nếu việc đó có thể làm mất chỉnh sửa thủ công; ưu tiên chèn/sửa ở mức nhỏ nhất cần thiết.
 - Không ghi đè chỉnh sửa thủ công, không sửa nội dung đã `APPROVED`.
 - Không sửa khi sinh viên đang thao tác trên cùng file.
 
 **Sau khi sửa**
-- Mở lại bằng Word thành công; cập nhật field (mục lục, danh mục, caption).
-- So sánh: nội dung ngoài phạm vi task không đổi (so văn bản từng heading trước/sau).
-- Kiểm tra style, heading, bảng, hình, field liên quan.
-- Ghi hash mới, đường dẫn backup và danh sách mục đã đổi vào báo cáo thực hiện.
+- Mở lại bằng Word thành công; cập nhật field (mục lục, danh mục hình/bảng, số trang, cross-reference).
+- So sánh trước/sau phần **ngoài phạm vi task**, theo từng heading: văn bản, bảng biểu, hình ảnh, chú thích (caption), công thức, hyperlink, định dạng (style và định dạng trực tiếp).
+- Phân loại chênh lệch:
+  - **Hợp lệ** — thay đổi tự động do cập nhật field: nội dung mục lục, danh mục hình/bảng, số trang, số thứ tự caption và kết quả cross-reference.
+  - **Không hợp lệ** — mọi thay đổi nội dung hoặc định dạng khác ngoài phạm vi → hoàn tác thay đổi của agent (không khôi phục cả file từ backup), hoặc dừng nếu không hoàn tác an toàn được.
+- Kiểm tra style, heading, bảng, hình, field liên quan trong phạm vi.
+- Ghi hash mới, đường dẫn backup, danh sách mục đã đổi và kết quả phân loại chênh lệch vào báo cáo thực hiện.
 
-**Xung đột**: phát hiện chỉnh sửa thủ công trong chính phạm vi task mà không hợp nhất an toàn được → dừng, `BLOCKED`, chờ sinh viên quyết định. Không tự khôi phục backup nếu có thể làm mất chỉnh sửa mới.
+**Xung đột**: phát hiện chỉnh sửa thủ công trong chính phạm vi task mà không hợp nhất an toàn được, hoặc không thể bảo toàn chỉnh sửa thủ công → dừng, `BLOCKED`, báo cáo và chờ sinh viên quyết định. Không tự khôi phục backup nếu có thể làm mất chỉnh sửa mới.
 
 ## 6. Source Baseline Lock
 
@@ -127,6 +131,6 @@ Dừng ngay và báo cáo `BLOCKED` khi: thiếu nguồn bắt buộc; nguy cơ 
 | TC-W3 | Mỗi nhận định kỹ thuật có traceability tới nguồn tại Report Baseline; nhãn trạng thái đúng; không mô tả mock/thiết kế như đã hiện thực | Bảng traceability trong báo cáo thực hiện |
 | TC-W4 | Mỗi trích dẫn [n] trỏ tới nguồn có thật, đã xác minh; không có nguồn bịa | Đối chiếu danh sách nguồn + truy cập URL/DOI |
 | TC-W5 | Hình/bảng đánh số theo chương, caption đúng vị trí, được nhắc trong văn bản; hình ngoài có "Nguồn: …" | Danh mục hình/bảng tự động |
-| TC-W6 | Human Edit Protection: có backup trước, hash trước/sau, nội dung ngoài phạm vi không đổi | Log so sánh trong báo cáo thực hiện |
-| TC-W7 | Dung lượng trong khoảng ±25 % mức của task; không độn chữ | Đếm trang phạm vi |
+| TC-W6 | Human Edit Protection: có backup trước, hash trước/sau; ngoài phạm vi không có chênh lệch **không hợp lệ** (văn bản, bảng, hình, caption, công thức, hyperlink, định dạng) — chỉ có thay đổi field hợp lệ ([mục 5](#5-human-edit-protection)) | Log so sánh và phân loại chênh lệch trong báo cáo thực hiện |
+| TC-W7 | **Ngưỡng cảnh báo**, không phải điều kiện đạt/trượt: dung lượng lệch quá ±25 % mức của task thì nêu lý do để review. Ưu tiên chất lượng; không kéo dài nội dung để đủ trang, không đánh trượt phần viết tốt chỉ vì số trang. Tổng báo cáo vẫn phải trong 60–80 trang | Đếm trang phạm vi; ghi chú trong báo cáo thực hiện |
 | TC-W8 | Văn phong học thuật, không lặp nội dung đã viết ở chương khác; chỗ thiếu nguồn để `[CẦN BỔ SUNG: …]` và liệt kê | Đọc lại; tìm chuỗi `CẦN BỔ SUNG` |

@@ -227,4 +227,4 @@ Số trang là định hướng, không phải chỉ tiêu phải viết đủ b
 | Tài liệu tham khảo | 2 | TH-022 (2) |
 | **Tổng** | **75** | Phụ lục ngoài tổng |
 
-Mỗi task được lệch khoảng ±25 % số trang của mình. Nếu tổng dự kiến có nguy cơ ra ngoài khoảng 60–80 trang thì báo trong báo cáo thực hiện để Project Owner điều chỉnh; không tự cắt hoặc thêm mục.
+Mức trang từng task là định hướng; lệch quá ±25 % chỉ là ngưỡng cảnh báo để review (TC-W7), ưu tiên chất lượng hơn số trang. Nếu tổng dự kiến có nguy cơ ra ngoài khoảng 60–80 trang thì báo trong báo cáo thực hiện để Project Owner điều chỉnh; không tự cắt hoặc thêm mục.
