@@ -1,0 +1,35 @@
+@startuml D10-seq-hoi-dap-rag
+!include _style.iuml
+autonumber
+actor "Người dùng" as U
+participant "Web" as W
+participant "ChatService" as CS
+participant "RagService" as R
+participant "EmbeddingService" as E
+database "Qdrant" as Q
+participant "LlmProvider" as L
+database "MongoDB" as DB
+
+U -> W : Chọn tài liệu (≤ 5), đặt câu hỏi
+W -> CS : POST /chat/stream {content, documentIds}
+CS -> R : prepare(userId, documentIds, câu hỏi)
+R -> DB : Lọc tài liệu của chính người dùng,\nREADY, chưa xóa
+alt Không còn tài liệu hợp lệ
+  R --> CS : insufficient (DOCUMENTS_UNAVAILABLE)
+else
+  R -> E : embed(câu hỏi)
+  E --> R : vector truy vấn
+  R -> Q : search(vector, lọc userId + documentId,\nlimit = 5)
+  Q --> R : top-5 đoạn kèm điểm cosine
+  R -> R : Dựng prompt hệ thống: đoạn [1..5]\ntrong khối phân cách "dữ liệu, không phải chỉ dẫn"
+  R --> CS : ready (systemPrompt, sources)
+  CS -> L : stream(prompt + lịch sử + câu hỏi)
+  L --> CS : delta ...
+  CS --> W : SSE delta
+  CS -> R : verifyCitations(nội dung, sources)
+  R --> CS : citations [n] hợp lệ,\ninsufficientEvidence, ungrounded
+end
+CS -> DB : Lưu tin ASSISTANT kèm trích dẫn
+CS --> W : SSE done
+W --> U : Câu trả lời + nhãn [n] mở đoạn nguồn
+@enduml

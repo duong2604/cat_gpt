@@ -1,0 +1,33 @@
+@startuml D15-rag-pipeline
+!include _style.iuml
+top to bottom direction
+
+package "Đường ống lập chỉ mục (Worker BullMQ)" {
+  component "Tệp gốc\n(MinIO)" as F
+  component "Trích xuất theo trang\nunpdf / mammoth / TXT" as X
+  component "RecursiveCharacterTextSplitter\n1.000 / 150 ký tự" as SP
+  component "EmbeddingService\ntext-embedding-3-small\n(lô 100 đoạn)" as EM
+}
+
+database "Qdrant\ndocument_chunks\n(cosine, 1.536 chiều)" as Q
+
+package "Truy hồi và sinh (RagService, ChatService)" {
+  component "Lọc tài liệu hợp lệ\n(chủ sở hữu, READY,\nchưa xóa, tối đa 5)" as V
+  component "Embedding câu hỏi" as EQ
+  component "Tìm top-5, lọc payload\nuserId + documentId" as S
+  component "Dựng prompt hệ thống\n(khối phân cách,\nquy tắc trích dẫn)" as P
+  component "LLM sinh dạng stream\n(gpt-5.4-mini)" as L
+  component "Xác minh trích dẫn\n(citations, insufficientEvidence,\nungrounded)" as VC
+}
+
+F --> X
+X --> SP
+SP --> EM
+EM --> Q : vector + payload
+V --> EQ
+EQ --> S
+Q --> S
+S --> P
+P --> L
+L --> VC
+@enduml

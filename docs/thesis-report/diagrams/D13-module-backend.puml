@@ -1,0 +1,38 @@
+@startuml D13-module-backend
+!include _style.iuml
+top to bottom direction
+
+package "apps/api — NestJS (AppModule)" {
+  [AuthModule] as AUTH
+  [SessionsModule] as SES
+  [UsersModule] as USR
+  [MeModule] as ME
+  [AdminUsersModule] as ADM
+  [StorageModule\n(ảnh đại diện)] as STO
+  [ChatModule] as CHAT
+  [LlmModule\n(Mock / OpenAI)] as LLM
+  [RagModule] as RAG
+  [DocumentsModule\n(MinIO, BullMQ, Qdrant)] as DOCS
+  [Thành phần dùng chung:\nJwtAuthGuard, RolesGuard,\nThrottlerGuard, ValidationPipe,\nAllExceptionsFilter, AppConfig] as COM
+}
+package "packages/shared" {
+  [Enum, mã lỗi,\nkiểu DTO, hằng số] as SH
+}
+
+AUTH --> SES
+AUTH --> USR
+ME --> USR
+ME --> SES
+ME --> LLM
+ADM --> USR
+ADM --> SES
+STO --> USR
+CHAT --> LLM
+CHAT --> RAG
+CHAT --> DOCS
+DOCS --> LLM
+DOCS <--> RAG
+COM ..> SH
+CHAT ..> SH
+DOCS ..> SH
+@enduml

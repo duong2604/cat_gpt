@@ -1,0 +1,24 @@
+@startuml D05-uc-tai-lieu
+!include _style.iuml
+left to right direction
+
+actor "Nhân viên" as NV
+actor "Dịch vụ embedding" as AI
+
+rectangle "Module 3 — Quản lý tài liệu" {
+  usecase "Tải lên tài liệu\n(TXT, PDF dạng chữ, DOCX)" as UP
+  usecase "Xử lý bất đồng bộ:\ntrích xuất, chia đoạn,\nembedding, lưu vector" as PROC
+  usecase "Xem danh sách,\ntìm kiếm, lọc trạng thái" as LIST
+  usecase "Xem thông tin\nvà trạng thái xử lý" as INFO
+  usecase "Tải xuống tài liệu" as DOWN
+  usecase "Xóa tài liệu" as DEL
+}
+
+NV --> UP
+NV --> LIST
+UP ..> PROC : <<include>>
+LIST <.. INFO : <<extend>>
+LIST <.. DOWN : <<extend>>
+LIST <.. DEL : <<extend>>
+PROC --> AI
+@enduml

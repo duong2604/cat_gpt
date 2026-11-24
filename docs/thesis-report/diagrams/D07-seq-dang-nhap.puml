@@ -1,0 +1,40 @@
+@startuml D07-seq-dang-nhap
+!include _style.iuml
+autonumber
+actor "Người dùng" as U
+participant "Web (Next.js)" as W
+participant "AuthController\nAuthService" as A
+participant "SessionsService" as S
+database "MongoDB" as DB
+
+U -> W : Nhập email, mật khẩu
+W -> A : POST /api/v1/auth/login
+note right of A : Giới hạn 5 lần/phút
+A -> DB : Tìm người dùng theo email
+A -> A : So khớp mật khẩu (bcrypt)
+alt Sai thông tin hoặc tài khoản bị khóa
+  A --> W : 401 (AUTH_INVALID_CREDENTIALS /\nAUTH_ACCOUNT_BLOCKED)
+  W --> U : Hiển thị thông báo lỗi
+else Hợp lệ
+  A -> S : Tạo phiên (lưu hash refresh token,\nthiết bị, IP, hạn 7 ngày)
+  S -> DB : Lưu Session
+  A -> A : Ký access token JWT (15 phút)\nchứa sub, sid
+  A --> W : 200 + Set-Cookie httpOnly\n(access, refresh)
+  W --> U : Chuyển vào trang trò chuyện
+end
+
+== Các request tiếp theo ==
+W -> A : Request kèm cookie access
+A -> A : Kiểm tra chữ ký JWT
+A -> DB : Phiên còn hiệu lực?\nTài khoản ACTIVE?
+alt Access token hết hạn
+  W -> A : POST /auth/refresh (cookie refresh)
+  A -> S : Xoay vòng refresh token
+  alt Token cũ bị dùng lại ngoài thời gian ân hạn
+    S -> DB : Thu hồi phiên
+    A --> W : 401 — yêu cầu đăng nhập lại
+  else Hợp lệ
+    A --> W : Cookie access, refresh mới
+  end
+end
+@enduml

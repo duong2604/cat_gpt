@@ -1,6 +1,6 @@
 # Quyết định
 
-Các quyết định dưới đây do **Project Owner (sinh viên) phê duyệt** thông qua cố vấn ChatGPT, không phải do Thesis Agent tự đưa ra. Nguồn: Master Instruction V1.0 (mục 16.5), Amendment V1.1, chỉ thị "Resume TH-001 — Project Owner Authorization" và "TH-001 — Review vòng 1" (24/11/2026). Toàn văn Amendment V1.1 không được gửi vào phiên TH-001; nội dung V1.1 lấy từ các chỉ thị trên và bản ghi bàn giao trong repo.
+Các quyết định dưới đây do **Project Owner (sinh viên) phê duyệt** thông qua cố vấn ChatGPT, không phải do Thesis Agent tự đưa ra. Nguồn: Master Instruction V1.0 (mục 16.5), Amendment V1.1, chỉ thị "Resume TH-001 — Project Owner Authorization", "TH-001 — Review vòng 1" và "Thesis Roadmap V1.2 — Fast-track" (24/11/2026). Toàn văn Amendment V1.1 không được gửi vào phiên TH-001; nội dung V1.1 lấy từ các chỉ thị trên và bản ghi bàn giao trong repo.
 
 Quyết định mới chỉ được thêm khi Project Owner xác nhận rõ ràng; đề xuất chưa duyệt ghi `PROPOSED`, vấn đề chờ ghi `PENDING`.
 
@@ -27,6 +27,8 @@ Quyết định mới chỉ được thêm khi Project Owner xác nhận rõ rà
 | DEC-017 | Source Baseline Lock: Handover `c34410b` · Audit = SHA đầy đủ `origin/develop` khi bắt đầu TH-002 · Report = sau khi TH-002 `APPROVED` ([workflow mục 6](workflow.md#6-source-baseline-lock)) | V1.1 | 24/11/2026 |
 | DEC-018 | File nguồn sơ đồ (dạng văn bản/chỉnh sửa được) lưu trong `docs/thesis-report/diagrams/`; ảnh xuất và tài liệu Word lưu local (`D:\workspace\CAT_GPT_Thesis\`). Thư mục chỉ tạo khi task có sơ đồ được cấp quyền | Review vòng 1 (CR-005, từ PROP-001) | 24/11/2026 |
 | DEC-019 | Báo cáo audit TH-002 lưu tại `docs/thesis-report/audit/TH-002-audit.md`; chỉ tạo khi thực hiện TH-002 | Review vòng 1 (CR-005, từ PROP-002) | 24/11/2026 |
+| DEC-020 | Fast-track V1.2: gộp thực thi thành FT-001 (chuẩn bị, nguồn, Word), FT-002 (soạn toàn bộ), FT-003 (kiểm tra, bàn giao V0.1), FT-004 (review sau khi đọc — chưa cấp quyền). Thay quy định thực thi tuần tự và STOP sau từng task; giữ nguyên trung thực học thuật, phạm vi, định dạng, Human Edit Protection, Git, bảo mật. 24 task TH giữ làm checklist phạm vi và tiêu chí | Chỉ thị Fast-track V1.2 | 24/11/2026 |
+| DEC-021 | V0.1 dùng Audit Baseline `e8cefed` làm baseline kỹ thuật tạm thời, chưa nghiệm thu; Report Baseline chính thức xác nhận ở FT-004 | Chỉ thị Fast-track V1.2 | 24/11/2026 |
 
 ## Đề xuất chưa phê duyệt
 
@@ -42,4 +44,4 @@ Hiện không có. (PROP-001 → DEC-018, PROP-002 → DEC-019.)
 | OPEN-004 | Định dạng chưa có trong quy định: đánh số trang phần đầu, chi tiết bìa, style caption, bảng, đoạn mã | Toàn báo cáo | PENDING | TH-003 |
 | OPEN-005 | Ngày nộp báo cáo và lịch mốc M1–M6 | Lập lịch | PENDING | Project Owner |
 | OPEN-006 | Mục 3.6 (đóng gói/triển khai) và 4.4 (thực nghiệm RAG, so sánh embedding) phụ thuộc hiện thực thực tế; nếu TH-002 cho thấy `NOT_IMPLEMENTED` thì cần quyết định cách viết | Ch.3, Ch.4 | PENDING | Sau TH-002 |
-| OPEN-007 | Công cụ vẽ sơ đồ chính thức (Q12): CTO đã chấp nhận Mermaid cho bản nháp (17/11); cần chốt công cụ và xác nhận GVHD có yêu cầu riêng không | Ch.2, Ch.3 | PENDING | Trước TH-009 |
+| OPEN-007 | Công cụ vẽ sơ đồ chính thức (Q12): V0.1 dùng PlantUML (nguồn `diagrams/*.puml`); cần chốt công cụ và xác nhận GVHD có yêu cầu riêng không | Ch.2, Ch.3 | PENDING | FT-004 |

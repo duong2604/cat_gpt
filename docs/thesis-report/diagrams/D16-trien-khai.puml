@@ -1,0 +1,33 @@
+@startuml D16-trien-khai
+!include _style.iuml
+left to right direction
+
+node "Máy trạm người dùng" {
+  artifact "Trình duyệt web" as BR
+}
+
+node "Máy chủ ứng dụng (môi trường phát triển / demo)" as HOST {
+  node "Node.js ≥ 22" {
+    artifact "apps/web\nNext.js :3000" as WEB
+    artifact "apps/api\nNestJS :4000\n(REST + SSE + Worker)" as API
+  }
+  node "Docker Compose (127.0.0.1)" {
+    database "Redis 7.4\n:6379" as RD
+    database "MinIO\n:9000" as MIO
+    database "Qdrant 1.20\n:6333" as QD
+  }
+}
+
+cloud "Dịch vụ đám mây" {
+  database "MongoDB Atlas" as MDB
+  node "OpenAI API" as OAI
+}
+
+BR --> WEB : HTTP(S)
+WEB --> API : /api/v1 (rewrites)
+API --> RD
+API --> MIO
+API --> QD
+API --> MDB : mongodb+srv
+API --> OAI : HTTPS
+@enduml

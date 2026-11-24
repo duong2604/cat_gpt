@@ -1,0 +1,36 @@
+@startuml D12-kien-truc-tong-the
+!include _style.iuml
+top to bottom direction
+
+actor "Người dùng\n(trình duyệt)" as U
+
+node "Ứng dụng web — Next.js (cổng 3000)" as WEB {
+  component "Giao diện React\n(App Router, TanStack Query)" as UI
+  component "Rewrites /api → API\n(cùng origin)" as RW
+}
+
+node "Máy chủ ứng dụng — NestJS (cổng 4000)" as API {
+  component "REST API /api/v1\n+ SSE" as REST
+  component "Worker BullMQ\n(xử lý tài liệu, tóm tắt)" as WK
+}
+
+database "MongoDB\n(người dùng, phiên,\nhội thoại, tài liệu)" as MDB
+database "Redis\n(hàng đợi BullMQ)" as RD
+database "MinIO\n(tệp tài liệu)" as MIO
+database "Qdrant\n(vector đoạn văn)" as QD
+cloud "OpenAI API\n(LLM, embedding)" as OAI
+
+U --> UI : HTTPS
+UI --> RW
+RW --> REST : HTTP + cookie
+REST --> MDB
+REST --> RD : đưa job
+RD --> WK : nhận job
+REST --> MIO
+WK --> MIO
+WK --> QD
+REST --> QD : truy hồi
+WK --> OAI : embedding, tóm tắt
+REST --> OAI : chat, embedding câu hỏi
+WK --> MDB
+@enduml

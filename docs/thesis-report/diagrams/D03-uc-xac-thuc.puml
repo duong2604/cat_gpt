@@ -1,0 +1,38 @@
+@startuml D03-uc-xac-thuc
+!include _style.iuml
+left to right direction
+
+actor "Nhân viên" as NV
+actor "Quản trị viên" as QT
+QT -|> NV
+
+rectangle "Module 1 — Xác thực và quản lý người dùng" {
+  usecase "Đăng nhập" as L
+  usecase "Đăng xuất" as LO
+  usecase "Làm mới phiên\n(refresh token)" as R
+  usecase "Xem, cập nhật\nthông tin cá nhân" as P
+  usecase "Cập nhật / xóa\nảnh đại diện" as AV
+  usecase "Đổi mật khẩu" as CP
+  usecase "Xem phiên đăng nhập" as S
+  usecase "Đăng xuất từ xa\nmột / tất cả phiên" as SR
+  usecase "Xem danh sách,\ntìm kiếm tài khoản" as AL
+  usecase "Tạo tài khoản" as AC
+  usecase "Sửa thông tin,\nđổi vai trò" as AE
+  usecase "Khóa / mở khóa" as AB
+  usecase "Đặt lại mật khẩu" as AR
+}
+
+NV --> L
+NV --> LO
+NV --> P
+NV --> CP
+NV --> S
+L <.. R : <<extend>>
+P <.. AV : <<extend>>
+S <.. SR : <<extend>>
+QT --> AL
+AL <.. AC : <<extend>>
+AL <.. AE : <<extend>>
+AL <.. AB : <<extend>>
+AL <.. AR : <<extend>>
+@enduml

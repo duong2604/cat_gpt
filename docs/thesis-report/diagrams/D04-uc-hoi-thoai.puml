@@ -1,0 +1,30 @@
+@startuml D04-uc-hoi-thoai
+!include _style.iuml
+left to right direction
+
+actor "Nhân viên" as NV
+actor "Dịch vụ LLM" as AI
+
+rectangle "Module 2 — Trợ lý hội thoại" {
+  usecase "Gửi tin nhắn,\nnhận phản hồi streaming" as SEND
+  usecase "Tạo hội thoại mới" as NEW
+  usecase "Dừng sinh câu trả lời" as STOP
+  usecase "Tạo lại câu trả lời" as REGEN
+  usecase "Xem danh sách,\ntìm kiếm hội thoại" as LIST
+  usecase "Mở lại lịch sử\nhội thoại" as OPEN
+  usecase "Đổi tên hội thoại" as REN
+  usecase "Xóa hội thoại" as DEL
+  usecase "Sao chép câu trả lời" as COPY
+}
+
+NV --> SEND
+NV --> LIST
+SEND ..> NEW : <<include>>\n(lượt đầu)
+SEND <.. STOP : <<extend>>
+SEND <.. REGEN : <<extend>>
+LIST <.. OPEN : <<extend>>
+LIST <.. REN : <<extend>>
+LIST <.. DEL : <<extend>>
+OPEN <.. COPY : <<extend>>
+SEND --> AI
+@enduml

@@ -1,0 +1,35 @@
+@startuml D08-seq-chat-stream
+!include _style.iuml
+autonumber
+actor "Người dùng" as U
+participant "Web\n(Chat UI)" as W
+participant "ChatController" as C
+participant "ChatService" as CS
+participant "LlmProvider\n(Mock / OpenAI)" as L
+database "MongoDB" as DB
+
+U -> W : Nhập câu hỏi, bấm Gửi
+W -> C : POST /api/v1/chat/stream\n{conversationId?, content}
+C -> C : Guard: JWT, giới hạn 20 tin/phút
+C -> CS : prepare()
+CS -> DB : Kiểm quyền sở hữu / tạo hội thoại
+CS -> CS : Đặt khóa hội thoại (đang xử lý → 409)
+CS -> DB : Lưu tin nhắn USER
+C --> W : 200 text/event-stream
+CS --> W : data: {type: "meta"}
+CS -> DB : Lấy ≤ 20 tin gần nhất\n(trong ngân sách 4.000 token)
+CS -> L : stream(messages, signal)
+loop Mỗi đoạn văn bản sinh ra
+  L --> CS : delta
+  CS --> W : data: {type: "delta", text}
+  W --> U : Hiển thị dần câu trả lời
+end
+opt Người dùng bấm Dừng
+  W -> C : POST /conversations/:id/stop
+  C -> CS : abort(conversationId)
+  CS -> L : Hủy kết nối tới nhà cung cấp
+end
+CS -> DB : Lưu tin ASSISTANT\n(COMPLETED / STOPPED / TRUNCATED / ERROR)
+CS --> W : data: {type: "done", message}
+CS -> CS : Nhả khóa hội thoại
+@enduml

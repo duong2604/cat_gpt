@@ -75,3 +75,7 @@ Ngày nộp chưa được ghi nhận ([decisions — OPEN-005](decisions.md#v�
 | `docs/thesis-report/` (repo) | Tài liệu quản lý, đặc tả task, báo cáo thực hiện, file nguồn sơ đồ (khi task giao) | Có, qua PR |
 | `docs/thesis/` (repo) | Bộ nguồn TL-004 — chỉ đọc | Không sửa |
 | `D:\workspace\CAT_GPT_Thesis\` (local, tạo ở TH-003) | `CAT_GPT_DATN.docx`, `references\`, `assets\`, `diagrams\`, `backups\`, `exports\`, `scripts\` | **Không** |
+
+## 7. Fast-track V1.2 (24/11/2026)
+
+Thực thi được gộp thành FT-001 → FT-003 trong cùng phiên để có bản Word V0.1 đầy đủ, sau đó Project Owner và ChatGPT review tổng thể (FT-004, chưa cấp quyền). Roadmap 24 task và outline V1.0 giữ nguyên làm checklist phạm vi ([DEC-020](decisions.md#quyết-định-đã-phê-duyệt)). Trạng thái: [progress.md](progress.md#fast-track-v12).

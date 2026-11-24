@@ -1,0 +1,48 @@
+' Kiểu chung cho mọi sơ đồ báo cáo (render: java -jar plantuml.jar -tpng -charset UTF-8)
+!pragma layout smetana
+skinparam defaultFontName "Times New Roman"
+skinparam defaultFontSize 15
+skinparam dpi 160
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #333333
+skinparam ArrowFontSize 13
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #F5F8FC
+  BorderColor #2F5597
+}
+skinparam rectangle {
+  BackgroundColor #FFFFFF
+  BorderColor #2F5597
+}
+skinparam component {
+  BackgroundColor #F5F8FC
+  BorderColor #2F5597
+}
+skinparam database {
+  BackgroundColor #FFF8E5
+  BorderColor #8A6D1D
+}
+skinparam sequence {
+  ParticipantBackgroundColor #F5F8FC
+  ParticipantBorderColor #2F5597
+  LifeLineBorderColor #888888
+  ActorBorderColor #2F5597
+}
+skinparam activity {
+  BackgroundColor #F5F8FC
+  BorderColor #2F5597
+  DiamondBackgroundColor #FFFFFF
+}
+skinparam class {
+  BackgroundColor #F5F8FC
+  BorderColor #2F5597
+  HeaderBackgroundColor #DCE6F2
+}
+skinparam node {
+  BackgroundColor #FFFFFF
+  BorderColor #2F5597
+}
+skinparam noteBackgroundColor #FFFDE7
+skinparam noteBorderColor #B8A200

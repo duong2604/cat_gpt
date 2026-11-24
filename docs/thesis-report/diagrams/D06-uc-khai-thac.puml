@@ -1,0 +1,26 @@
+@startuml D06-uc-khai-thac
+!include _style.iuml
+left to right direction
+
+actor "Nhân viên" as NV
+actor "Dịch vụ AI\n(LLM, embedding)" as AI
+
+rectangle "Module 4 — Khai thác tài liệu bằng AI" {
+  usecase "Chọn phạm vi tài liệu\n(tối đa 5 tài liệu READY)" as SCOPE
+  usecase "Hỏi đáp dựa trên\ntài liệu" as QA
+  usecase "Xem trích dẫn nguồn\n(đoạn, trang)" as CITE
+  usecase "Nhận thông báo\nkhông đủ căn cứ" as INS
+  usecase "Yêu cầu tóm tắt\ntài liệu" as SUM
+  usecase "Xem bản tóm tắt\nđã lưu" as VIEW
+}
+
+NV --> SCOPE
+NV --> QA
+NV --> SUM
+QA ..> SCOPE : <<include>>
+QA <.. CITE : <<extend>>
+QA <.. INS : <<extend>>
+SUM <.. VIEW : <<extend>>
+QA --> AI
+SUM --> AI
+@enduml
