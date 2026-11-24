@@ -1,43 +1,33 @@
 @startuml D09-act-xu-ly-tai-lieu
 !include _style.iuml
-!pragma useVerticalIf on
+skinparam defaultFontSize 17
 
 |Người dùng|
 start
-:Chọn tệp và tải lên;
-|API (DocumentsController)|
-if (Định dạng TXT/PDF/DOCX và ≤ 20 MB?) then (không)
-  :Trả lỗi 400 / 413;
+:Chọn tệp, tải lên;
+|API|
+if (Đúng định dạng\nvà ≤ 20 MB?) then (không)
+  :Từ chối\nyêu cầu;
   stop
 else (có)
 endif
 :Lưu tệp vào MinIO;
-:Tạo bản ghi tài liệu\n(trạng thái PENDING);
-:Đưa job "process" vào hàng đợi BullMQ;
-:Trả 201 cho người dùng;
-|Worker (DocumentProcessor)|
-:Nhận job, chuyển PROCESSING;
-:Đọc tệp từ MinIO;
-:Trích xuất văn bản theo trang\n(unpdf / mammoth / TXT);
-if (Có văn bản và không quá giới hạn?) then (không)
-  :Đặt FAILED kèm mã lỗi\n(DOCUMENT_NO_TEXT, ...);
+:Tạo bản ghi PENDING,\nđưa job vào hàng đợi;
+|Worker|
+:Chuyển PROCESSING,\ntrích xuất văn bản;
+if (Có văn bản hợp lệ?) then (không)
+  :FAILED kèm\nmã lỗi;
   stop
 else (có)
 endif
-:Chia đoạn 1.000 ký tự,\nchồng lấn 150 ký tự;
-:Gọi embedding theo lô 100 đoạn;
-if (Lỗi tạm thời (mạng, 429, 5xx)?) then (có)
-  :BullMQ thử lại\n(tối đa 3 lần);
-  if (Hết số lần thử?) then (có)
-    :Đặt FAILED\n(DOCUMENT_PROCESSING_FAILED);
-    stop
-  else (không)
-  endif
+:Chia đoạn, sinh\nembedding theo lô;
+if (Lỗi tạm thời?) then (có)
+  :BullMQ thử lại\n(≤ 3 lần), hết lượt\nthì FAILED;
+  stop
 else (không)
 endif
-:Ghi các điểm vector vào Qdrant\n(userId, documentId, chunkIndex, page, text);
-:Đặt READY, lưu chunkCount;
+:Ghi vector vào Qdrant,\nchuyển READY;
 |Người dùng|
-:Thấy trạng thái "Sẵn sàng"\nở danh sách tài liệu;
+:Thấy trạng thái\n"Sẵn sàng";
 stop
 @enduml

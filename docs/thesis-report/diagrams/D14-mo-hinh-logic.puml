@@ -1,0 +1,60 @@
+@startuml D14-mo-hinh-logic
+!include _style.iuml
+hide circle
+hide methods
+top to bottom direction
+skinparam classAttributeFontSize 14
+
+entity "Người dùng" as U {
+  * Mã người dùng
+  --
+  Email (duy nhất)
+  Họ tên, phòng ban
+  Vai trò, trạng thái
+}
+entity "Phiên đăng nhập" as S {
+  * Mã phiên
+  --
+  Thiết bị, địa chỉ IP
+  Thời điểm hết hạn
+  Thời điểm thu hồi
+}
+entity "Cuộc hội thoại" as C {
+  * Mã hội thoại
+  --
+  Tiêu đề
+  Thời điểm tin nhắn cuối
+}
+entity "Tin nhắn" as M {
+  * Mã tin nhắn
+  --
+  Vai trò người gửi
+  Nội dung, trạng thái
+}
+entity "Trích dẫn" as T {
+  Số hiệu [n]
+  Tên tài liệu, trang
+  Trích đoạn
+}
+entity "Tài liệu" as D {
+  * Mã tài liệu
+  --
+  Tên tệp, kích thước
+  Trạng thái xử lý
+  Bản tóm tắt
+}
+entity "Đoạn văn bản" as K {
+  Số thứ tự đoạn
+  Số trang
+  Nội dung, vector
+}
+
+U ||--o{ S : sở hữu
+U ||--o{ C : sở hữu
+U ||--o{ D : sở hữu
+C ||--o{ M : gồm
+M ||--o{ T : kèm
+C }o--o{ D : phạm vi hỏi đáp (≤ 5)
+D ||--o{ K : được chia thành
+T }o..|| K : tham chiếu
+@enduml

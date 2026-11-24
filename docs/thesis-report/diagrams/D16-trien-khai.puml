@@ -1,33 +1,32 @@
 @startuml D16-trien-khai
 !include _style.iuml
-left to right direction
+skinparam defaultFontSize 16
+top to bottom direction
 
 node "Máy trạm người dùng" {
   artifact "Trình duyệt web" as BR
 }
-
-node "Máy chủ ứng dụng (môi trường phát triển / demo)" as HOST {
-  node "Node.js ≥ 22" {
-    artifact "apps/web\nNext.js :3000" as WEB
-    artifact "apps/api\nNestJS :4000\n(REST + SSE + Worker)" as API
+node "Máy chủ ứng dụng" as HOST {
+  node "Node.js ≥ 22" as NODE {
+    artifact "Ứng dụng web\nNext.js :3000" as WEB
+    artifact "Máy chủ API NestJS :4000\n(REST, SSE, worker)" as API
   }
-  node "Docker Compose (127.0.0.1)" {
-    database "Redis 7.4\n:6379" as RD
-    database "MinIO\n:9000" as MIO
-    database "Qdrant 1.20\n:6333" as QD
+  node "Docker Compose (127.0.0.1)" as DC {
+    database "Redis 7.4" as RD
+    database "MinIO" as MIO
+    database "Qdrant 1.20" as QD
   }
 }
-
-cloud "Dịch vụ đám mây" {
+cloud "Dịch vụ bên ngoài" {
   database "MongoDB Atlas" as MDB
   node "OpenAI API" as OAI
 }
 
-BR --> WEB : HTTP(S)
-WEB --> API : /api/v1 (rewrites)
+BR --> WEB : HTTP
+WEB --> API : /api/v1
 API --> RD
 API --> MIO
 API --> QD
-API --> MDB : mongodb+srv
+API --> MDB
 API --> OAI : HTTPS
 @enduml

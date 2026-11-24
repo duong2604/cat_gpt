@@ -1,4 +1,4 @@
-@startuml D14-mo-hinh-du-lieu
+@startuml D17-mo-hinh-collection
 !include _style.iuml
 hide circle
 hide methods

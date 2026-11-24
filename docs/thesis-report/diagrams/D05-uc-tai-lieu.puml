@@ -3,22 +3,22 @@
 left to right direction
 
 actor "Nhân viên" as NV
-actor "Dịch vụ embedding" as AI
+actor "Dịch vụ\nembedding" as EMB
 
 rectangle "Module 3 — Quản lý tài liệu" {
-  usecase "Tải lên tài liệu\n(TXT, PDF dạng chữ, DOCX)" as UP
-  usecase "Xử lý bất đồng bộ:\ntrích xuất, chia đoạn,\nembedding, lưu vector" as PROC
-  usecase "Xem danh sách,\ntìm kiếm, lọc trạng thái" as LIST
-  usecase "Xem thông tin\nvà trạng thái xử lý" as INFO
-  usecase "Tải xuống tài liệu" as DOWN
-  usecase "Xóa tài liệu" as DEL
+  usecase "UC19. Tải lên tài liệu" as U19
+  usecase "Xử lý và lập chỉ mục\ntài liệu (tự động)" as UP
+  usecase "UC20. Xem danh sách và\ntrạng thái xử lý" as U20
+  usecase "UC21. Tìm kiếm,\nlọc tài liệu" as U21
+  usecase "UC22. Tải xuống\ntài liệu" as U22
+  usecase "UC23. Xóa tài liệu" as U23
 }
 
-NV --> UP
-NV --> LIST
-UP ..> PROC : <<include>>
-LIST <.. INFO : <<extend>>
-LIST <.. DOWN : <<extend>>
-LIST <.. DEL : <<extend>>
-PROC --> AI
+NV -- U19
+NV -- U20
+NV -- U21
+NV -- U22
+NV -- U23
+U19 ..> UP : <<include>>
+UP -- EMB
 @enduml

@@ -5,29 +5,27 @@ left to right direction
 actor "Nhân viên" as NV
 actor "Quản trị viên" as QT
 actor "Dịch vụ AI\n(LLM, embedding)" as AI
-QT -|> NV
+NV <|-- QT
 
 rectangle "Hệ thống CAT_GPT" {
-  usecase "Đăng nhập / đăng xuất" as UC1
-  usecase "Quản lý thông tin cá nhân\nvà phiên đăng nhập" as UC2
-  usecase "Quản trị tài khoản\nvà phân quyền" as UC3
-  usecase "Trò chuyện với trợ lý AI" as UC4
-  usecase "Quản lý hội thoại" as UC5
-  usecase "Quản lý tài liệu" as UC6
-  usecase "Hỏi đáp dựa trên tài liệu" as UC7
-  usecase "Tóm tắt tài liệu" as UC8
+  usecase "Xác thực và quản lý\ntài khoản cá nhân" as G1
+  usecase "Quản trị tài khoản\nvà phân quyền" as G2
+  usecase "Trò chuyện với trợ lý AI" as G3
+  usecase "Quản lý cuộc hội thoại" as G4
+  usecase "Quản lý tài liệu" as G5
+  usecase "Hỏi đáp dựa trên tài liệu" as G6
+  usecase "Tóm tắt tài liệu" as G7
 }
 
-NV --> UC1
-NV --> UC2
-NV --> UC4
-NV --> UC5
-NV --> UC6
-NV --> UC7
-NV --> UC8
-QT --> UC3
-UC4 --> AI
-UC6 --> AI
-UC7 --> AI
-UC8 --> AI
+NV -- G1
+NV -- G3
+NV -- G4
+NV -- G5
+NV -- G6
+NV -- G7
+QT -- G2
+G3 -- AI
+G5 -- AI
+G6 -- AI
+G7 -- AI
 @enduml

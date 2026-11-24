@@ -5,22 +5,17 @@ left to right direction
 actor "Nhân viên" as NV
 actor "Dịch vụ AI\n(LLM, embedding)" as AI
 
-rectangle "Module 4 — Khai thác tài liệu bằng AI" {
-  usecase "Chọn phạm vi tài liệu\n(tối đa 5 tài liệu READY)" as SCOPE
-  usecase "Hỏi đáp dựa trên\ntài liệu" as QA
-  usecase "Xem trích dẫn nguồn\n(đoạn, trang)" as CITE
-  usecase "Nhận thông báo\nkhông đủ căn cứ" as INS
-  usecase "Yêu cầu tóm tắt\ntài liệu" as SUM
-  usecase "Xem bản tóm tắt\nđã lưu" as VIEW
+rectangle "Module 4 — Khai thác thông tin từ tài liệu" {
+  usecase "UC24. Chọn phạm vi\ntài liệu (≤ 5)" as U24
+  usecase "UC25. Hỏi đáp dựa\ntrên tài liệu" as U25
+  usecase "UC26. Xem trích dẫn\nnguồn" as U26
+  usecase "UC27. Tóm tắt tài liệu" as U27
 }
 
-NV --> SCOPE
-NV --> QA
-NV --> SUM
-QA ..> SCOPE : <<include>>
-QA <.. CITE : <<extend>>
-QA <.. INS : <<extend>>
-SUM <.. VIEW : <<extend>>
-QA --> AI
-SUM --> AI
+NV -- U25
+NV -- U27
+U25 ..> U24 : <<include>>
+U26 .> U25 : <<extend>>
+U25 -- AI
+U27 -- AI
 @enduml

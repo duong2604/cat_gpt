@@ -1,48 +1,71 @@
 ' Kiểu chung cho mọi sơ đồ báo cáo (render: java -jar plantuml.jar -tpng -charset UTF-8)
+' Bảng màu trung tính, nét đen/xám để in A4 rõ ràng.
 !pragma layout smetana
 skinparam defaultFontName "Times New Roman"
-skinparam defaultFontSize 15
-skinparam dpi 160
+skinparam defaultFontSize 16
+skinparam dpi 170
 skinparam shadowing false
 skinparam backgroundColor white
-skinparam ArrowColor #333333
-skinparam ArrowFontSize 13
-skinparam actorStyle awesome
+skinparam ArrowColor #222222
+skinparam ArrowFontSize 14
+skinparam roundCorner 8
 skinparam usecase {
-  BackgroundColor #F5F8FC
-  BorderColor #2F5597
+  BackgroundColor #F7F7F7
+  BorderColor #333333
+}
+skinparam actor {
+  BackgroundColor #FFFFFF
+  BorderColor #222222
 }
 skinparam rectangle {
   BackgroundColor #FFFFFF
-  BorderColor #2F5597
+  BorderColor #333333
+}
+skinparam package {
+  BackgroundColor #FFFFFF
+  BorderColor #555555
 }
 skinparam component {
-  BackgroundColor #F5F8FC
-  BorderColor #2F5597
+  BackgroundColor #F7F7F7
+  BorderColor #333333
 }
 skinparam database {
-  BackgroundColor #FFF8E5
-  BorderColor #8A6D1D
+  BackgroundColor #EFEFEF
+  BorderColor #333333
+}
+skinparam queue {
+  BackgroundColor #EFEFEF
+  BorderColor #333333
+}
+skinparam cloud {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
 }
 skinparam sequence {
-  ParticipantBackgroundColor #F5F8FC
-  ParticipantBorderColor #2F5597
+  ParticipantBackgroundColor #F7F7F7
+  ParticipantBorderColor #333333
   LifeLineBorderColor #888888
-  ActorBorderColor #2F5597
+  ActorBorderColor #222222
+  GroupBorderColor #555555
 }
 skinparam activity {
-  BackgroundColor #F5F8FC
-  BorderColor #2F5597
+  BackgroundColor #F7F7F7
+  BorderColor #333333
   DiamondBackgroundColor #FFFFFF
+  DiamondBorderColor #333333
+}
+skinparam swimlane {
+  BorderColor #555555
+  TitleFontSize 16
 }
 skinparam class {
-  BackgroundColor #F5F8FC
-  BorderColor #2F5597
-  HeaderBackgroundColor #DCE6F2
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+  HeaderBackgroundColor #EDEDED
 }
 skinparam node {
   BackgroundColor #FFFFFF
-  BorderColor #2F5597
+  BorderColor #333333
 }
-skinparam noteBackgroundColor #FFFDE7
-skinparam noteBorderColor #B8A200
+skinparam noteBackgroundColor #FAFAFA
+skinparam noteBorderColor #777777

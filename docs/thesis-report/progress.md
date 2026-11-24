@@ -2,7 +2,7 @@
 
 Bảng trạng thái **chính thức** của 24 task; phải khớp dòng "Trạng thái" trong từng file task. Trạng thái hợp lệ và quyền chuyển: [workflow mục 2](workflow.md#2-review-gate).
 
-Cập nhật: 24/11/2026 — Fast-track V1.2: bản nháp Word V0.1 đầy đủ, chờ review (FT-003). Trạng thái TH là theo mức bản nháp V0.1; nghiệm thu qua FT-004.
+Cập nhật: 24/11/2026: bản V0.2 (Master Prompt Revision V0.2) chờ review; trước đó Fast-track V1.2 bàn giao V0.1. Trạng thái TH là theo mức bản nháp V0.1; nghiệm thu qua FT-004.
 
 ## Fast-track V1.2
 
@@ -12,6 +12,7 @@ Cập nhật: 24/11/2026 — Fast-track V1.2: bản nháp Word V0.1 đầy đủ
 | FT-002 | Soạn toàn bộ báo cáo (TH-004…TH-022) | READY_FOR_REVIEW | `CAT_GPT_DATN.docx` V0.1 (local) |
 | FT-003 | Kiểm tra, bàn giao V0.1 | READY_FOR_REVIEW | PDF V0.1, `REVIEW_NOTES.md` (local) |
 | FT-004 | Review và chỉnh sửa sau khi Project Owner đọc | TODO — chưa được cấp quyền | |
+| V0.2 | Master Prompt Revision V0.2: tái cấu trúc theo Outline V1.4, bìa, sơ đồ, ảnh giao diện, biên tập văn phong | READY_FOR_REVIEW | `CAT_GPT_DATN.docx`, PDF V0.2, `REVIEW_NOTES.md` (local); 18 nguồn sơ đồ |
 
 ## Task TH (checklist phạm vi)
 

@@ -1,0 +1,38 @@
+@startuml D18-kien-truc-frontend
+!include _style.iuml
+skinparam defaultFontSize 16
+top to bottom direction
+
+package "Ứng dụng web Next.js (App Router)" {
+  package "Định tuyến (src/app)" {
+    [Nhóm (auth): /login] as R1
+    [Nhóm (app): /chat, /documents,\n/profile, /admin/users] as R2
+  }
+  package "Tính năng (src/features)" {
+    [auth] as F1
+    [chat] as F2
+    [documents] as F3
+    [profile] as F4
+    [admin-users] as F5
+  }
+  package "Hạ tầng giao diện" {
+    [Lớp gọi API\n(fetch + làm mới phiên)] as API
+    [TanStack Query\n(bộ nhớ đệm dữ liệu)] as TQ
+    [Bộ đọc SSE] as SSE
+    [Thành phần UI dùng chung,\nđa ngôn ngữ vi/en] as UI
+  }
+}
+node "Máy chủ API\n(/api/v1 qua rewrites)" as BE
+
+R1 --> F1
+R2 --> F2
+R2 --> F3
+R2 --> F4
+R2 --> F5
+F2 --> SSE
+F1 --> API
+F3 --> TQ
+TQ --> API
+SSE --> BE
+API --> BE
+@enduml
